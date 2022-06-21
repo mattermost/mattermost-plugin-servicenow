@@ -1,15 +1,18 @@
 package main
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"path/filepath"
 	"runtime/debug"
 
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/pkg/errors"
 )
 
 // InitAPI initializes the REST API
@@ -21,11 +24,24 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s := r.PathPrefix("/api/v1").Subrouter()
 
 	// API for POC. TODO: Remove this endpoint later
-	s.HandleFunc("/notification", p.handleNotification).Methods(http.MethodPost)
+	s.HandleFunc("/notification", p.handleAuthRequired(p.handleNotification)).Methods(http.MethodPost)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
 	return r
+}
+
+// handleAuthRequired verifies if provided request is performed by an authorized source.
+func (p *Plugin) handleAuthRequired(handleFunc func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if status, err := verifyHTTPSecret(p.getConfiguration().Secret, r.FormValue("secret")); err != nil {
+			p.API.LogError("Invalid secret", "Error", err.Error())
+			http.Error(w, fmt.Sprintf("Invalid Secret. Error: %s", err.Error()), status)
+			return
+		}
+
+		handleFunc(w, r)
+	}
 }
 
 func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +57,7 @@ func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
 	returnStatusOK(w, v)
 }
 
+// TODO: Modify this function to work without taking a map in the params
 func returnStatusOK(w http.ResponseWriter, m map[string]string) {
 	w.Header().Set("Content-Type", "application/json")
 	m[model.STATUS] = model.STATUS_OK
@@ -73,4 +90,21 @@ func (p *Plugin) withRecovery(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// Ref: mattermost plugin confluence(https://github.com/mattermost/mattermost-plugin-confluence/blob/3ee2aa149b6807d14fe05772794c04448a17e8be/server/controller/main.go#L97)
+func verifyHTTPSecret(expected, got string) (status int, err error) {
+	for {
+		if subtle.ConstantTimeCompare([]byte(got), []byte(expected)) == 1 {
+			break
+		}
+
+		unescaped, _ := url.QueryUnescape(got)
+		if unescaped == got {
+			return http.StatusForbidden, errors.New("request URL: secret did not match")
+		}
+		got = unescaped
+	}
+
+	return 0, nil
 }

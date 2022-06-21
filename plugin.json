@@ -20,6 +20,22 @@
     "settings_schema": {
         "header": "",
         "footer": "",
-        "settings": []
+        "settings": [
+            {
+                "key": "ServiceNowURL",
+                "display_name": "ServiceNow Server URL:",
+                "type": "text",
+                "help_text": "The site URL for the ServiceNow server.",
+                "default": null
+            },
+            {
+                "key": "Secret",
+                "display_name": "Webhook Secret:",
+                "type": "generated",
+                "help_text": "The webhook secret used by the ServiceNow API calls to Mattermost for sending notifications.",
+                "regenerate_help_text": "Regenerates the secret for ServiceNow Plugin. Regenerating this key invalidates any existing token.",
+                "default": null
+            }
+        ]
     }
 }
