@@ -70,8 +70,12 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return err
 	}
 
-	_, err = p.DM(mattermostUserID, fmt.Sprintf("%s%s", constants.ConnectSuccessMessage, strings.ReplaceAll(commandHelp, "|", "`")), mattermostUserID)
-	if err != nil {
+	user, userErr := p.API.GetUser(mattermostUserID)
+	if userErr != nil {
+		return errors.Wrap(err, fmt.Sprintf("unable to get user for userID: %s", mattermostUserID))
+	}
+
+	if _, err = p.DM(mattermostUserID, fmt.Sprintf("%s%s", constants.ConnectSuccessMessage, strings.ReplaceAll(commandHelp, "|", "`")), user.Username); err != nil {
 		return err
 	}
 

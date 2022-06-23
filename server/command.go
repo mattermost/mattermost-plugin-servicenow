@@ -68,7 +68,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	p.postCommandResponse(args, fmt.Sprintf("Unknown action %v", action))
+	p.postCommandResponse(args, fmt.Sprintf("Unknown action `%v`", action))
 	return &model.CommandResponse{}, nil
 }
 
@@ -78,15 +78,23 @@ func (p *Plugin) handleHelp(_ *plugin.Context, _ *model.CommandArgs, _ []string)
 
 func (p *Plugin) handleConnect(_ *plugin.Context, args *model.CommandArgs, _ []string) string {
 	if _, err := p.GetUser(args.UserId); err == nil {
-		return "User is already connected to ServiceNow."
+		return "You are already connected to ServiceNow."
 	}
 	return fmt.Sprintf("[Click here to link your ServiceNow account.](%s%s)", p.GetPluginURL(), constants.PathOAuth2Connect)
 }
 
 func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string) string {
+	disconnectErrorMessage := "Something went wrong. Not able to disconnect user. Check server logs for errors."
+	if _, err := p.GetUser(args.UserId); err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return "You are not connected to ServiceNow."
+		}
+		p.API.LogError("Unable to get user", "Error", err.Error())
+		return disconnectErrorMessage
+	}
 	if err := p.DisconnectUser(args.UserId); err != nil {
 		p.API.LogError("Unable to disconnect user", "Error", err.Error())
-		return "Something went wrong. Not able to disconnect user. Check server logs for errors."
+		return disconnectErrorMessage
 	}
 	return "Disconnected your ServiceNow account."
 }
