@@ -59,6 +59,13 @@
                 "type": "generated",
                 "help_text": "The secret key used to encrypt and decrpyt OAuth token.",
                 "default": null
+            },
+            {
+                "key": "ServiceNowOtherPluginID",
+                "display_name": "Plugin ID for another ServiceNow plugin installed:",
+                "type": "text",
+                "help_text": "The plugin ID for another ServiceNow plugin, if installed on this server.",
+                "default": null
             }
         ]
     }

@@ -85,14 +85,32 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 func (p *Plugin) GetUser(mattermostUserID string) (*User, error) {
 	storedUser, err := p.store.LoadUser(mattermostUserID)
 	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return p.GetUserFromOtherPlugin(mattermostUserID)
+		}
 		return nil, err
 	}
 
 	return storedUser, nil
 }
 
+func (p *Plugin) GetUserFromOtherPlugin(userID string) (*User, error) {
+	user, err := p.store.GetToken(p.getConfiguration().ServiceNowOtherPluginID, userID)
+	if err != nil {
+		p.API.LogError("Unable to get token from other plugin", "Error", err.Error())
+		return nil, ErrNotFound
+	}
+
+	return user, nil
+}
+
 func (p *Plugin) DisconnectUser(mattermostUserID string) error {
 	if err := p.store.DeleteUser(mattermostUserID); err != nil {
+		if errors.Is(err, ErrNotFound) {
+			if err = p.store.DeleteToken(p.getConfiguration().ServiceNowOtherPluginID, mattermostUserID); err != nil {
+				return err
+			}
+		}
 		return err
 	}
 

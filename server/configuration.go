@@ -24,6 +24,7 @@ type configuration struct {
 	ServiceNowOAuthClientSecret string `json:"ServiceNowOAuthClientSecret"`
 	EncryptionSecret            string `json:"EncryptionSecret"`
 	WebhookSecret               string `json:"WebhookSecret"`
+	ServiceNowOtherPluginID     string `json:"ServiceNowOtherPluginID"`
 	MattermostSiteURL           string
 	PluginID                    string
 	PluginURL                   string
@@ -44,6 +45,7 @@ func (c *configuration) ProcessConfiguration() error {
 	c.ServiceNowOAuthClientID = strings.TrimSpace(c.ServiceNowOAuthClientID)
 	c.ServiceNowOAuthClientSecret = strings.TrimSpace(c.ServiceNowOAuthClientSecret)
 	c.EncryptionSecret = strings.TrimSpace(c.EncryptionSecret)
+	c.ServiceNowOtherPluginID = strings.TrimSpace(c.ServiceNowOtherPluginID)
 
 	return nil
 }

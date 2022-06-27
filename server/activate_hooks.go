@@ -29,7 +29,17 @@ func (p *Plugin) OnActivate() error {
 	}
 
 	p.router = p.InitAPI()
-	p.store = p.NewStore(p.API)
+	p.store = p.NewStore()
+	sqlSettings := p.API.GetUnsanitizedConfig().SqlSettings
+	p.store.Connect(sqlSettings)
+	return nil
+}
+
+func (p *Plugin) OnDeactivate() error {
+	if p.store != nil {
+		p.store.Disconnect()
+	}
+
 	return nil
 }
 

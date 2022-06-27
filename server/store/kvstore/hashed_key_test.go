@@ -26,7 +26,7 @@ func Test_hashKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := hashKey(tt.args.prefix, tt.args.hashableKey)
+			got := HashKey(tt.args.prefix, tt.args.hashableKey)
 			require.Equal(t, tt.want, got)
 		})
 	}

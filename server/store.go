@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v5/store/sqlstore"
 	"github.com/pkg/errors"
 )
 
@@ -23,6 +25,7 @@ var ErrNotFound = kvstore.ErrNotFound
 type Store interface {
 	UserStore
 	OAuth2StateStore
+	TokenStore
 }
 
 type UserStore interface {
@@ -37,20 +40,29 @@ type OAuth2StateStore interface {
 	StoreOAuth2State(state string) error
 }
 
+type TokenStore interface {
+	Connect(model.SqlSettings)
+	Disconnect()
+	GetToken(pluginID, userID string) (*User, error)
+	DeleteToken(pluginID, userID string) error
+}
+
 type pluginStore struct {
 	plugin   *Plugin
 	basicKV  kvstore.KVStore
 	oauth2KV kvstore.KVStore
 	userKV   kvstore.KVStore
+	db       *sqlstore.SqlStore
 }
 
-func (p *Plugin) NewStore(api plugin.API) Store {
-	basicKV := kvstore.NewPluginStore(api)
+func (p *Plugin) NewStore() Store {
+	basicKV := kvstore.NewPluginStore(p.API)
 	return &pluginStore{
 		plugin:   p,
 		basicKV:  basicKV,
 		userKV:   kvstore.NewHashedKeyStore(basicKV, UserKeyPrefix),
-		oauth2KV: kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(api, OAuth2KeyExpiration), OAuth2KeyPrefix),
+		oauth2KV: kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(p.API, OAuth2KeyExpiration), OAuth2KeyPrefix),
+		db:       nil,
 	}
 }
 
@@ -102,4 +114,38 @@ func (s *pluginStore) VerifyOAuth2State(state string) error {
 
 func (s *pluginStore) StoreOAuth2State(state string) error {
 	return s.oauth2KV.StoreTTL(state, []byte(state), oAuth2StateTimeToLive)
+}
+
+func (s *pluginStore) Connect(sqlSettings model.SqlSettings) {
+	s.db = sqlstore.New(sqlSettings, nil)
+}
+
+func (s *pluginStore) Disconnect() {
+	if s.db != nil {
+		s.db.Close()
+	}
+}
+
+func (s *pluginStore) GetToken(pluginID, userID string) (*User, error) {
+	userKey := kvstore.HashKey(UserKeyPrefix, userID)
+	value, err := s.db.Plugin().Get(pluginID, userKey)
+	if err != nil {
+		return nil, err
+	}
+
+	var user *User
+	if err = json.Unmarshal(value.Value, &user); err != nil {
+		return nil, errors.Wrap(err, "unable to unmarshal the value into user")
+	}
+
+	return user, nil
+}
+
+func (s *pluginStore) DeleteToken(pluginID, userID string) error {
+	userKey := kvstore.HashKey(UserKeyPrefix, userID)
+	if err := s.db.Plugin().Delete(pluginID, userKey); err != nil {
+		return err
+	}
+
+	return nil
 }
