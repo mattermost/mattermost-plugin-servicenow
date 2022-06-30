@@ -19,8 +19,8 @@ import (
 // If you add non-reference types to your configuration struct, be sure to rewrite Clone as a deep
 // copy appropriate for your types.
 type configuration struct {
-	ServiceNowURL string `json:"ServiceNowURL"`
-	Secret        string `json:"Secret"`
+	ServiceNowBaseURL string `json:"ServiceNowBaseURL"`
+	Secret            string `json:"Secret"`
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -30,9 +30,9 @@ func (c *configuration) Clone() *configuration {
 	return &clone
 }
 
-// ProcessConfiguration processes the config.
+// "ProcessConfiguration" processes the config.
 func (c *configuration) ProcessConfiguration() error {
-	c.ServiceNowURL = strings.TrimRight(strings.TrimSpace(c.ServiceNowURL), "/")
+	c.ServiceNowBaseURL = strings.TrimRight(strings.TrimSpace(c.ServiceNowBaseURL), "/")
 	c.Secret = strings.TrimSpace(c.Secret)
 
 	return nil
@@ -40,7 +40,7 @@ func (c *configuration) ProcessConfiguration() error {
 
 // IsValid checks if all the required fields are set.
 func (c *configuration) IsValid() error {
-	if len(c.ServiceNowURL) == 0 {
+	if len(c.ServiceNowBaseURL) == 0 {
 		return errors.New("serviceNow server URL cannot be empty")
 	}
 
