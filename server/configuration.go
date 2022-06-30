@@ -30,7 +30,7 @@ func (c *configuration) Clone() *configuration {
 	return &clone
 }
 
-// "ProcessConfiguration" processes the config.
+// ProcessConfiguration processes the config.
 func (c *configuration) ProcessConfiguration() error {
 	c.ServiceNowBaseURL = strings.TrimRight(strings.TrimSpace(c.ServiceNowBaseURL), "/")
 	c.Secret = strings.TrimSpace(c.Secret)
