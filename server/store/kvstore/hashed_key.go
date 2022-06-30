@@ -51,5 +51,6 @@ func hashKey(prefix, hashableKey string) string {
 
 	h := sha512.New()
 	_, _ = h.Write([]byte(hashableKey))
-	return fmt.Sprintf("%s%x", prefix, h.Sum(nil))
+	hashedKey := fmt.Sprintf("%s%x", prefix, h.Sum(nil))
+	return hashedKey[:50]
 }

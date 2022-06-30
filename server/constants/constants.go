@@ -11,7 +11,7 @@ const (
 		"You've connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n" +
 		"##### Slash Commands\n"
 
-	PathOAuth2Connect  = "/oauth2/connect"
-	PathOAuth2Complete = "/oauth2/complete"
-	CommandTrigger     = "servicenow"
+	CommandTrigger                            = "servicenow"
+	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std_servicenow_for_mattermost"
+	SysQueryParam                             = "sysparm_query"
 )

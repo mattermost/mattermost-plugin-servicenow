@@ -100,6 +100,7 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	err := p.CompleteOAuth2(mattermostUserID, code, state)
 	if err != nil {
+		p.API.LogError("Unable to complete OAuth.", "UserId", mattermostUserID, "Error", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

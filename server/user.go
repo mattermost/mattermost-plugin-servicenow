@@ -49,6 +49,11 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return errors.New("not authorized, user ID mismatch")
 	}
 
+	user, userErr := p.API.GetUser(mattermostUserID)
+	if userErr != nil {
+		return errors.Wrap(err, fmt.Sprintf("unable to get user for userID: %s", mattermostUserID))
+	}
+
 	ctx := context.Background()
 	tok, err := oconf.Exchange(ctx, code)
 	if err != nil {
@@ -70,9 +75,11 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return err
 	}
 
-	user, userErr := p.API.GetUser(mattermostUserID)
-	if userErr != nil {
-		return errors.Wrap(err, fmt.Sprintf("unable to get user for userID: %s", mattermostUserID))
+	client := p.NewClient(context.Background(), tok)
+	if !p.subscriptionsActivated {
+		if err := client.ActivateSubscriptions(p.getConfiguration().MattermostSiteURL, p.getConfiguration().WebhookSecret); err != nil {
+			return err
+		}
 	}
 
 	if _, err = p.DM(mattermostUserID, fmt.Sprintf("%s%s", constants.ConnectSuccessMessage, strings.ReplaceAll(commandHelp, "|", "`")), user.Username); err != nil {
