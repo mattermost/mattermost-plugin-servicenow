@@ -19,7 +19,7 @@ import (
 // If you add non-reference types to your configuration struct, be sure to rewrite Clone as a deep
 // copy appropriate for your types.
 type configuration struct {
-	ServiceNowURL               string `json:"ServiceNowURL"`
+	ServiceNowBaseURL           string `json:"ServiceNowBaseURL"`
 	ServiceNowOAuthClientID     string `json:"ServiceNowOAuthClientID"`
 	ServiceNowOAuthClientSecret string `json:"ServiceNowOAuthClientSecret"`
 	EncryptionSecret            string `json:"EncryptionSecret"`
@@ -37,9 +37,9 @@ func (c *configuration) Clone() *configuration {
 	return &clone
 }
 
-// ProcessConfiguration processes the config.
+// "ProcessConfiguration" processes the config.
 func (c *configuration) ProcessConfiguration() error {
-	c.ServiceNowURL = strings.TrimRight(strings.TrimSpace(c.ServiceNowURL), "/")
+	c.ServiceNowBaseURL = strings.TrimRight(strings.TrimSpace(c.ServiceNowBaseURL), "/")
 	c.WebhookSecret = strings.TrimSpace(c.WebhookSecret)
 	c.ServiceNowOAuthClientID = strings.TrimSpace(c.ServiceNowOAuthClientID)
 	c.ServiceNowOAuthClientSecret = strings.TrimSpace(c.ServiceNowOAuthClientSecret)
@@ -50,7 +50,7 @@ func (c *configuration) ProcessConfiguration() error {
 
 // IsValid checks if all the required fields are set.
 func (c *configuration) IsValid() error {
-	if len(c.ServiceNowURL) == 0 {
+	if len(c.ServiceNowBaseURL) == 0 {
 		return errors.New("serviceNow server URL should not be empty")
 	}
 	if len(c.WebhookSecret) == 0 {
