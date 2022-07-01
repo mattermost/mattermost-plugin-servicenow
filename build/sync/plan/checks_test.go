@@ -13,7 +13,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mattermost/mattermost-plugin-starter-template/build/sync/plan"
+	"github.com/Brightscout/mattermost-plugin-servicenow/build/sync/plan"
 )
 
 // Tests for the RepoIsClean checker.

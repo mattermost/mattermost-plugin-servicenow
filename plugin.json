@@ -1,10 +1,7 @@
 {
-    "id": "com.mattermost.plugin-starter-template",
-    "name": "Plugin Starter Template",
-    "description": "This plugin serves as a starting point for writing a Mattermost plugin.",
-    "homepage_url": "https://github.com/mattermost/mattermost-plugin-starter-template",
-    "support_url": "https://github.com/mattermost/mattermost-plugin-starter-template/issues",
-    "release_notes_url": "https://github.com/mattermost/mattermost-plugin-starter-template/releases/tag/v0.1.0",
+    "id": "mattermost-plugin-servicenow",
+    "name": "Servicenow Plugin",
+    "description": "This plugin serves as an integration between Mattermost and ServiceNow.",
     "icon_path": "assets/starter-template-icon.svg",
     "version": "0.1.0",
     "min_server_version": "5.37.0",
@@ -23,6 +20,22 @@
     "settings_schema": {
         "header": "",
         "footer": "",
-        "settings": []
+        "settings": [
+            {
+                "key": "ServiceNowBaseURL",
+                "display_name": "ServiceNow Server Base URL:",
+                "type": "text",
+                "help_text": "The base URL for the ServiceNow server.",
+                "default": null
+            },
+            {
+                "key": "Secret",
+                "display_name": "Webhook Secret:",
+                "type": "generated",
+                "help_text": "The webhook secret used by the ServiceNow API calls to Mattermost for sending notifications.",
+                "regenerate_help_text": "Regenerates the secret for ServiceNow Plugin. Regenerating this key invalidates any existing token.",
+                "default": null
+            }
+        ]
     }
 }
