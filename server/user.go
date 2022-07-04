@@ -77,7 +77,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 
 	client := p.NewClient(context.Background(), tok)
 	if !p.subscriptionsActivated {
-		if err := client.ActivateSubscriptions(p.getConfiguration().MattermostSiteURL, p.getConfiguration().WebhookSecret); err != nil {
+		if err = client.ActivateSubscriptions(p.getConfiguration().MattermostSiteURL, p.getConfiguration().WebhookSecret); err != nil {
 			return err
 		}
 	}
