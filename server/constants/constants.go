@@ -11,10 +11,33 @@ const (
 		"You've connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n" +
 		"##### Slash Commands\n"
 
-	CommandTrigger                            = "servicenow"
-	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std_servicenow_for_mattermost"
-	SysQueryParam                             = "sysparm_query"
+	UpdateSetNotUploadedMessage = "It looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
 
-	UpdateSetVersion  = "v1.0"
-	UpdateSetFilename = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
+	CommandTrigger                            = "servicenow"
+	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
+	SysQueryParam                             = "sysparm_query"
+	SysQueryParamLimit                        = "sysparm_limit"
+	SysQueryParamOffset                       = "sysparm_offset"
+	DefaultPage                               = 0
+	DefaultPerPage                            = 10
+
+	UpdateSetVersion                    = "v1.0"
+	UpdateSetFilename                   = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
+	SubscriptionLevelRecord             = "record"
+	SubscriptionRecordTypeProblem       = "problem"
+	SubscriptionRecordTypeIncident      = "incident"
+	SubscriptionRecordTypeChangeRequest = "change_request"
+	SubscriptionTypePriority            = "priority"
+)
+
+var (
+	SubscriptionRecordTypes = map[string]bool{
+		SubscriptionRecordTypeIncident:      true,
+		SubscriptionRecordTypeProblem:       true,
+		SubscriptionRecordTypeChangeRequest: true,
+	}
+
+	SubscriptionTypes = map[string]bool{
+		SubscriptionTypePriority: true,
+	}
 )
