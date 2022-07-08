@@ -59,6 +59,7 @@ func (s *pluginStore) LoadUser(mattermostUserID string) (*User, error) {
 	if err := kvstore.LoadJSON(s.userKV, mattermostUserID, &user); err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -75,6 +76,7 @@ func (s *pluginStore) DeleteUser(mattermostUserID string) error {
 	if err != nil {
 		return err
 	}
+
 	if err = s.userKV.Delete(u.MattermostUserID); err != nil {
 		return err
 	}
