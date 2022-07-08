@@ -60,6 +60,7 @@ func (s *pluginStore) LoadUser(mattermostUserID string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -77,6 +78,7 @@ func (s *pluginStore) DeleteUser(mattermostUserID string) error {
 	if err != nil {
 		return err
 	}
+
 	err = s.userKV.Delete(u.MattermostUserID)
 	if err != nil {
 		return err
