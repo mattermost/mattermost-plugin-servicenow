@@ -1,5 +1,6 @@
-import React from "react";
-import {FormGroup, Col, Button} from "react-bootstrap";
+import React from 'react';
+import {FormGroup, Col, Button} from 'react-bootstrap';
+
 import Client from 'client';
 import {DOWNLOAD_UPDATE_SET_LINK} from '../../constants';
 
@@ -29,7 +30,10 @@ export default function DownloadButton({label, helpText}: Props) {
             </Col>
             <Col sm={8}>
                 {/* TODO: Add proper handling for the download logic as the downloaded filename should be the same that we get in the response headers. */}
-                <a href={`${Client.getPluginBaseURL()}/${DOWNLOAD_UPDATE_SET_LINK}`} download>
+                <a
+                    href={`${Client.getPluginBaseURL()}/${DOWNLOAD_UPDATE_SET_LINK}`}
+                    download={true}
+                >
                     <Button>
                         {'Download'}
                     </Button>

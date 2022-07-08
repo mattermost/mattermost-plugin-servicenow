@@ -40,10 +40,10 @@ func (c *client) ActivateSubscriptions() error {
 	}
 	serverURL := c.plugin.getConfiguration().MattermostSiteURL
 	subscriptionAuthDetails := &serializer.SubscriptionAuthDetails{}
-	params := url.Values{}
-	params.Add(constants.SysQueryParam, fmt.Sprintf("server_url=%s", serverURL))
+	queryParams := url.Values{}
+	queryParams.Add(constants.SysQueryParam, fmt.Sprintf("server_url=%s", serverURL))
 	// TODO: Add an API call for checking if the update set has been uploaded and if its version matches with the plugin's update set XML file
-	if _, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, params); err != nil {
+	if _, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, queryParams); err != nil {
 		if strings.Contains(err.Error(), "Invalid table") {
 			return errors.New(constants.UpdateSetNotUploadedMessage)
 		}
@@ -55,12 +55,12 @@ func (c *client) ActivateSubscriptions() error {
 		return nil
 	}
 
-	body := serializer.SubscriptionAuthPayload{
+	payload := serializer.SubscriptionAuthPayload{
 		ServerURL: serverURL,
 		APISecret: c.plugin.getConfiguration().WebhookSecret,
 	}
 
-	if _, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, body, nil, nil); err != nil {
+	if _, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, payload, nil, nil); err != nil {
 		return errors.Wrap(err, "failed to activate subscriptions for this server")
 	}
 

@@ -25,8 +25,7 @@ type Error struct {
 func (c *client) CallJSON(method, path string, in, out interface{}, params url.Values) (responseData []byte, err error) {
 	contentType := "application/json"
 	buf := &bytes.Buffer{}
-	err = json.NewEncoder(buf).Encode(in)
-	if err != nil {
+	if err = json.NewEncoder(buf).Encode(in); err != nil {
 		return nil, err
 	}
 	return c.call(method, path, contentType, buf, out, params)
@@ -41,10 +40,11 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 
 	if pathURL.Scheme == "" || pathURL.Host == "" {
 		var baseURL *url.URL
-		baseURL, err = url.Parse(c.plugin.getConfiguration().ServiceNowURL)
+		baseURL, err = url.Parse(c.plugin.getConfiguration().ServiceNowBaseURL)
 		if err != nil {
 			return nil, errors.WithMessage(err, errContext)
 		}
+
 		if path[0] != '/' {
 			path = "/" + path
 		}
@@ -61,6 +61,7 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 	if contentType != "" {
 		req.Header.Add("Content-Type", contentType)
 	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -79,8 +80,7 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 	switch resp.StatusCode {
 	case http.StatusOK, http.StatusCreated:
 		if out != nil {
-			err = json.Unmarshal(responseData, out)
-			if err != nil {
+			if err = json.Unmarshal(responseData, out); err != nil {
 				return responseData, err
 			}
 		}
@@ -91,8 +91,7 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 	}
 
 	errResp := ErrorResponse{}
-	err = json.Unmarshal(responseData, &errResp)
-	if err != nil {
+	if err = json.Unmarshal(responseData, &errResp); err != nil {
 		return responseData, errors.WithMessagef(err, "status: %s", resp.Status)
 	}
 	return responseData, fmt.Errorf("errorMessage %s. errorDetail: %s", errResp.Error.Message, errResp.Error.Detail)

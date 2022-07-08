@@ -8,7 +8,7 @@ export default class Client {
     urlVersion = 'api/v1';
 
     setPluginBaseURL(url: string) {
-        this.url = url + `/plugins/${pluginId}/${this.urlVersion}`;
+        this.url = `${url}/plugins/${pluginId}/${this.urlVersion}`;
     }
 
     getPluginBaseURL(): string {

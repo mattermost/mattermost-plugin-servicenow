@@ -258,8 +258,10 @@ func (p *Plugin) isAuthorizedSysAdmin(userID string) (bool, error) {
 	if appErr != nil {
 		return false, appErr
 	}
+
 	if !strings.Contains(user.Roles, "system_admin") {
 		return false, nil
 	}
+
 	return true, nil
 }
