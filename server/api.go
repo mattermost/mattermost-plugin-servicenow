@@ -66,7 +66,7 @@ func (p *Plugin) downloadUpdateSet(w http.ResponseWriter, r *http.Request) {
 	bundlePath, err := p.API.GetBundlePath()
 	if err != nil {
 		p.API.LogError("Error in getting the bundle path", "Error", err.Error())
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error in getting the bundle path. Error: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -74,12 +74,12 @@ func (p *Plugin) downloadUpdateSet(w http.ResponseWriter, r *http.Request) {
 	fileBytes, err := ioutil.ReadFile(xmlPath)
 	if err != nil {
 		p.API.LogError("Error in reading the file", "Error", err.Error())
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error in reading the file. Error: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Disposition", "attachment; filename="+constants.UpdateSetFilename)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", constants.UpdateSetFilename))
 	w.Header().Set("Content-Type", http.DetectContentType(fileBytes))
 	w.Write(fileBytes)
 }

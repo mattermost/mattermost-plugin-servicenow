@@ -39,7 +39,7 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 
 	if pathURL.Scheme == "" || pathURL.Host == "" {
 		var baseURL *url.URL
-		baseURL, err = url.Parse(c.plugin.getConfiguration().ServiceNowURL)
+		baseURL, err = url.Parse(c.plugin.getConfiguration().ServiceNowBaseURL)
 		if err != nil {
 			return nil, errors.WithMessage(err, errContext)
 		}
