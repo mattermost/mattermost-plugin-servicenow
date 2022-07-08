@@ -81,7 +81,7 @@ func (p *Plugin) downloadUpdateSet(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", constants.UpdateSetFilename))
 	w.Header().Set("Content-Type", http.DetectContentType(fileBytes))
-	w.Write(fileBytes)
+	_, _ = w.Write(fileBytes)
 }
 
 func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
