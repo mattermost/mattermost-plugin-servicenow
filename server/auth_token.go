@@ -57,8 +57,7 @@ func (p *Plugin) ParseAuthToken(encoded string) (*oauth2.Token, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(jsonBytes, &t)
-	if err != nil {
+	if err = json.Unmarshal(jsonBytes, &t); err != nil {
 		return nil, err
 	}
 
@@ -87,8 +86,7 @@ func encrypt(plain, secret []byte) ([]byte, error) {
 	}
 
 	nonce := make([]byte, aesgcm.NonceSize())
-	_, err = io.ReadFull(rand.Reader, nonce)
-	if err != nil {
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
 

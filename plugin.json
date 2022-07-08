@@ -22,10 +22,10 @@
         "footer": "",
         "settings": [
             {
-                "key": "ServiceNowURL",
-                "display_name": "ServiceNow Server URL:",
+                "key": "ServiceNowBaseURL",
+                "display_name": "ServiceNow Server Base URL:",
                 "type": "text",
-                "help_text": "The site URL for the ServiceNow server.",
+                "help_text": "The base URL for the ServiceNow server.",
                 "placeholder": "https://servicenow.com",
                 "default": null
             },

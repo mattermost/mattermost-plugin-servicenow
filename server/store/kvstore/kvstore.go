@@ -31,8 +31,7 @@ func Ensure(s KVStore, key string, newValue []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	err = s.Store(key, newValue)
-	if err != nil {
+	if err = s.Store(key, newValue); err != nil {
 		return nil, err
 	}
 

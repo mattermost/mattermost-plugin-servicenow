@@ -33,9 +33,9 @@ func (p *Plugin) NewClient(ctx context.Context, token *oauth2.Token) Client {
 
 func (c *client) ActivateSubscriptions(serverURL, secret string) error {
 	subscriptionAuthDetails := &serializer.SubscriptionAuthDetails{}
-	params := url.Values{}
-	params.Add(constants.SysQueryParam, fmt.Sprintf("server_url=%s", serverURL))
-	if _, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, params); err != nil {
+	queryParams := url.Values{}
+	queryParams.Add(constants.SysQueryParam, fmt.Sprintf("server_url=%s", serverURL))
+	if _, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, queryParams); err != nil {
 		return errors.Wrap(err, "failed to get subscription auth details")
 	}
 
@@ -44,13 +44,12 @@ func (c *client) ActivateSubscriptions(serverURL, secret string) error {
 		return nil
 	}
 
-	body := serializer.SubscriptionAuthPayload{
+	payload := serializer.SubscriptionAuthPayload{
 		ServerURL: serverURL,
 		APISecret: secret,
 	}
 
-	_, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, body, nil, nil)
-	if err != nil {
+	if _, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, payload, nil, nil); err != nil {
 		return errors.Wrap(err, "failed to activate subscriptions for this server")
 	}
 

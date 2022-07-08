@@ -66,8 +66,8 @@ func (p *Plugin) NewOAuth2Config() *oauth2.Config {
 		ClientSecret: p.getConfiguration().ServiceNowOAuthClientSecret,
 		RedirectURL:  fmt.Sprintf("%s%s", p.GetPluginURL(), constants.PathOAuth2Complete),
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth_auth.do", p.getConfiguration().ServiceNowURL),
-			TokenURL: fmt.Sprintf("%s/oauth_token.do", p.getConfiguration().ServiceNowURL),
+			AuthURL:  fmt.Sprintf("%s/oauth_auth.do", p.getConfiguration().ServiceNowBaseURL),
+			TokenURL: fmt.Sprintf("%s/oauth_token.do", p.getConfiguration().ServiceNowBaseURL),
 		},
 	}
 }
