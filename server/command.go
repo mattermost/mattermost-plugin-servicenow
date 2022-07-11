@@ -172,6 +172,9 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		return errorMessage
 	}
 
+	if len(subscriptions) == 0 {
+		return "You don't have any subscriptions active for this channel."
+	}
 	return ParseSubscriptionsToCommandResponse(subscriptions)
 }
 
