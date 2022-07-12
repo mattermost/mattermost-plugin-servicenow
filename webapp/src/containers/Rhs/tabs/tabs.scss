@@ -1,0 +1,14 @@
+.rhs-tabs {
+  // height = right-sidebar-height - right-sidebar-header-height(63px);
+  height: calc(100% - 63px);
+
+  .tab-content {
+    // height = (right-sidebar-height - right-sidebar-header-height = 100%) - tabs-height;
+    height: calc(100% - 63px);
+    overflow: auto;
+
+    .tab-pane {
+      height: 100%;
+    }
+  }
+}
