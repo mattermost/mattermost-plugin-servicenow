@@ -28,6 +28,8 @@ const (
 	SubscriptionRecordTypeIncident      = "incident"
 	SubscriptionRecordTypeChangeRequest = "change_request"
 	SubscriptionTypePriority            = "priority"
+
+	ServiceNowSysIDRegex = "[0-9a-f]{32}"
 )
 
 var (

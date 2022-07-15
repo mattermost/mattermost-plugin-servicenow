@@ -38,6 +38,7 @@ func NewPlugin() *Plugin {
 		"disconnect": p.handleDisconnect,
 		"subscribe":  p.handleSubscribe,
 		"list":       p.handleListSubscriptions,
+		"delete":     p.handleDeleteSubscription,
 		"help":       p.handleHelp,
 		"":           p.handleHelp,
 	}
