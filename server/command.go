@@ -15,11 +15,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-const commandHelp = `* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
+const (
+	commandHelp = `* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
-* |/servicenow subscribe| - Subscribe to the record changes in ServiceNow
+* |/servicenow subscribe| - Subscribe to the notifications of record changes in ServiceNow
 * |/servicenow list| - List your subscriptions for the current channel
 `
+	subscribeErrorMessage         = "Something went wrong. Not able to subscribe. Check server logs for errors."
+	subscribeSuccessMessage       = "Subscription successfully created."
+	listSubscriptionsErrorMessage = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+)
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string) string
 
@@ -104,7 +109,6 @@ func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ 
 }
 
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string) string {
-	subscribeErrorMessage := "Something went wrong. Not able to subscribe. Check server logs for errors."
 	user, err := p.GetUser(args.UserId)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
@@ -146,31 +150,30 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 		p.API.LogError("Unable to create subscription", "Error", err.Error())
 		return subscribeErrorMessage
 	}
-	return "Subscription successfully created."
+	return subscribeSuccessMessage
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string) string {
-	errorMessage := "Something went wrong. Not able to list subscriptions. Check server logs for errors."
 	user, err := p.GetUser(args.UserId)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			return "You are not connected to ServiceNow."
 		}
 		p.API.LogError("Unable to get user", "Error", err.Error())
-		return errorMessage
+		return listSubscriptionsErrorMessage
 	}
 
 	token, err := p.ParseAuthToken(user.OAuth2Token)
 	if err != nil {
 		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-		return errorMessage
+		return listSubscriptionsErrorMessage
 	}
 
 	client := p.NewClient(context.Background(), token)
 	subscriptions, err := client.GetSubscriptions(args.UserId, args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 	if err != nil {
 		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
-		return errorMessage
+		return listSubscriptionsErrorMessage
 	}
 
 	if len(subscriptions) == 0 {
@@ -224,8 +227,8 @@ func getAutocompleteData() *model.AutocompleteData {
 	disconnect := model.NewAutocompleteData("disconnect", "", "Disconnect your Mattermost account from your ServiceNow account")
 	serviceNow.AddCommand(disconnect)
 
-	subscribe := model.NewAutocompleteData("subscribe", "[record_type] [record_id]", "Subscribe to the record changes in ServiceNow")
-	subscribe.AddTextArgument("Type of the record to subscribe to. Can be one of: problem, incident, change_request", "[record_type]", "")
+	subscribe := model.NewAutocompleteData("subscribe", "[record_type] [record_id]", "Subscribe to the notifications of record changes in ServiceNow")
+	subscribe.AddTextArgument("Type of the record for subscription. Can be one of: problem, incident, change_request", "[record_type]", "")
 	subscribe.AddTextArgument("ID of the record to subscribe to. It is referred as sys_id in ServiceNow.", "[record_id]", "")
 	serviceNow.AddCommand(subscribe)
 

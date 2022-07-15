@@ -4,7 +4,7 @@ import {FormGroup, Col, Button} from 'react-bootstrap';
 import Client from 'client';
 import {DOWNLOAD_UPDATE_SET_LINK} from '../../constants';
 
-interface HelpText {
+type HelpText = {
     key: string | null;
     props: {
         isMarkdown: boolean;
@@ -15,7 +15,7 @@ interface HelpText {
     }
 }
 
-interface Props {
+type Props = {
     id: string;
     label: string;
     value: string;

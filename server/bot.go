@@ -31,7 +31,7 @@ func (p *Plugin) DM(mattermostUserID, format string, args ...interface{}) (strin
 	}
 	sentPost, err := p.API.CreatePost(post)
 	if err != nil {
-		p.API.LogError("error occurred while creating post", "error", err.Error())
+		p.API.LogError("Error occurred while creating post", "error", err.Error())
 		return "", err
 	}
 	return sentPost.Id, nil
