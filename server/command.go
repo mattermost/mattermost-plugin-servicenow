@@ -21,9 +21,11 @@ const (
 * |/servicenow subscribe| - Subscribe to the notifications of record changes in ServiceNow
 * |/servicenow list| - List your subscriptions for the current channel
 `
-	subscribeErrorMessage         = "Something went wrong. Not able to subscribe. Check server logs for errors."
-	subscribeSuccessMessage       = "Subscription successfully created."
-	listSubscriptionsErrorMessage = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+	subscribeErrorMessage            = "Something went wrong. Not able to subscribe. Check server logs for errors."
+	subscribeSuccessMessage          = "Subscription successfully created."
+	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
+	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
 )
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string) string
@@ -183,21 +185,20 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 }
 
 func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string) string {
-	errorMessage := "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	user, err := p.GetUser(args.UserId)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			return "You are not connected to ServiceNow."
 		}
 		p.API.LogError("Unable to get user", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
 
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
 
 	if !valid {
@@ -207,15 +208,15 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 	token, err := p.ParseAuthToken(user.OAuth2Token)
 	if err != nil {
 		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
 
 	client := p.NewClient(context.Background(), token)
 	if err = client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Unable to delete subscription", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
-	return "Subscription successfully deleted."
+	return deleteSubscriptionSuccessMessage
 }
 
 func getAutocompleteData() *model.AutocompleteData {
