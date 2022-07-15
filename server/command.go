@@ -15,11 +15,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-const commandHelp = `* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
+const (
+	commandHelp = `* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
 * |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
 * |/servicenow help| - Know about the features of this plugin
 `
+	disconnectErrorMessage           = "Something went wrong. Not able to disconnect user. Check server logs for errors."
+	disconnectSuccessMessage         = "Disconnected your ServiceNow account."
+	subscribeErrorMessage            = "Something went wrong. Not able to subscribe. Check server logs for errors."
+	subscribeSuccessMessage          = "Subscription successfully created."
+	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
+	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
+	editSubscriptionErrorMessage     = "Something went wrong. Not able to edit subscription. Check server logs for errors."
+	editSubscriptionSuccessMessage   = "Subscription successfully edited."
+)
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
 
@@ -114,17 +125,16 @@ func (p *Plugin) handleHelp(_ *plugin.Context, _ *model.CommandArgs, _ []string,
 }
 
 func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client) string {
-	disconnectErrorMessage := "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	if err := p.DisconnectUser(args.UserId); err != nil {
 		p.API.LogError("Unable to disconnect user", "Error", err.Error())
 		return disconnectErrorMessage
 	}
-	return "Disconnected your ServiceNow account."
+	return disconnectSuccessMessage
 }
 
 func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string {
 	if len(parameters) == 0 {
-		return "Invalid subscribe command. Available commands are 'list', 'add' and 'delete'."
+		return "Invalid subscribe command. Available commands are 'list', 'add', 'edit' and 'delete'."
 	}
 
 	command := parameters[0]
@@ -145,7 +155,6 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 }
 
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	subscribeErrorMessage := "Something went wrong. Not able to subscribe. Check server logs for errors."
 	if len(params) < 2 {
 		return "You have not entered the correct number of arguments for the subscribe command."
 	}
@@ -174,15 +183,14 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 		p.API.LogError("Unable to create subscription", "Error", err.Error())
 		return subscribeErrorMessage
 	}
-	return "Subscription successfully created."
+	return subscribeSuccessMessage
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
-	errorMessage := "Something went wrong. Not able to list subscriptions. Check server logs for errors."
 	subscriptions, err := client.GetAllSubscriptions(args.UserId, args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 	if err != nil {
 		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
-		return errorMessage
+		return listSubscriptionsErrorMessage
 	}
 
 	if len(subscriptions) == 0 {
@@ -192,12 +200,11 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 }
 
 func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	errorMessage := "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
 
 	if !valid {
@@ -206,19 +213,18 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 
 	if err = client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Unable to delete subscription", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
-	return "Subscription successfully deleted."
+	return deleteSubscriptionSuccessMessage
 }
 
 func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	errorMessage := "Something went wrong. Not able to edit subscription. Check server logs for errors."
 	// TODO: Remove this code later. This is just for testing purposes.
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return errorMessage
+		return deleteSubscriptionErrorMessage
 	}
 
 	if !valid {
@@ -230,14 +236,14 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	}
 	if err = subscription.IsValidForUpdation(); err != nil {
 		p.API.LogError("Failed to validate subscription", "Error", err.Error())
-		return errorMessage
+		return editSubscriptionErrorMessage
 	}
 
 	if err = client.EditSubscription(subscriptionID, subscription); err != nil {
 		p.API.LogError("Unable to edit subscription", "Error", err.Error())
-		return errorMessage
+		return editSubscriptionErrorMessage
 	}
-	return "Subscription successfully edited."
+	return editSubscriptionSuccessMessage
 }
 
 func getAutocompleteData() *model.AutocompleteData {

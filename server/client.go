@@ -94,14 +94,14 @@ func (c *client) GetAllSubscriptions(userID, channelID, limit, offset string) ([
 		query = fmt.Sprintf("%s^channel_id=%s", query, channelID)
 	}
 
-	params := url.Values{
+	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
 		constants.SysQueryParamLimit:  {limit},
 		constants.SysQueryParamOffset: {offset},
 	}
 
 	subscriptions := &serializer.SubscriptionsResult{}
-	if _, err := c.CallJSON(http.MethodGet, constants.PathSubscriptionCRUD, nil, subscriptions, params); err != nil {
+	if _, err := c.CallJSON(http.MethodGet, constants.PathSubscriptionCRUD, nil, subscriptions, queryParams); err != nil {
 		return nil, errors.Wrap(err, "failed to get subscriptions from ServiceNow")
 	}
 
