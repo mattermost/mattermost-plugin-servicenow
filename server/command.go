@@ -17,11 +17,11 @@ import (
 
 const commandHelp = `* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
-* |/servicenow subscribe| - Subscribe to the record changes in ServiceNow
-* |/servicenow list| - List your subscriptions for the current channel
+* |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
+* |/servicenow help| - Know about the features of this plugin
 `
 
-type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string) string
+type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
 
 func (p *Plugin) getCommand() (*model.Command, error) {
 	iconData, err := command.GetIconData(p.API, "assets/icon.svg")
@@ -32,7 +32,7 @@ func (p *Plugin) getCommand() (*model.Command, error) {
 	return &model.Command{
 		Trigger:              constants.CommandTrigger,
 		AutoComplete:         true,
-		AutoCompleteDesc:     "Available commands: connect, disconnect, subscribe, list, help",
+		AutoCompleteDesc:     "Available commands: connect, disconnect, subscriptions, help",
 		AutoCompleteHint:     "[command]",
 		AutocompleteData:     getAutocompleteData(),
 		AutocompleteIconData: iconData,
@@ -64,8 +64,41 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
+	if action == "connect" {
+		message := ""
+		if _, userErr := p.GetUser(args.UserId); userErr == nil {
+			message = "You are already connected to ServiceNow."
+		} else {
+			message = fmt.Sprintf("[Click here to link your ServiceNow account.](%s%s)", p.GetPluginURL(), constants.PathOAuth2Connect)
+		}
+
+		p.postCommandResponse(args, message)
+		return &model.CommandResponse{}, nil
+	}
+
 	if f, ok := p.CommandHandlers[action]; ok {
-		message := f(c, args, parameters)
+		unknownErrorMessage := "Unknown error."
+		notConnectedMessage := "You are not connected to ServiceNow."
+		user, userErr := p.GetUser(args.UserId)
+		if userErr != nil {
+			if errors.Is(userErr, ErrNotFound) {
+				p.postCommandResponse(args, notConnectedMessage)
+			} else {
+				p.API.LogError("Unable to get user", "Error", userErr.Error())
+				p.postCommandResponse(args, unknownErrorMessage)
+			}
+			return &model.CommandResponse{}, nil
+		}
+
+		token, err := p.ParseAuthToken(user.OAuth2Token)
+		if err != nil {
+			p.API.LogError("Unable to parse oauth token", "Error", err.Error())
+			p.postCommandResponse(args, unknownErrorMessage)
+			return &model.CommandResponse{}, nil
+		}
+
+		client := p.NewClient(context.Background(), token)
+		message := f(c, args, parameters, client)
 		if message != "" {
 			p.postCommandResponse(args, message)
 		}
@@ -76,26 +109,12 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	return &model.CommandResponse{}, nil
 }
 
-func (p *Plugin) handleHelp(_ *plugin.Context, _ *model.CommandArgs, _ []string) string {
+func (p *Plugin) handleHelp(_ *plugin.Context, _ *model.CommandArgs, _ []string, _ Client) string {
 	return "###### Mattermost ServiceNow Plugin - Slash Command Help\n" + strings.ReplaceAll(commandHelp, "|", "`")
 }
 
-func (p *Plugin) handleConnect(_ *plugin.Context, args *model.CommandArgs, _ []string) string {
-	if _, err := p.GetUser(args.UserId); err == nil {
-		return "You are already connected to ServiceNow."
-	}
-	return fmt.Sprintf("[Click here to link your ServiceNow account.](%s%s)", p.GetPluginURL(), constants.PathOAuth2Connect)
-}
-
-func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string) string {
+func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client) string {
 	disconnectErrorMessage := "Something went wrong. Not able to disconnect user. Check server logs for errors."
-	if _, err := p.GetUser(args.UserId); err != nil {
-		if errors.Is(err, ErrNotFound) {
-			return "You are not connected to ServiceNow."
-		}
-		p.API.LogError("Unable to get user", "Error", err.Error())
-		return disconnectErrorMessage
-	}
 	if err := p.DisconnectUser(args.UserId); err != nil {
 		p.API.LogError("Unable to disconnect user", "Error", err.Error())
 		return disconnectErrorMessage
@@ -103,71 +122,64 @@ func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ 
 	return "Disconnected your ServiceNow account."
 }
 
-func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string) string {
-	subscribeErrorMessage := "Something went wrong. Not able to subscribe. Check server logs for errors."
-	user, err := p.GetUser(args.UserId)
-	if err != nil {
-		if errors.Is(err, ErrNotFound) {
-			return "You are not connected to ServiceNow."
-		}
-		p.API.LogError("Unable to get user", "Error", err.Error())
-		return subscribeErrorMessage
+func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string {
+	if len(parameters) == 0 {
+		return "Invalid subscribe command. Available commands are 'list', 'add' and 'delete'."
 	}
 
+	command := parameters[0]
+	parameters = parameters[1:]
+
+	switch {
+	case command == "list":
+		return p.handleListSubscriptions(c, args, parameters, client)
+	case command == "add":
+		return p.handleSubscribe(c, args, parameters, client)
+	case command == "edit":
+		return p.handleEditSubscription(c, args, parameters, client)
+	case command == "delete":
+		return p.handleDeleteSubscription(c, args, parameters, client)
+	default:
+		return fmt.Sprintf("Unknown subcommand %v", command)
+	}
+}
+
+func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	subscribeErrorMessage := "Something went wrong. Not able to subscribe. Check server logs for errors."
 	if len(params) < 2 {
 		return "You have not entered the correct number of arguments for the subscribe command."
 	}
 
 	// TODO: Add logic to open the Create subscription modal
 	// The below code is temporary and it'll be removed in the future.
-	token, err := p.ParseAuthToken(user.OAuth2Token)
-	if err != nil {
-		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-		return subscribeErrorMessage
-	}
-
-	client := p.NewClient(context.Background(), token)
+	subscriptionType := constants.SubscriptionTypePriority
+	subscriptionLevel := constants.SubscriptionLevelRecord
+	subscriptionActive := true
 	subscription := serializer.SubscriptionPayload{
-		ServerURL:        p.getConfiguration().MattermostSiteURL,
-		UserID:           args.UserId,
-		ChannelID:        args.ChannelId,
-		RecordType:       params[0],
-		RecordID:         params[1],
-		SubscriptionType: constants.SubscriptionTypePriority,
-		IsActive:         true,
-		Level:            constants.SubscriptionLevelRecord,
+		ServerURL:        &p.getConfiguration().MattermostSiteURL,
+		UserID:           &args.UserId,
+		ChannelID:        &args.ChannelId,
+		RecordType:       &params[0],
+		RecordID:         &params[1],
+		SubscriptionType: &subscriptionType,
+		IsActive:         &subscriptionActive,
+		Level:            &subscriptionLevel,
 	}
-	if err = subscription.IsValid(); err != nil {
+	if err := subscription.IsValidForCreation(); err != nil {
 		p.API.LogError("Failed to validate subscription", "Error", err.Error())
 		return subscribeErrorMessage
 	}
 
-	if err = client.CreateSubscription(&subscription); err != nil {
+	if err := client.CreateSubscription(&subscription); err != nil {
 		p.API.LogError("Unable to create subscription", "Error", err.Error())
 		return subscribeErrorMessage
 	}
 	return "Subscription successfully created."
 }
 
-func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string) string {
+func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
 	errorMessage := "Something went wrong. Not able to list subscriptions. Check server logs for errors."
-	user, err := p.GetUser(args.UserId)
-	if err != nil {
-		if errors.Is(err, ErrNotFound) {
-			return "You are not connected to ServiceNow."
-		}
-		p.API.LogError("Unable to get user", "Error", err.Error())
-		return errorMessage
-	}
-
-	token, err := p.ParseAuthToken(user.OAuth2Token)
-	if err != nil {
-		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-		return errorMessage
-	}
-
-	client := p.NewClient(context.Background(), token)
-	subscriptions, err := client.GetSubscriptions(args.UserId, args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+	subscriptions, err := client.GetAllSubscriptions(args.UserId, args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 	if err != nil {
 		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
 		return errorMessage
@@ -179,17 +191,8 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 	return ParseSubscriptionsToCommandResponse(subscriptions)
 }
 
-func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string) string {
+func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
 	errorMessage := "Something went wrong. Not able to delete subscription. Check server logs for errors."
-	user, err := p.GetUser(args.UserId)
-	if err != nil {
-		if errors.Is(err, ErrNotFound) {
-			return "You are not connected to ServiceNow."
-		}
-		p.API.LogError("Unable to get user", "Error", err.Error())
-		return errorMessage
-	}
-
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
@@ -201,18 +204,40 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		return "Invalid subscription ID."
 	}
 
-	token, err := p.ParseAuthToken(user.OAuth2Token)
-	if err != nil {
-		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-		return errorMessage
-	}
-
-	client := p.NewClient(context.Background(), token)
 	if err = client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Unable to delete subscription", "Error", err.Error())
 		return errorMessage
 	}
 	return "Subscription successfully deleted."
+}
+
+func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	errorMessage := "Something went wrong. Not able to edit subscription. Check server logs for errors."
+	// TODO: Remove this code later. This is just for testing purposes.
+	subscriptionID := params[0]
+	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
+	if err != nil {
+		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
+		return errorMessage
+	}
+
+	if !valid {
+		return "Invalid subscription ID."
+	}
+
+	subscription := &serializer.SubscriptionPayload{
+		SubscriptionType: &params[1],
+	}
+	if err = subscription.IsValidForUpdation(); err != nil {
+		p.API.LogError("Failed to validate subscription", "Error", err.Error())
+		return errorMessage
+	}
+
+	if err = client.EditSubscription(subscriptionID, subscription); err != nil {
+		p.API.LogError("Unable to edit subscription", "Error", err.Error())
+		return errorMessage
+	}
+	return "Subscription successfully edited."
 }
 
 func getAutocompleteData() *model.AutocompleteData {
@@ -224,13 +249,26 @@ func getAutocompleteData() *model.AutocompleteData {
 	disconnect := model.NewAutocompleteData("disconnect", "", "Disconnect your Mattermost account from your ServiceNow account")
 	serviceNow.AddCommand(disconnect)
 
-	subscribe := model.NewAutocompleteData("subscribe", "[record_type] [record_id]", "Subscribe to the record changes in ServiceNow")
-	subscribe.AddTextArgument("Type of the record to subscribe to. Can be one of: problem, incident, change_request", "[record_type]", "")
-	subscribe.AddTextArgument("ID of the record to subscribe to. It is referred as sys_id in ServiceNow.", "[record_id]", "")
-	serviceNow.AddCommand(subscribe)
+	subscriptions := model.NewAutocompleteData("subscriptions", "[command]", "Available commands: list, add, edit, delete")
 
-	list := model.NewAutocompleteData("list", "", "List your subscriptions for the current channel")
-	serviceNow.AddCommand(list)
+	subscribeList := model.NewAutocompleteData("list", "", "List the current channel subscriptions")
+	subscriptions.AddCommand(subscribeList)
+
+	subscriptionsAdd := model.NewAutocompleteData("add", "[record_type] [record_id]", "Subscribe to the record changes in ServiceNow")
+	subscriptionsAdd.AddTextArgument("Type of the record to subscribe to. Can be one of: problem, incident, change_request", "[record_type]", "")
+	subscriptionsAdd.AddTextArgument("ID of the record to subscribe to. It is referred as sys_id in ServiceNow.", "[record_id]", "")
+	subscriptions.AddCommand(subscriptionsAdd)
+
+	subscriptionsEdit := model.NewAutocompleteData("edit", "[subscription_id] [subscription_type]", "Edit the subscriptions created to the record changes in ServiceNow")
+	subscriptionsEdit.AddTextArgument("ID of the subscription", "[subscription_id]", "")
+	subscriptionsEdit.AddTextArgument("Type of the subscription. Can be on of: priority, state", "[subscription_type]", "")
+	subscriptions.AddCommand(subscriptionsEdit)
+
+	subscriptionsDelete := model.NewAutocompleteData("delete", "[subscription_id]", "Unsubscribe to the record changes in ServiceNow")
+	subscriptionsDelete.AddTextArgument("ID of the subscription", "[subscription_id]", "")
+	subscriptions.AddCommand(subscriptionsDelete)
+
+	serviceNow.AddCommand(subscriptions)
 
 	help := model.NewAutocompleteData("help", "", "Display slash command help text")
 	serviceNow.AddCommand(help)

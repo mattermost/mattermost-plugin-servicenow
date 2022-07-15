@@ -28,6 +28,7 @@ const (
 	SubscriptionRecordTypeIncident      = "incident"
 	SubscriptionRecordTypeChangeRequest = "change_request"
 	SubscriptionTypePriority            = "priority"
+	SubscriptionTypeState               = "state"
 
 	ServiceNowSysIDRegex = "[0-9a-f]{32}"
 )
@@ -41,5 +42,6 @@ var (
 
 	SubscriptionTypes = map[string]bool{
 		SubscriptionTypePriority: true,
+		SubscriptionTypeState:    true,
 	}
 )
