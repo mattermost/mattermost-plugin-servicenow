@@ -56,8 +56,7 @@ func (p *Plugin) NewStore(api plugin.API) Store {
 
 func (s *pluginStore) LoadUser(mattermostUserID string) (*User, error) {
 	user := User{}
-	err := kvstore.LoadJSON(s.userKV, mattermostUserID, &user)
-	if err != nil {
+	if err := kvstore.LoadJSON(s.userKV, mattermostUserID, &user); err != nil {
 		return nil, err
 	}
 
@@ -65,8 +64,7 @@ func (s *pluginStore) LoadUser(mattermostUserID string) (*User, error) {
 }
 
 func (s *pluginStore) StoreUser(user *User) error {
-	err := kvstore.StoreJSON(s.userKV, user.MattermostUserID, user)
-	if err != nil {
+	if err := kvstore.StoreJSON(s.userKV, user.MattermostUserID, user); err != nil {
 		return err
 	}
 
@@ -79,8 +77,7 @@ func (s *pluginStore) DeleteUser(mattermostUserID string) error {
 		return err
 	}
 
-	err = s.userKV.Delete(u.MattermostUserID)
-	if err != nil {
+	if err = s.userKV.Delete(u.MattermostUserID); err != nil {
 		return err
 	}
 

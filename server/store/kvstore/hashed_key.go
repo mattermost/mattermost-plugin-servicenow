@@ -51,5 +51,7 @@ func hashKey(prefix, hashableKey string) string {
 
 	h := sha512.New()
 	_, _ = h.Write([]byte(hashableKey))
-	return fmt.Sprintf("%s%x", prefix, h.Sum(nil))
+	hashedKey := fmt.Sprintf("%s%x", prefix, h.Sum(nil))
+	// We are returning a key of 50 length because Mattermost server below v6 don't support keys longer than 50
+	return hashedKey[:50]
 }

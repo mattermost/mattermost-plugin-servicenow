@@ -17,15 +17,13 @@ type User struct {
 }
 
 func (p *Plugin) InitOAuth2(mattermostUserID string) (string, error) {
-	_, err := p.GetUser(mattermostUserID)
-	if err == nil {
+	if _, err := p.GetUser(mattermostUserID); err == nil {
 		return "", fmt.Errorf("user is already connected to ServiceNow")
 	}
 
 	conf := p.NewOAuth2Config()
 	state := fmt.Sprintf("%v_%v", model.NewId()[0:15], mattermostUserID)
-	err = p.store.StoreOAuth2State(state)
-	if err != nil {
+	if err := p.store.StoreOAuth2State(state); err != nil {
 		return "", err
 	}
 
@@ -39,8 +37,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 
 	oconf := p.NewOAuth2Config()
 
-	err := p.store.VerifyOAuth2State(state)
-	if err != nil {
+	if err := p.store.VerifyOAuth2State(state); err != nil {
 		return errors.WithMessage(err, "missing stored state")
 	}
 
@@ -49,13 +46,18 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return errors.New("not authorized, user ID mismatch")
 	}
 
+	user, userErr := p.API.GetUser(mattermostUserID)
+	if userErr != nil {
+		return errors.Wrap(userErr, fmt.Sprintf("unable to get user for userID: %s", mattermostUserID))
+	}
+
 	ctx := context.Background()
-	tok, err := oconf.Exchange(ctx, code)
+	token, err := oconf.Exchange(ctx, code)
 	if err != nil {
 		return err
 	}
 
-	encryptedToken, err := p.NewEncodedAuthToken(tok)
+	encryptedToken, err := p.NewEncodedAuthToken(token)
 	if err != nil {
 		return err
 	}
@@ -65,14 +67,15 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		OAuth2Token:      encryptedToken,
 	}
 
-	err = p.store.StoreUser(u)
-	if err != nil {
+	if err = p.store.StoreUser(u); err != nil {
 		return err
 	}
 
-	user, userErr := p.API.GetUser(mattermostUserID)
-	if userErr != nil {
-		return errors.Wrap(err, fmt.Sprintf("unable to get user for userID: %s", mattermostUserID))
+	client := p.NewClient(context.Background(), token)
+	if !p.subscriptionsActivated {
+		if err = client.ActivateSubscriptions(p.getConfiguration().MattermostSiteURL, p.getConfiguration().WebhookSecret); err != nil {
+			return err
+		}
 	}
 
 	if _, err = p.DM(mattermostUserID, fmt.Sprintf("%s%s", constants.ConnectSuccessMessage, strings.ReplaceAll(commandHelp, "|", "`")), user.Username); err != nil {

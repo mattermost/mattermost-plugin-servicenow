@@ -21,11 +21,12 @@ type Plugin struct {
 
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
-	configuration   *configuration
-	botID           string
-	router          *mux.Router
-	store           Store
-	CommandHandlers map[string]CommandHandleFunc
+	configuration          *configuration
+	botID                  string
+	router                 *mux.Router
+	store                  Store
+	CommandHandlers        map[string]CommandHandleFunc
+	subscriptionsActivated bool
 }
 
 // NewPlugin returns an instance of a Plugin.
