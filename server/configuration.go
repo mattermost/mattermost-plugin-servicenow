@@ -19,8 +19,15 @@ import (
 // If you add non-reference types to your configuration struct, be sure to rewrite Clone as a deep
 // copy appropriate for your types.
 type configuration struct {
-	ServiceNowBaseURL string `json:"ServiceNowBaseURL"`
-	Secret            string `json:"Secret"`
+	ServiceNowBaseURL           string `json:"ServiceNowBaseURL"`
+	ServiceNowOAuthClientID     string `json:"ServiceNowOAuthClientID"`
+	ServiceNowOAuthClientSecret string `json:"ServiceNowOAuthClientSecret"`
+	EncryptionSecret            string `json:"EncryptionSecret"`
+	WebhookSecret               string `json:"WebhookSecret"`
+	MattermostSiteURL           string
+	PluginID                    string
+	PluginURL                   string
+	PluginURLPath               string
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -33,7 +40,10 @@ func (c *configuration) Clone() *configuration {
 // ProcessConfiguration processes the config.
 func (c *configuration) ProcessConfiguration() error {
 	c.ServiceNowBaseURL = strings.TrimRight(strings.TrimSpace(c.ServiceNowBaseURL), "/")
-	c.Secret = strings.TrimSpace(c.Secret)
+	c.WebhookSecret = strings.TrimSpace(c.WebhookSecret)
+	c.ServiceNowOAuthClientID = strings.TrimSpace(c.ServiceNowOAuthClientID)
+	c.ServiceNowOAuthClientSecret = strings.TrimSpace(c.ServiceNowOAuthClientSecret)
+	c.EncryptionSecret = strings.TrimSpace(c.EncryptionSecret)
 
 	return nil
 }
@@ -41,11 +51,19 @@ func (c *configuration) ProcessConfiguration() error {
 // IsValid checks if all the required fields are set.
 func (c *configuration) IsValid() error {
 	if len(c.ServiceNowBaseURL) == 0 {
-		return errors.New("serviceNow server URL cannot be empty")
+		return errors.New("serviceNow server URL should not be empty")
 	}
-
-	if len(c.Secret) == 0 {
-		return errors.New("please generate secret from the plugin system console settings")
+	if len(c.WebhookSecret) == 0 {
+		return errors.New("webhook secret should not be empty")
+	}
+	if c.ServiceNowOAuthClientID == "" {
+		return errors.New("serviceNow OAuth clientID should not be empty")
+	}
+	if c.ServiceNowOAuthClientSecret == "" {
+		return errors.New("serviceNow OAuth clientSecret should not be empty")
+	}
+	if c.EncryptionSecret == "" {
+		return errors.New("encryption secret should not be empty")
 	}
 
 	return nil
@@ -108,6 +126,16 @@ func (p *Plugin) OnConfigurationChange() error {
 	if err := configuration.IsValid(); err != nil {
 		return errors.Wrap(err, "failed to validate configuration")
 	}
+
+	mattermostSiteURL := p.API.GetConfig().ServiceSettings.SiteURL
+	if mattermostSiteURL == nil {
+		return errors.New("plugin requires Mattermost Site URL to be set")
+	}
+
+	configuration.MattermostSiteURL = *mattermostSiteURL
+	configuration.PluginURL = p.GetPluginURL()
+	configuration.PluginURLPath = p.GetPluginURLPath()
+	configuration.PluginID = manifest.ID
 
 	p.setConfiguration(configuration)
 	return nil

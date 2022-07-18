@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime/debug"
 
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/pkg/errors"
@@ -23,18 +24,33 @@ func (p *Plugin) InitAPI() *mux.Router {
 	p.handleStaticFiles(r)
 	s := r.PathPrefix("/api/v1").Subrouter()
 
+	// Add custom routes here
+	s.HandleFunc(constants.PathOAuth2Connect, p.checkAuth(p.httpOAuth2Connect)).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathOAuth2Complete, p.checkAuth(p.httpOAuth2Complete)).Methods(http.MethodGet)
 	// API for POC. TODO: Remove this endpoint later
-	s.HandleFunc("/notification", p.handleAuthRequired(p.handleNotification)).Methods(http.MethodPost)
+	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
 	return r
 }
 
-// handleAuthRequired verifies if provided request is performed by an authorized source.
-func (p *Plugin) handleAuthRequired(handleFunc func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+func (p *Plugin) checkAuth(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if status, err := verifyHTTPSecret(p.getConfiguration().Secret, r.FormValue("secret")); err != nil {
+		userID := r.Header.Get(constants.HeaderMattermostUserID)
+		if userID == "" {
+			http.Error(w, "Not authorized", http.StatusUnauthorized)
+			return
+		}
+
+		handler(w, r)
+	}
+}
+
+// checkAuthBySecret verifies if provided request is performed by an authorized source.
+func (p *Plugin) checkAuthBySecret(handleFunc func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if status, err := verifyHTTPSecret(p.getConfiguration().WebhookSecret, r.FormValue("secret")); err != nil {
 			p.API.LogError("Invalid secret", "Error", err.Error())
 			http.Error(w, fmt.Sprintf("Invalid Secret. Error: %s", err.Error()), status)
 			return
@@ -55,6 +71,57 @@ func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
 
 	p.API.LogInfo(fmt.Sprintf("%+v", v))
 	returnStatusOK(w, v)
+}
+
+func (p *Plugin) httpOAuth2Connect(w http.ResponseWriter, r *http.Request) {
+	mattermostUserID := r.Header.Get("Mattermost-User-ID")
+	redirectURL, err := p.InitOAuth2(mattermostUserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, redirectURL, http.StatusFound)
+}
+
+func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		http.Error(w, "missing authorization code", http.StatusBadRequest)
+		return
+	}
+
+	state := r.URL.Query().Get("state")
+	if state == "" {
+		http.Error(w, "missing authorization state", http.StatusBadRequest)
+		return
+	}
+
+	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
+	err := p.CompleteOAuth2(mattermostUserID, code, state)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	html := `
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			window.close();
+		</script>
+	</head>
+	<body>
+		<p>Completed connecting to ServiceNow. Please close this window.</p>
+	</body>
+</html>
+`
+
+	w.Header().Set("Content-Type", "text/html")
+	if _, err := w.Write([]byte(html)); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // TODO: Modify this function to work without taking a map in the params
