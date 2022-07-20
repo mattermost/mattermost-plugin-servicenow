@@ -258,9 +258,9 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(statusCode)
 	result, err := json.Marshal(subscriptions)
 	if err != nil || string(result) == "null" {
-		w.Write([]byte("[]"))
+		_, _ = w.Write([]byte("[]"))
 	} else {
-		w.Write(result)
+		_, _ = w.Write(result)
 	}
 }
 
