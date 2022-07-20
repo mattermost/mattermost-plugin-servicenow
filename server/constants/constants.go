@@ -1,5 +1,7 @@
 package constants
 
+import "errors"
+
 const (
 	// Bot related constants
 	BotUserName    = "servicenow"
@@ -14,11 +16,13 @@ const (
 		"##### Slash Commands\n"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
+	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
 	SysQueryParam                             = "sysparm_query"
 	SysQueryParamLimit                        = "sysparm_limit"
 	SysQueryParamOffset                       = "sysparm_offset"
 	DefaultPage                               = 0
 	DefaultPerPage                            = 10
+	MaxPerPage                                = 50
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
 	UpdateSetVersion            = "v1.0"
@@ -31,7 +35,11 @@ const (
 	SubscriptionTypePriority            = "priority"
 	SubscriptionTypeState               = "state"
 
-	ServiceNowSysIDRegex = "[0-9a-f]{32}"
+	TokenHeader ServiceNowOAuthTokenHeader = "ServiceNow-Oauth-Token"
+
+	QueryParamPage      = "page"
+	QueryParamPerPage   = "per_page"
+	QueryParamChannelID = "channel_id"
 )
 
 var (
@@ -45,4 +53,8 @@ var (
 		SubscriptionTypePriority: true,
 		SubscriptionTypeState:    true,
 	}
+
+	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
 )
+
+type ServiceNowOAuthTokenHeader string

@@ -72,7 +72,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 	}
 
 	client := p.NewClient(context.Background(), token)
-	if err = client.ActivateSubscriptions(); err != nil {
+	if _, err = client.ActivateSubscriptions(); err != nil {
 		return err
 	}
 
