@@ -78,7 +78,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), constants.TokenHeader, token)
+		ctx := context.WithValue(r.Context(), constants.ContextTokenKey, token)
 		r = r.Clone(ctx)
 		handler(w, r)
 	}
@@ -198,7 +198,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	token := ctx.Value(constants.TokenHeader).(*oauth2.Token)
+	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	client := p.NewClient(ctx, token)
 	exists, statusCode, err := client.CheckForDuplicateSubscription(subcription)
 	if err != nil {
@@ -245,7 +245,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	token := ctx.Value(constants.TokenHeader).(*oauth2.Token)
+	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	client := p.NewClient(ctx, token)
 	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
@@ -268,7 +268,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	subscriptionID := pathParams["subscription_id"]
 	ctx := r.Context()
-	token := ctx.Value(constants.TokenHeader).(*oauth2.Token)
+	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	client := p.NewClient(ctx, token)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Error in deleting the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
@@ -300,7 +300,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	token := ctx.Value(constants.TokenHeader).(*oauth2.Token)
+	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	client := p.NewClient(ctx, token)
 	if statusCode, err := client.EditSubscription(subscriptionID, subcription); err != nil {
 		p.API.LogError("Error in editing the subscription", "subscriptionID", subscriptionID, "Error", err.Error())

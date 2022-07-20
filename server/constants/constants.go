@@ -35,7 +35,8 @@ const (
 	SubscriptionTypePriority            = "priority"
 	SubscriptionTypeState               = "state"
 
-	TokenHeader ServiceNowOAuthTokenHeader = "ServiceNow-Oauth-Token"
+	// Used for storing the token in the request context to pass from one middleware to another
+	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
 	QueryParamPage      = "page"
 	QueryParamPerPage   = "per_page"
@@ -57,4 +58,4 @@ var (
 	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
 )
 
-type ServiceNowOAuthTokenHeader string
+type ServiceNowOAuthToken string
