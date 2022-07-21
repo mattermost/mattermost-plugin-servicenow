@@ -59,6 +59,13 @@
                 "type": "generated",
                 "help_text": "The secret key used to encrypt and decrpyt OAuth token.",
                 "default": null
+            },
+            {
+                "key": "ServiceNowUpdateSetDownload",
+                "display_name": "Download ServiceNow Update Set:",
+                "type": "custom",
+                "help_text": "The update set XML file that needs to be uploaded in ServiceNow for enabling subscriptions.",
+                "default": ""
             }
         ]
     }

@@ -14,4 +14,7 @@ const (
 	CommandTrigger                            = "servicenow"
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std_servicenow_for_mattermost"
 	SysQueryParam                             = "sysparm_query"
+
+	UpdateSetVersion  = "v1.0"
+	UpdateSetFilename = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 )

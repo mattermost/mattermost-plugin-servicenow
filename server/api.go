@@ -4,6 +4,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -27,6 +28,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	// Add custom routes here
 	s.HandleFunc(constants.PathOAuth2Connect, p.checkAuth(p.httpOAuth2Connect)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathOAuth2Complete, p.checkAuth(p.httpOAuth2Complete)).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathDownloadUpdateSet, p.downloadUpdateSet).Methods(http.MethodGet)
 	// API for POC. TODO: Remove this endpoint later
 	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 
@@ -58,6 +60,28 @@ func (p *Plugin) checkAuthBySecret(handleFunc func(w http.ResponseWriter, r *htt
 
 		handleFunc(w, r)
 	}
+}
+
+func (p *Plugin) downloadUpdateSet(w http.ResponseWriter, r *http.Request) {
+	bundlePath, err := p.API.GetBundlePath()
+	if err != nil {
+		p.API.LogError("Error in getting the bundle path", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in getting the bundle path. Error: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	xmlPath := filepath.Join(bundlePath, "assets", constants.UpdateSetFilename)
+	fileBytes, err := ioutil.ReadFile(xmlPath)
+	if err != nil {
+		p.API.LogError("Error in reading the file", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in reading the file. Error: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", constants.UpdateSetFilename))
+	w.Header().Set("Content-Type", http.DetectContentType(fileBytes))
+	_, _ = w.Write(fileBytes)
 }
 
 func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
