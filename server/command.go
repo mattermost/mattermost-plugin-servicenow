@@ -121,7 +121,7 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 		return "You have not entered the correct number of arguments for the subscribe command."
 	}
 
-	// TODO: Add logic to open the Create subscription modal
+	// TODO: Add logic to open the create subscription modal
 	// The below code is temporary and it'll be removed in the future.
 	token, err := p.ParseAuthToken(user.OAuth2Token)
 	if err != nil {
