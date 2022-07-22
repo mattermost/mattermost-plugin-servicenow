@@ -17,6 +17,7 @@ type Client interface {
 	ActivateSubscriptions() error
 	CreateSubscription(*serializer.SubscriptionPayload) error
 	GetSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error)
+	DeleteSubscription(subscriptionID string) error
 }
 
 type client struct {
@@ -103,4 +104,15 @@ func (c *client) GetSubscriptions(userID, channelID, limit, offset string) ([]*s
 	}
 
 	return subscriptions.Result, nil
+}
+
+func (c *client) DeleteSubscription(subscriptionID string) error {
+	if err := c.ActivateSubscriptions(); err != nil {
+		return err
+	}
+
+	if _, err := c.CallJSON(http.MethodDelete, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, nil, nil); err != nil {
+		return errors.Wrap(err, "failed to delete subscription from ServiceNow")
+	}
+	return nil
 }
