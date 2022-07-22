@@ -13,7 +13,8 @@ import (
 )
 
 type ErrorResponse struct {
-	Error Error `json:"error"`
+	Error  Error  `json:"error"`
+	Status string `json:"status"`
 }
 
 type Error struct {
@@ -31,7 +32,7 @@ func (c *client) CallJSON(method, path string, in, out interface{}, params url.V
 }
 
 func (c *client) call(method, path, contentType string, inBody io.Reader, out interface{}, params url.Values) (responseData []byte, err error) {
-	errContext := fmt.Sprintf("serviceNow virtual agent: Call failed: method:%s, path:%s", method, path)
+	errContext := fmt.Sprintf("serviceNow: Call failed: method:%s, path:%s", method, path)
 	pathURL, err := url.Parse(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, errContext)

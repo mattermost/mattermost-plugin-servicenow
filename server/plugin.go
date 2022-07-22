@@ -36,6 +36,8 @@ func NewPlugin() *Plugin {
 	p.CommandHandlers = map[string]CommandHandleFunc{
 		"connect":    p.handleConnect,
 		"disconnect": p.handleDisconnect,
+		"subscribe":  p.handleSubscribe,
+		"list":       p.handleListSubscriptions,
 		"help":       p.handleHelp,
 		"":           p.handleHelp,
 	}

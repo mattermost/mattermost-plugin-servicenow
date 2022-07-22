@@ -32,6 +32,11 @@ func (p *Plugin) OnActivate() error {
 	return nil
 }
 
+func (p *Plugin) OnDeactivate() error {
+	p.subscriptionsActivated = false
+	return nil
+}
+
 func (p *Plugin) initBotUser() error {
 	botID, err := p.Helpers.EnsureBot(&model.Bot{
 		Username:    constants.BotUserName,

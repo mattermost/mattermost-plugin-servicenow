@@ -72,10 +72,8 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 	}
 
 	client := p.NewClient(context.Background(), token)
-	if !p.subscriptionsActivated {
-		if err = client.ActivateSubscriptions(p.getConfiguration().MattermostSiteURL, p.getConfiguration().WebhookSecret); err != nil {
-			return err
-		}
+	if err = client.ActivateSubscriptions(); err != nil {
+		return err
 	}
 
 	if _, err = p.DM(mattermostUserID, fmt.Sprintf("%s%s", constants.ConnectSuccessMessage, strings.ReplaceAll(commandHelp, "|", "`")), user.Username); err != nil {
