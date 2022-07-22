@@ -102,13 +102,13 @@ func (s *SubscriptionPayload) IsValidForCreation(siteURL string) error {
 
 	if s.SubscriptionEvents == nil {
 		return fmt.Errorf("subscriptionEvents are required")
-	} else {
-		events := strings.Split(*s.SubscriptionEvents, ",")
-		for _, event := range events {
-			event = strings.TrimSpace(event)
-			if !constants.ValidSubscriptionEvents[event] {
-				return fmt.Errorf("subscription event %s is not valid", event)
-			}
+	}
+
+	events := strings.Split(*s.SubscriptionEvents, ",")
+	for _, event := range events {
+		event = strings.TrimSpace(event)
+		if !constants.ValidSubscriptionEvents[event] {
+			return fmt.Errorf("subscription event %s is not valid", event)
 		}
 	}
 
