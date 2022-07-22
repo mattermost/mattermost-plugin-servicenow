@@ -16,8 +16,10 @@ import (
 type Client interface {
 	ActivateSubscriptions() error
 	CreateSubscription(*serializer.SubscriptionPayload) error
-	GetSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error)
+	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, error)
+	GetAllSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error)
 	DeleteSubscription(subscriptionID string) error
+	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) error
 }
 
 type client struct {
@@ -81,7 +83,7 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 	return nil
 }
 
-func (c *client) GetSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error) {
+func (c *client) GetAllSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error) {
 	if err := c.ActivateSubscriptions(); err != nil {
 		return nil, err
 	}
@@ -106,6 +108,19 @@ func (c *client) GetSubscriptions(userID, channelID, limit, offset string) ([]*s
 	return subscriptions.Result, nil
 }
 
+func (c *client) GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, error) {
+	if err := c.ActivateSubscriptions(); err != nil {
+		return nil, err
+	}
+
+	subscription := &serializer.SubscriptionResult{}
+	if _, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, subscription, nil); err != nil {
+		return nil, errors.Wrap(err, "failed to get subscription from ServiceNow")
+	}
+
+	return subscription.Result, nil
+}
+
 func (c *client) DeleteSubscription(subscriptionID string) error {
 	if err := c.ActivateSubscriptions(); err != nil {
 		return err
@@ -113,6 +128,17 @@ func (c *client) DeleteSubscription(subscriptionID string) error {
 
 	if _, err := c.CallJSON(http.MethodDelete, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, nil, nil); err != nil {
 		return errors.Wrap(err, "failed to delete subscription from ServiceNow")
+	}
+	return nil
+}
+
+func (c *client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) error {
+	if err := c.ActivateSubscriptions(); err != nil {
+		return err
+	}
+
+	if _, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), subscription, nil, nil); err != nil {
+		return errors.Wrap(err, "failed to update subscription from ServiceNow")
 	}
 	return nil
 }
