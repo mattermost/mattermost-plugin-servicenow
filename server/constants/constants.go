@@ -28,12 +28,12 @@ const (
 	UpdateSetVersion            = "v1.0"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
-	SubscriptionLevelRecord             = "record"
+	SubscriptionTypeRecord              = "record"
 	SubscriptionRecordTypeProblem       = "problem"
 	SubscriptionRecordTypeIncident      = "incident"
 	SubscriptionRecordTypeChangeRequest = "change_request"
-	SubscriptionTypePriority            = "priority"
-	SubscriptionTypeState               = "state"
+	SubscriptionEventPriority           = "priority"
+	SubscriptionEventState              = "state"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -45,15 +45,15 @@ const (
 )
 
 var (
-	SubscriptionRecordTypes = map[string]bool{
+	ValidSubscriptionRecordTypes = map[string]bool{
 		SubscriptionRecordTypeIncident:      true,
 		SubscriptionRecordTypeProblem:       true,
 		SubscriptionRecordTypeChangeRequest: true,
 	}
 
-	SubscriptionTypes = map[string]bool{
-		SubscriptionTypePriority: true,
-		SubscriptionTypeState:    true,
+	ValidSubscriptionEvents = map[string]bool{
+		SubscriptionEventPriority: true,
+		SubscriptionEventState:    true,
 	}
 
 	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
