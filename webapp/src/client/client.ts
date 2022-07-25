@@ -3,6 +3,7 @@
 
 import {id as pluginId} from '../manifest';
 
+// TODO: Replace this with the use of RTK query
 export default class Client {
     url = '';
     urlVersion = 'api/v1';

@@ -30,6 +30,8 @@ const (
 	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
 	editSubscriptionErrorMessage     = "Something went wrong. Not able to edit subscription. Check server logs for errors."
 	editSubscriptionSuccessMessage   = "Subscription successfully edited."
+	unknownErrorMessage              = "Unknown error."
+	notConnectedMessage              = "You are not connected to ServiceNow."
 )
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
@@ -88,8 +90,6 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	}
 
 	if f, ok := p.CommandHandlers[action]; ok {
-		unknownErrorMessage := "Unknown error."
-		notConnectedMessage := "You are not connected to ServiceNow."
 		user, userErr := p.GetUser(args.UserId)
 		if userErr != nil {
 			if errors.Is(userErr, ErrNotFound) {
@@ -159,7 +159,7 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 		return "You have not entered the correct number of arguments for the subscribe command."
 	}
 
-	// TODO: Add logic to open the Create subscription modal
+	// TODO: Add logic to open the create subscription modal
 	// The below code is temporary and it'll be removed in the future.
 	subscriptionEvents := constants.SubscriptionEventPriority
 	subscriptionType := constants.SubscriptionTypeRecord
