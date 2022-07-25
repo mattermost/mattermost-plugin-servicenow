@@ -34,6 +34,21 @@ type SubscriptionResponse struct {
 	IsActive           string `json:"is_active"`
 }
 
+func (s *SubscriptionResponse) GetFormattedSubscription() string {
+	var subscriptionEvents strings.Builder
+	events := strings.Split(s.SubscriptionEvents, ",")
+	for index, event := range events {
+		event = strings.TrimSpace(event)
+		if index != len(events)-1 {
+			event = constants.FormattedEventNames[event] + ", "
+		} else {
+			event = constants.FormattedEventNames[event]
+		}
+		subscriptionEvents.WriteString(event)
+	}
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, s.Type, s.RecordType, s.RecordID, subscriptionEvents.String())
+}
+
 type SubscriptionResult struct {
 	Result *SubscriptionResponse `json:"result"`
 }

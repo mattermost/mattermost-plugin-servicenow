@@ -187,7 +187,7 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
-	subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+	subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, args.UserId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 	if err != nil {
 		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
 		return listSubscriptionsErrorMessage

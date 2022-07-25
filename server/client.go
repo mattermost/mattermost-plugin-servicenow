@@ -17,7 +17,7 @@ type Client interface {
 	ActivateSubscriptions() (int, error)
 	CreateSubscription(*serializer.SubscriptionPayload) (int, error)
 	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error)
-	GetAllSubscriptions(channelID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
+	GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
 	DeleteSubscription(subscriptionID string) (int, error)
 	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error)
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
@@ -85,12 +85,16 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 	return statusCode, nil
 }
 
-func (c *client) GetAllSubscriptions(channelID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
+func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
 	if statusCode, err := c.ActivateSubscriptions(); err != nil {
 		return nil, statusCode, err
 	}
 
 	query := "is_active=true"
+	// userID will be intentionally sent empty string if we have to return subscriptions irrespective of user
+	if userID != "" {
+		query = fmt.Sprintf("%s^user_id=%s", query, userID)
+	}
 	// channelID will be intentionally sent empty string if we have to return subscriptions for whole server
 	if channelID != "" {
 		query = fmt.Sprintf("%s^channel_id=%s", query, channelID)

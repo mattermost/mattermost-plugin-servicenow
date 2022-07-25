@@ -244,10 +244,17 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.URL.Query().Get(constants.QueryParamUserID)
+	if userID != "" && !model.IsValidId(userID) {
+		p.API.LogError("Invalid query param", "Query param", constants.QueryParamUserID)
+		http.Error(w, "Query param userID is not valid", http.StatusBadRequest)
+		return
+	}
+
 	ctx := r.Context()
 	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	client := p.NewClient(ctx, token)
-	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
 		p.API.LogError("Error in getting all subscriptions", "Error", err.Error())
 		http.Error(w, fmt.Sprintf("Error in getting all subscriptions. Error: %s", err.Error()), statusCode)

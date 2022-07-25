@@ -34,6 +34,9 @@ const (
 	SubscriptionRecordTypeChangeRequest = "change_request"
 	SubscriptionEventPriority           = "priority"
 	SubscriptionEventState              = "state"
+	SubscriptionEventCommented          = "commented"
+	SubscriptionEventAssignedTo         = "assigned_to"
+	SubscriptionEventAssignmentGroup    = "assignment_group"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -42,6 +45,7 @@ const (
 	QueryParamPage      = "page"
 	QueryParamPerPage   = "per_page"
 	QueryParamChannelID = "channel_id"
+	QueryParamUserID    = "user_id"
 )
 
 var (
@@ -52,8 +56,19 @@ var (
 	}
 
 	ValidSubscriptionEvents = map[string]bool{
-		SubscriptionEventPriority: true,
-		SubscriptionEventState:    true,
+		SubscriptionEventPriority:        true,
+		SubscriptionEventState:           true,
+		SubscriptionEventCommented:       true,
+		SubscriptionEventAssignedTo:      true,
+		SubscriptionEventAssignmentGroup: true,
+	}
+
+	FormattedEventNames = map[string]string{
+		SubscriptionEventPriority:        "Priority changed",
+		SubscriptionEventState:           "State changed",
+		SubscriptionEventCommented:       "New comment",
+		SubscriptionEventAssignedTo:      "Assigned to changed",
+		SubscriptionEventAssignmentGroup: "Assignment group changed",
 	}
 
 	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
