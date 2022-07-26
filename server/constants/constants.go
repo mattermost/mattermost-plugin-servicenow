@@ -71,6 +71,12 @@ var (
 		SubscriptionEventAssignmentGroup: "Assignment group changed",
 	}
 
+	FormattedRecordTypes = map[string]string{
+		SubscriptionRecordTypeProblem:       "Problem",
+		SubscriptionRecordTypeIncident:      "Incident",
+		SubscriptionRecordTypeChangeRequest: "Change Request",
+	}
+
 	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
 )
 

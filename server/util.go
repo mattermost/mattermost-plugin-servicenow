@@ -11,7 +11,7 @@ import (
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
 	var sb strings.Builder
 	sb.WriteString("#### Record subscriptions for this channel\n")
-	recordSubscriptionsTableHeader := "| Subscription ID | Subscription Type | Record Type | Record ID | Events|\n| :----|:--------| :--------| :-----| :--------|"
+	recordSubscriptionsTableHeader := "| Subscription ID | Record Type | Record ID | Events|\n| :----|:--------| :--------| :-----| :--------|"
 	sb.WriteString(recordSubscriptionsTableHeader)
 	for _, subscription := range subscriptions {
 		sb.WriteString(subscription.GetFormattedSubscription())
