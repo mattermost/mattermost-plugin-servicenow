@@ -36,6 +36,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.getAllSubscriptions))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathDeleteSubscription, p.checkAuth(p.checkOAuth(p.deleteSubscription))).Methods(http.MethodDelete)
 	s.HandleFunc(constants.PathEditSubscription, p.checkAuth(p.checkOAuth(p.editSubscription))).Methods(http.MethodPatch)
+	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
 
 	// API for POC. TODO: Remove this endpoint later
 	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
@@ -223,20 +224,6 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
-	page, err := GetPaginationParamsFromRequest(r, constants.QueryParamPage)
-	if err != nil {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamPage, "Error", err.Error())
-		page = constants.DefaultPage
-	}
-
-	perPage, err := GetPaginationParamsFromRequest(r, constants.QueryParamPerPage)
-	if err != nil {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamPerPage, "Error", err.Error())
-		perPage = constants.DefaultPerPage
-	} else if perPage > constants.MaxPerPage {
-		perPage = constants.DefaultPerPage
-	}
-
 	channelID := r.URL.Query().Get(constants.QueryParamChannelID)
 	if channelID != "" && !model.IsValidId(channelID) {
 		p.API.LogError("Invalid query param", "Query param", constants.QueryParamChannelID)
@@ -254,6 +241,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	client := p.NewClient(ctx, token)
+	page, perPage := GetPageAndPerPage(r)
 	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
 		p.API.LogError("Error in getting all subscriptions", "Error", err.Error())
@@ -320,6 +308,52 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w, make(map[string]string))
+}
+
+func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	teamID := pathParams["team_id"]
+	if !model.IsValidId(teamID) {
+		p.API.LogError("Invalid team id")
+		http.Error(w, "Invalid team id", http.StatusBadRequest)
+		return
+	}
+	userID := pathParams["user_id"]
+	if !model.IsValidId(userID) {
+		p.API.LogError("Invalid user id")
+		http.Error(w, "Invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	channels, channelErr := p.API.GetChannelsForTeamForUser(teamID, userID, false)
+	if channelErr != nil {
+		p.API.LogError("Error in getting channels for team and user", "Error", channelErr.Error())
+		http.Error(w, fmt.Sprintf("Error in getting channels for team and user. Error: %s", channelErr.Error()), channelErr.StatusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if channels == nil {
+		w.Write([]byte("[]"))
+		return
+	}
+
+	var requiredChannels []*model.Channel
+	for _, channel := range channels {
+		if channel.Type == model.CHANNEL_PRIVATE || channel.Type == model.CHANNEL_OPEN {
+			requiredChannels = append(requiredChannels, channel)
+		}
+	}
+
+	if requiredChannels == nil {
+		w.Write([]byte("[]"))
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(requiredChannels); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // TODO: Modify this function to work without taking a map in the params

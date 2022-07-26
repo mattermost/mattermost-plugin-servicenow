@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 )
 
@@ -19,12 +20,23 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 	return sb.String()
 }
 
-func GetPaginationParamsFromRequest(r *http.Request, param string) (int, error) {
-	param = r.URL.Query().Get(param)
-	convertedParam, err := strconv.Atoi(param)
-	if err != nil {
-		return 0, err
+func GetPageAndPerPage(r *http.Request) (page, perPage int) {
+	query := r.URL.Query()
+	if val, err := strconv.Atoi(query.Get(constants.QueryParamPage)); err != nil || val < 0 {
+		page = constants.DefaultPage
+	} else {
+		page = val
 	}
 
-	return convertedParam, nil
+	val, err := strconv.Atoi(query.Get(constants.QueryParamPerPage))
+	switch {
+	case err != nil || val < 0:
+		perPage = constants.DefaultPerPage
+	case val > constants.MaxPerPage:
+		perPage = constants.MaxPerPage
+	default:
+		perPage = val
+	}
+
+	return page, perPage
 }
