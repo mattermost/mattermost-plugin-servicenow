@@ -4,7 +4,7 @@ import {FormGroup, Col, Button} from 'react-bootstrap';
 import Client from 'client';
 
 // TODO: Use absolute path here
-import {DOWNLOAD_UPDATE_SET_LINK} from '../../constants';
+import {DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
 
 type HelpText = {
     key: string | null;
