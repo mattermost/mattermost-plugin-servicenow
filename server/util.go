@@ -7,6 +7,7 @@ import (
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
+	"golang.org/x/oauth2"
 )
 
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
@@ -39,4 +40,10 @@ func GetPageAndPerPage(r *http.Request) (page, perPage int) {
 	}
 
 	return page, perPage
+}
+
+func (p *Plugin) GetClientFromRequest(r *http.Request) Client {
+	ctx := r.Context()
+	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
+	return p.NewClient(ctx, token)
 }

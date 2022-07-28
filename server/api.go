@@ -17,7 +17,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2"
 )
 
 // InitAPI initializes the REST API
@@ -37,6 +36,8 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathDeleteSubscription, p.checkAuth(p.checkOAuth(p.deleteSubscription))).Methods(http.MethodDelete)
 	s.HandleFunc(constants.PathEditSubscription, p.checkAuth(p.checkOAuth(p.editSubscription))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
 
 	// API for POC. TODO: Remove this endpoint later
 	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
@@ -198,9 +199,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
 	exists, statusCode, err := client.CheckForDuplicateSubscription(subcription)
 	if err != nil {
 		p.API.LogError("Error in checking for duplicate subscription", "Error", err.Error())
@@ -238,9 +237,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
 	page, perPage := GetPageAndPerPage(r)
 	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
@@ -262,9 +259,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	subscriptionID := pathParams["subscription_id"]
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Error in deleting the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
@@ -294,9 +289,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.EditSubscription(subscriptionID, subcription); err != nil {
 		p.API.LogError("Error in editing the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
@@ -311,17 +304,12 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
 	pathParams := mux.Vars(r)
 	teamID := pathParams["team_id"]
 	if !model.IsValidId(teamID) {
 		p.API.LogError("Invalid team id")
 		http.Error(w, "Invalid team id", http.StatusBadRequest)
-		return
-	}
-	userID := pathParams["user_id"]
-	if !model.IsValidId(userID) {
-		p.API.LogError("Invalid user id")
-		http.Error(w, "Invalid user id", http.StatusBadRequest)
 		return
 	}
 
@@ -351,6 +339,65 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := json.NewEncoder(w).Encode(requiredChannels); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams["record_type"]
+	if !constants.ValidSubscriptionRecordTypes[recordType] {
+		p.API.LogError("Invalid record type while searching", "Record type", recordType)
+		http.Error(w, "Invalid record type", http.StatusBadRequest)
+		return
+	}
+
+	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
+	if len(searchTerm) < 4 {
+		http.Error(w, "The search term must be at least 4 characters long.", http.StatusBadRequest)
+		return
+	}
+
+	page, perPage := GetPageAndPerPage(r)
+	client := p.GetClientFromRequest(r)
+	records, statusCode, err := client.SearchRecordsInServiceNow(recordType, searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	if err != nil {
+		p.API.LogError("Error in searching for records in ServiceNow", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in searching for records in ServiceNow. Error: %s", err.Error()), statusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	result, err := json.Marshal(records)
+	if err != nil || string(result) == "null" {
+		_, _ = w.Write([]byte("[]"))
+	} else {
+		_, _ = w.Write(result)
+	}
+}
+
+func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams["record_type"]
+	if !constants.ValidSubscriptionRecordTypes[recordType] {
+		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
+		http.Error(w, "Invalid record type", http.StatusBadRequest)
+		return
+	}
+
+	recordID := pathParams["record_id"]
+	client := p.GetClientFromRequest(r)
+	record, statusCode, err := client.GetRecordFromServiceNow(recordType, recordID)
+	if err != nil {
+		p.API.LogError("Error in getting record from ServiceNow", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in getting record from ServiceNow. Error: %s", err.Error()), statusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(record); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 	}

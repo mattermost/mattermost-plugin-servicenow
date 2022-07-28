@@ -20,6 +20,8 @@ const (
 	SysQueryParam                             = "sysparm_query"
 	SysQueryParamLimit                        = "sysparm_limit"
 	SysQueryParamOffset                       = "sysparm_offset"
+	SysQueryParamFields                       = "sysparm_fields"
+	SysQueryParamDisplayValue                 = "sysparm_display_value"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
 	UpdateSetVersion            = "v1.0"
@@ -39,13 +41,14 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage         = 0
-	DefaultPerPage      = 20
-	MaxPerPage          = 100
-	QueryParamPage      = "page"
-	QueryParamPerPage   = "per_page"
-	QueryParamChannelID = "channel_id"
-	QueryParamUserID    = "user_id"
+	DefaultPage          = 0
+	DefaultPerPage       = 20
+	MaxPerPage           = 100
+	QueryParamPage       = "page"
+	QueryParamPerPage    = "per_page"
+	QueryParamChannelID  = "channel_id"
+	QueryParamUserID     = "user_id"
+	QueryParamSearchTerm = "search"
 )
 
 var (

@@ -21,6 +21,8 @@ type Client interface {
 	DeleteSubscription(subscriptionID string) (int, error)
 	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error)
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
+	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
+	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
 }
 
 type client struct {
@@ -173,4 +175,47 @@ func (c *client) CheckForDuplicateSubscription(subscription *serializer.Subscrip
 	}
 
 	return len(subscriptions.Result) > 0, statusCode, nil
+}
+
+func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
+	}
+
+	query := fmt.Sprintf("short_description LIKE%s ^OR number STARTSWITH%s", searchTerm, searchTerm)
+	queryParams := url.Values{
+		constants.SysQueryParam:       {query},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+		constants.SysQueryParamFields: {"sys_id,number,short_description"},
+	}
+
+	records := &serializer.ServiceNowPartialRecordsResult{}
+	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, records, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return records.Result, statusCode, nil
+}
+
+func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
+	}
+
+	queryParams := url.Values{
+		constants.SysQueryParamFields:       {"sys_id,number,short_description,state,priority,assigned_to,assignment_group"},
+		constants.SysQueryParamDisplayValue: {"true"},
+	}
+
+	record := &serializer.ServiceNowRecordResult{}
+	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, sysID), nil, record, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return record.Result, statusCode, nil
 }
