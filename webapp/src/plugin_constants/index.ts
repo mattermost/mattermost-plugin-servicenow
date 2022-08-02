@@ -23,6 +23,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
     },
 };
 
+export const PanelDefaultHeights = {
+    channelPanel: 151,
+    alertTypePanel: 195,
+    searchRecordPanel: 203,
+    searchRecordPanelExpanded: 360,
+    eventsPanel: 500,
+    successPanel: 220,
+    panelHeader: 65,
+};
+
 export default {
     RightSidebarHeader,
     DOWNLOAD_UPDATE_SET_LINK,

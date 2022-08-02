@@ -20,3 +20,8 @@ type PluginApiService = {
 type PluginState = {
     'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, WellList[], 'pluginApi'>; }, never, 'pluginApi'>
 }
+
+type DropdownOptionType = {
+    label?: string | JSX.Element;
+    value: string;
+}

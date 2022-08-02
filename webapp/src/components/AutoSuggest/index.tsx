@@ -1,20 +1,26 @@
 import React, {useEffect, useState} from 'react';
+import {clearTimeout} from 'timers';
 
 import './styles.scss';
 
 type AutoSuggestProps = {
     inputValue: string;
     onInputValueChange: (newValue: string) => void;
+    onOptionClick: (newValue: string) => void;
     placeholder?: string;
     suggestions: string[];
     loadingSuggestions?: boolean;
     charThresholdToShowSuggestions?: number;
     disabled?: boolean;
+    error?: boolean | string;
+    required?: boolean;
+    className?: string;
 }
 
-const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, loadingSuggestions, charThresholdToShowSuggestions, disabled}: AutoSuggestProps) => {
+const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, loadingSuggestions, charThresholdToShowSuggestions, disabled, error, required, className = '', onOptionClick}: AutoSuggestProps) => {
     const [open, setOpen] = useState(false);
     const [focused, setFocused] = useState(false);
+    let blurTimer1: NodeJS.Timeout;
 
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
@@ -26,19 +32,33 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
     }, [charThresholdToShowSuggestions, focused, inputValue]);
 
     const handleSuggestionClick = (suggestedValue: string) => {
+        onOptionClick(suggestedValue);
         onInputValueChange(suggestedValue);
         setOpen(false);
     };
 
+    useEffect(() => {
+        return () => {
+            clearTimeout(blurTimer1);
+        };
+    }, []);
+
+    const handleBlur = () => {
+        // Hide focused state
+        blurTimer1 = setTimeout(() => {
+            setFocused(false);
+        }, 200);
+    };
+
     return (
-        <div className={`auto-suggest ${disabled && 'auto-suggest--disabled'}`}>
+        <div className={`auto-suggest ${disabled && 'auto-suggest--disabled'} ${error && 'auto-suggest--error'} ${className}`}>
             <div className={`auto-suggest__field d-flex align-items-center justify-content-between ${focused && 'auto-suggest__field--focused'}`}>
                 <input
-                    placeholder={placeholder ?? ''}
+                    placeholder={`${placeholder ?? ''}${required ? '*' : ''}`}
                     value={inputValue}
                     onChange={(e) => onInputValueChange(e.target.value)}
                     onFocus={() => setFocused(true)}
-                    onBlur={() => setTimeout(() => setFocused(false), 200)}
+                    onBlur={handleBlur}
                     className='auto-suggest__input'
                     disabled={disabled}
                 />
@@ -58,6 +78,7 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                 }
                 {!suggestions.length && <li className='auto-suggest__suggestion'>{'Nothing to show'}</li>}
             </ul>
+            {typeof error === 'string' && <p className='auto-suggest__err-text'>{error}</p>}
         </div>
     );
 };
