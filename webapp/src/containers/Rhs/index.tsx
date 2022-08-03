@@ -31,11 +31,17 @@ const Rhs = (): JSX.Element => {
                 labelPositioning={ToggleSwitchLabelPositioning.Right}
             />
             <SubscriptionCard
+
+                // TODO: Update props after the API gets integrated
                 header='82ojwerise8r9w3r8u9lkjsoer93iose'
                 label='Single Record'
                 description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ultricies cursus tempor consectetur augue senectus felis maecenas facilisis massa.'
+                onDelete={() => ''}
+                onEdit={() => ''}
             />
             <SubscriptionCard
+
+                // TODO: Update props after the API gets integrated
                 header='82ojwerise8r9w3r8u9lkjsoer93'
                 label='Bulk Record'
                 cardBody={[

@@ -16,9 +16,11 @@ type SubscriptionCardProps = {
         }
     ];
     description?: string;
+    onDelete: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    onEdit: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const SubscriptionCard = ({header, label, cardBody, description}: SubscriptionCardProps) => {
+const SubscriptionCard = ({header, label, cardBody, description, onDelete, onEdit}: SubscriptionCardProps) => {
     const buttonMenuPopover = (
         <Popover
             popoverBody={
@@ -27,12 +29,12 @@ const SubscriptionCard = ({header, label, cardBody, description}: SubscriptionCa
                         {
                             icon: 'fa fa-pencil-square-o',
                             text: 'Edit',
-                            onClick: () => '',
+                            onClick: onEdit,
                         },
                         {
                             icon: 'fa fa-trash-o',
                             text: 'Delete',
-                            onClick: () => '',
+                            onClick: onDelete,
                         },
                     ]}
                 />

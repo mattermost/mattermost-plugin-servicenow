@@ -15,7 +15,7 @@ const Popover = ({placement = 'bottom', children, popoverBody, className = ''}: 
         <OverlayTrigger
             placement={placement}
             trigger='focus'
-            delay={500}
+            delay={300}
             overlay={
                 <BootstrapPopover
                     id='popover'
