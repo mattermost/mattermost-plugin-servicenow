@@ -25,3 +25,16 @@ type DropdownOptionType = {
     label?: string | JSX.Element;
     value: string;
 }
+
+type ProjectDetails = {
+    mattermostID: string
+    projectID: string,
+    projectName: string,
+    organizationName: string
+}
+
+type SubscriptionDetails = {
+    id: string
+    name: string
+    eventType: eventType
+}

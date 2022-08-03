@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import ToggleSwitch from 'components/toggleSwitch';
 import {ToggleSwitchLabelPositioning} from 'plugin_constants';
 import Modal from 'components/modal';
+import SubscriptionCard from 'components/card/subscription';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {hideModal as hideEditModal} from 'reducers/editSubscriptionModal';
@@ -28,6 +29,22 @@ const Rhs = (): JSX.Element => {
                 onChange={(newState) => setActive(newState)}
                 label='Show all subscriptions'
                 labelPositioning={ToggleSwitchLabelPositioning.Right}
+            />
+            <SubscriptionCard
+                header='82ojwerise8r9w3r8u9lkjsoer93iose'
+                label='Single Record'
+                description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ultricies cursus tempor consectetur augue senectus felis maecenas facilisis massa.'
+            />
+            <SubscriptionCard
+                header='82ojwerise8r9w3r8u9lkjsoer93'
+                label='Bulk Record'
+                cardBody={[
+                    {
+                        label: 'Channel Slug Name',
+                        value: 'Town Square',
+                    },
+                ]}
+                description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ultricies cursus tempor consectetur augue senectus felis maecenas facilisis massa.'
             />
             <div className='rhs-btn-container'>
                 <button
