@@ -9,6 +9,8 @@ type TabData = {
 
 type HttpMethod = 'GET' | 'POST';
 
+const pluginStateKey = 'plugins-mattermost-plugin-servicenow';
+
 type ApiServiceName = 'fetchRecords'
 
 type PluginApiService = {
@@ -18,5 +20,5 @@ type PluginApiService = {
 }
 
 type PluginState = {
-    'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
+    [pluginStateKey]: RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
 }
