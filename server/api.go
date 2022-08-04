@@ -88,11 +88,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
-	type ConnectedResponse struct {
-		Connected bool `json:"connected"`
-	}
-
-	resp := &ConnectedResponse{
+	resp := &serializer.ConnectedResponse{
 		Connected: false,
 	}
 
