@@ -1,5 +1,10 @@
 .rhs-content {
   padding: 15px 12px 12px;
+  height: calc(100% - $rhs-header-height - $rhs-footer-height);
+
+  .empty-state {
+    height: calc(100% - 60px);
+  }
 }
 
 .rhs-btn-container {

@@ -13,7 +13,7 @@ type ToggleSwitchProps = {
 
 const ToggleSwitch = ({active, onChange, label, labelPositioning = ToggleSwitchLabelPositioning.Left}: ToggleSwitchProps): JSX.Element => {
     return (
-        <div className={`toggle-switch-container d-flex align-items-center ${labelPositioning === ToggleSwitchLabelPositioning.Right && 'flex-row-reverse'}`}>
+        <div className={`toggle-switch-container d-flex align-items-center ${labelPositioning === ToggleSwitchLabelPositioning.Right && 'flex-row-reverse'} justify-content-between`}>
             {label && <span className={labelPositioning === ToggleSwitchLabelPositioning.Left ? 'toggle-switch-label--left' : 'toggle-switch-label--right'}>{label}</span>}
             <label className='toggle-switch'>
                 <input
