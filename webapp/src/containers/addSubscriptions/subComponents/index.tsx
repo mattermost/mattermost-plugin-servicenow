@@ -136,7 +136,7 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
         if (searchRecordsPanelOpen) {
             height = searchRecordsPanelRef.current?.offsetHeight || PanelDefaultHeights.searchRecordPanel;
 
-            if (suggestionChosen && height < 350) {
+            if (suggestionChosen && height < PanelDefaultHeights.searchRecordPanelExpanded) {
                 height = PanelDefaultHeights.searchRecordPanelExpanded;
             }
 

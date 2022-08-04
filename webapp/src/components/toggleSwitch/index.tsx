@@ -15,14 +15,14 @@ const ToggleSwitch = ({active, onChange, label, labelPositioning = ToggleSwitchL
     return (
         <div className={`toggle-switch-container d-flex align-items-center ${labelPositioning === ToggleSwitchLabelPositioning.Right && 'flex-row-reverse'}`}>
             {label && <span className={labelPositioning === ToggleSwitchLabelPositioning.Left ? 'toggle-switch-label--left' : 'toggle-switch-label--right'}>{label}</span>}
-            <label className='toggle-switch'>
+            <label className='toggle-switch cursor-pointer'>
                 <input
                     type='checkbox'
                     className='toggle-switch__input'
                     checked={active}
                     onChange={(e) => onChange(e.target.checked)}
                 />
-                <span className='toggle-switch__slider'/>
+                <span className='toggle-switch__slider cursor-pointer'/>
             </label>
         </div>
     );

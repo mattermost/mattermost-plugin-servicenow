@@ -14,14 +14,12 @@
 .toggle-switch {
   position: relative;
   display: inline-block;
-  cursor: pointer;
   width: 50px;
   height: 28px;
   margin: 0;
 
   &__slider {
     position: absolute;
-    cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
