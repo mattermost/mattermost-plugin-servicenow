@@ -16,10 +16,13 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
     },
 };
 
+const ChannelHeaderTooltipText = 'ServiceNow';
+
 export default {
     DOWNLOAD_UPDATE_SET_LINK,
     pluginApiServiceConfigs,
     MMUSERID,
     HeaderMattermostUserID,
     RightSidebarHeader,
+    ChannelHeaderTooltipText,
 };

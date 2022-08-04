@@ -11,7 +11,7 @@ function usePluginApi() {
     };
 
     const getApiState = (apiServiceName: string, body?: void) => {
-        const {data, isError, isLoading, isSuccess, error} = services.endpoints[apiServiceName].select(body)(state['plugins-mattermost-plugin-service-now']);
+        const {data, isError, isLoading, isSuccess, error} = services.endpoints[apiServiceName].select(body)(state['plugins-mattermost-plugin-servicenow']);
         return {data, isError, isLoading, isSuccess, error};
     };
 
