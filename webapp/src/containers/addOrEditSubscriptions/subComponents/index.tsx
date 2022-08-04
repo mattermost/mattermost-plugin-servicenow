@@ -15,12 +15,22 @@ import ResultPanel from './resultPanel';
 
 import './styles.scss';
 
-type AddSubscriptionProps = {
+type AddOrEditSubscriptionProps = {
     open: boolean;
     close: () => void;
+    subscriptionData?: {
+        channel: string,
+        recordValue: string,
+        alertType: string,
+        stateChanged: boolean;
+        priorityChanged: boolean;
+        newCommentChecked: boolean;
+        assignedToChecked: boolean;
+        assignmentGroupChecked: boolean;
+    }
 };
 
-const AddSubscription = ({open, close}: AddSubscriptionProps) => {
+const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscriptionProps) => {
     // Channel panel values
     const [channel, setChannel] = useState<string | null>(null);
 
@@ -55,6 +65,27 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
     const searchRecordsPanelRef = createRef<HTMLDivElement>();
     const eventsPanelRef = createRef<HTMLDivElement>();
     const resultPanelRef = createRef<HTMLDivElement>();
+
+    useEffect(() => {
+        if (open && subscriptionData) {
+            // Set values for channel panel
+            setChannel(subscriptionData.channel);
+
+            // Set initial values for alert-type panel
+            setAlertType(subscriptionData.alertType);
+
+            // Set initial values for search-record panel
+            setRecordValue(subscriptionData.recordValue);
+            setSuggestionChosen(true);
+
+            // Set initial values for events panel
+            setStateChanged(subscriptionData.stateChanged);
+            setPriorityChanged(subscriptionData.priorityChanged);
+            setNewCommentChecked(subscriptionData.newCommentChecked);
+            setAssignedToChecked(subscriptionData.assignedToChecked);
+            setAssignmentGroupChecked(subscriptionData.assignmentGroupChecked);
+        }
+    }, [open, subscriptionData]);
 
     // Reset input field states
     const resetFieldStates = () => {
@@ -111,7 +142,7 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
 
     // Set height of the modal content according to different panels;
     // Added 65 in the given height due of (header + loader) height
-    const setModalDialogHeight = (bodyHeight: number) => document.querySelectorAll('.rhs-modal.add-subscription-modal .modal-content').forEach((modalContent) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`));
+    const setModalDialogHeight = (bodyHeight: number) => document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`));
 
     // Change height of the modal depending on the height of the visible panel
     useEffect(() => {
@@ -163,7 +194,27 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
 
         // Disabling the eslint rule below because we can't include refs in the dependency array otherwise it causes a lot of unnecessary changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [eventsPanelOpen, searchRecordsPanelOpen, alertTypePanelOpen, channelPanelRef, alertTypePanelRef, searchRecordsPanelRef, eventsPanelRef, apiError, apiResponseValid, suggestionChosen]);
+    }, [eventsPanelOpen, searchRecordsPanelOpen, alertTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
+
+    // Returns action handler for primary button in the result panel
+    const getResultPanelPrimaryBtnActionOrText = (action: boolean) => {
+        if (apiError && apiResponseValid) {
+            return action ? resetFailureState : 'Back';
+        } else if (subscriptionData) {
+            return null;
+        }
+        return action ? addAnotherSubscription : 'Add Another Subscription';
+    };
+
+    // Returns heading for the result panel
+    const getResultPanelHeader = () => {
+        if (apiError && apiResponseValid) {
+            return apiError;
+        } else if (subscriptionData) {
+            return 'Subscription updated successfully! ';
+        }
+        return null;
+    };
 
     return (
         <Modal
@@ -171,11 +222,11 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
             onHide={hideModal}
 
             // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-            className='rhs-modal add-subscription-modal'
+            className='rhs-modal add-edit-subscription-modal'
         >
             <>
                 <ModalHeader
-                    title={'Add Subscription'}
+                    title={subscriptionData ? 'Edit Subscription' : 'Add Subscription'}
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
@@ -245,13 +296,13 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
                     record={recordValue}
                 />
                 <ResultPanel
-                    onPrimaryBtnClick={apiError && apiResponseValid ? resetFailureState : addAnotherSubscription}
+                    onPrimaryBtnClick={getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null}
                     onSecondaryBtnClick={hideModal}
                     className={`${(successPanelOpen || (apiError && apiResponseValid)) && 'secondary-panel--slide-in'}`}
                     ref={resultPanelRef}
-                    primaryBtnText={apiError && apiResponseValid ? 'Back' : 'Add Another Subscription'}
+                    primaryBtnText={getResultPanelPrimaryBtnActionOrText(false) as string | null}
                     iconClass={apiError && apiResponseValid ? 'fa-times-circle-o result-panel-icon--error' : null}
-                    header={apiResponseValid ? apiError : null}
+                    header={getResultPanelHeader()}
                 />
                 {false && <CircularLoader/>}
             </>
@@ -259,4 +310,4 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
     );
 };
 
-export default AddSubscription;
+export default AddOrEditSubscription;

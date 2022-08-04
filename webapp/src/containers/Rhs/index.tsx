@@ -1,20 +1,41 @@
 import React, {useState} from 'react';
 
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 
 import ToggleSwitch from 'components/toggleSwitch';
-import Modal from 'components/modal';
-import EmptyState from 'components/emptyState';
+
+// TODO: Uncomment while adding empty state
+// import EmptyState from 'components/emptyState';
+import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
-import {hideModal as hideEditModal} from 'reducers/editSubscriptionModal';
+import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 
 import './rhs.scss';
+import SubscriptionCard from 'components/card/subscription';
 
 const Rhs = (): JSX.Element => {
     const [active, setActive] = useState(false);
-    const pluginState = useSelector((state: PluginState) => state);
+    const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
     const dispatch = useDispatch();
+
+    // TODO: Update this accordingly when integrating edit subscription API
+    // Handles action when edit button is clicked for a subscription
+    const handleEditSubscription = () => {
+        // Dummy data
+        const subscriptionData: EditSubscriptionData = {
+            channel: 'WellValue1',
+            recordValue: 'Record 3',
+            alertType: 'Change Request',
+            stateChanged: true,
+            priorityChanged: false,
+            newCommentChecked: true,
+            assignedToChecked: true,
+            assignmentGroupChecked: false,
+        };
+        dispatch(showEditModal());
+        setEditSubscriptionData(subscriptionData);
+    };
 
     return (
         <div className='rhs-content'>
@@ -23,8 +44,16 @@ const Rhs = (): JSX.Element => {
                 onChange={(newState) => setActive(newState)}
                 label='Show all subscriptions'
             />
-            {/* TODO: Remove the follwing during integration */}
-            {active && (
+            {/* TODO: Update the following when fetch subscriptions API is integrated */}
+            <SubscriptionCard
+                header='9034ikser82u389irjho239w3'
+                label='Single Record'
+                description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
+                onEdit={handleEditSubscription}
+                onDelete={() => ''}
+            />
+            {/* TODO: Uncomment and update the follwing during integration */}
+            {/* {active && (
                 <EmptyState
                     title='No Subscriptions Found'
                     subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
@@ -34,9 +63,9 @@ const Rhs = (): JSX.Element => {
                     }}
                     iconClass='fa fa-bell-slash-o'
                 />
-            )}
-            {/* TODO: Remove the following during integration */}
-            {!active && (
+            )} */}
+            {/* TODO: Uncomment and update the following during integration */}
+            {/* {!active && (
                 <EmptyState
                     title='No Account Connected'
                     subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
@@ -46,7 +75,7 @@ const Rhs = (): JSX.Element => {
                     }}
                     iconClass='fa fa-user-circle'
                 />
-            )}
+            )} */}
             <div className='rhs-btn-container'>
                 <button
                     className='btn btn-primary rhs-btn'
@@ -55,18 +84,7 @@ const Rhs = (): JSX.Element => {
                     {'Add Subscription'}
                 </button>
             </div>
-            <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow']?.openEditSubscriptionModalReducer?.open || false}
-                onHide={() => dispatch(hideEditModal())}
-                title='Edit subscription'
-                confirmBtnText='Edit'
-                onConfirm={() => dispatch(hideEditModal())}
-
-                // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-                className='rhs-modal edit-feed-modal'
-            >
-                <h4>{'Test Edit Modal'}</h4>
-            </Modal>
+            {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
         </div>
     );
 };

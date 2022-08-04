@@ -4,10 +4,10 @@ type ResultPanelProps = {
     iconClass?: string | null;
     header?: string | null;
     className?: string;
-    primaryBtnText?: string;
+    primaryBtnText?: string | null;
     secondaryBtnText?: string;
-    onPrimaryBtnClick?: () => void | null;
-    onSecondaryBtnClick?: () => void | null;
+    onPrimaryBtnClick?: (() => void) | null;
+    onSecondaryBtnClick?: (() => void) | null;
 };
 
 const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(({header, className = '', primaryBtnText, secondaryBtnText, onPrimaryBtnClick, onSecondaryBtnClick, iconClass}: ResultPanelProps, feedAddedRef): JSX.Element => {
