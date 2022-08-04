@@ -7,12 +7,12 @@ import ToggleSwitch from 'components/toggleSwitch';
 // TODO: Uncomment while adding empty state
 // import EmptyState from 'components/emptyState';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
+import SubscriptionCard from 'components/card/subscription';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 
 import './rhs.scss';
-import SubscriptionCard from 'components/card/subscription';
 
 const Rhs = (): JSX.Element => {
     const [active, setActive] = useState(false);

@@ -18,16 +18,7 @@ import './styles.scss';
 type AddOrEditSubscriptionProps = {
     open: boolean;
     close: () => void;
-    subscriptionData?: {
-        channel: string,
-        recordValue: string,
-        alertType: string,
-        stateChanged: boolean;
-        priorityChanged: boolean;
-        newCommentChecked: boolean;
-        assignedToChecked: boolean;
-        assignmentGroupChecked: boolean;
-    }
+    subscriptionData?: EditSubscriptionData;
 };
 
 const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscriptionProps) => {
