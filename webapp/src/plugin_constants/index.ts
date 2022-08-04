@@ -5,7 +5,7 @@ export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 
 const RightSidebarHeader = 'Right Sidebar Placeholder Text';
 const MMUSERID = 'MMUSERID';
-const HeaderMattermostUserID = 'User-ID';
+const HeaderMattermostUserID = 'Mattermost-User-ID';
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
