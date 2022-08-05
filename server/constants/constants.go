@@ -42,6 +42,10 @@ const (
 	QueryParamPage      = "page"
 	QueryParamPerPage   = "per_page"
 	QueryParamChannelID = "channel_id"
+
+	// Websocket events
+	WSEventConnect    = "connect"
+	WSEventDisconnect = "disconnect"
 )
 
 var (

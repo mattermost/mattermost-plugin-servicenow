@@ -183,6 +183,12 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p.API.PublishWebSocketEvent(
+		constants.WSEventConnect,
+		nil,
+		&model.WebsocketBroadcast{UserId: mattermostUserID},
+	)
+
 	html := `
 <!DOCTYPE html>
 <html>
