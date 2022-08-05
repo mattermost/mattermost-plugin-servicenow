@@ -41,14 +41,18 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage          = 0
-	DefaultPerPage       = 20
-	MaxPerPage           = 100
-	QueryParamPage       = "page"
-	QueryParamPerPage    = "per_page"
-	QueryParamChannelID  = "channel_id"
-	QueryParamUserID     = "user_id"
-	QueryParamSearchTerm = "search"
+	DefaultPage             = 0
+	DefaultPerPage          = 20
+	MaxPerPage              = 100
+	QueryParamPage          = "page"
+	QueryParamPerPage       = "per_page"
+	QueryParamChannelID     = "channel_id"
+	QueryParamUserID        = "user_id"
+	QueryParamSearchTerm    = "search"
+	PathParamSubscriptionID = "subscription_id"
+	PathParamTeamID         = "team_id"
+	PathParamRecordType     = "record_type"
+	PathParamRecordID       = "record_id"
 )
 
 var (
