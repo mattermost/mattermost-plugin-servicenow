@@ -236,14 +236,15 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	result, err := json.Marshal(subscriptions)
 	if err != nil || string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
-	} else {
-		_, _ = w.Write(result)
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	subscriptionID := pathParams["subscription_id"]
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Error in deleting the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
@@ -260,7 +261,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	subscriptionID := pathParams["subscription_id"]
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	subcription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
@@ -291,7 +292,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
 	pathParams := mux.Vars(r)
-	teamID := pathParams["team_id"]
+	teamID := pathParams[constants.PathParamTeamID]
 	if !model.IsValidId(teamID) {
 		p.API.LogError("Invalid team id")
 		http.Error(w, "Invalid team id", http.StatusBadRequest)
@@ -331,7 +332,7 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 
 func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	recordType := pathParams["record_type"]
+	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while searching", "Record type", recordType)
 		http.Error(w, "Invalid record type", http.StatusBadRequest)
@@ -358,21 +359,22 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	result, err := json.Marshal(records)
 	if err != nil || string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
-	} else {
-		_, _ = w.Write(result)
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	recordType := pathParams["record_type"]
+	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
 		http.Error(w, "Invalid record type", http.StatusBadRequest)
 		return
 	}
 
-	recordID := pathParams["record_id"]
+	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
 	record, statusCode, err := client.GetRecordFromServiceNow(recordType, recordID)
 	if err != nil {
