@@ -11,6 +11,8 @@ const (
 	PathGetUserChannelsForTeam = "/channels/{team_id:[A-Za-z0-9]+}"
 	PathSearchRecords          = "/records/{record_type}"
 	PathGetSingleRecord        = "/records/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
+	PathProcessNotification    = "/notification"
+	PathGetConnected           = "/connected"
 
 	// ServiceNow API paths
 	PathActivateSubscriptions     = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"

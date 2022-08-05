@@ -30,6 +30,9 @@ func (p *Plugin) InitAPI() *mux.Router {
 	// Add custom routes here
 	s.HandleFunc(constants.PathOAuth2Connect, p.checkAuth(p.httpOAuth2Connect)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathOAuth2Complete, p.checkAuth(p.httpOAuth2Complete)).Methods(http.MethodGet)
+
+	s.HandleFunc(constants.PathGetConnected, p.checkAuth(p.getConnected)).Methods(http.MethodGet)
+
 	s.HandleFunc(constants.PathDownloadUpdateSet, p.downloadUpdateSet).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.createSubscription))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.getAllSubscriptions))).Methods(http.MethodGet)
@@ -38,7 +41,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
-	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -81,6 +84,23 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 		ctx := context.WithValue(r.Context(), constants.ContextTokenKey, token)
 		r = r.Clone(ctx)
 		handler(w, r)
+	}
+}
+
+func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
+	resp := &serializer.ConnectedResponse{
+		Connected: false,
+	}
+
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	if _, err := p.GetUser(userID); err == nil {
+		resp.Connected = true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -149,6 +169,12 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventConnect,
+		nil,
+		&model.WebsocketBroadcast{UserId: mattermostUserID},
+	)
 
 	html := `
 <!DOCTYPE html>
@@ -236,14 +262,15 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	result, err := json.Marshal(subscriptions)
 	if err != nil || string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
-	} else {
-		_, _ = w.Write(result)
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	subscriptionID := pathParams["subscription_id"]
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Error in deleting the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
@@ -260,7 +287,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	subscriptionID := pathParams["subscription_id"]
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	subcription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
@@ -291,7 +318,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
 	pathParams := mux.Vars(r)
-	teamID := pathParams["team_id"]
+	teamID := pathParams[constants.PathParamTeamID]
 	if !model.IsValidId(teamID) {
 		p.API.LogError("Invalid team id")
 		http.Error(w, "Invalid team id", http.StatusBadRequest)
@@ -331,7 +358,7 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 
 func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	recordType := pathParams["record_type"]
+	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while searching", "Record type", recordType)
 		http.Error(w, "Invalid record type", http.StatusBadRequest)
@@ -358,21 +385,22 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	result, err := json.Marshal(records)
 	if err != nil || string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
-	} else {
-		_, _ = w.Write(result)
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	recordType := pathParams["record_type"]
+	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
 		http.Error(w, "Invalid record type", http.StatusBadRequest)
 		return
 	}
 
-	recordID := pathParams["record_id"]
+	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
 	record, statusCode, err := client.GetRecordFromServiceNow(recordType, recordID)
 	if err != nil {

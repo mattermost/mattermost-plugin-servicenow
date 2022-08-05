@@ -129,6 +129,12 @@ func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ 
 		p.API.LogError("Unable to disconnect user", "Error", err.Error())
 		return disconnectErrorMessage
 	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventDisconnect,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
 	return disconnectSuccessMessage
 }
 
