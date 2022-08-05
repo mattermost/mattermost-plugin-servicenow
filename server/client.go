@@ -14,12 +14,15 @@ import (
 )
 
 type Client interface {
-	ActivateSubscriptions() error
-	CreateSubscription(*serializer.SubscriptionPayload) error
-	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, error)
-	GetAllSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error)
-	DeleteSubscription(subscriptionID string) error
-	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) error
+	ActivateSubscriptions() (int, error)
+	CreateSubscription(*serializer.SubscriptionPayload) (int, error)
+	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error)
+	GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
+	DeleteSubscription(subscriptionID string) (int, error)
+	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error)
+	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
+	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
+	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
 }
 
 type client struct {
@@ -37,25 +40,25 @@ func (p *Plugin) NewClient(ctx context.Context, token *oauth2.Token) Client {
 	}
 }
 
-func (c *client) ActivateSubscriptions() error {
+func (c *client) ActivateSubscriptions() (int, error) {
 	if c.plugin.subscriptionsActivated {
-		return nil
+		return http.StatusOK, nil
 	}
 	serverURL := c.plugin.getConfiguration().MattermostSiteURL
 	subscriptionAuthDetails := &serializer.SubscriptionAuthDetails{}
 	queryParams := url.Values{}
 	queryParams.Add(constants.SysQueryParam, fmt.Sprintf("server_url=%s", serverURL))
 	// TODO: Add an API call for checking if the update set has been uploaded and if its version matches with the plugin's update set XML file
-	if _, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, queryParams); err != nil {
+	if _, statusCode, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, queryParams); err != nil {
 		if strings.Contains(err.Error(), "Invalid table") {
-			return errors.New(constants.UpdateSetNotUploadedMessage)
+			return statusCode, constants.ErrUpdateSetNotUploaded
 		}
-		return errors.Wrap(err, "failed to get subscription auth details")
+		return statusCode, errors.Wrap(err, "failed to get subscription auth details")
 	}
 
 	if len(subscriptionAuthDetails.Result) > 0 {
 		c.plugin.subscriptionsActivated = true
-		return nil
+		return http.StatusOK, nil
 	}
 
 	payload := serializer.SubscriptionAuthPayload{
@@ -63,32 +66,37 @@ func (c *client) ActivateSubscriptions() error {
 		APISecret: c.plugin.getConfiguration().WebhookSecret,
 	}
 
-	if _, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, payload, nil, nil); err != nil {
-		return errors.Wrap(err, "failed to activate subscriptions for this server")
+	if _, statusCode, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, payload, nil, nil); err != nil {
+		return statusCode, errors.Wrap(err, "failed to activate subscriptions for this server")
 	}
 
 	c.plugin.subscriptionsActivated = true
-	return nil
+	return http.StatusOK, nil
 }
 
-func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) error {
-	if err := c.ActivateSubscriptions(); err != nil {
-		return err
+func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) (int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return statusCode, err
 	}
 
-	if _, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, nil, nil); err != nil {
-		return errors.Wrap(err, "failed to create subscription in ServiceNow")
+	_, statusCode, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, nil, nil)
+	if err != nil {
+		return statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
 	}
 
-	return nil
+	return statusCode, nil
 }
 
-func (c *client) GetAllSubscriptions(userID, channelID, limit, offset string) ([]*serializer.SubscriptionResponse, error) {
-	if err := c.ActivateSubscriptions(); err != nil {
-		return nil, err
+func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
 	}
 
-	query := fmt.Sprintf("mm_user_id=%s^is_active=true", userID)
+	query := "is_active=true"
+	// userID will be intentionally sent empty string if we have to return subscriptions irrespective of user
+	if userID != "" {
+		query = fmt.Sprintf("%s^user_id=%s", query, userID)
+	}
 	// channelID will be intentionally sent empty string if we have to return subscriptions for whole server
 	if channelID != "" {
 		query = fmt.Sprintf("%s^channel_id=%s", query, channelID)
@@ -101,44 +109,113 @@ func (c *client) GetAllSubscriptions(userID, channelID, limit, offset string) ([
 	}
 
 	subscriptions := &serializer.SubscriptionsResult{}
-	if _, err := c.CallJSON(http.MethodGet, constants.PathSubscriptionCRUD, nil, subscriptions, queryParams); err != nil {
-		return nil, errors.Wrap(err, "failed to get subscriptions from ServiceNow")
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathSubscriptionCRUD, nil, subscriptions, queryParams)
+	if err != nil {
+		return nil, statusCode, errors.Wrap(err, "failed to get subscriptions from ServiceNow")
 	}
 
-	return subscriptions.Result, nil
+	return subscriptions.Result, statusCode, nil
 }
 
-func (c *client) GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, error) {
-	if err := c.ActivateSubscriptions(); err != nil {
-		return nil, err
+func (c *client) GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
 	}
 
 	subscription := &serializer.SubscriptionResult{}
-	if _, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, subscription, nil); err != nil {
-		return nil, errors.Wrap(err, "failed to get subscription from ServiceNow")
+	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, subscription, nil)
+	if err != nil {
+		return nil, statusCode, errors.Wrap(err, "failed to get subscription from ServiceNow")
 	}
 
-	return subscription.Result, nil
+	return subscription.Result, statusCode, nil
 }
 
-func (c *client) DeleteSubscription(subscriptionID string) error {
-	if err := c.ActivateSubscriptions(); err != nil {
-		return err
+func (c *client) DeleteSubscription(subscriptionID string) (int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return statusCode, err
 	}
 
-	if _, err := c.CallJSON(http.MethodDelete, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, nil, nil); err != nil {
-		return errors.Wrap(err, "failed to delete subscription from ServiceNow")
+	_, statusCode, err := c.CallJSON(http.MethodDelete, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, nil, nil)
+	if err != nil {
+		return statusCode, errors.Wrap(err, "failed to delete subscription from ServiceNow")
 	}
-	return nil
+	return statusCode, nil
 }
 
-func (c *client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) error {
-	if err := c.ActivateSubscriptions(); err != nil {
-		return err
+func (c *client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return statusCode, err
 	}
 
-	if _, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), subscription, nil, nil); err != nil {
-		return errors.Wrap(err, "failed to update subscription from ServiceNow")
+	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), subscription, nil, nil)
+	if err != nil {
+		return statusCode, errors.Wrap(err, "failed to update subscription from ServiceNow")
 	}
-	return nil
+	return statusCode, nil
+}
+
+// CheckForDuplicateSubscription returns true if duplicate subscription exists in ServiceNow and an error
+// The boolean return type value should be checked only if the error being returned is nil
+func (c *client) CheckForDuplicateSubscription(subscription *serializer.SubscriptionPayload) (bool, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return false, statusCode, err
+	}
+
+	query := fmt.Sprintf("channel_id=%s^is_active=true^record_id=%s^server_url=%s", *subscription.ChannelID, *subscription.RecordID, *subscription.ServerURL)
+	queryParams := url.Values{
+		constants.SysQueryParam:      {query},
+		constants.SysQueryParamLimit: {fmt.Sprint(constants.DefaultPerPage)},
+	}
+
+	subscriptions := &serializer.SubscriptionsResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathSubscriptionCRUD, nil, subscriptions, queryParams)
+	if err != nil {
+		return false, statusCode, errors.Wrap(err, "failed to get subscriptions from ServiceNow")
+	}
+
+	return len(subscriptions.Result) > 0, statusCode, nil
+}
+
+func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
+	}
+
+	query := fmt.Sprintf("short_description LIKE%s ^OR number STARTSWITH%s", searchTerm, searchTerm)
+	queryParams := url.Values{
+		constants.SysQueryParam:       {query},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+		constants.SysQueryParamFields: {"sys_id,number,short_description"},
+	}
+
+	records := &serializer.ServiceNowPartialRecordsResult{}
+	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, records, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return records.Result, statusCode, nil
+}
+
+func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
+	}
+
+	queryParams := url.Values{
+		constants.SysQueryParamFields:       {"sys_id,number,short_description,state,priority,assigned_to,assignment_group"},
+		constants.SysQueryParamDisplayValue: {"true"},
+	}
+
+	record := &serializer.ServiceNowRecordResult{}
+	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, sysID), nil, record, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return record.Result, statusCode, nil
 }
