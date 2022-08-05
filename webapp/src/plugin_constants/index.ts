@@ -1,9 +1,6 @@
 /**
- * Keep all plugin related constants here
+* Keep all plugin related constants here
 */
-
-const RightSidebarHeader = 'Right Sidebar Placeholder Text';
-
 export enum ToggleSwitchLabelPositioning{
     Left = 'left',
     Right = 'right',
@@ -11,8 +8,9 @@ export enum ToggleSwitchLabelPositioning{
 
 export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 
+const RightSidebarHeader = 'Right Sidebar Placeholder Text';
 const MMUSERID = 'MMUSERID';
-const HeaderMattermostUserID = 'User-ID';
+const HeaderMattermostUserID = 'Mattermost-User-ID';
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
@@ -23,10 +21,13 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
     },
 };
 
+const ChannelHeaderTooltipText = 'ServiceNow';
+
 export default {
     RightSidebarHeader,
     DOWNLOAD_UPDATE_SET_LINK,
     pluginApiServiceConfigs,
     MMUSERID,
     HeaderMattermostUserID,
+    ChannelHeaderTooltipText,
 };

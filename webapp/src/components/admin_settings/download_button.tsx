@@ -1,10 +1,9 @@
 import React from 'react';
 import {FormGroup, Col, Button} from 'react-bootstrap';
 
-import Client from 'client';
+import Utils from 'utils';
 
-// TODO: Use absolute path here
-import {DOWNLOAD_UPDATE_SET_LINK} from '../../constants';
+import {DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
 
 type HelpText = {
     key: string | null;
@@ -32,7 +31,7 @@ const DownloadButton = ({label, helpText}: Props) => (
         <Col sm={8}>
             {/* TODO: Add proper handling for the download logic as the downloaded filename should be the same that we get in the response headers. */}
             <a
-                href={`${Client.getPluginBaseURL()}/${DOWNLOAD_UPDATE_SET_LINK}`}
+                href={`${Utils.getBaseUrls().pluginApiBaseUrl}/${DOWNLOAD_UPDATE_SET_LINK}`}
                 download={true}
             >
                 <Button>
