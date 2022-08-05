@@ -17,10 +17,12 @@ type Client interface {
 	ActivateSubscriptions() (int, error)
 	CreateSubscription(*serializer.SubscriptionPayload) (int, error)
 	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error)
-	GetAllSubscriptions(channelID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
+	GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
 	DeleteSubscription(subscriptionID string) (int, error)
 	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error)
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
+	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
+	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
 }
 
 type client struct {
@@ -85,12 +87,16 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 	return statusCode, nil
 }
 
-func (c *client) GetAllSubscriptions(channelID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
+func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
 	if statusCode, err := c.ActivateSubscriptions(); err != nil {
 		return nil, statusCode, err
 	}
 
 	query := "is_active=true"
+	// userID will be intentionally sent empty string if we have to return subscriptions irrespective of user
+	if userID != "" {
+		query = fmt.Sprintf("%s^user_id=%s", query, userID)
+	}
 	// channelID will be intentionally sent empty string if we have to return subscriptions for whole server
 	if channelID != "" {
 		query = fmt.Sprintf("%s^channel_id=%s", query, channelID)
@@ -169,4 +175,47 @@ func (c *client) CheckForDuplicateSubscription(subscription *serializer.Subscrip
 	}
 
 	return len(subscriptions.Result) > 0, statusCode, nil
+}
+
+func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
+	}
+
+	query := fmt.Sprintf("short_description LIKE%s ^OR number STARTSWITH%s", searchTerm, searchTerm)
+	queryParams := url.Values{
+		constants.SysQueryParam:       {query},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+		constants.SysQueryParamFields: {"sys_id,number,short_description"},
+	}
+
+	records := &serializer.ServiceNowPartialRecordsResult{}
+	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, records, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return records.Result, statusCode, nil
+}
+
+func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error) {
+	if statusCode, err := c.ActivateSubscriptions(); err != nil {
+		return nil, statusCode, err
+	}
+
+	queryParams := url.Values{
+		constants.SysQueryParamFields:       {"sys_id,number,short_description,state,priority,assigned_to,assignment_group"},
+		constants.SysQueryParamDisplayValue: {"true"},
+	}
+
+	record := &serializer.ServiceNowRecordResult{}
+	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, sysID), nil, record, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return record.Result, statusCode, nil
 }

@@ -167,18 +167,18 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 
 	// TODO: Add logic to open the create subscription modal
 	// The below code is temporary and it'll be removed in the future.
-	subscriptionType := constants.SubscriptionTypePriority
-	subscriptionLevel := constants.SubscriptionLevelRecord
+	subscriptionEvents := constants.SubscriptionEventPriority
+	subscriptionType := constants.SubscriptionTypeRecord
 	subscriptionActive := true
 	subscription := serializer.SubscriptionPayload{
-		ServerURL:        &p.getConfiguration().MattermostSiteURL,
-		UserID:           &args.UserId,
-		ChannelID:        &args.ChannelId,
-		RecordType:       &params[0],
-		RecordID:         &params[1],
-		SubscriptionType: &subscriptionType,
-		IsActive:         &subscriptionActive,
-		Level:            &subscriptionLevel,
+		ServerURL:          &p.getConfiguration().MattermostSiteURL,
+		UserID:             &args.UserId,
+		ChannelID:          &args.ChannelId,
+		RecordType:         &params[0],
+		RecordID:           &params[1],
+		SubscriptionEvents: &subscriptionEvents,
+		IsActive:           &subscriptionActive,
+		Type:               &subscriptionType,
 	}
 	if err := subscription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
 		p.API.LogError("Failed to validate subscription", "Error", err.Error())
@@ -193,7 +193,7 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
-	subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+	subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, args.UserId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 	if err != nil {
 		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
 		return listSubscriptionsErrorMessage
@@ -238,7 +238,7 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	}
 
 	subscription := &serializer.SubscriptionPayload{
-		SubscriptionType: &params[1],
+		SubscriptionEvents: &params[1],
 	}
 	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
 		p.API.LogError("Failed to validate subscription", "Error", err.Error())
