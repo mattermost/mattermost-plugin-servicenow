@@ -58,6 +58,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createSubscription',
     },
+    fetchSubscriptions: {
+        path: '/subscriptions',
+        method: 'GET',
+        apiServiceName: 'fetchSubscriptions',
+    },
 };
 
 export const PanelDefaultHeights = {

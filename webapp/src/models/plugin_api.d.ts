@@ -72,3 +72,21 @@ type CreateSubscriptionPayload = {
     subscription_events: string;
     channel_id: string;
 }
+
+type FetchSubscriptionsParams = {
+    page?: number;
+    per_page?: number;
+    channel_id?: string;
+}
+
+type SubscriptionData = {
+    server_url: string;
+    is_active: boolean;
+    user_id: string;
+    type: string;
+    record_type: string;
+    record_id: string;
+    subscription_events: string;
+    channel_id: string;
+    sys_id: string;
+}

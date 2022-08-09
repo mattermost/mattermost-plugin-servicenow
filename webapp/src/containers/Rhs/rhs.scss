@@ -1,9 +1,17 @@
+@import '../../styles/abstract/variables';
+
 .rhs-content {
   padding: 15px 12px 12px;
-  height: calc(100% - $rhs-header-height - $rhs-footer-height);
+  height: calc(100% - #{$rhs-header-height});
+  position: relative;
+
+  &__cards-container{
+    height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
+    overflow-y: auto;
+  }
 
   .empty-state {
-    height: calc(100% - 60px);
+    height: calc(100% - #{$rhs-toggle-section-height});
   }
 }
 
