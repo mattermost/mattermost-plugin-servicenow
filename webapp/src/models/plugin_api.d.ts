@@ -53,8 +53,8 @@ type Suggestion = {
 }
 
 type RecordData = {
-    assigned_to: string;
-    assignment_group: string;
+    assigned_to: string | { display_value: string, link: string };
+    assignment_group: string | { display_value: string, link: string };
     number: string;
     priority: string;
     short_description: string;
