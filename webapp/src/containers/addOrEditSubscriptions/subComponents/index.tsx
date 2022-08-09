@@ -278,8 +278,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             user_id: Cookies.get(Constants.MMUSERID) ?? '',
             type: 'record',
             record_type: alertType as string,
-
-            // TODO: modify to access record_id here
             record_id: recordId as string,
             subscription_events: subscriptionEvents.trim().split(' ').join(', '),
             channel_id: channel as string,
