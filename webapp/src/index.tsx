@@ -15,6 +15,7 @@ import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
 import Hooks from 'hooks';
+import {handleConnect, handleDisconnect} from 'websocket';
 
 import manifest from './manifest';
 
@@ -31,6 +32,9 @@ export default class Plugin {
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
         const hooks = new Hooks(store);
         registry.registerSlashCommandWillBePostedHook(hooks.slashCommandWillBePostedHook);
+
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
     }
 }
 

@@ -1,11 +1,10 @@
 import React, {useState} from 'react';
 
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 import ToggleSwitch from 'components/toggleSwitch';
 
-// TODO: Uncomment while adding empty state
-// import EmptyState from 'components/emptyState';
+import EmptyState from 'components/emptyState';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 import SubscriptionCard from 'components/card/subscription';
 
@@ -16,6 +15,7 @@ import './rhs.scss';
 
 const Rhs = (): JSX.Element => {
     const [active, setActive] = useState(false);
+    const connected = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow'].connectedReducer.connected);
     const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
     const dispatch = useDispatch();
 
@@ -39,19 +39,23 @@ const Rhs = (): JSX.Element => {
 
     return (
         <div className='rhs-content'>
-            <ToggleSwitch
-                active={active}
-                onChange={(newState) => setActive(newState)}
-                label='Show all subscriptions'
-            />
-            {/* TODO: Update the following when fetch subscriptions API is integrated */}
-            <SubscriptionCard
-                header='9034ikser82u389irjho239w3'
-                label='Single Record'
-                description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
-                onEdit={handleEditSubscription}
-                onDelete={() => ''}
-            />
+            {connected && (
+                <>
+                    <ToggleSwitch
+                        active={active}
+                        onChange={(newState) => setActive(newState)}
+                        label='Show all subscriptions'
+                        />
+                    {/* TODO: Update the following when fetch subscriptions API is integrated */}
+                    <SubscriptionCard
+                        header='9034ikser82u389irjho239w3'
+                        label='Single Record'
+                        description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
+                        onEdit={handleEditSubscription}
+                        onDelete={() => ''}
+                    />
+                </>
+            )}
             {/* TODO: Uncomment and update the follwing during integration */}
             {/* {active && (
                 <EmptyState
@@ -65,7 +69,7 @@ const Rhs = (): JSX.Element => {
                 />
             )} */}
             {/* TODO: Uncomment and update the following during integration */}
-            {/* {!active && (
+            {!connected && (
                 <EmptyState
                     title='No Account Connected'
                     subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
@@ -75,16 +79,20 @@ const Rhs = (): JSX.Element => {
                     }}
                     iconClass='fa fa-user-circle'
                 />
-            )} */}
-            <div className='rhs-btn-container'>
-                <button
-                    className='btn btn-primary rhs-btn'
-                    onClick={() => dispatch(showAddModal())}
-                >
-                    {'Add Subscription'}
-                </button>
-            </div>
-            {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
+            )}
+            {connected && (
+                <>
+                    <div className='rhs-btn-container'>
+                        <button
+                            className='btn btn-primary rhs-btn'
+                            onClick={() => dispatch(showAddModal())}
+                        >
+                            {'Add Subscription'}
+                        </button>
+                    </div>
+                    {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
+                </>
+            )}
         </div>
     );
 };
