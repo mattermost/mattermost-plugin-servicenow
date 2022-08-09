@@ -153,6 +153,12 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         getSuggestionData(suggestionValue.sys_id);
     };
 
+    // Returns value for record data header
+    const getRecordValueForHeader = (key: RecordDataKeys) => {
+        const value = getRecordDataState().data[key];
+        return typeof value === 'string' ? value : value.display_value;
+    };
+
     return (
         <div
             className={`modal__body modal-body search-panel secondary-panel ${className}`}
@@ -180,7 +186,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                             className='d-flex align-items-center search-panel__description-item'
                         >
                             <span className='search-panel__description-header text-ellipsis'>{header.label}</span>
-                            <span className='search-panel__description-text text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordDataState().data[header.key] || 'N/A'}</span>
+                            <span className='search-panel__description-text text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
                         </li>
                     ))
                 }

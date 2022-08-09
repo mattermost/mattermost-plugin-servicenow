@@ -256,19 +256,19 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Add checked events
         if (stateChanged) {
-            subscriptionEvents += 'state, ';
+            subscriptionEvents += 'state ';
         }
         if (priorityChanged) {
-            subscriptionEvents += 'priority, ';
+            subscriptionEvents += 'priority ';
         }
         if (newCommentChecked) {
-            subscriptionEvents += 'commented, ';
+            subscriptionEvents += 'commented ';
         }
         if (assignedToChecked) {
-            subscriptionEvents += 'assigned_to, ';
+            subscriptionEvents += 'assigned_to ';
         }
         if (assignmentGroupChecked) {
-            subscriptionEvents += 'assignment_group, ';
+            subscriptionEvents += 'assignment_group';
         }
 
         // Create subscription payload
@@ -281,7 +281,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
             // TODO: modify to access record_id here
             record_id: recordId as string,
-            subscription_events: subscriptionEvents.trim(),
+            subscription_events: subscriptionEvents.trim().split(' ').join(', '),
             channel_id: channel as string,
         };
 
