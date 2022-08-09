@@ -11,8 +11,8 @@ export enum ToggleSwitchLabelPositioning{
 
 export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 
-const MMUSERID = 'MMUSERID';
-const HeaderMattermostUserID = 'Mattermost-User-ID';
+const MMCSRF = 'MMCSRF';
+const HeaderCSRFToken = 'X-CSRF-Token';
 
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 
@@ -74,8 +74,8 @@ export default {
     RightSidebarHeader,
     DOWNLOAD_UPDATE_SET_LINK,
     pluginApiServiceConfigs,
-    MMUSERID,
-    HeaderMattermostUserID,
+    MMCSRF,
+    HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
 };
