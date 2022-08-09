@@ -9,7 +9,7 @@ type TabData = {
 
 type HttpMethod = 'GET' | 'POST';
 
-type ApiServiceName = 'fetchRecords'
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription'
 
 type PluginApiService = {
     path: string,
@@ -18,7 +18,7 @@ type PluginApiService = {
 }
 
 type PluginState = {
-    'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, WellList[], 'pluginApi'>; }, never, 'pluginApi'>
+    'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, ChannelList[], 'pluginApi'>; }, never, 'pluginApi'>
 }
 
 type DropdownOptionType = {
@@ -42,10 +42,17 @@ type SubscriptionDetails = {
 type EditSubscriptionData = {
     channel: string,
     recordValue: string,
-    alertType: string,
+    alertType: RecordType,
     stateChanged: boolean;
     priorityChanged: boolean;
     newCommentChecked: boolean;
     assignedToChecked: boolean;
     assignmentGroupChecked: boolean;
+}
+
+type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group';
+
+type RecordDataLabelConfigType = {
+    key: RecordDataKeys;
+    label: string;
 }

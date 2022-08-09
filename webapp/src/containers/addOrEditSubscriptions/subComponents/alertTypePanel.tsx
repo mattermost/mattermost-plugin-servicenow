@@ -11,8 +11,8 @@ type AlertTypePanelProps = {
     onBack?: () => void;
     actionBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
-    alertType: string | null;
-    setAlertType: (value: string) => void;
+    alertType: RecordType | null;
+    setAlertType: (value: RecordType) => void;
 }
 
 const alertTypeOptions: DropdownOptionType[] = [
@@ -22,11 +22,11 @@ const alertTypeOptions: DropdownOptionType[] = [
     },
     {
         label: 'Problem',
-        value: 'Problem',
+        value: 'problem',
     },
     {
         label: 'Change Request',
-        value: 'Change Request',
+        value: 'change_request',
     },
 ];
 
@@ -60,7 +60,7 @@ const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({classNa
             <Dropdown
                 placeholder='Select Record Type'
                 value={alertType}
-                onChange={(newValue) => setAlertType(newValue)}
+                onChange={(newValue) => setAlertType(newValue as RecordType)}
                 options={alertTypeOptions}
                 required={true}
                 error={validationFailed && 'Required'}

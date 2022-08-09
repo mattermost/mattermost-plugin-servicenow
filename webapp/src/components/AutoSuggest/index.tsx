@@ -6,9 +6,12 @@ import './styles.scss';
 type AutoSuggestProps = {
     inputValue: string;
     onInputValueChange: (newValue: string) => void;
-    onOptionClick: (newValue: string) => void;
+    onOptionClick: (suggestion: Record<string, string>) => void;
     placeholder?: string;
-    suggestions: string[];
+    suggestionConfig: {
+        suggestions: Record<string, string>[],
+        renderValue: (suggestion: Record<string, string>) => string;
+    };
     loadingSuggestions?: boolean;
     charThresholdToShowSuggestions?: number;
     disabled?: boolean;
@@ -17,23 +20,24 @@ type AutoSuggestProps = {
     className?: string;
 }
 
-const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, loadingSuggestions, charThresholdToShowSuggestions, disabled, error, required, className = '', onOptionClick}: AutoSuggestProps) => {
+const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestionConfig, loadingSuggestions, charThresholdToShowSuggestions, disabled, error, required, className = '', onOptionClick}: AutoSuggestProps) => {
     const [open, setOpen] = useState(false);
     const [focused, setFocused] = useState(false);
     let blurTimer1: NodeJS.Timeout;
 
+    const {suggestions, renderValue} = suggestionConfig;
+
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
-        if (inputValue.length >= (charThresholdToShowSuggestions ?? 1) && focused) {
+        if (inputValue.length >= (charThresholdToShowSuggestions ?? 1) && focused && !loadingSuggestions) {
             setOpen(true);
         } else {
             setOpen(false);
         }
-    }, [charThresholdToShowSuggestions, focused, inputValue]);
+    }, [charThresholdToShowSuggestions, focused, inputValue, loadingSuggestions]);
 
-    const handleSuggestionClick = (suggestedValue: string) => {
+    const handleSuggestionClick = (suggestedValue: Record<string, string>) => {
         onOptionClick(suggestedValue);
-        onInputValueChange(suggestedValue);
         setOpen(false);
     };
 
@@ -70,10 +74,10 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                 {
                     suggestions.map((suggestion) => (
                         <li
-                            key={suggestion}
+                            key={renderValue(suggestion)}
                             onClick={() => handleSuggestionClick(suggestion)}
                             className='auto-suggest__suggestion text-ellipses'
-                        >{suggestion}</li>
+                        >{renderValue(suggestion)}</li>
                     ))
                 }
                 {!suggestions.length && <li className='auto-suggest__suggestion'>{'Nothing to show'}</li>}

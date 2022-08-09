@@ -6,11 +6,11 @@ function usePluginApi() {
     const state = useSelector((pluginState: PluginState) => pluginState);
     const dispatch = useDispatch();
 
-    const makeApiRequest = (apiServiceName: string, payload?: void) => {
+    const makeApiRequest = (apiServiceName: string, payload?: void | FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload) => {
         dispatch(services.endpoints[apiServiceName].initiate(payload));
     };
 
-    const getApiState = (apiServiceName: string, body?: void) => {
+    const getApiState = (apiServiceName: string, body?: void | FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload) => {
         const {data, isError, isLoading, isSuccess, error} = services.endpoints[apiServiceName].select(body)(state['plugins-mattermost-plugin-servicenow']);
         return {data, isError, isLoading, isSuccess, error};
     };

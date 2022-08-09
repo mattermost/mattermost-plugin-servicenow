@@ -81,6 +81,9 @@
   .result-panel-text {
     font-size: 20px;
     margin: 24px 0;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
 
   .result-panel-close-btn {

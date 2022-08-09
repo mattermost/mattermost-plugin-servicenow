@@ -12,14 +12,51 @@ export enum ToggleSwitchLabelPositioning{
 export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 
 const MMUSERID = 'MMUSERID';
-const HeaderMattermostUserID = 'User-ID';
+const HeaderMattermostUserID = 'Mattermost-User-ID';
+
+const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
+
+// 'short_description', 'state', 'priority', 'assigned_to', 'assignment_group'
+const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
+    {
+        key: 'short_description',
+        label: 'Short Description',
+    }, {
+        key: 'state',
+        label: 'State',
+    }, {
+        key: 'priority',
+        label: 'Priority',
+    }, {
+        key: 'assigned_to',
+        label: 'Assigned To',
+    }, {
+        key: 'assignment_group',
+        label: 'Assignment Group',
+    },
+];
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
-    fetchRecords: {
-        path: '/fetch-records',
+    getChannels: {
+        path: '/channels',
         method: 'GET',
-        apiServiceName: 'fetchRecords',
+        apiServiceName: 'getChannels',
+    },
+    searchRecords: {
+        path: '/records',
+        method: 'GET',
+        apiServiceName: 'searchRecords',
+    },
+    getRecord: {
+        path: '/records',
+        method: 'GET',
+        apiServiceName: 'getRecord',
+    },
+    createSubscription: {
+        path: '/subscriptions',
+        method: 'POST',
+        apiServiceName: 'createSubscription',
     },
 };
 
@@ -39,4 +76,6 @@ export default {
     pluginApiServiceConfigs,
     MMUSERID,
     HeaderMattermostUserID,
+    InvalidAutoCompleteValueMsg,
+    RecordDataLabelConfig,
 };
