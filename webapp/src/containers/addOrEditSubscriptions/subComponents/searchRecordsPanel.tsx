@@ -44,7 +44,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     recordType,
     setApiError,
     setApiResponseValid,
-    recordId,
     setRecordId,
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
