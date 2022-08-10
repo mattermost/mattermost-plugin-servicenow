@@ -57,9 +57,9 @@ const pluginApi = createApi({
             }),
         }),
         [Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName]: builder.query<void, DeleteSubscriptionPayload>({
-            query: ({sys_id}) => ({
+            query: ({id}) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: `${Constants.pluginApiServiceConfigs.deleteSubscription.path}/${sys_id}`,
+                url: `${Constants.pluginApiServiceConfigs.deleteSubscription.path}/${id}`,
                 method: Constants.pluginApiServiceConfigs.deleteSubscription.method,
             }),
         }),

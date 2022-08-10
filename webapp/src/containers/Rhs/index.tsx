@@ -126,7 +126,7 @@ const Rhs = (): JSX.Element => {
     // Handles action when the delete button is clicked
     const handleDeleteClick = (subscription: SubscriptionData) => {
         const deleteFeedPayload : DeleteSubscriptionPayload = {
-            sys_id: subscription.sys_id,
+            id: subscription.sys_id,
         };
         setToBeDeleted(deleteFeedPayload);
         setDeleteConfirmationOpen(true);
