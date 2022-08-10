@@ -1,11 +1,15 @@
-import React, {forwardRef} from 'react';
+import React, {forwardRef, useState, useEffect} from 'react';
+import {useSelector} from 'react-redux';
+import {GlobalState} from 'mattermost-redux/types/store';
+import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Checkbox from 'components/checkbox';
 
-// This will be replaced by global api state of fetch-channel api
-import {ChannelDropdownOptions} from './channelPanel';
+import Constants from 'plugin_constants';
+
+import usePluginApi from 'hooks/usePluginApi';
 
 type EventsPanelProps = {
     className?: string;
@@ -47,6 +51,27 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     channel,
     record,
 }: EventsPanelProps, eventsPanelRef): JSX.Element => {
+    const {entities} = useSelector((state: GlobalState) => state);
+    const {state: APIState, getApiState} = usePluginApi();
+    const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
+
+    // Update the channelList once it is fetched from the backend
+    useEffect(() => {
+        const channelListState = getChannelState();
+        if (channelListState.data) {
+            setChannelOptions(channelListState.data?.map((ch) => ({label: <span><i className='fa fa-globe dropdown-option-icon'/>{ch.display_name}</span>, value: ch.id})));
+        }
+
+        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getMmApiState" in the dependency array, the useEffect runs infinitely.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [APIState]);
+
+    // Get channelList state
+    const getChannelState = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
+        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {error?: string})?.error};
+    };
+
     return (
         <div
             className={`modal__body modal-body secondary-panel events-panel ${className}`}
@@ -55,8 +80,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
             <div className='events-panel__prev-data'>
                 <h4 className='events-panel__prev-data-header'>{'Channel'}</h4>
                 <p className='events-panel__prev-data-text'>
-                    {/* TODO: Replace "ChannelDropdownOptions" by global api state of fetch-channel api */}
-                    {ChannelDropdownOptions.find((ch) => ch.value === channel)?.label}
+                    {channelOptions.find((ch) => ch.value === channel)?.label}
                 </p>
                 <h4 className='events-panel__prev-data-header record-header'>{'Record'}</h4>
                 <p className='events-panel__prev-data-text'>{record}</p>

@@ -6,12 +6,12 @@ function usePluginApi() {
     const state = useSelector((pluginState: PluginState) => pluginState);
     const dispatch = useDispatch();
 
-    const makeApiRequest = (apiServiceName: string, payload?: void) => {
-        dispatch(services.endpoints[apiServiceName].initiate(payload));
+    const makeApiRequest = (apiServiceName: string, payload?: APIPayloadType) => {
+        dispatch(services.endpoints[apiServiceName].initiate(payload as APIPayloadType));
     };
 
-    const getApiState = (apiServiceName: string, body?: void) => {
-        const {data, isError, isLoading, isSuccess, error} = services.endpoints[apiServiceName].select(body)(state['plugins-mattermost-plugin-servicenow']);
+    const getApiState = (apiServiceName: string, body?: APIPayloadType) => {
+        const {data, isError, isLoading, isSuccess, error} = services.endpoints[apiServiceName].select(body as APIPayloadType)(state['plugins-mattermost-plugin-servicenow']);
         return {data, isError, isLoading, isSuccess, error};
     };
 

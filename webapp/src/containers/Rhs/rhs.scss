@@ -1,9 +1,17 @@
+@import "../../styles/abstract/variables";
+
 .rhs-content {
   padding: 15px 12px 12px;
-  height: calc(100% - $rhs-header-height - $rhs-footer-height);
+  height: calc(100% - #{$rhs-header-height});
+  position: relative;
+
+  &__cards-container {
+    height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
+    overflow-y: auto;
+  }
 
   .empty-state {
-    height: calc(100% - 60px);
+    height: calc(100% - #{$rhs-toggle-section-height});
   }
 }
 
@@ -20,4 +28,27 @@
 
 .rhs-btn {
   width: 100%;
+}
+
+.delete-confirmation-modal {
+  .modal__error {
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  &__text {
+    margin: 0 0 16px;
+  }
+
+  .modal__footer {
+    border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
+    padding: 12px 15px;
+    flex-direction: row-reverse !important;
+    justify-content: flex-start !important;
+
+    .modal__confirm-btn {
+      margin: 0 0 0 16px;
+      width: unset;
+    }
+  }
 }

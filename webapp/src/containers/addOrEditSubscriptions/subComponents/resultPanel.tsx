@@ -18,7 +18,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(({header, class
         >
             <>
                 <i className={`fa result-panel-icon ${iconClass ?? 'fa-check-circle-o'}`}/>
-                <h2 className='result-panel-text'>{header ?? 'Subscription added successfully!'}</h2>
+                <h2 className='result-panel-text text-center'>{header ?? 'Subscription added successfully!'}</h2>
                 {onPrimaryBtnClick && (
                     <button
                         className='btn btn-primary'

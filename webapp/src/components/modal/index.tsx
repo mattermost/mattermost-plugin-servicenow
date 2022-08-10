@@ -22,9 +22,10 @@ type ModalProps = {
     error?: string | JSX.Element;
     confirmDisabled?: boolean;
     cancelDisabled?: boolean;
+    confirmBtnClassName?: string;
 }
 
-const Modal = ({show, onHide, showCloseIconInHeader = true, children, title, subTitle, onConfirm, confirmBtnText, cancelBtnText, className = '', loading = false, error, confirmDisabled, cancelDisabled}: ModalProps) => {
+const Modal = ({show, onHide, showCloseIconInHeader = true, children, title, subTitle, onConfirm, confirmBtnText, cancelBtnText, className = '', loading = false, error, confirmDisabled, cancelDisabled, confirmBtnClassName}: ModalProps) => {
     return (
         <RBModal
             show={show}
@@ -56,6 +57,7 @@ const Modal = ({show, onHide, showCloseIconInHeader = true, children, title, sub
                 confirmBtnText={confirmBtnText}
                 cancelDisabled={cancelDisabled}
                 confirmDisabled={confirmDisabled}
+                confirmBtnClassName={confirmBtnClassName}
             />
         </RBModal>
     );
