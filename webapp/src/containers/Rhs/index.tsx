@@ -38,12 +38,12 @@ const mockSubscriptions = {
 };
 
 const Rhs = (): JSX.Element => {
-    const connected = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow'].connectedReducer.connected);
+    const pluginState = useSelector((state: PluginState) => state);
+    const connected = pluginState['plugins-mattermost-plugin-servicenow'].connectedReducer.connected;
     const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
     const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
     const dispatch = useDispatch();
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
-    const pluginState = useSelector((state: PluginState) => state);
     const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
@@ -126,7 +126,7 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when the delete button is clicked
     const handleDeleteClick = (subscription: SubscriptionData) => {
-        const deleteFeedPayload : DeleteSubscriptionPayload = {
+        const deleteFeedPayload: DeleteSubscriptionPayload = {
             id: subscription.sys_id,
         };
         setToBeDeleted(deleteFeedPayload);
@@ -147,44 +147,70 @@ const Rhs = (): JSX.Element => {
 
     return (
         <div className='rhs-content'>
-            <ToggleSwitch
-                active={showAllSubscriptions}
-                onChange={(newState) => setShowAllSubscriptions(newState)}
-                label='Show all subscriptions'
-            />
-            {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
-            {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
+            {connected && (
                 <>
-                    <div className='rhs-content__cards-container'>
-                        {mockSubscriptions.data?.map((subscription) => (
-                            <SubscriptionCard
-                                key={subscription.sys_id}
-                                header={subscription.sys_id}
-                                label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
-                                onEdit={() => handleEditSubscription(subscription)}
-                                onDelete={() => handleDeleteClick(subscription)}
-                            />
-                        ))}
-                    </div>
-                    <div className='rhs-btn-container'>
-                        <button
-                            className='btn btn-primary rhs-btn'
-                            onClick={() => dispatch(showAddModal())}
+                    <ToggleSwitch
+                        active={showAllSubscriptions}
+                        onChange={(newState) => setShowAllSubscriptions(newState)}
+                        label='Show all subscriptions'
+                    />
+                    {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
+                    {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
+                        <>
+                            <div className='rhs-content__cards-container'>
+                                {mockSubscriptions.data?.map((subscription) => (
+                                    <SubscriptionCard
+                                        key={subscription.sys_id}
+                                        header={subscription.sys_id}
+                                        label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
+                                        onEdit={() => handleEditSubscription(subscription)}
+                                        onDelete={() => handleDeleteClick(subscription)}
+                                    />
+                                ))}
+                            </div>
+                            <div className='rhs-btn-container'>
+                                <button
+                                    className='btn btn-primary rhs-btn'
+                                    onClick={() => dispatch(showAddModal())}
+                                >
+                                    {'Add Subscription'}
+                                </button>
+                            </div>
+                        </>
+                    )}
+                    {(!mockSubscriptions.data?.length && !subscriptionsState.isLoading) && (
+                        <EmptyState
+                            title='No Subscriptions Found'
+                            buttonConfig={{
+                                text: 'Add new Subscription',
+                                action: () => dispatch(showAddModal()),
+                            }}
+                            iconClass='fa fa-bell-slash-o'
+                        />
+                    )}
+                    {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
+                    {subscriptionsState.isLoading && <CircularLoader/>}
+                    {toBeDeleted && (
+                        <Modal
+                            show={deleteConfirmationOpen}
+                            onHide={hideDeleteConfirmation}
+                            title='Confirm Delete Subscription'
+                            cancelBtnText='Cancel'
+                            confirmBtnText='Delete'
+                            className='delete-confirmation-modal'
+                            onConfirm={handleDeleteConfirmation}
+                            cancelDisabled={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
+                            confirmDisabled={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
+                            loading={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
+                            error={invalidDeleteApi || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
+                            confirmBtnClassName='btn-danger'
                         >
-                            {'Add Subscription'}
-                        </button>
-                    </div>
+                            <>
+                                <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
+                            </>
+                        </Modal>
+                    )}
                 </>
-            )}
-            {(!mockSubscriptions.data?.length && !subscriptionsState.isLoading) && (
-                <EmptyState
-                    title='No Subscriptions Found'
-                    buttonConfig={{
-                        text: 'Add new Subscription',
-                        action: () => dispatch(showAddModal()),
-                    }}
-                    iconClass='fa fa-bell-slash-o'
-                />
             )}
             {/* TODO: Uncomment and update the following during integration */}
             {!connected && (
@@ -197,28 +223,6 @@ const Rhs = (): JSX.Element => {
                     }}
                     iconClass='fa fa-user-circle'
                 />
-            )} */}
-            {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
-            {subscriptionsState.isLoading && <CircularLoader/>}
-            {toBeDeleted && (
-                <Modal
-                    show={deleteConfirmationOpen}
-                    onHide={hideDeleteConfirmation}
-                    title='Confirm Delete Subscription'
-                    cancelBtnText='Cancel'
-                    confirmBtnText='Delete'
-                    className='delete-confirmation-modal'
-                    onConfirm={handleDeleteConfirmation}
-                    cancelDisabled={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
-                    confirmDisabled={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
-                    loading={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
-                    error={invalidDeleteApi || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
-                    confirmBtnClassName='btn-danger'
-                >
-                    <>
-                        <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
-                    </>
-                </Modal>
             )}
         </div>
     );
