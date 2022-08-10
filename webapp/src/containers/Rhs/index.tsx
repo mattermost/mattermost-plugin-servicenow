@@ -45,7 +45,7 @@ const Rhs = (): JSX.Element => {
                         active={active}
                         onChange={(newState) => setActive(newState)}
                         label='Show all subscriptions'
-                        />
+                    />
                     {/* TODO: Update the following when fetch subscriptions API is integrated */}
                     <SubscriptionCard
                         header='9034ikser82u389irjho239w3'

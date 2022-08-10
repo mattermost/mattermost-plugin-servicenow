@@ -8,7 +8,6 @@ import (
 	"unicode"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-plugin-api/experimental/command"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
@@ -23,13 +22,9 @@ const (
 `
 	disconnectErrorMessage           = "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	disconnectSuccessMessage         = "Disconnected your ServiceNow account."
-	subscribeErrorMessage            = "Something went wrong. Not able to subscribe. Check server logs for errors."
-	subscribeSuccessMessage          = "Subscription successfully created."
 	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
 	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
-	editSubscriptionErrorMessage     = "Something went wrong. Not able to edit subscription. Check server logs for errors."
-	editSubscriptionSuccessMessage   = "Subscription successfully edited."
 	unknownErrorMessage              = "Unknown error."
 	notConnectedMessage              = "You are not connected to ServiceNow."
 )
@@ -149,47 +144,11 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	switch {
 	case command == "list":
 		return p.handleListSubscriptions(c, args, parameters, client)
-	// case command == "add":
-	// 	return p.handleSubscribe(c, args, parameters, client)
-	// case command == "edit":
-	// 	return p.handleEditSubscription(c, args, parameters, client)
 	case command == "delete":
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
-}
-
-func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	if len(params) < 2 {
-		return "You have not entered the correct number of arguments for the subscribe command."
-	}
-
-	// TODO: Add logic to open the create subscription modal
-	// The below code is temporary and it'll be removed in the future.
-	subscriptionEvents := constants.SubscriptionEventPriority
-	subscriptionType := constants.SubscriptionTypeRecord
-	subscriptionActive := true
-	subscription := serializer.SubscriptionPayload{
-		ServerURL:          &p.getConfiguration().MattermostSiteURL,
-		UserID:             &args.UserId,
-		ChannelID:          &args.ChannelId,
-		RecordType:         &params[0],
-		RecordID:           &params[1],
-		SubscriptionEvents: &subscriptionEvents,
-		IsActive:           &subscriptionActive,
-		Type:               &subscriptionType,
-	}
-	if err := subscription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Failed to validate subscription", "Error", err.Error())
-		return subscribeErrorMessage
-	}
-
-	if _, err := client.CreateSubscription(&subscription); err != nil {
-		p.API.LogError("Unable to create subscription", "Error", err.Error())
-		return subscribeErrorMessage
-	}
-	return subscribeSuccessMessage
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
@@ -224,34 +183,6 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 	return deleteSubscriptionSuccessMessage
 }
 
-func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	// TODO: Remove this code later. This is just for testing purposes.
-	subscriptionID := params[0]
-	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
-	if err != nil {
-		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return deleteSubscriptionErrorMessage
-	}
-
-	if !valid {
-		return "Invalid subscription ID."
-	}
-
-	subscription := &serializer.SubscriptionPayload{
-		SubscriptionEvents: &params[1],
-	}
-	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Failed to validate subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-
-	if _, err = client.EditSubscription(subscriptionID, subscription); err != nil {
-		p.API.LogError("Unable to edit subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-	return editSubscriptionSuccessMessage
-}
-
 func getAutocompleteData() *model.AutocompleteData {
 	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", "Available commands: connect, disconnect, help")
 
@@ -266,14 +197,11 @@ func getAutocompleteData() *model.AutocompleteData {
 	subscribeList := model.NewAutocompleteData("list", "", "List the current channel subscriptions")
 	subscriptions.AddCommand(subscribeList)
 
-	subscriptionsAdd := model.NewAutocompleteData("add", "[record_type] [record_id]", "Subscribe to the record changes in ServiceNow")
-	subscriptionsAdd.AddTextArgument("Type of the record to subscribe to. Can be one of: problem, incident, change_request", "[record_type]", "")
-	subscriptionsAdd.AddTextArgument("ID of the record to subscribe to. It is referred as sys_id in ServiceNow.", "[record_id]", "")
+	subscriptionsAdd := model.NewAutocompleteData("add", "", "Subscribe to the record changes in ServiceNow")
 	subscriptions.AddCommand(subscriptionsAdd)
 
-	subscriptionsEdit := model.NewAutocompleteData("edit", "[subscription_id] [subscription_type]", "Edit the subscriptions created to the record changes in ServiceNow")
+	subscriptionsEdit := model.NewAutocompleteData("edit", "[subscription_id]", "Edit the subscriptions created to the record changes in ServiceNow")
 	subscriptionsEdit.AddTextArgument("ID of the subscription", "[subscription_id]", "")
-	subscriptionsEdit.AddTextArgument("Type of the subscription. Can be on of: priority, state", "[subscription_type]", "")
 	subscriptions.AddCommand(subscriptionsEdit)
 
 	subscriptionsDelete := model.NewAutocompleteData("delete", "[subscription_id]", "Unsubscribe to the record changes in ServiceNow")
