@@ -17,7 +17,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2"
 )
 
 // InitAPI initializes the REST API
@@ -36,6 +35,9 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.getAllSubscriptions))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathDeleteSubscription, p.checkAuth(p.checkOAuth(p.deleteSubscription))).Methods(http.MethodDelete)
 	s.HandleFunc(constants.PathEditSubscription, p.checkAuth(p.checkOAuth(p.editSubscription))).Methods(http.MethodPatch)
+	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
 
 	// API for POC. TODO: Remove this endpoint later
 	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
@@ -197,9 +199,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
 	exists, statusCode, err := client.CheckForDuplicateSubscription(subcription)
 	if err != nil {
 		p.API.LogError("Error in checking for duplicate subscription", "Error", err.Error())
@@ -223,20 +223,6 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
-	page, err := GetPaginationParamsFromRequest(r, constants.QueryParamPage)
-	if err != nil {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamPage, "Error", err.Error())
-		page = constants.DefaultPage
-	}
-
-	perPage, err := GetPaginationParamsFromRequest(r, constants.QueryParamPerPage)
-	if err != nil {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamPerPage, "Error", err.Error())
-		perPage = constants.DefaultPerPage
-	} else if perPage > constants.MaxPerPage {
-		perPage = constants.DefaultPerPage
-	}
-
 	channelID := r.URL.Query().Get(constants.QueryParamChannelID)
 	if channelID != "" && !model.IsValidId(channelID) {
 		p.API.LogError("Invalid query param", "Query param", constants.QueryParamChannelID)
@@ -251,9 +237,8 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
+	page, perPage := GetPageAndPerPage(r)
 	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
 		p.API.LogError("Error in getting all subscriptions", "Error", err.Error())
@@ -266,17 +251,16 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	result, err := json.Marshal(subscriptions)
 	if err != nil || string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
-	} else {
-		_, _ = w.Write(result)
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	subscriptionID := pathParams["subscription_id"]
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
+	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Error in deleting the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
@@ -292,7 +276,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
-	subscriptionID := pathParams["subscription_id"]
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	subcription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
@@ -306,9 +290,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
-	client := p.NewClient(ctx, token)
+	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.EditSubscription(subscriptionID, subcription); err != nil {
 		p.API.LogError("Error in editing the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
@@ -320,6 +302,107 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w, make(map[string]string))
+}
+
+func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	pathParams := mux.Vars(r)
+	teamID := pathParams[constants.PathParamTeamID]
+	if !model.IsValidId(teamID) {
+		p.API.LogError("Invalid team id")
+		http.Error(w, "Invalid team id", http.StatusBadRequest)
+		return
+	}
+
+	channels, channelErr := p.API.GetChannelsForTeamForUser(teamID, userID, false)
+	if channelErr != nil {
+		p.API.LogError("Error in getting channels for team and user", "Error", channelErr.Error())
+		http.Error(w, fmt.Sprintf("Error in getting channels for team and user. Error: %s", channelErr.Error()), channelErr.StatusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if channels == nil {
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	var requiredChannels []*model.Channel
+	for _, channel := range channels {
+		if channel.Type == model.CHANNEL_PRIVATE || channel.Type == model.CHANNEL_OPEN {
+			requiredChannels = append(requiredChannels, channel)
+		}
+	}
+
+	if requiredChannels == nil {
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(requiredChannels); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.ValidSubscriptionRecordTypes[recordType] {
+		p.API.LogError("Invalid record type while searching", "Record type", recordType)
+		http.Error(w, "Invalid record type", http.StatusBadRequest)
+		return
+	}
+
+	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
+	if len(searchTerm) < 4 {
+		http.Error(w, "The search term must be at least 4 characters long.", http.StatusBadRequest)
+		return
+	}
+
+	page, perPage := GetPageAndPerPage(r)
+	client := p.GetClientFromRequest(r)
+	records, statusCode, err := client.SearchRecordsInServiceNow(recordType, searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	if err != nil {
+		p.API.LogError("Error in searching for records in ServiceNow", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in searching for records in ServiceNow. Error: %s", err.Error()), statusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	result, err := json.Marshal(records)
+	if err != nil || string(result) == "null" {
+		_, _ = w.Write([]byte("[]"))
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.ValidSubscriptionRecordTypes[recordType] {
+		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
+		http.Error(w, "Invalid record type", http.StatusBadRequest)
+		return
+	}
+
+	recordID := pathParams[constants.PathParamRecordID]
+	client := p.GetClientFromRequest(r)
+	record, statusCode, err := client.GetRecordFromServiceNow(recordType, recordID)
+	if err != nil {
+		p.API.LogError("Error in getting record from ServiceNow", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in getting record from ServiceNow. Error: %s", err.Error()), statusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(record); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // TODO: Modify this function to work without taking a map in the params
