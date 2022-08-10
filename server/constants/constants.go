@@ -53,6 +53,10 @@ const (
 	PathParamTeamID         = "team_id"
 	PathParamRecordType     = "record_type"
 	PathParamRecordID       = "record_id"
+
+	// Websocket events
+	WSEventConnect    = "connect"
+	WSEventDisconnect = "disconnect"
 )
 
 var (

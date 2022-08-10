@@ -30,6 +30,9 @@ func (p *Plugin) InitAPI() *mux.Router {
 	// Add custom routes here
 	s.HandleFunc(constants.PathOAuth2Connect, p.checkAuth(p.httpOAuth2Connect)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathOAuth2Complete, p.checkAuth(p.httpOAuth2Complete)).Methods(http.MethodGet)
+
+	s.HandleFunc(constants.PathGetConnected, p.checkAuth(p.getConnected)).Methods(http.MethodGet)
+
 	s.HandleFunc(constants.PathDownloadUpdateSet, p.downloadUpdateSet).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.createSubscription))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.getAllSubscriptions))).Methods(http.MethodGet)
@@ -81,6 +84,23 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 		ctx := context.WithValue(r.Context(), constants.ContextTokenKey, token)
 		r = r.Clone(ctx)
 		handler(w, r)
+	}
+}
+
+func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
+	resp := &serializer.ConnectedResponse{
+		Connected: false,
+	}
+
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	if _, err := p.GetUser(userID); err == nil {
+		resp.Connected = true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -149,6 +169,12 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventConnect,
+		nil,
+		&model.WebsocketBroadcast{UserId: mattermostUserID},
+	)
 
 	html := `
 <!DOCTYPE html>
