@@ -9,7 +9,7 @@ type TabData = {
 
 type HttpMethod = 'GET' | 'POST';
 
-type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions'
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription'
 
 type PluginApiService = {
     path: string,
@@ -41,13 +41,14 @@ type SubscriptionDetails = {
 
 type EditSubscriptionData = {
     channel: string,
-    recordValue: string,
+    recordId: string,
     alertType: RecordType,
     stateChanged: boolean;
     priorityChanged: boolean;
     newCommentChecked: boolean;
     assignedToChecked: boolean;
     assignmentGroupChecked: boolean;
+    id: string;
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group';
@@ -56,3 +57,5 @@ type RecordDataLabelConfigType = {
     key: RecordDataKeys;
     label: string;
 }
+
+type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload;

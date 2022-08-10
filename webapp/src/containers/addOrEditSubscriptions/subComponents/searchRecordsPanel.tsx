@@ -29,6 +29,7 @@ type SearchRecordsPanelProps = {
     setShowModalLoader: (show: boolean) => void;
     recordId: string | null;
     setRecordId: (recordId: string | null) => void;
+    resetStates: boolean;
 }
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({
@@ -45,6 +46,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     setApiError,
     setApiResponseValid,
     setRecordId,
+    recordId,
+    resetStates,
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
@@ -55,6 +58,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     const charThresholdToShowSuggestions = 4;
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
+    const [disabledInput, setDisableInput] = useState(false);
 
     // Get record suggestions state
     const getRecordsSuggestions = () => {
@@ -87,10 +91,47 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     };
 
+    // Handles resetting the states
+    const resetValues = () => {
+        setRecordId(null);
+        setDisableInput(false);
+        setSuggestionChosen(false);
+        setGetSuggestionDataPayload(null);
+        setSearchRecordsPayload(null);
+        setSuggestions([]);
+    };
+
     // Initialize the debounced getSuggestion function
     useEffect(() => {
         setDebouncedGetSuggestions(() => Utils.debounce(getSuggestions, 500));
     }, [recordType]);
+
+    // If "recordId" is provided when the component is mounted, then the subscription is being edited, hence fetch the record data from the API
+    useEffect(() => {
+        if (recordId && !recordValue) {
+            setDisableInput(true);
+            setSuggestionChosen(true);
+            getSuggestionData(recordId);
+        }
+    }, []);
+
+    // If the "resetStates" is set, reset the data
+    useEffect(() => {
+        if (resetStates) {
+            resetValues();
+        }
+    }, [resetStates]);
+
+    // Set the default "inputValue" when the subscription is being edited
+    useEffect(() => {
+        if (recordId && !recordValue) {
+            const recordDataState = getRecordDataState();
+            if (recordDataState.data) {
+                setRecordValue(`${recordDataState.data.number}: ${recordDataState.data.short_description}`);
+                setDisableInput(false);
+            }
+        }
+    }, [APIState]);
 
     // Handle API state updates in the suggestions
     useEffect(() => {
@@ -106,11 +147,27 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     }, [APIState]);
 
+    // Handle API state updates while fetching record data
+    useEffect(() => {
+        const recordDataState = getRecordDataState();
+        if (recordDataState.isLoading) {
+            setApiResponseValid(true);
+        }
+        if (recordDataState.isError) {
+            setApiError(recordDataState.error);
+        }
+    }, [APIState]);
+
     // Hide error state once it the value is valid
     useEffect(() => {
         setValidationFailed(false);
         setValidationMsg(null);
     }, [recordValue]);
+
+    // Reset the state when the component is unmounted
+    useEffect(() => {
+        return () => resetValues();
+    }, []);
 
     // handle input value change
     const handleInputChange = (currentValue: string) => {
@@ -154,8 +211,11 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     };
 
     // Returns value for record data header
-    const getRecordValueForHeader = (key: RecordDataKeys) => {
-        const value = getRecordDataState().data[key];
+    const getRecordValueForHeader = (key: RecordDataKeys): null | string => {
+        const value = getRecordDataState().data?.[key];
+        if (!value) {
+            return null;
+        }
         return typeof value === 'string' ? value : value.display_value;
     };
 
@@ -176,7 +236,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 charThresholdToShowSuggestions={charThresholdToShowSuggestions}
                 error={validationMsg || validationFailed}
                 className='search-panel__auto-suggest'
-                loadingSuggestions={getRecordsSuggestions().isLoading}
+                loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
+                disabled={disabledInput}
             />
             {suggestionChosen && <ul className='search-panel__description'>
                 {

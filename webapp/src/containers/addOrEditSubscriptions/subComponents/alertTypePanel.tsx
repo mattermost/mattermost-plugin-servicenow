@@ -13,12 +13,13 @@ type AlertTypePanelProps = {
     requiredFieldValidationErr?: boolean;
     alertType: RecordType | null;
     setAlertType: (value: RecordType) => void;
+    setResetRecordPanelStates: (reset: boolean) => void;
 }
 
 const alertTypeOptions: DropdownOptionType[] = [
     {
         label: 'Incident',
-        value: 'incident',
+        value: 'Incident',
     },
     {
         label: 'Problem',
@@ -30,7 +31,16 @@ const alertTypeOptions: DropdownOptionType[] = [
     },
 ];
 
-const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({className, error, onContinue, onBack, actionBtnDisabled, alertType, setAlertType}: AlertTypePanelProps, alertTypePanelRef): JSX.Element => {
+const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({
+    className,
+    error,
+    onContinue,
+    onBack,
+    actionBtnDisabled,
+    alertType,
+    setAlertType,
+    setResetRecordPanelStates,
+}: AlertTypePanelProps, alertTypePanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
     // Hide error state once it the value is valid
@@ -52,6 +62,12 @@ const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({classNa
         }
     };
 
+    // Handle change in alert type
+    const handleAlertTypeChange = (newValue: RecordType) => {
+        setAlertType(newValue);
+        setResetRecordPanelStates(true);
+    };
+
     return (
         <div
             className={`modal__body modal-body secondary-panel ${className}`}
@@ -60,7 +76,7 @@ const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({classNa
             <Dropdown
                 placeholder='Select Record Type'
                 value={alertType}
-                onChange={(newValue) => setAlertType(newValue as RecordType)}
+                onChange={(newValue) => handleAlertTypeChange(newValue as RecordType)}
                 options={alertTypeOptions}
                 required={true}
                 error={validationFailed && 'Required'}

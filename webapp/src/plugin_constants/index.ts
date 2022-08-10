@@ -13,6 +13,7 @@ export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
+const MMUSERID = 'MMUSERID';
 
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 
@@ -72,6 +73,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'fetchSubscriptions',
     },
+    editSubscription: {
+        path: '/subscriptions',
+        method: 'PATCH',
+        apiServiceName: 'editSubscriptions',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -93,4 +99,5 @@ export default {
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
     SubscriptionEvents,
+    MMUSERID,
 };
