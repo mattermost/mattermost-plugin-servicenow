@@ -256,19 +256,19 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Add checked events
         if (stateChanged) {
-            subscriptionEvents += 'state ';
+            subscriptionEvents += Constants.SubscriptionEvents.state;
         }
         if (priorityChanged) {
-            subscriptionEvents += 'priority ';
+            subscriptionEvents += `${Constants.SubscriptionEvents.priority} `;
         }
         if (newCommentChecked) {
-            subscriptionEvents += 'commented ';
+            subscriptionEvents += `${Constants.SubscriptionEvents.commented} `;
         }
         if (assignedToChecked) {
-            subscriptionEvents += 'assigned_to ';
+            subscriptionEvents += `${Constants.SubscriptionEvents.assignedTo} `;
         }
         if (assignmentGroupChecked) {
-            subscriptionEvents += 'assignment_group';
+            subscriptionEvents += `${Constants.SubscriptionEvents.assignmentGroup} `;
         }
 
         // Create subscription payload
