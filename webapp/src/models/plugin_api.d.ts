@@ -100,6 +100,7 @@ type EditSubscriptionPayload = {
     record_id: string;
     subscription_events: string;
     channel_id: string;
+    sys_id: string;
 }
 
 type DeleteSubscriptionPayload = {
