@@ -16,7 +16,7 @@ const HeaderMattermostUserID = 'Mattermost-User-ID';
 
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 
-// 'short_description', 'state', 'priority', 'assigned_to', 'assignment_group'
+// Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
         key: 'short_description',
@@ -35,6 +35,15 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
         label: 'Assignment Group',
     },
 ];
+
+// Subscription event names
+const SubscriptionEvents = {
+    state: 'state',
+    priority: 'priority',
+    commented: 'commented',
+    assignedTo: 'assigned_to',
+    assignmentGroup: 'assignment_group',
+};
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
@@ -64,7 +73,7 @@ export const PanelDefaultHeights = {
     channelPanel: 151,
     alertTypePanel: 195,
     searchRecordPanel: 203,
-    searchRecordPanelExpanded: 360,
+    searchRecordPanelExpanded: 372,
     eventsPanel: 500,
     successPanel: 220,
     panelHeader: 65,
@@ -78,4 +87,5 @@ export default {
     HeaderMattermostUserID,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
+    SubscriptionEvents,
 };

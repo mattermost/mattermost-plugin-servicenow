@@ -26,7 +26,7 @@ const Rhs = (): JSX.Element => {
         const subscriptionData: EditSubscriptionData = {
             channel: 'WellValue1',
             recordValue: 'Record 3',
-            alertType: 'Change Request',
+            alertType: 'change_request',
             stateChanged: true,
             priorityChanged: false,
             newCommentChecked: true,
