@@ -11,5 +11,5 @@ const (
 
 	// ServiceNow API paths
 	PathActivateSubscriptions = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
-	PathSubscriptionCRUD      = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_mm_subscriptions"
+	PathSubscriptionCRUD      = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
 )
