@@ -38,11 +38,9 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 	var subscriptionEvents strings.Builder
 	events := strings.Split(s.SubscriptionEvents, ",")
 	for index, event := range events {
-		event = strings.TrimSpace(event)
+		event = constants.FormattedEventNames[strings.TrimSpace(event)]
 		if index != len(events)-1 {
-			event = constants.FormattedEventNames[event] + ", "
-		} else {
-			event = constants.FormattedEventNames[event]
+			event += ", "
 		}
 		subscriptionEvents.WriteString(event)
 	}
