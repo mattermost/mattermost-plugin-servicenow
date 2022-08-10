@@ -38,9 +38,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
-
-	// API for POC. TODO: Remove this endpoint later
-	s.HandleFunc("/notification", p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -119,19 +117,6 @@ func (p *Plugin) downloadUpdateSet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", constants.UpdateSetFilename))
 	w.Header().Set("Content-Type", http.DetectContentType(fileBytes))
 	_, _ = w.Write(fileBytes)
-}
-
-func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
-	v := make(map[string]string)
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&v); err != nil {
-		p.API.LogError("Error in decoding body", "Error", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	p.API.LogInfo(fmt.Sprintf("%+v", v))
-	returnStatusOK(w, v)
 }
 
 func (p *Plugin) httpOAuth2Connect(w http.ResponseWriter, r *http.Request) {
@@ -219,7 +204,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(statusCode)
-	returnStatusOK(w, make(map[string]string))
+	returnStatusOK(w)
 }
 
 func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
@@ -271,7 +256,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	returnStatusOK(w, make(map[string]string))
+	returnStatusOK(w)
 }
 
 func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
@@ -301,7 +286,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	returnStatusOK(w, make(map[string]string))
+	returnStatusOK(w)
 }
 
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
@@ -405,8 +390,23 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// TODO: Modify this function to work without taking a map in the params
-func returnStatusOK(w http.ResponseWriter, m map[string]string) {
+func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
+	event, err := serializer.ServiceNowEventFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
+		http.Error(w, fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	post := event.CreateNotificationPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError("Unable to create post", "Error", postErr.Error())
+	}
+	returnStatusOK(w)
+}
+
+func returnStatusOK(w http.ResponseWriter) {
+	m := make(map[string]string)
 	w.Header().Set("Content-Type", "application/json")
 	m[model.STATUS] = model.STATUS_OK
 	_, _ = w.Write([]byte(model.MapToJson(m)))

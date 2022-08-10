@@ -83,7 +83,7 @@ func (s *SubscriptionPayload) IsValidForUpdation(siteURL string) error {
 	}
 
 	if s.ServerURL != nil && *s.ServerURL != siteURL {
-		return fmt.Errorf("serverURL is not valid")
+		return fmt.Errorf("serverURL is different from the site URL")
 	}
 	return nil
 }
@@ -140,7 +140,7 @@ func (s *SubscriptionPayload) IsValidForCreation(siteURL string) error {
 	if s.ServerURL == nil {
 		return fmt.Errorf("serverURL is required")
 	} else if *s.ServerURL != siteURL {
-		return fmt.Errorf("serverURL is not valid")
+		return fmt.Errorf("serverURL is different from the site URL")
 	}
 
 	return nil
