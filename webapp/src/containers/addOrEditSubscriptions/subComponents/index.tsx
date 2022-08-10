@@ -346,6 +346,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             record_id: recordId as string,
             subscription_events: subscriptionEvents.trim().split(' ').join(', '),
             channel_id: channel as string,
+            sys_id: subscriptionData?.id as string,
         };
 
         // Set payload
