@@ -153,7 +153,7 @@ func (c *client) EditSubscription(subscriptionID string, subscription *serialize
 	return statusCode, nil
 }
 
-// CheckForDuplicateSubscription returns true if duplicate subscription exists in ServiceNow and an error
+// CheckForDuplicateSubscription returns true and an error if a duplicate subscription exists in ServiceNow
 // The boolean return type value should be checked only if the error being returned is nil
 func (c *client) CheckForDuplicateSubscription(subscription *serializer.SubscriptionPayload) (bool, int, error) {
 	if statusCode, err := c.ActivateSubscriptions(); err != nil {
