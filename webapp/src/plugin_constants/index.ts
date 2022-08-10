@@ -78,6 +78,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'editSubscriptions',
     },
+    deleteSubscription: {
+        path: '/subscriptions',
+        method: 'DELETE',
+        apiServiceName: 'deleteSubscriptions',
+    },
 };
 
 export const PanelDefaultHeights = {

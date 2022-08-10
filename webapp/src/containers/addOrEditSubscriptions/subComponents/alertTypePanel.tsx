@@ -19,7 +19,7 @@ type AlertTypePanelProps = {
 const alertTypeOptions: DropdownOptionType[] = [
     {
         label: 'Incident',
-        value: 'Incident',
+        value: 'incident',
     },
     {
         label: 'Problem',

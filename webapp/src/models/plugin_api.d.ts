@@ -101,3 +101,7 @@ type EditSubscriptionPayload = {
     subscription_events: string;
     channel_id: string;
 }
+
+type DeleteSubscriptionPayload = {
+    sys_id: string;
+}
