@@ -38,8 +38,11 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                     className='auto-suggest__input'
                     disabled={disabled}
                 />
-                {!loadingSuggestions && <i className={`fa fa-angle-down auto-suggest__field-angle ${open && 'auto-suggest__field-angle--rotated'}`}/>}
-                {loadingSuggestions && <div className='auto-suggest__loader'/>}
+                {loadingSuggestions ? (
+                    <div className='auto-suggest__loader'/>
+                ) : (
+                    <i className={`fa fa-angle-down auto-suggest__field-angle ${open && 'auto-suggest__field-angle--rotated'}`}/>
+                )}
             </div>
             {inputValue.length < (charThresholdToShowSuggestions || 1) && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
             <ul className={`auto-suggest__suggestions ${open && 'auto-suggest__suggestions--open'}`}>
