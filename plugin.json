@@ -3,7 +3,7 @@
     "name": "Servicenow Plugin",
     "description": "This plugin serves as an integration between Mattermost and ServiceNow.",
     "icon_path": "assets/starter-template-icon.svg",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "min_server_version": "5.37.0",
     "server": {
         "executables": {
@@ -26,15 +26,46 @@
                 "display_name": "ServiceNow Server Base URL:",
                 "type": "text",
                 "help_text": "The base URL for the ServiceNow server.",
+                "placeholder": "https://servicenow.com",
                 "default": null
             },
             {
-                "key": "Secret",
+                "key": "WebhookSecret",
                 "display_name": "Webhook Secret:",
                 "type": "generated",
                 "help_text": "The webhook secret used by the ServiceNow API calls to Mattermost for sending notifications.",
                 "regenerate_help_text": "Regenerates the secret for ServiceNow Plugin. Regenerating this key invalidates any existing token.",
                 "default": null
+            },
+            {
+                "key": "ServiceNowOAuthClientID",
+                "display_name": "ServiceNow OAuth Client ID:",
+                "type": "text",
+                "help_text": "The client ID for the OAuth app registered with ServiceNow.",
+                "placeholder": "",
+                "default": null
+            },
+            {
+                "key": "ServiceNowOAuthClientSecret",
+                "display_name": "ServiceNow OAuth Client Secret:",
+                "type": "text",
+                "help_text": "The client secret for the OAuth app registered with ServiceNow.",
+                "placeholder": "",
+                "default": null
+            },
+            {
+                "key": "EncryptionSecret",
+                "display_name": "Encryption Secret:",
+                "type": "generated",
+                "help_text": "The secret key used to encrypt and decrpyt OAuth token.",
+                "default": null
+            },
+            {
+                "key": "ServiceNowUpdateSetDownload",
+                "display_name": "Download ServiceNow Update Set:",
+                "type": "custom",
+                "help_text": "The update set XML file that needs to be uploaded in ServiceNow for enabling subscriptions.",
+                "default": ""
             }
         ]
     }
