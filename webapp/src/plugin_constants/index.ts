@@ -13,6 +13,7 @@ export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
+const MMUSERID = 'MMUSERID';
 
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 
@@ -88,4 +89,5 @@ export default {
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
     SubscriptionEvents,
+    MMUSERID,
 };
