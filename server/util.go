@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
@@ -46,4 +47,15 @@ func (p *Plugin) GetClientFromRequest(r *http.Request) Client {
 	ctx := r.Context()
 	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	return p.NewClient(ctx, token)
+}
+
+func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer.SubscriptionResponse, client Client, wg *sync.WaitGroup) {
+	defer wg.Done()
+	record, _, err := client.GetRecordFromServiceNow(subscription.RecordType, subscription.RecordID)
+	if err != nil {
+		p.API.LogError("Error in getting record from ServiceNow", "Record type", subscription.RecordType, "Record ID", subscription.RecordID, "Error", err.Error())
+		return
+	}
+	subscription.Number = record.Number
+	subscription.ShortDescription = record.ShortDescription
 }

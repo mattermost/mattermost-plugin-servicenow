@@ -32,6 +32,8 @@ type SubscriptionResponse struct {
 	Type               string `json:"type"`
 	ServerURL          string `json:"server_url"`
 	IsActive           string `json:"is_active"`
+	Number             string `json:"number"`
+	ShortDescription   string `json:"short_description"`
 }
 
 func (s *SubscriptionResponse) GetFormattedSubscription() string {
