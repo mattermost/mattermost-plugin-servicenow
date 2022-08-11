@@ -5,6 +5,7 @@ import AutoSuggest from 'components/AutoSuggest';
 
 import './tabs.scss';
 
+// Mock data
 const suggestions = [
     'Suggestion1',
     'Suggestion2',
