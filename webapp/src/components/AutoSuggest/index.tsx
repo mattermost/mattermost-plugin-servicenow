@@ -18,11 +18,7 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
 
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
-        if (inputValue.length >= (charThresholdToShowSuggestions ?? 1) && focused) {
-            setOpen(true);
-        } else {
-            setOpen(false);
-        }
+        setOpen(inputValue.length >= (charThresholdToShowSuggestions ?? 1) && focused);
     }, [charThresholdToShowSuggestions, focused, inputValue]);
 
     const handleSuggestionClick = (suggestedValue: string) => {
@@ -32,7 +28,7 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
 
     return (
         <div className={`auto-suggest ${disabled && 'auto-suggest--disabled'}`}>
-            <div className={`auto-suggest__field d-flex align-items-center justify-content-between ${focused && 'auto-suggest__field--focused'}`}>
+            <div className={`auto-suggest__field cursor-pointer d-flex align-items-center justify-content-between ${focused && 'auto-suggest__field--focused'}`}>
                 <input
                     placeholder={placeholder ?? ''}
                     value={inputValue}
@@ -52,7 +48,7 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                         <li
                             key={suggestion}
                             onClick={() => handleSuggestionClick(suggestion)}
-                            className='auto-suggest__suggestion text-ellipses'
+                            className='auto-suggest__suggestion text-ellipses cursor-pointer'
                         >{suggestion}</li>
                     ))
                 }
