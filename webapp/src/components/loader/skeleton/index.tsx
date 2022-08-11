@@ -7,14 +7,11 @@ type SkeletonLoaderProps = {
     width?: number;
 }
 
-const SkeletonLoader = ({height, width}: SkeletonLoaderProps) => {
-    const styles = {height, width};
-    return (
-        <div
-            className='skeleton-loader'
-            style={styles}
-        />
-    );
-};
+const SkeletonLoader = ({height, width}: SkeletonLoaderProps) => (
+    <div
+        className='skeleton-loader'
+        style={{height, width}}
+    />
+);
 
 export default SkeletonLoader;

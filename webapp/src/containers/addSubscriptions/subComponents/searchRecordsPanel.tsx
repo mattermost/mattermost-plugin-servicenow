@@ -18,6 +18,7 @@ type SearchRecordsPanelProps = {
     setSuggestionChosen: (suggestion: boolean) => void;
 }
 
+// Dummy data
 const suggestions = ['Record 1', 'Record 2', 'Record 3', 'Record 4', 'Record 5'];
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({className, onBack, onContinue, actionBtnDisabled, error, recordValue, setRecordValue, suggestionChosen, setSuggestionChosen}: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
@@ -25,7 +26,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     const descriptionHeaders = ['Short Description', 'State', 'Priority', 'Assigned To', 'Assignment Group'];
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         setValidationFailed(false);
     }, [recordValue]);
