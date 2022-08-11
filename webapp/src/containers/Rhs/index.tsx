@@ -20,6 +20,8 @@ import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 
+import Utils from 'utils';
+
 import './rhs.scss';
 
 // Mock data
@@ -219,7 +221,7 @@ const Rhs = (): JSX.Element => {
                     subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
                     buttonConfig={{
                         text: 'Connect your account',
-                        action: () => '',
+                        href: `${Utils.getBaseUrls().pluginApiBaseUrl}/oauth2/connect`,
                     }}
                     iconClass='fa fa-user-circle'
                 />
