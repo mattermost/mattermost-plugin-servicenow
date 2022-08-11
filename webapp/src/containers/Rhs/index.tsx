@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 import ToggleSwitch from 'components/toggleSwitch';
-import {ToggleSwitchLabelPositioning} from 'plugin_constants';
+import Constants, {ToggleSwitchLabelPositioning} from 'plugin_constants';
 
 import './rhs.scss';
 
@@ -13,12 +13,12 @@ const Rhs = (): JSX.Element => {
             <ToggleSwitch
                 active={active}
                 onChange={(newState) => setActive(newState)}
-                label='Show all subscriptions'
+                label={Constants.RhsToggleLabel}
             />
             <ToggleSwitch
                 active={active}
                 onChange={(newState) => setActive(newState)}
-                label='Show all subscriptions'
+                label={Constants.RhsToggleLabel}
                 labelPositioning={ToggleSwitchLabelPositioning.Right}
             />
             <div className='rhs-btn-container'>
