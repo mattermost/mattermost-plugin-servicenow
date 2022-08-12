@@ -30,6 +30,7 @@ type AddOrEditSubscriptionProps = {
 const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscriptionProps) => {
     // Channel panel values
     const [channel, setChannel] = useState<string | null>(null);
+    const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
 
     // Record panel values
     const [recordValue, setRecordValue] = useState('');
@@ -320,6 +321,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     channel={channel}
                     setChannel={setChannel}
                     setShowModalLoader={setShowModalLoader}
+                    channelOptions={channelOptions}
+                    setChannelOptions={setChannelOptions}
                 />
                 <AlertTypePanel
                     className={`
@@ -380,6 +383,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setAssignmentGroupChecked={setAssignmentGroupChecked}
                     channel={channel as string}
                     record={recordValue}
+                    channelOptions={channelOptions}
                 />
                 <ResultPanel
                     onPrimaryBtnClick={getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null}
