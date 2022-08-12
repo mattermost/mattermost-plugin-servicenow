@@ -13,6 +13,7 @@ type ChannelPanelProps = {
     setChannel: (value: string | null) => void;
 }
 
+// Dummy data
 export const ChannelDropdownOptions: DropdownOptionType[] = [
     {
         label: (
@@ -62,7 +63,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         if (channel) {
             setValidationFailed(false);

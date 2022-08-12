@@ -1,4 +1,4 @@
-.d-none{
+.d-none {
   display: none;
 }
 
@@ -7,4 +7,8 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

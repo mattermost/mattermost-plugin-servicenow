@@ -143,10 +143,6 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	switch {
 	case command == "list":
 		return p.handleListSubscriptions(c, args, parameters, client)
-	// case command == "add":
-	// 	return p.handleSubscribe(c, args, parameters, client)
-	// case command == "edit":
-	// 	return p.handleEditSubscription(c, args, parameters, client)
 	case command == "delete":
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
@@ -174,12 +170,12 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 		IsActive:         &subscriptionActive,
 		Level:            &subscriptionLevel,
 	}
-	if err := subscription.IsValidForCreation(); err != nil {
+	if err := subscription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
 		p.API.LogError("Failed to validate subscription", "Error", err.Error())
 		return subscribeErrorMessage
 	}
 
-	if err := client.CreateSubscription(&subscription); err != nil {
+	if _, err := client.CreateSubscription(&subscription); err != nil {
 		p.API.LogError("Unable to create subscription", "Error", err.Error())
 		return subscribeErrorMessage
 	}
@@ -187,7 +183,7 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
-	subscriptions, err := client.GetAllSubscriptions(args.UserId, args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+	subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 	if err != nil {
 		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
 		return listSubscriptionsErrorMessage
@@ -211,7 +207,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		return "Invalid subscription ID."
 	}
 
-	if err = client.DeleteSubscription(subscriptionID); err != nil {
+	if _, err = client.DeleteSubscription(subscriptionID); err != nil {
 		p.API.LogError("Unable to delete subscription", "Error", err.Error())
 		return deleteSubscriptionErrorMessage
 	}
@@ -234,12 +230,12 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	subscription := &serializer.SubscriptionPayload{
 		SubscriptionType: &params[1],
 	}
-	if err = subscription.IsValidForUpdation(); err != nil {
+	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
 		p.API.LogError("Failed to validate subscription", "Error", err.Error())
 		return editSubscriptionErrorMessage
 	}
 
-	if err = client.EditSubscription(subscriptionID, subscription); err != nil {
+	if _, err = client.EditSubscription(subscriptionID, subscription); err != nil {
 		p.API.LogError("Unable to edit subscription", "Error", err.Error())
 		return editSubscriptionErrorMessage
 	}
