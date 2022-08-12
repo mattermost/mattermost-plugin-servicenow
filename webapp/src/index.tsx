@@ -16,16 +16,16 @@ import DownloadButton from 'components/admin_settings/download_button';
 import Hooks from 'hooks';
 
 import manifest from './manifest';
-import App from './app';
+
+import './styles/main.scss';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
         // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
         registry.registerReducer(reducer);
-        registry.registerRootComponent(App);
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, null);
+        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
         const hooks = new Hooks(store);
         registry.registerSlashCommandWillBePostedHook(hooks.slashCommandWillBePostedHook);
