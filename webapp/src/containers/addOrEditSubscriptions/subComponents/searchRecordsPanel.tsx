@@ -94,6 +94,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     // Handles resetting the states
     const resetValues = () => {
+        setRecordValue('');
         setRecordId(null);
         setDisableInput(false);
         setSuggestionChosen(false);
@@ -167,7 +168,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     // Reset the state when the component is unmounted
     useEffect(() => {
-        return () => resetValues();
+        return resetValues;
     }, []);
 
     // handle input value change
