@@ -1,7 +1,7 @@
 /**
 * Keep all plugin related constants here
 */
-export enum ToggleSwitchLabelPositioning{
+export enum ToggleSwitchLabelPositioning {
     Left = 'left',
     Right = 'right',
 }
