@@ -19,6 +19,8 @@ type ChannelPanelProps = {
     channel: string | null;
     setChannel: (value: string | null) => void;
     setShowModalLoader: (show: boolean) => void;
+    channelOptions: DropdownOptionType[],
+    setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
 }
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
@@ -29,9 +31,10 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     channel,
     setChannel,
     setShowModalLoader,
+    channelOptions,
+    setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
-    const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
     const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
 
@@ -61,7 +64,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [APIState]);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         if (channel) {
             setValidationFailed(false);
