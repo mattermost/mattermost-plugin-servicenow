@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
+import Constants from 'plugin_constants';
+
 import './styles.scss';
 
 type AutoSuggestProps = {
@@ -12,13 +14,21 @@ type AutoSuggestProps = {
     disabled?: boolean;
 }
 
-const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, loadingSuggestions, charThresholdToShowSuggestions, disabled}: AutoSuggestProps) => {
+const AutoSuggest = ({
+    inputValue,
+    onInputValueChange,
+    placeholder,
+    suggestions,
+    loadingSuggestions = false,
+    charThresholdToShowSuggestions = Constants.DefaultCharThresholdToShowSuggestions,
+    disabled,
+}: AutoSuggestProps) => {
     const [open, setOpen] = useState(false);
     const [focused, setFocused] = useState(false);
 
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
-        setOpen(inputValue.length >= (charThresholdToShowSuggestions ?? 1) && focused);
+        setOpen(inputValue.length >= charThresholdToShowSuggestions && focused);
     }, [charThresholdToShowSuggestions, focused, inputValue]);
 
     const handleSuggestionClick = (suggestedValue: string) => {
@@ -44,7 +54,7 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                     <i className={`fa fa-angle-down auto-suggest__field-angle ${open && 'auto-suggest__field-angle--rotated'}`}/>
                 )}
             </div>
-            {inputValue.length < (charThresholdToShowSuggestions || 1) && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
+            {inputValue.length < charThresholdToShowSuggestions && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
             <ul className={`auto-suggest__suggestions ${open && 'auto-suggest__suggestions--open'}`}>
                 {
                     suggestions.map((suggestion) => (
@@ -52,7 +62,9 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                             key={suggestion}
                             onClick={() => handleSuggestionClick(suggestion)}
                             className='auto-suggest__suggestion text-ellipses cursor-pointer'
-                        >{suggestion}</li>
+                        >
+                            {suggestion}
+                        </li>
                     ))
                 }
                 {!suggestions.length && <li className='auto-suggest__suggestion'>{'Nothing to show'}</li>}
