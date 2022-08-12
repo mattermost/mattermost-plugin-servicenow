@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
 import ToggleSwitch from 'components/toggleSwitch';
+import Constants from 'plugin_constants';
 import Modal from 'components/modal';
 import EmptyState from 'components/emptyState';
 
@@ -21,7 +22,7 @@ const Rhs = (): JSX.Element => {
             <ToggleSwitch
                 active={active}
                 onChange={(newState) => setActive(newState)}
-                label='Show all subscriptions'
+                label={Constants.RhsToggleLabel}
             />
             {/* TODO: Remove the follwing during integration */}
             {active && (
