@@ -58,3 +58,5 @@ type RecordDataLabelConfigType = {
     key: RecordDataKeys;
     label: string;
 }
+
+type APIPayloadType = void | FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload;
