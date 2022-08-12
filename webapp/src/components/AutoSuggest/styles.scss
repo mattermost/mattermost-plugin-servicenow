@@ -62,12 +62,6 @@
     animation: rotate-center 1.2s linear infinite both;
   }
 
-  .text-ellipses {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   &__get-suggestion-warn {
     opacity: 0.6;
     font-size: 13px;
