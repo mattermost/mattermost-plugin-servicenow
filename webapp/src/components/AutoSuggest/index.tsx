@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {clearTimeout} from 'timers';
 
+import Constants from 'plugin_constants';
+
 import './styles.scss';
 
 type AutoSuggestProps = {
@@ -17,18 +19,26 @@ type AutoSuggestProps = {
     className?: string;
 }
 
-const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, loadingSuggestions, charThresholdToShowSuggestions, disabled, error, required, className = '', onOptionClick}: AutoSuggestProps) => {
+const AutoSuggest = ({
+    inputValue,
+    onInputValueChange,
+    placeholder,
+    suggestions,
+    loadingSuggestions = false,
+    charThresholdToShowSuggestions = Constants.DefaultCharThresholdToShowSuggestions,
+    disabled,
+    error,
+    required,
+    className = '',
+    onOptionClick,
+}: AutoSuggestProps) => {
     const [open, setOpen] = useState(false);
     const [focused, setFocused] = useState(false);
-    let blurTimer1: NodeJS.Timeout;
+    let inputBlurTimer: NodeJS.Timeout;
 
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
-        if (inputValue.length >= (charThresholdToShowSuggestions ?? 1) && focused) {
-            setOpen(true);
-        } else {
-            setOpen(false);
-        }
+        setOpen(inputValue.length >= charThresholdToShowSuggestions && focused);
     }, [charThresholdToShowSuggestions, focused, inputValue]);
 
     const handleSuggestionClick = (suggestedValue: string) => {
@@ -39,20 +49,20 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
 
     useEffect(() => {
         return () => {
-            clearTimeout(blurTimer1);
+            clearTimeout(inputBlurTimer);
         };
     }, []);
 
     const handleBlur = () => {
         // Hide focused state
-        blurTimer1 = setTimeout(() => {
+        inputBlurTimer = setTimeout(() => {
             setFocused(false);
         }, 200);
     };
 
     return (
         <div className={`auto-suggest ${disabled && 'auto-suggest--disabled'} ${error && 'auto-suggest--error'} ${className}`}>
-            <div className={`auto-suggest__field d-flex align-items-center justify-content-between ${focused && 'auto-suggest__field--focused'}`}>
+            <div className={`auto-suggest__field cursor-pointer d-flex align-items-center justify-content-between ${focused && 'auto-suggest__field--focused'}`}>
                 <input
                     placeholder={`${placeholder ?? ''}${required ? '*' : ''}`}
                     value={inputValue}
@@ -62,21 +72,26 @@ const AutoSuggest = ({inputValue, onInputValueChange, placeholder, suggestions, 
                     className='auto-suggest__input'
                     disabled={disabled}
                 />
-                {!loadingSuggestions && <i className={`fa fa-angle-down auto-suggest__field-angle ${open && 'auto-suggest__field-angle--rotated'}`}/>}
-                {loadingSuggestions && <div className='auto-suggest__loader'/>}
+                {loadingSuggestions ? (
+                    <div className='auto-suggest__loader'/>
+                ) : (
+                    <i className={`fa fa-angle-down auto-suggest__field-angle ${open && 'auto-suggest__field-angle--rotated'}`}/>
+                )}
             </div>
-            {inputValue.length < (charThresholdToShowSuggestions || 1) && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
+            {inputValue.length < charThresholdToShowSuggestions && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
             <ul className={`auto-suggest__suggestions ${open && 'auto-suggest__suggestions--open'}`}>
                 {
                     suggestions.map((suggestion) => (
                         <li
                             key={suggestion}
                             onClick={() => handleSuggestionClick(suggestion)}
-                            className='auto-suggest__suggestion text-ellipses'
-                        >{suggestion}</li>
+                            className='auto-suggest__suggestion text-ellipses cursor-pointer'
+                        >
+                            {suggestion}
+                        </li>
                     ))
                 }
-                {!suggestions.length && <li className='auto-suggest__suggestion'>{'Nothing to show'}</li>}
+                {!suggestions.length && <li className='auto-suggest__suggestion cursor-pointer'>{'Nothing to show'}</li>}
             </ul>
             {typeof error === 'string' && <p className='auto-suggest__err-text'>{error}</p>}
         </div>

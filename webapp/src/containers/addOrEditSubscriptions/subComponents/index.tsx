@@ -133,7 +133,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Set height of the modal content according to different panels;
     // Added 65 in the given height due of (header + loader) height
-    const setModalDialogHeight = (bodyHeight: number) => document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`));
+    const setModalDialogHeight = (bodyHeight: number) => {
+        const setHeight = (modalContent: Element) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`);
+
+        // Select all the modal-content elements and set the height
+        document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
+    };
 
     // Change height of the modal depending on the height of the visible panel
     useEffect(() => {
@@ -158,7 +163,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (searchRecordsPanelOpen) {
             height = searchRecordsPanelRef.current?.offsetHeight || PanelDefaultHeights.searchRecordPanel;
 
-            if (suggestionChosen && height < 350) {
+            if (suggestionChosen && height < PanelDefaultHeights.searchRecordPanelExpanded) {
                 height = PanelDefaultHeights.searchRecordPanelExpanded;
             }
 

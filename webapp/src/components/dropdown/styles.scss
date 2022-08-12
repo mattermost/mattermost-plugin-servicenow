@@ -6,7 +6,6 @@
     height: 50px;
     border: 2px solid rgba(var(--center-channel-color-rgb), 0.16);
     border-radius: 4px;
-    cursor: pointer;
     padding: 0 14px;
 
     &--open {
@@ -41,7 +40,6 @@
     position: absolute;
     left: 0;
     top: 0;
-    cursor: pointer;
 
     &:disabled {
       cursor: not-allowed;
@@ -118,7 +116,6 @@
     font-size: 14px;
     padding: 8px 24px;
     margin: 0;
-    cursor: pointer;
     max-width: 100%;
 
     &:hover {
