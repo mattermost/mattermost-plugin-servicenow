@@ -61,7 +61,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [APIState]);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         if (channel) {
             setValidationFailed(false);

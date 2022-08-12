@@ -8,6 +8,7 @@ import ToggleSwitch from 'components/toggleSwitch';
 // import EmptyState from 'components/emptyState';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 import SubscriptionCard from 'components/card/subscription';
+import Constants from 'plugin_constants';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
@@ -42,7 +43,7 @@ const Rhs = (): JSX.Element => {
             <ToggleSwitch
                 active={active}
                 onChange={(newState) => setActive(newState)}
-                label='Show all subscriptions'
+                label={Constants.RhsToggleLabel}
             />
             {/* TODO: Update the following when fetch subscriptions API is integrated */}
             <SubscriptionCard

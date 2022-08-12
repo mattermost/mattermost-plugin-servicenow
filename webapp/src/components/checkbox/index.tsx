@@ -15,7 +15,7 @@ const Checkbox = ({checked, label, onChange, className = ''}: CheckboxProps): JS
             <input
                 type='checkbox'
                 checked={checked}
-                className='checkbox__input-field'
+                className='checkbox__input-field cursor-pointer'
                 onChange={(e) => onChange(e.target.checked)}
             />
             <div className='checkbox__box d-flex justify-content-between align-items-center'>

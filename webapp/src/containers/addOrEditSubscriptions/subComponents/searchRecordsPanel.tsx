@@ -107,7 +107,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     }, [APIState]);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         setValidationFailed(false);
         setValidationMsg(null);
@@ -162,9 +162,17 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
             return null;
         } else if (typeof value === 'string') {
             return value;
-        } else if(value?.display_value && value?.link) {
-            return <Link to={value.link} target='_blank' className='btn btn-link'>{value.display_value}</Link>
-        } else if(value?.display_value){
+        } else if (value?.display_value && value?.link) {
+            return (
+                <Link
+                    to={value.link}
+                    target='_blank'
+                    className='btn btn-link'
+                >
+                    {value.display_value}
+                </Link>
+            );
+        } else if (value?.display_value) {
             return value.display_value;
         }
 

@@ -33,7 +33,7 @@ const alertTypeOptions: DropdownOptionType[] = [
 const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({className, error, onContinue, onBack, actionBtnDisabled, alertType, setAlertType}: AlertTypePanelProps, alertTypePanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         if (alertType) {
             setValidationFailed(false);
