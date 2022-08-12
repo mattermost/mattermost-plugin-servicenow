@@ -143,10 +143,6 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	switch {
 	case command == "list":
 		return p.handleListSubscriptions(c, args, parameters, client)
-	// case command == "add":
-	// 	return p.handleSubscribe(c, args, parameters, client)
-	// case command == "edit":
-	// 	return p.handleEditSubscription(c, args, parameters, client)
 	case command == "delete":
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
