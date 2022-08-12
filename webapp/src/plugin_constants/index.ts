@@ -1,10 +1,7 @@
 /**
- * Keep all plugin related constants here
+* Keep all plugin related constants here
 */
-
-const RightSidebarHeader = 'Right Sidebar Placeholder Text';
-
-export enum ToggleSwitchLabelPositioning{
+export enum ToggleSwitchLabelPositioning {
     Left = 'left',
     Right = 'right',
 }
@@ -14,8 +11,11 @@ export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
 const MMUSERID = 'MMUSERID';
-
+const RightSidebarHeader = 'Right Sidebar Placeholder Text';
+const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
+const ChannelHeaderTooltipText = 'ServiceNow';
+const DefaultCharThresholdToShowSuggestions = 1;
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
@@ -100,4 +100,7 @@ export default {
     RecordDataLabelConfig,
     SubscriptionEvents,
     MMUSERID,
+    ChannelHeaderTooltipText,
+    RhsToggleLabel,
+    DefaultCharThresholdToShowSuggestions,
 };

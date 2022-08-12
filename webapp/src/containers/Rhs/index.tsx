@@ -84,7 +84,7 @@ const Rhs = (): JSX.Element => {
             <ToggleSwitch
                 active={showAllSubscriptions}
                 onChange={(newState) => setShowAllSubscriptions(newState)}
-                label='Show all subscriptions'
+                label={Constants.RhsToggleLabel}
             />
             {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
             {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
@@ -96,6 +96,8 @@ const Rhs = (): JSX.Element => {
                                 header={subscription.sys_id}
                                 label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
                                 onEdit={() => handleEditSubscription(subscription)}
+
+                                // TODO: Update following when the delete functionality has been integrated
                                 onDelete={() => ''}
                             />
                         ))}
