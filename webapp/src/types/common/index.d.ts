@@ -11,8 +11,6 @@ type HttpMethod = 'GET' | 'POST';
 
 type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription'
 
-const pluginStateKey = 'plugins-mattermost-plugin-servicenow';
-
 type PluginApiService = {
     path: string,
     method: httpMethod,
@@ -20,7 +18,7 @@ type PluginApiService = {
 }
 
 type PluginState = {
-    [pluginStateKey]: RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
+    'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
 }
 
 type DropdownOptionType = {
