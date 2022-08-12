@@ -81,6 +81,8 @@ const Rhs = (): JSX.Element => {
                                 header={subscription.sys_id}
                                 label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
                                 onEdit={handleEditSubscription}
+
+                                // TODO: Update following when the delete functionality has been integrated
                                 onDelete={() => ''}
                             />
                         ))}
