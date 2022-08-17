@@ -18,7 +18,7 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
 
 const ChannelHeaderTooltipText = 'ServiceNow';
 
-const DefaultCharThresholdToShowSuggestions = 1;
+const DefaultCharThresholdToShowSuggestions = 4;
 
 export default {
     DOWNLOAD_UPDATE_SET_LINK,
