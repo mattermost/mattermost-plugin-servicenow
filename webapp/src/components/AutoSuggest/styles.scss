@@ -1,0 +1,130 @@
+.auto-suggest {
+  position: relative;
+  margin-bottom: 24px;
+
+  &__field {
+    height: 50px;
+    border: 2px solid rgba(var(--center-channel-color-rgb), 0.16);
+    border-radius: 4px;
+    padding: 0 20px;
+
+    &--focused {
+      border-color: rgba(var(--center-channel-color-rgb), 0.4);
+    }
+  }
+
+  &__input {
+    border: none;
+    outline: none;
+    background: transparent;
+    height: 100%;
+    width: calc(100% - 20px);
+    padding: 0;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background: transparent;
+      outline: none;
+    }
+  }
+
+  &--disabled {
+    opacity: 0.6;
+    background: rgba(var(--center-channel-color-rgb), 0.1);
+    cursor: not-allowed;
+    .auto-suggest__field {
+      cursor: not-allowed;
+    }
+    .auto-suggest__input {
+      cursor: not-allowed;
+    }
+  }
+
+  &__field-angle {
+    font-size: 20px;
+    transition: all 100ms ease-in-out;
+    color: rgba(var(--center-channel-color-rgb), 0.4);
+
+    &--rotated {
+      transform: rotate(180deg);
+      color: rgba(var(--center-channel-color-rgb), 0.7);
+    }
+  }
+
+  &__loader {
+    width: 14px;
+    height: 14px;
+    border-radius: 100%;
+    border-top: 2px solid var(--button-bg);
+    border-right: 2px solid var(--button-bg);
+    -webkit-animation: rotate-center 1.2s linear infinite both;
+    animation: rotate-center 1.2s linear infinite both;
+  }
+
+  &__get-suggestion-warn {
+    opacity: 0.6;
+    font-size: 13px;
+    margin: 2px 0 0;
+    position: absolute;
+    z-index: 1;
+    top: 49px;
+    left: 0;
+  }
+
+  &__suggestions {
+    list-style-type: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50px;
+    z-index: 2;
+    border: 2px solid rgba(var(--center-channel-color-rgb), 0.4);
+    border-radius: 4px;
+    max-height: 0;
+    overflow: auto;
+    opacity: 0;
+    transition: all 100ms ease-in-out;
+    background: var(--center-channel-bg);
+    padding: 0;
+    box-shadow: 0 0 16px 0 rgba(var(--center-channel-color-rgb), 0.26);
+
+    &--open {
+      opacity: 1;
+      max-height: 200px;
+    }
+  }
+
+  &__suggestion {
+    font-size: 14px;
+    padding: 8px 24px;
+    margin: 0;
+    max-width: 100%;
+
+    &:hover {
+      background: rgba(var(--center-channel-text-rgb), 0.1);
+    }
+  }
+}
+
+@-webkit-keyframes rotate-center {
+  0% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-center {
+  0% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
