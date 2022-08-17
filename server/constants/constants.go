@@ -6,7 +6,7 @@ const (
 	BotDisplayName = "ServiceNow"
 	BotDescription = "A bot account created by the ServiceNow plugin."
 
-	HeaderMattermostUserID = "Mattermost-User-ID"
+	HeaderMattermostUserID = "Mattermost-User-Id"
 	CommandTrigger         = "servicenow"
 
 	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin\n" +
