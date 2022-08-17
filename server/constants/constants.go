@@ -56,7 +56,7 @@ const (
 	WSEventConnect    = "connect"
 	WSEventDisconnect = "disconnect"
 
-	// API Error IDs
+	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
 	APIErrorNotConnected                 = "You have not connected your Mattermost account to ServiceNow."
 	APIErrorIDSubscriptionsNotConfigured = "subscriptions_not_configured"

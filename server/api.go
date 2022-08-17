@@ -52,18 +52,17 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 func (p *Plugin) writeAPIError(w http.ResponseWriter, apiErr *serializer.APIErrorResponse) {
 	w.Header().Set("Content-Type", "application/json")
-	b, err := json.Marshal(apiErr)
+	errorBytes, err := json.Marshal(apiErr)
 	if err != nil {
-		p.API.LogWarn("Failed to marshal API error", "error", err.Error())
+		p.API.LogError("Failed to marshal API error", "error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(apiErr.StatusCode)
 
-	_, err = w.Write(b)
-	if err != nil {
-		p.API.LogWarn("Failed to write JSON response", "error", err.Error())
+	if _, err = w.Write(errorBytes); err != nil {
+		p.API.LogError("Failed to write JSON response", "error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -111,8 +110,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		client := p.GetClientFromRequest(r)
-		_, err := client.ActivateSubscriptions()
-		if err != nil {
+		if _, err := client.ActivateSubscriptions(); err != nil {
 			if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
 				p.writeAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusInternalServerError, Message: constants.APIErrorSubscriptionsNotConfigured})
 				return
