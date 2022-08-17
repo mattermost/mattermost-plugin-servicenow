@@ -9,9 +9,8 @@ const (
 	HeaderMattermostUserID = "Mattermost-User-ID"
 	CommandTrigger         = "servicenow"
 
-	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin!\n" +
-		"You've connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n" +
-		"##### Slash Commands\n"
+	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin\n" +
+		"You've connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
