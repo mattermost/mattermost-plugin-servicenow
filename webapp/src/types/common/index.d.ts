@@ -40,3 +40,9 @@ type SubscriptionDetails = {
     name: string
     eventType: eventType
 }
+
+type MmHookArgTypes = {
+    channel_id: string,
+    team_id: string,
+    root_id: string
+}
