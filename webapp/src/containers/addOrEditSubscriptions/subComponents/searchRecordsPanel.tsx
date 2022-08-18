@@ -1,5 +1,6 @@
 import React, {forwardRef, useEffect, useState} from 'react';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
+import {Link} from 'react-router-dom';
 
 import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
 import ModalFooter from 'components/modal/subComponents/modalFooter';
@@ -93,6 +94,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     // Handles resetting the states
     const resetValues = () => {
+        setRecordValue('');
         setRecordId(null);
         setDisableInput(false);
         setSuggestionChosen(false);
@@ -158,7 +160,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     }, [APIState]);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         setValidationFailed(false);
         setValidationMsg(null);
@@ -166,7 +168,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     // Reset the state when the component is unmounted
     useEffect(() => {
-        return () => resetValues();
+        return resetValues;
     }, []);
 
     // handle input value change
@@ -211,12 +213,28 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     };
 
     // Returns value for record data header
-    const getRecordValueForHeader = (key: RecordDataKeys): null | string => {
+    const getRecordValueForHeader = (key: RecordDataKeys): string | JSX.Element | null => {
         const value = getRecordDataState().data?.[key];
+
         if (!value) {
             return null;
+        } else if (typeof value === 'string') {
+            return value;
+        } else if (value?.display_value && value?.link) {
+            return (
+                <Link
+                    to={value.link}
+                    target='_blank'
+                    className='btn btn-link'
+                >
+                    {value.display_value}
+                </Link>
+            );
+        } else if (value?.display_value) {
+            return value.display_value;
         }
-        return typeof value === 'string' ? value : value.display_value;
+
+        return null;
     };
 
     return (

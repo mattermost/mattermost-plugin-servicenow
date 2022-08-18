@@ -149,7 +149,7 @@ const Rhs = (): JSX.Element => {
             <ToggleSwitch
                 active={showAllSubscriptions}
                 onChange={(newState) => setShowAllSubscriptions(newState)}
-                label='Show all subscriptions'
+                label={Constants.RhsToggleLabel}
             />
             {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
             {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
