@@ -38,7 +38,7 @@ const Rhs = (): JSX.Element => {
                 </button>
             </div>
             <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow']?.openEditSubscriptionModalReducer?.open || false}
+                show={pluginState['plugins-mattermost-plugin-servicenow'].openEditSubscriptionModalReducer.open}
                 onHide={() => dispatch(hideEditModal())}
                 title='Edit subscription'
                 confirmBtnText='Edit'

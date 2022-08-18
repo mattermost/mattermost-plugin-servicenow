@@ -27,3 +27,9 @@ type DropdownOptionType = {
     label?: string | JSX.Element;
     value: string;
 }
+
+type MmHookArgTypes = {
+    channel_id: string,
+    team_id: string,
+    root_id: string
+}
