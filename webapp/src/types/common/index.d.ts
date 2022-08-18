@@ -22,3 +22,9 @@ type PluginApiService = {
 type PluginState = {
     [pluginStateKey]: RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
 }
+
+type MmHookArgTypes = {
+    channel_id: string,
+    team_id: string,
+    root_id: string
+}

@@ -38,7 +38,7 @@ const Rhs = (): JSX.Element => {
                 </button>
             </div>
             <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow']?.openAddSubscriptionModalReducer?.open || false}
+                show={pluginState['plugins-mattermost-plugin-servicenow'].openAddSubscriptionModalReducer.open || false}
                 onHide={() => dispatch(hideAddModal())}
                 title='Add subscription'
                 confirmBtnText='Add'
@@ -50,7 +50,7 @@ const Rhs = (): JSX.Element => {
                 <h4>{'Test Add Modal'}</h4>
             </Modal>
             <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow']?.openEditSubscriptionModalReducer?.open || false}
+                show={pluginState['plugins-mattermost-plugin-servicenow'].openEditSubscriptionModalReducer.open || false}
                 onHide={() => dispatch(hideEditModal())}
                 title='Edit subscription'
                 confirmBtnText='Edit'
