@@ -8,7 +8,7 @@ import CircularLoader from 'components/loader/circular';
 import {PanelDefaultHeights} from 'plugin_constants';
 
 import ChannelPanel from './channelPanel';
-import AlertTypePanel from './alertTypePanel';
+import RecordTypePanel from './recordTypePanel';
 import EventsPanel from './eventsPanel';
 import SearchRecordsPanel from './searchRecordsPanel';
 import ResultPanel from './resultPanel';
@@ -29,10 +29,10 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
     const [suggestionChosen, setSuggestionChosen] = useState(false);
 
     // Alert type panel
-    const [alertType, setAlertType] = useState<null | string>(null);
+    const [recordType, setRecordType] = useState<null | string>(null);
 
     // Opened panel states
-    const [alertTypePanelOpen, setAlertTypePanelOpen] = useState(false);
+    const [recordTypePanelOpen, setRecordTypePanelOpen] = useState(false);
     const [searchRecordsPanelOpen, setSearchRecordsPanelOpen] = useState(false);
     const [eventsPanelOpen, setEventsPanelOpen] = useState(false);
     const [successPanelOpen, setSuccessPanelOpen] = useState(false);
@@ -49,9 +49,9 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
     const [apiResponseValid, setApiResponseValid] = useState(false);
 
     // Create refs to access height of the panels and providing height to modal-dialog
-    // We've made all the panel absolute positioned to apply animations and because they are absolute positioned, there parent container, which is modal-dialog, won't expand same as their heights
+    // We've made all the panels absolute positioned to apply animations and because they are absolute positioned, their parent container, which is modal-dialog, won't expand the same as their heights
     const channelPanelRef = createRef<HTMLDivElement>();
-    const alertTypePanelRef = createRef<HTMLDivElement>();
+    const recordTypePanelRef = createRef<HTMLDivElement>();
     const searchRecordsPanelRef = createRef<HTMLDivElement>();
     const eventsPanelRef = createRef<HTMLDivElement>();
     const resultPanelRef = createRef<HTMLDivElement>();
@@ -61,7 +61,7 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
         setChannel(null);
         setRecordValue('');
         setSuggestionChosen(false);
-        setAlertType(null);
+        setRecordType(null);
         setStateChanged(false);
         setPriorityChanged(false);
         setNewCommentChecked(false);
@@ -71,7 +71,7 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
 
     // Reset panel states
     const resetPanelStates = () => {
-        setAlertTypePanelOpen(false);
+        setRecordTypePanelOpen(false);
         setSearchRecordsPanelOpen(false);
         setEventsPanelOpen(false);
         setSuccessPanelOpen(false);
@@ -109,8 +109,8 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
         resetError();
     };
 
-    // Set height of the modal content according to different panels;
-    // Added 65 in the given height due of (header + loader) height
+    // Set the height of the modal content according to different panels;
+    // Added 65 in the given height because of (header + loader) height
     const setModalDialogHeight = (bodyHeight: number) => document.querySelectorAll('.rhs-modal.add-subscription-modal .modal-content').forEach((modalContent) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`));
 
     // Change height of the modal depending on the height of the visible panel
@@ -145,25 +145,22 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
             searchRecordsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
-        if (alertTypePanelOpen) {
-            height = alertTypePanelRef.current?.offsetHeight || PanelDefaultHeights.alertTypePanel;
+        if (recordTypePanelOpen) {
+            height = recordTypePanelRef.current?.offsetHeight || PanelDefaultHeights.recordTypePanel;
 
             setModalDialogHeight(height);
             // eslint-disable-next-line no-unused-expressions
-            alertTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
+            recordTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
-        if (!alertTypePanelOpen && !searchRecordsPanelOpen && !eventsPanelOpen) {
+        if (!recordTypePanelOpen && !searchRecordsPanelOpen && !eventsPanelOpen) {
             height = channelPanelRef.current?.offsetHeight || PanelDefaultHeights.channelPanel;
 
             setModalDialogHeight(height);
             // eslint-disable-next-line no-unused-expressions
             channelPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
         }
-
-        // Disabling the eslint rule below because we can't include refs in the dependency array otherwise it causes a lot of unnecessary changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [eventsPanelOpen, searchRecordsPanelOpen, alertTypePanelOpen, channelPanelRef, alertTypePanelRef, searchRecordsPanelRef, eventsPanelRef, apiError, apiResponseValid, suggestionChosen]);
+    }, [eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, channelPanelRef, recordTypePanelRef, searchRecordsPanelRef, eventsPanelRef, resultPanelRef, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
 
     return (
         <Modal
@@ -182,30 +179,30 @@ const AddSubscription = ({open, close}: AddSubscriptionProps) => {
                 <ModalLoader loading={false}/>
                 <ChannelPanel
                     className={`
-                        ${alertTypePanelOpen && 'channel-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'chanel-panel--fade-out'}
+                        ${recordTypePanelOpen && 'channel-panel--fade-out'}
+                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'channel-panel--fade-out'}
                     `}
                     ref={channelPanelRef}
-                    onContinue={() => setAlertTypePanelOpen(true)}
+                    onContinue={() => setRecordTypePanelOpen(true)}
                     channel={channel}
                     setChannel={setChannel}
                 />
-                <AlertTypePanel
+                <RecordTypePanel
                     className={`
-                        ${alertTypePanelOpen && 'secondary-panel--slide-in'}
+                        ${recordTypePanelOpen && 'secondary-panel--slide-in'}
                         ${(searchRecordsPanelOpen || eventsPanelOpen) && 'secondary-panel--fade-out'}
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
                     `}
-                    ref={alertTypePanelRef}
+                    ref={recordTypePanelRef}
                     onContinue={() => setSearchRecordsPanelOpen(true)}
-                    onBack={() => setAlertTypePanelOpen(false)}
-                    alertType={alertType}
-                    setAlertType={setAlertType}
+                    onBack={() => setRecordTypePanelOpen(false)}
+                    recordType={recordType}
+                    setRecordType={setRecordType}
                 />
                 <SearchRecordsPanel
                     className={`
                         ${searchRecordsPanelOpen && 'secondary-panel--slide-in'}
-                        ${(eventsPanelOpen) && 'secondary-panel--fade-out'}
+                        ${eventsPanelOpen && 'secondary-panel--fade-out'}
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
                     `}
                     ref={searchRecordsPanelRef}

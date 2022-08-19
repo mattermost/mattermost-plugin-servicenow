@@ -24,7 +24,7 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
 
 export const PanelDefaultHeights = {
     channelPanel: 151,
-    alertTypePanel: 195,
+    recordTypePanel: 195,
     searchRecordPanel: 203,
     searchRecordPanelExpanded: 360,
     eventsPanel: 500,
