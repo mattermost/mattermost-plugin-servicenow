@@ -51,6 +51,8 @@ const Rhs = (): JSX.Element => {
                     },
                 ]}
                 description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ultricies cursus tempor consectetur augue senectus felis maecenas facilisis massa.'
+                onEdit={() => ''}
+                onDelete={() => ''}
             />
             <div className='rhs-btn-container'>
                 <button
