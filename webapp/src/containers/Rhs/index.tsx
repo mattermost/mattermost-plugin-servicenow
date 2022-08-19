@@ -23,7 +23,7 @@ import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 import './rhs.scss';
 
 // Mock data
-const mockSubscriptions = {
+const mockSubscriptions: {data: SubscriptionData[]} = {
     data: [{
         server_url: 'http://localhost:8065',
         is_active: true,
@@ -31,9 +31,11 @@ const mockSubscriptions = {
         type: 'record',
         record_type: 'incident',
         record_id: '9d385017c611228701d22104cc95c371',
-        subscription_events: 'priority, commented',
+        subscription_events: 'priority,commented',
         channel_id: '5n4r5bkc6bbgixgyfmjh4oa65c',
         sys_id: '9d385017c611228701d22104cc95c739',
+        number: 'INC00010001',
+        short_description: 'Test Incident',
     }],
 };
 
@@ -144,6 +146,17 @@ const Rhs = (): JSX.Element => {
         setToBeDeleted(null);
     };
 
+    // Returns card-body for the subscription cards
+    const getSubscriptionCardBody = (subscription: SubscriptionData): SubscriptionCardBody => ({
+        labelValuePairs: [
+            {
+                label: 'ID',
+                value: subscription.sys_id,
+            },
+        ],
+        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
+    });
+
     return (
         <div className='rhs-content'>
             <ToggleSwitch
@@ -158,10 +171,11 @@ const Rhs = (): JSX.Element => {
                         {mockSubscriptions.data?.map((subscription) => (
                             <SubscriptionCard
                                 key={subscription.sys_id}
-                                header={subscription.sys_id}
-                                label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
+                                header={`${subscription.number} | ${subscription.short_description}`}
+                                label={subscription.type === 'record' ? 'Single Record' : 'Bulk Subscription'}
                                 onEdit={() => handleEditSubscription(subscription)}
                                 onDelete={() => handleDeleteClick(subscription)}
+                                cardBody={getSubscriptionCardBody(subscription)}
                             />
                         ))}
                     </div>

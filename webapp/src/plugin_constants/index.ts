@@ -46,6 +46,15 @@ const SubscriptionEvents = {
     assignmentGroup: 'assignment_group',
 };
 
+// Map subscription events to texts to be shown in the UI(on cards)
+const SubscriptionEventLabels: Record<string, string> = {
+    state: 'State changed',
+    priority: 'Priority changed',
+    commented: 'New comment',
+    assigned_to: 'Assigned to changed',
+    assignment_group: 'Assignment group changed',
+};
+
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
     getChannels: {
@@ -108,4 +117,5 @@ export default {
     ChannelHeaderTooltipText,
     RhsToggleLabel,
     DefaultCharThresholdToShowSuggestions,
+    SubscriptionEventLabels,
 };
