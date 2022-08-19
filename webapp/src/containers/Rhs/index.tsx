@@ -14,7 +14,7 @@ import './rhs.scss';
 
 const Rhs = (): JSX.Element => {
     const [active, setActive] = useState(false);
-    const pluginState = useSelector((state: PluginState) => state);
+    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
     const dispatch = useDispatch();
 
     return (
@@ -63,7 +63,7 @@ const Rhs = (): JSX.Element => {
                 </button>
             </div>
             <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow'].openEditSubscriptionModalReducer.open}
+                show={pluginState.openEditSubscriptionModalReducer.open}
                 onHide={() => dispatch(hideEditModal())}
                 title='Edit subscription'
                 confirmBtnText='Edit'
