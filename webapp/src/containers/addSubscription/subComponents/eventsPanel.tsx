@@ -61,7 +61,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                 <h4 className='events-panel__prev-data-header record-header'>{'Record'}</h4>
                 <p className='events-panel__prev-data-text'>{record}</p>
             </div>
-            <label className='events-panel__label'>{'Available alert:(optional)'}</label>
+            <label className='events-panel__label'>{'Available events:(optional)'}</label>
             <Checkbox
                 checked={stateChanged}
                 label='State changed'

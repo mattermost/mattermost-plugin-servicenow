@@ -28,15 +28,8 @@ type DropdownOptionType = {
     value: string;
 }
 
-type ProjectDetails = {
-    mattermostID: string
-    projectID: string,
-    projectName: string,
-    organizationName: string
-}
-
-type SubscriptionDetails = {
-    id: string
-    name: string
-    eventType: eventType
+type MmHookArgTypes = {
+    channel_id: string,
+    team_id: string,
+    root_id: string
 }
