@@ -44,7 +44,6 @@ const Rhs = (): JSX.Element => {
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
 
-    // Get record data state
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
@@ -54,7 +53,7 @@ const Rhs = (): JSX.Element => {
 
     // Fetch subscriptions from the API
     useEffect(() => {
-        const params: FetchSubscriptionsParams = {page: 1, per_page: 100};
+        const params: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
             params.channel_id = currentChannelId;
         }
@@ -83,18 +82,18 @@ const Rhs = (): JSX.Element => {
         <div className='rhs-content'>
             <ToggleSwitch
                 active={showAllSubscriptions}
-                onChange={(newState) => setShowAllSubscriptions(newState)}
+                onChange={setShowAllSubscriptions}
                 label={Constants.RhsToggleLabel}
             />
             {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
             {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
                 <>
                     <div className='rhs-content__cards-container'>
-                        {mockSubscriptions.data?.map((subscription) => (
+                        {mockSubscriptions.data.map((subscription) => (
                             <SubscriptionCard
                                 key={subscription.sys_id}
                                 header={subscription.sys_id}
-                                label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
+                                label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
                                 onEdit={() => handleEditSubscription(subscription)}
 
                                 // TODO: Update following when the delete functionality has been integrated
