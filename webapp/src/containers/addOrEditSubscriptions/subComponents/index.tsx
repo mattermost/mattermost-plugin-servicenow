@@ -1,5 +1,5 @@
 import React, {createRef, useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
@@ -12,6 +12,8 @@ import CircularLoader from 'components/loader/circular';
 import Constants, {PanelDefaultHeights} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
+
+import {refetch} from 'reducers/refetchSubscriptions';
 
 import ChannelPanel from './channelPanel';
 import AlertTypePanel from './alertTypePanel';
@@ -30,6 +32,7 @@ type AddOrEditSubscriptionProps = {
 const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscriptionProps) => {
     // Channel panel values
     const [channel, setChannel] = useState<string | null>(null);
+    const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
 
     // Record panel values
     const [recordValue, setRecordValue] = useState('');
@@ -78,6 +81,9 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const eventsPanelRef = createRef<HTMLDivElement>();
     const resultPanelRef = createRef<HTMLDivElement>();
 
+    // Dispatch
+    const dispatch = useDispatch();
+
     // Get create subscription state
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
@@ -121,6 +127,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         if (createSubscriptionState.data) {
             setSuccessPanelOpen(true);
+            dispatch(refetch());
         }
         setShowModalLoader(createSubscriptionState.isLoading);
     }, [APIState]);
@@ -135,6 +142,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         if (editSubscriptionState.data) {
             setSuccessPanelOpen(true);
+            dispatch(refetch());
         }
         setShowModalLoader(editSubscriptionState.isLoading);
     }, [APIState]);
@@ -199,7 +207,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Set height of the modal content according to different panels;
     // Added 65 in the given height due of (header + loader) height
-    const setModalDialogHeight = (bodyHeight: number) => document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`));
+    const setModalDialogHeight = (bodyHeight: number) => {
+        const setHeight = (modalContent: Element) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`);
+
+        // Select all the modal-content elements and set the height
+        document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
+    };
 
     // Change height of the modal depending on the height of the visible panel
     useEffect(() => {
@@ -224,7 +237,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (searchRecordsPanelOpen) {
             height = searchRecordsPanelRef.current?.offsetHeight || PanelDefaultHeights.searchRecordPanel;
 
-            if (suggestionChosen && height < 350) {
+            if (suggestionChosen && height < PanelDefaultHeights.searchRecordPanelExpanded) {
                 height = PanelDefaultHeights.searchRecordPanelExpanded;
             }
 
@@ -383,6 +396,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setShowModalLoader={setShowModalLoader}
                     setApiError={setApiError}
                     setApiResponseValid={setApiResponseValid}
+                    channelOptions={channelOptions}
+                    setChannelOptions={setChannelOptions}
                 />
                 <AlertTypePanel
                     className={`
@@ -445,6 +460,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setAssignmentGroupChecked={setAssignmentGroupChecked}
                     channel={channel as string}
                     record={recordValue}
+                    channelOptions={channelOptions}
                 />
                 <ResultPanel
                     onPrimaryBtnClick={getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null}

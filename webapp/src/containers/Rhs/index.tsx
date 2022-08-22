@@ -67,12 +67,12 @@ const Rhs = (): JSX.Element => {
 
     // Fetch subscriptions from the API
     useEffect(() => {
-        const params: FetchSubscriptionsParams = {page: 1, per_page: 100};
+        const subscriptionParams: FetchSubscriptionsParams = {page: 1, per_page: 100};
         if (!showAllSubscriptions) {
-            params.channel_id = currentChannelId;
+            subscriptionParams.channel_id = currentChannelId;
         }
-        setFetchSubscriptionParams(params);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, params);
+        setFetchSubscriptionParams(subscriptionParams);
+        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
     }, [showAllSubscriptions]);
 
     // Fetch subscriptions from the API when refetch is set
@@ -126,10 +126,7 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when the delete button is clicked
     const handleDeleteClick = (subscription: SubscriptionData) => {
-        const deleteSubscriptionPayload: DeleteSubscriptionPayload = {
-            id: subscription.sys_id,
-        };
-        setToBeDeleted(deleteSubscriptionPayload);
+        setToBeDeleted({id: subscription.sys_id});
         setDeleteConfirmationOpen(true);
     };
 
@@ -152,7 +149,7 @@ const Rhs = (): JSX.Element => {
                     <ToggleSwitch
                         active={showAllSubscriptions}
                         onChange={(newState) => setShowAllSubscriptions(newState)}
-                        label='Show all subscriptions'
+                        label={Constants.RhsToggleLabel}
                     />
                     {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
                     {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
