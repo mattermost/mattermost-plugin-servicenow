@@ -68,7 +68,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [editSubscriptionPayload, setEditSubscriptionPayload] = useState<EditSubscriptionPayload | null>(null);
 
     // usePluginApi hook
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
 
     // Create refs to access height of the panels and providing height to modal-dialog
     // We've made all the panel absolute positioned to apply animations and because they are absolute positioned, there parent container, which is modal-dialog, won't expand same as their heights
@@ -123,7 +123,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setSuccessPanelOpen(true);
         }
         setShowModalLoader(createSubscriptionState.isLoading);
-    }, [APIState]);
+    }, [pluginState]);
 
     useEffect(() => {
         const editSubscriptionState = getEditSubscriptionState();
@@ -137,7 +137,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setSuccessPanelOpen(true);
         }
         setShowModalLoader(editSubscriptionState.isLoading);
-    }, [APIState]);
+    }, [pluginState]);
 
     // Reset input field states
     const resetFieldStates = () => {
@@ -280,7 +280,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Add checked events
         if (stateChanged) {
-            subscriptionEvents += Constants.SubscriptionEvents.state;
+            subscriptionEvents += `${Constants.SubscriptionEvents.state} `;
         }
         if (priorityChanged) {
             subscriptionEvents += `${Constants.SubscriptionEvents.priority} `;
@@ -292,7 +292,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             subscriptionEvents += `${Constants.SubscriptionEvents.assignedTo} `;
         }
         if (assignmentGroupChecked) {
-            subscriptionEvents += `${Constants.SubscriptionEvents.assignmentGroup} `;
+            subscriptionEvents += Constants.SubscriptionEvents.assignmentGroup;
         }
 
         // Create subscription payload
@@ -303,7 +303,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             type: 'record',
             record_type: alertType as string,
             record_id: recordId as string,
-            subscription_events: subscriptionEvents.trim().split(' ').join(', '),
+            subscription_events: subscriptionEvents.trim().split(' ').join(','),
             channel_id: channel as string,
         };
 
@@ -321,7 +321,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Add checked events
         if (stateChanged) {
-            subscriptionEvents += Constants.SubscriptionEvents.state;
+            subscriptionEvents += `${Constants.SubscriptionEvents.state} `;
         }
         if (priorityChanged) {
             subscriptionEvents += `${Constants.SubscriptionEvents.priority} `;
@@ -333,7 +333,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             subscriptionEvents += `${Constants.SubscriptionEvents.assignedTo} `;
         }
         if (assignmentGroupChecked) {
-            subscriptionEvents += `${Constants.SubscriptionEvents.assignmentGroup} `;
+            subscriptionEvents += Constants.SubscriptionEvents.assignmentGroup;
         }
 
         // Create subscription payload
@@ -344,7 +344,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             type: 'record',
             record_type: alertType as string,
             record_id: recordId as string,
-            subscription_events: subscriptionEvents.trim().split(' ').join(', '),
+            subscription_events: subscriptionEvents.trim().split(' ').join(','),
             channel_id: channel as string,
             sys_id: subscriptionData?.id as string,
         };

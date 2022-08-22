@@ -8,8 +8,9 @@ type EmptyStatePropTypes = {
     buttonConfig?:{
         text: string;
         href?: string;
+        download?: boolean;
         action?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    }
+    } | null,
     iconClass?: string;
 }
 
@@ -36,6 +37,7 @@ const EmptyState = ({title, subTitle, buttonConfig, iconClass}: EmptyStatePropTy
                         rel='noreferrer'
                         href={buttonConfig.href}
                         className='empty-state__btn btn btn-primary'
+                        download={buttonConfig.download}
                     >
                         {buttonConfig.text}
                     </a>

@@ -53,7 +53,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
     const [debouncedGetSuggestions, setDebouncedGetSuggestions] =
     useState<(args: Record<string, string>) => void>();
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const charThresholdToShowSuggestions = 4;
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
@@ -131,7 +131,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 setDisableInput(false);
             }
         }
-    }, [APIState]);
+    }, [pluginState]);
 
     // Handle API state updates in the suggestions
     useEffect(() => {
@@ -145,7 +145,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (searchSuggestionsState.data) {
             setSuggestions(searchSuggestionsState.data);
         }
-    }, [APIState]);
+    }, [pluginState]);
 
     // Handle API state updates while fetching record data
     useEffect(() => {
@@ -156,7 +156,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (recordDataState.isError) {
             setApiError(recordDataState.error);
         }
-    }, [APIState]);
+    }, [pluginState]);
 
     // Hide error state once it the value is valid
     useEffect(() => {

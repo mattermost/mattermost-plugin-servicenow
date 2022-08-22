@@ -7,14 +7,14 @@ type TabData = {
     tabPanel: JSX.Element
 }
 
-type HttpMethod = 'GET' | 'POST';
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription'
 
 type PluginApiService = {
     path: string,
     method: httpMethod,
-    apiServiceName: string
+    apiServiceName: ApiServiceName,
 }
 
 type PluginState = {
@@ -24,19 +24,6 @@ type PluginState = {
 type DropdownOptionType = {
     label?: string | JSX.Element;
     value: string;
-}
-
-type ProjectDetails = {
-    mattermostID: string
-    projectID: string,
-    projectName: string,
-    organizationName: string
-}
-
-type SubscriptionDetails = {
-    id: string
-    name: string
-    eventType: eventType
 }
 
 type EditSubscriptionData = {
@@ -59,3 +46,13 @@ type RecordDataLabelConfigType = {
 }
 
 type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | DeleteSubscriptionPayload;
+
+type APIError = {
+    id: string,
+    message: string,
+}
+
+type WebsocketEventParams = {
+    event: string,
+    data: Record<string, string>,
+}

@@ -36,7 +36,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
 
     // Get channelList state
@@ -73,7 +73,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
         // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getMmApiState" in the dependency array, the useEffect runs infinitely.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [APIState]);
+    }, [pluginState]);
 
     // Hide error state once it the value is valid
     useEffect(() => {

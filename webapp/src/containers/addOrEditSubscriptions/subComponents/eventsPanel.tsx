@@ -52,7 +52,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     record,
 }: EventsPanelProps, eventsPanelRef): JSX.Element => {
     const {entities} = useSelector((state: GlobalState) => state);
-    const {state: APIState, getApiState} = usePluginApi();
+    const {pluginState, getApiState} = usePluginApi();
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
 
     // Update the channelList once it is fetched from the backend
@@ -64,7 +64,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
 
         // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getMmApiState" in the dependency array, the useEffect runs infinitely.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [APIState]);
+    }, [pluginState]);
 
     // Get channelList state
     const getChannelState = () => {

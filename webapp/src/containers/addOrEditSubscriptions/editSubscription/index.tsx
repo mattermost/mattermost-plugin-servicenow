@@ -1,24 +1,21 @@
 import React from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
+
+import usePluginApi from 'hooks/usePluginApi';
 
 import {hideModal as hideEditModal} from 'reducers/editSubscriptionModal';
 
 import AddOrEditSubscriptionModal from '../subComponents';
 
-type EditSubscriptionProps = {
-    subscriptionData: EditSubscriptionData;
-}
-
-const EditSubscription = ({subscriptionData}: EditSubscriptionProps) => {
+const EditSubscription = () => {
     const dispatch = useDispatch();
-    const pluginState = useSelector((state: PluginState) => state);
+    const {pluginState} = usePluginApi();
 
-    // TODO: Add the logic for checking if the user is connected first
     return (
         <AddOrEditSubscriptionModal
-            open={pluginState['plugins-mattermost-plugin-servicenow']?.openEditSubscriptionModalReducer?.open}
+            open={pluginState.openEditSubscriptionModalReducer.open}
             close={() => dispatch(hideEditModal())}
-            subscriptionData={subscriptionData}
+            subscriptionData={pluginState.openEditSubscriptionModalReducer.data}
         />
     );
 };

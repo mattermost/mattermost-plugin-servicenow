@@ -9,13 +9,13 @@ import {PluginRegistry} from 'types/mattermost-webapp';
 import reducer from 'reducers';
 
 import Rhs from 'containers/Rhs';
-import AddSubscriptions from 'containers/addOrEditSubscriptions/addSubscription';
+import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
+import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 
 import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
-import Hooks from 'hooks';
-import {handleConnect, handleDisconnect} from 'websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal} from 'websocket';
 
 import manifest from './manifest';
 
@@ -26,15 +26,16 @@ export default class Plugin {
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
         // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
         registry.registerReducer(reducer);
-        registry.registerRootComponent(AddSubscriptions);
+        registry.registerRootComponent(AddSubscription);
+        registry.registerRootComponent(EditSubscription);
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, null);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
-        const hooks = new Hooks(store);
-        registry.registerSlashCommandWillBePostedHook(hooks.slashCommandWillBePostedHook);
 
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_edit_subscription`, handleOpenEditSubscriptionModal(store));
     }
 }
 
