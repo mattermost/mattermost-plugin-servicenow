@@ -1,4 +1,4 @@
-import React, {createRef, useEffect, useState} from 'react';
+import React, {createRef, useCallback, useEffect, useState} from 'react';
 
 import Modal from 'components/modal/customModal';
 import ModalHeader from 'components/modal/subComponents/modalHeader';
@@ -79,7 +79,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     }, [open, subscriptionData]);
 
     // Reset input field states
-    const resetFieldStates = () => {
+    const resetFieldStates = useCallback(() => {
         setChannel(null);
         setRecordValue('');
         setSuggestionChosen(false);
@@ -89,21 +89,36 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setNewCommentChecked(false);
         setAssignedToChecked(false);
         setAssignmentGroupChecked(false);
-    };
+    }, [
+        setChannel,
+        setRecordValue,
+        setSuggestionChosen,
+        setAlertType,
+        setStateChanged,
+        setPriorityChanged,
+        setNewCommentChecked,
+        setAssignedToChecked,
+        setAssignmentGroupChecked,
+    ]);
 
     // Reset panel states
-    const resetPanelStates = () => {
+    const resetPanelStates = useCallback(() => {
         setAlertTypePanelOpen(false);
         setSearchRecordsPanelOpen(false);
         setEventsPanelOpen(false);
         setSuccessPanelOpen(false);
-    };
+    }, [
+        setAlertTypePanelOpen,
+        setSearchRecordsPanelOpen,
+        setEventsPanelOpen,
+        setSuccessPanelOpen,
+    ]);
 
     // Reset error states
-    const resetError = () => {
+    const resetError = useCallback(() => {
         setApiResponseValid(false);
         setApiError(null);
-    };
+    }, [setApiResponseValid, setApiError]);
 
     const hideModal = () => {
         // Reset modal states
@@ -120,16 +135,16 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     // Handle action when add another subscription button is clicked
-    const addAnotherSubscription = () => {
+    const addAnotherSubscription = useCallback(() => {
         resetFieldStates();
         resetPanelStates();
-    };
+    }, [resetFieldStates, resetPanelStates]);
 
     // Handle action when back button is clicked on failure modal
-    const resetFailureState = () => {
+    const resetFailureState = useCallback(() => {
         resetPanelStates();
         resetError();
-    };
+    }, [resetPanelStates, resetError]);
 
     // Set height of the modal content according to different panels;
     // Added 65 in the given height due of (header + loader) height
@@ -193,24 +208,24 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     }, [eventsPanelOpen, searchRecordsPanelOpen, alertTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
 
     // Returns action handler for primary button in the result panel
-    const getResultPanelPrimaryBtnActionOrText = (action: boolean) => {
+    const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
         if (apiError && apiResponseValid) {
             return action ? resetFailureState : 'Back';
         } else if (subscriptionData) {
             return null;
         }
         return action ? addAnotherSubscription : 'Add Another Subscription';
-    };
+    }, [apiError, apiResponseValid, subscriptionData, resetFailureState, addAnotherSubscription]);
 
     // Returns heading for the result panel
-    const getResultPanelHeader = () => {
+    const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
             return apiError;
         } else if (subscriptionData) {
             return 'Subscription updated successfully! ';
         }
         return null;
-    };
+    }, [apiError, apiResponseValid, subscriptionData]);
 
     return (
         <Modal
