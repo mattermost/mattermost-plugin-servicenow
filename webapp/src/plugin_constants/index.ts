@@ -16,6 +16,8 @@ const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 4;
+const DefaultPage = 0;
+const DefaultPageSize = 100;
 
 export enum SubscriptionEventsEnum {
     state = 'state',
@@ -106,4 +108,6 @@ export default {
     ChannelHeaderTooltipText,
     RhsToggleLabel,
     DefaultCharThresholdToShowSuggestions,
+    DefaultPage,
+    DefaultPageSize,
 };
