@@ -43,7 +43,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     };
 
-    // Handles action when an suggestion is chosen
+    // Handles action when a suggestion is chosen
     const handleSuggestionClick = (suggestionValue: string) => {
         setSuggestionChosen(true);
         setRecordValue(suggestionValue);
@@ -56,27 +56,28 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         >
             <AutoSuggest
                 inputValue={recordValue}
-                onInputValueChange={(newValue) => setRecordValue(newValue)}
+                onInputValueChange={setRecordValue}
                 onOptionClick={handleSuggestionClick}
                 placeholder='Search Records'
                 suggestions={suggestions}
-                charThresholdToShowSuggestions={4}
                 error={validationFailed}
                 className='search-panel__auto-suggest'
             />
-            {suggestionChosen && <ul className='search-panel__description'>
-                {
-                    descriptionHeaders.map((header) => (
-                        <li
-                            key={header}
-                            className='d-flex align-items-center search-panel__description-item'
-                        >
-                            <span className='search-panel__description-header text-ellipsis'>{header}</span>
-                            <span className='search-panel__description-text text-ellipsis'><SkeletonLoader/></span>
-                        </li>
-                    ))
-                }
-            </ul>}
+            {suggestionChosen && (
+                <ul className='search-panel__description'>
+                    {
+                        descriptionHeaders.map((header) => (
+                            <li
+                                key={header}
+                                className='d-flex align-items-center search-panel__description-item'
+                            >
+                                <span className='search-panel__description-header text-ellipsis'>{header}</span>
+                                <span className='search-panel__description-text text-ellipsis'><SkeletonLoader/></span>
+                            </li>
+                        ))
+                    }
+                </ul>
+            )}
             <ModalSubTitleAndError error={error}/>
             <ModalFooter
                 onHide={onBack}
