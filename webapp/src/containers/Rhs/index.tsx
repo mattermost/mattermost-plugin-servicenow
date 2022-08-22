@@ -126,10 +126,10 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when the delete button is clicked
     const handleDeleteClick = (subscription: SubscriptionData) => {
-        const deleteFeedPayload: DeleteSubscriptionPayload = {
+        const deleteSubscriptionPayload: DeleteSubscriptionPayload = {
             id: subscription.sys_id,
         };
-        setToBeDeleted(deleteFeedPayload);
+        setToBeDeleted(deleteSubscriptionPayload);
         setDeleteConfirmationOpen(true);
     };
 
@@ -212,11 +212,9 @@ const Rhs = (): JSX.Element => {
                     )}
                 </>
             )}
-            {/* TODO: Uncomment and update the following during integration */}
             {!connected && (
                 <EmptyState
                     title='No Account Connected'
-                    subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
                     buttonConfig={{
                         text: 'Connect your account',
                         action: () => '',
