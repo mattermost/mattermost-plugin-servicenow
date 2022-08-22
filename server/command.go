@@ -24,13 +24,7 @@ const (
 * |/servicenow help| - Know about the features of this plugin
 `
 
-	commandHelpForAdmin = `##### Slash Commands
-* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
-* |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
-* |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
-* |/servicenow help| - Know about the features of this plugin
-
-##### Configure/Enable subscriptions
+	commandHelpForAdmin = commandHelp + "\n\n" + `##### Configure/Enable subscriptions
 * Download the update set XML file from **System Console > Plugins > ServiceNow Plugin > Download ServiceNow Update Set**.
 * Go to ServiceNow and search for Update sets. Then go to "Retrieved Update Sets" under "System Update Sets".
 * Click on "Import Update Set from XML" link.
@@ -41,6 +35,7 @@ const (
 * You'll see a warning dialog. You can ignore that and click on "Proceed with Commit".
 `
 
+	helpCommandHeader                = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
 	disconnectErrorMessage           = "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	disconnectSuccessMessage         = "Disconnected your ServiceNow account."
 	subscribeErrorMessage            = "Something went wrong. Not able to subscribe. Check server logs for errors."
@@ -84,7 +79,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if err != nil {
 		text := "Error checking user's permissions"
 		p.API.LogWarn(text, "Error", err.Error())
-		p.postCommandResponse(args, "Error checking user's permissions")
+		p.postCommandResponse(args, text)
 		return &model.CommandResponse{}, nil
 	}
 
@@ -180,8 +175,7 @@ func (p *Plugin) GetClientFromUser(args *model.CommandArgs, user *User) Client {
 }
 
 func (p *Plugin) handleHelp(args *model.CommandArgs, isSysAdmin bool) {
-	header := "###### Mattermost ServiceNow Plugin - Slash Command Help\n"
-	p.postCommandResponse(args, p.getHelpMessage(header, isSysAdmin))
+	p.postCommandResponse(args, p.getHelpMessage(helpCommandHeader, isSysAdmin))
 }
 
 func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client) string {
@@ -262,7 +256,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		if len(subscriptions) == 0 {
-			p.postCommandResponse(args, "You don't have any subscriptions active for this channel.")
+			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
 			return
 		}
 

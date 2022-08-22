@@ -23,7 +23,7 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-var ErrorContentTypeNotJSON = fmt.Errorf("response content type is not JSON")
+var ErrorContentTypeNotJSON = fmt.Errorf("content type of the response is not JSON")
 
 func (c *client) CallJSON(method, path string, in, out interface{}, params url.Values) (responseData []byte, statusCode int, err error) {
 	contentType := "application/json"
