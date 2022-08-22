@@ -55,7 +55,20 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     useEffect(() => {
         const channelListState = getChannelState();
         if (channelListState.data) {
-            setChannelOptions(channelListState.data.map((ch) => ({label: <span><i className='fa fa-globe dropdown-option-icon'/>{ch.display_name}</span>, value: ch.id})));
+            setChannelOptions(channelListState.data.map((ch) => ({
+                label: (
+                    <span>
+                        <i
+                            className={`
+                                fa dropdown-option-icon
+                                ${ch.type === Constants.PrivateChannelType ? 'fa-lock' : 'fa-globe'}
+                            `}
+                        />
+                        {ch.display_name}
+                    </span>
+                ),
+                value: ch.id,
+            })));
         }
 
         setShowModalLoader(channelListState.isLoading);
