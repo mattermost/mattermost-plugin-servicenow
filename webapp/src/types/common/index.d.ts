@@ -23,6 +23,11 @@ type PluginState = {
     [pluginStateKey]: RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
 }
 
+type DropdownOptionType = {
+    label?: string | JSX.Element;
+    value: string;
+}
+
 type MmHookArgTypes = {
     channel_id: string,
     team_id: string,

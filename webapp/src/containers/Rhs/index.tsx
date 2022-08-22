@@ -6,14 +6,14 @@ import ToggleSwitch from 'components/toggleSwitch';
 import Constants, {ToggleSwitchLabelPositioning} from 'plugin_constants';
 import Modal from 'components/modal';
 
-import {hideModal as hideAddModal, showModal as showAddModal} from 'reducers/addSubscriptionModal';
+import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {hideModal as hideEditModal} from 'reducers/editSubscriptionModal';
 
 import './rhs.scss';
 
 const Rhs = (): JSX.Element => {
     const [active, setActive] = useState(false);
-    const pluginState = useSelector((state: PluginState) => state);
+    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
     const dispatch = useDispatch();
 
     return (
@@ -38,19 +38,7 @@ const Rhs = (): JSX.Element => {
                 </button>
             </div>
             <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow'].openAddSubscriptionModalReducer.open}
-                onHide={() => dispatch(hideAddModal())}
-                title='Add subscription'
-                confirmBtnText='Add'
-                onConfirm={() => dispatch(hideAddModal())}
-
-                // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-                className='rhs-modal edit-feed-modal'
-            >
-                <h4>{'Test Add Modal'}</h4>
-            </Modal>
-            <Modal
-                show={pluginState['plugins-mattermost-plugin-servicenow'].openEditSubscriptionModalReducer.open}
+                show={pluginState.openEditSubscriptionModalReducer.open}
                 onHide={() => dispatch(hideEditModal())}
                 title='Edit subscription'
                 confirmBtnText='Edit'

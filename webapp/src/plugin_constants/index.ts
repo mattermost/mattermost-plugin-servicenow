@@ -22,6 +22,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
     },
 };
 
+export const PanelDefaultHeights = {
+    channelPanel: 151,
+    recordTypePanel: 195,
+    searchRecordPanel: 203,
+    searchRecordPanelExpanded: 360,
+    eventsPanel: 500,
+    successPanel: 220,
+    panelHeader: 65,
+};
+
 const ChannelHeaderTooltipText = 'ServiceNow';
 
 const DefaultCharThresholdToShowSuggestions = 4;
