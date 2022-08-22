@@ -52,8 +52,10 @@ const (
 	PathParamRecordID       = "record_id"
 
 	// Websocket events
-	WSEventConnect    = "connect"
-	WSEventDisconnect = "disconnect"
+	WSEventConnect                   = "connect"
+	WSEventDisconnect                = "disconnect"
+	WSEventOpenAddSubscriptionModal  = "add_subscription"
+	WSEventOpenEditSubscriptionModal = "edit_subscription"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"

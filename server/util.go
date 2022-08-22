@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-server/v5/model"
 	"golang.org/x/oauth2"
 )
 
@@ -50,7 +52,9 @@ func (p *Plugin) GetClientFromRequest(r *http.Request) Client {
 }
 
 func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer.SubscriptionResponse, client Client, wg *sync.WaitGroup) {
-	defer wg.Done()
+	if wg != nil {
+		defer wg.Done()
+	}
 	record, _, err := client.GetRecordFromServiceNow(subscription.RecordType, subscription.RecordID)
 	if err != nil {
 		p.API.LogError("Error in getting record from ServiceNow", "Record type", subscription.RecordType, "Record ID", subscription.RecordID, "Error", err.Error())
@@ -70,4 +74,31 @@ func (p *Plugin) getHelpMessage(header string, isSysAdmin bool) string {
 
 	sb.WriteString(helpCommandMessage)
 	return sb.String()
+}
+
+func (p *Plugin) isAuthorizedSysAdmin(userID string) (bool, error) {
+	user, appErr := p.API.GetUser(userID)
+	if appErr != nil {
+		return false, appErr
+	}
+
+	if !strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func ConvertSubscriptionToMap(subscription *serializer.SubscriptionResponse) (map[string]interface{}, error) {
+	var m map[string]interface{}
+	bytes, err := json.Marshal(&subscription)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal(bytes, &m); err != nil {
+		return nil, err
+	}
+
+	return m, nil
 }

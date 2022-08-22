@@ -112,7 +112,7 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 		client := p.GetClientFromRequest(r)
 		if _, err := client.ActivateSubscriptions(); err != nil {
 			if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
-				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusInternalServerError, Message: constants.APIErrorSubscriptionsNotConfigured})
+				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusBadRequest, Message: constants.APIErrorSubscriptionsNotConfigured})
 				return
 			}
 

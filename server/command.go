@@ -9,7 +9,6 @@ import (
 	"unicode"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-plugin-api/experimental/command"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
@@ -35,19 +34,19 @@ const (
 * You'll see a warning dialog. You can ignore that and click on "Proceed with Commit".
 `
 
-	helpCommandHeader                = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
-	disconnectErrorMessage           = "Something went wrong. Not able to disconnect user. Check server logs for errors."
-	disconnectSuccessMessage         = "Disconnected your ServiceNow account."
-	subscribeErrorMessage            = "Something went wrong. Not able to subscribe. Check server logs for errors."
-	subscribeSuccessMessage          = "Subscription successfully created."
-	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
-	listSubscriptionsWaitMessage     = "Your subscriptions for this channel will be listed soon. Please wait."
-	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
-	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
-	editSubscriptionErrorMessage     = "Something went wrong. Not able to edit subscription. Check server logs for errors."
-	editSubscriptionSuccessMessage   = "Subscription successfully edited."
-	unknownErrorMessage              = "Unknown error."
-	notConnectedMessage              = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
+	helpCommandHeader                       = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
+	disconnectErrorMessage                  = "Something went wrong. Not able to disconnect user. Check server logs for errors."
+	disconnectSuccessMessage                = "Disconnected your ServiceNow account."
+	listSubscriptionsErrorMessage           = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+	listSubscriptionsWaitMessage            = "Your subscriptions for this channel will be listed soon. Please wait."
+	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
+	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
+	editSubscriptionErrorMessage            = "Something went wrong. Check server logs for errors."
+	unknownErrorMessage                     = "Unknown error."
+	notConnectedMessage                     = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
+	subscriptionsNotConfiguredError         = "It seems that subscriptions for ServiceNow have not been configured properly."
+	subscriptionsNotConfiguredErrorForUser  = subscriptionsNotConfiguredError + " Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin."
+	subscriptionsNotConfiguredErrorForAdmin = subscriptionsNotConfiguredError + "\nTo enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings. The instructions for uploading the update set are available in the plugin's documentation and also can be viewed by running the \"/servicenow help\" command."
 )
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
@@ -126,7 +125,10 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			if _, err := client.ActivateSubscriptions(); err != nil {
 				message := ""
 				if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
-					message = err.Error()
+					message = subscriptionsNotConfiguredErrorForUser
+					if isSysAdmin {
+						message = subscriptionsNotConfiguredErrorForAdmin
+					}
 				} else {
 					message = unknownErrorMessage
 				}
@@ -215,35 +217,13 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 }
 
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	if len(params) < 2 {
-		return "You have not entered the correct number of arguments for the subscribe command."
-	}
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenAddSubscriptionModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
 
-	// TODO: Add logic to open the create subscription modal
-	// The below code is temporary and it'll be removed in the future.
-	subscriptionEvents := constants.SubscriptionEventPriority
-	subscriptionType := constants.SubscriptionTypeRecord
-	subscriptionActive := true
-	subscription := serializer.SubscriptionPayload{
-		ServerURL:          &p.getConfiguration().MattermostSiteURL,
-		UserID:             &args.UserId,
-		ChannelID:          &args.ChannelId,
-		RecordType:         &params[0],
-		RecordID:           &params[1],
-		SubscriptionEvents: &subscriptionEvents,
-		IsActive:           &subscriptionActive,
-		Type:               &subscriptionType,
-	}
-	if err := subscription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Failed to validate subscription", "Error", err.Error())
-		return subscribeErrorMessage
-	}
-
-	if _, err := client.CreateSubscription(&subscription); err != nil {
-		p.API.LogError("Unable to create subscription", "Error", err.Error())
-		return subscribeErrorMessage
-	}
-	return subscribeSuccessMessage
+	return ""
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
@@ -293,31 +273,36 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 }
 
 func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	// TODO: Remove this code later. This is just for testing purposes.
+	if len(params) < 1 {
+		return "Invalid number of params for this command."
+	}
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return deleteSubscriptionErrorMessage
+		return editSubscriptionErrorMessage
 	}
 
 	if !valid {
 		return "Invalid subscription ID."
 	}
 
-	subscription := &serializer.SubscriptionPayload{
-		SubscriptionEvents: &params[1],
-	}
-	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Failed to validate subscription", "Error", err.Error())
+	subscription, _, err := client.GetSubscription(subscriptionID)
+	if err != nil {
+		p.API.LogError("Unable to get subscription", "Error", err.Error())
 		return editSubscriptionErrorMessage
 	}
 
-	if _, err = client.EditSubscription(subscriptionID, subscription); err != nil {
-		p.API.LogError("Unable to edit subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-	return editSubscriptionSuccessMessage
+	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
+
+	subscriptionMap, _ := ConvertSubscriptionToMap(subscription)
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenEditSubscriptionModal,
+		subscriptionMap,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
 }
 
 func getAutocompleteData() *model.AutocompleteData {
@@ -409,17 +394,4 @@ func parseCommand(input string) (command, action string, parameters []string) {
 
 func (p *Plugin) postCommandResponse(args *model.CommandArgs, text string) {
 	p.Ephemeral(args.UserId, args.ChannelId, args.RootId, text)
-}
-
-func (p *Plugin) isAuthorizedSysAdmin(userID string) (bool, error) {
-	user, appErr := p.API.GetUser(userID)
-	if appErr != nil {
-		return false, appErr
-	}
-
-	if !strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
-		return false, nil
-	}
-
-	return true, nil
 }
