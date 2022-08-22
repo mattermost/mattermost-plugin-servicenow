@@ -3,9 +3,9 @@ import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
 import ToggleSwitch from 'components/toggleSwitch';
-import Constants, {ToggleSwitchLabelPositioning} from 'plugin_constants';
+import Constants from 'plugin_constants';
 import Modal from 'components/modal';
-import SubscriptionCard from 'components/card/subscription';
+import EmptyState from 'components/emptyState';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {hideModal as hideEditModal} from 'reducers/editSubscriptionModal';
@@ -24,36 +24,30 @@ const Rhs = (): JSX.Element => {
                 onChange={(newState) => setActive(newState)}
                 label={Constants.RhsToggleLabel}
             />
-            <ToggleSwitch
-                active={active}
-                onChange={(newState) => setActive(newState)}
-                label={Constants.RhsToggleLabel}
-                labelPositioning={ToggleSwitchLabelPositioning.Right}
-            />
-            <SubscriptionCard
-
-                // TODO: Update props after the API gets integrated
-                header='82ojwerise8r9w3r8u9lkjsoer93iose'
-                label='Single Record'
-                description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ultricies cursus tempor consectetur augue senectus felis maecenas facilisis massa.'
-                onDelete={() => ''}
-                onEdit={() => ''}
-            />
-            <SubscriptionCard
-
-                // TODO: Update props after the API gets integrated
-                header='82ojwerise8r9w3r8u9lkjsoer93'
-                label='Bulk Record'
-                cardBody={[
-                    {
-                        label: 'Channel Slug Name',
-                        value: 'Town Square',
-                    },
-                ]}
-                description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ultricies cursus tempor consectetur augue senectus felis maecenas facilisis massa.'
-                onEdit={() => ''}
-                onDelete={() => ''}
-            />
+            {/* TODO: Remove the follwing during integration */}
+            {active && (
+                <EmptyState
+                    title='No Subscriptions Found'
+                    subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
+                    buttonConfig={{
+                        text: 'Add new Subscription',
+                        action: () => '',
+                    }}
+                    iconClass='fa fa-bell-slash-o'
+                />
+            )}
+            {/* TODO: Remove the following during integration */}
+            {!active && (
+                <EmptyState
+                    title='No Account Connected'
+                    subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
+                    buttonConfig={{
+                        text: 'Connect your account',
+                        action: () => '',
+                    }}
+                    iconClass='fa fa-user-circle'
+                />
+            )}
             <div className='rhs-btn-container'>
                 <button
                     className='btn btn-primary rhs-btn'

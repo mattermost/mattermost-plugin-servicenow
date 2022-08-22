@@ -30,4 +30,5 @@ const ToggleSwitch = ({
         </label>
     </div>
 );
+
 export default ToggleSwitch;
