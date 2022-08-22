@@ -6,7 +6,7 @@ type DropdownProps = {
     value: string | null;
     placeholder: string;
     onChange: (newValue: string) => void;
-    options:DropdownOptionType[];
+    options: DropdownOptionType[];
     customOption?: DropdownOptionType & {
         onClick: (customOptionValue: string) => void;
     }
@@ -31,13 +31,13 @@ const Dropdown = ({value, placeholder, options, onChange, customOption, loadingO
 
     // Handles when someone clicks on the custom option
     const handleCustomOptionClick = () => {
-        // Update the value on the input to indicate custom options has been chosen
+        // Update the value on the input to indicate a custom option has been chosen
         handleInputChange({
             label: customOption?.label,
             value: customOption?.value as string,
         });
 
-        // Take the action that need to be taken(only if not already taken) to handle when the user chooses custom option
+        // Take the action that needs to be taken(only if not already taken) to handle when the user chooses a custom option
         if (customOption?.onClick && customOption.value !== value) {
             customOption.onClick(customOption.value);
         }
@@ -82,7 +82,9 @@ const Dropdown = ({value, placeholder, options, onChange, customOption, loadingO
                             key={option.value}
                             onClick={() => !disabled && handleInputChange(option)}
                             className='dropdown__option-item cursor-pointer text-ellipses'
-                        >{option.label || option.value}</li>
+                        >
+                            {option.label || option.value}
+                        </li>
                     ))
                 }
                 {

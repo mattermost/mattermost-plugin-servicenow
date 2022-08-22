@@ -1,9 +1,12 @@
+@import '../../styles/abstract/variables';
+
 .rhs-content {
   padding: 15px 12px 12px;
-  height: calc(100% - $rhs-header-height - $rhs-footer-height);
+  height: calc(100% - #{$rhs-header-height} - #{$rhs-footer-height});
 
   .empty-state {
-    height: calc(100% - 60px);
+    // $toggle-section-height - height of the section containing toggle button for showing whole server subscription
+    height: calc(100% - #{$toggle-section-height});
   }
 }
 
