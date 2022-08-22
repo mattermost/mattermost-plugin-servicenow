@@ -9,7 +9,7 @@ import ModalHeader from 'components/modal/subComponents/modalHeader';
 import ModalLoader from 'components/modal/subComponents/modalLoader';
 import CircularLoader from 'components/loader/circular';
 
-import Constants, {PanelDefaultHeights} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEventsEnum} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -47,11 +47,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [successPanelOpen, setSuccessPanelOpen] = useState(false);
 
     // Events panel values
-    const [stateChanged, setStateChanged] = useState(false);
-    const [priorityChanged, setPriorityChanged] = useState(false);
-    const [newCommentChecked, setNewCommentChecked] = useState(false);
-    const [assignedToChecked, setAssignedToChecked] = useState(false);
-    const [assignmentGroupChecked, setAssignmentGroupChecked] = useState(false);
+    const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEventsEnum[]>([]);
 
     // API error
     const [apiError, setApiError] = useState<string | null>(null);
@@ -78,7 +74,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Get create subscription state
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data) as string};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as string};
     };
 
     useEffect(() => {
@@ -94,11 +90,22 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setSuggestionChosen(true);
 
             // Set initial values for events panel
-            setStateChanged(subscriptionData.stateChanged);
-            setPriorityChanged(subscriptionData.priorityChanged);
-            setNewCommentChecked(subscriptionData.newCommentChecked);
-            setAssignedToChecked(subscriptionData.assignedToChecked);
-            setAssignmentGroupChecked(subscriptionData.assignmentGroupChecked);
+            // TODO: update this by updating the subscriptionData sent from "../../Rhs/index.tsx";
+            if (subscriptionData.stateChanged) {
+                setSubscriptionEvents([SubscriptionEventsEnum.state]);
+            }
+            if (subscriptionData.priorityChanged) {
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.priority]);
+            }
+            if (subscriptionData.newCommentChecked) {
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.commented]);
+            }
+            if (subscriptionData.assignedToChecked) {
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.assignedTo]);
+            }
+            if (subscriptionData.assignmentGroupChecked) {
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.assignmentGroup]);
+            }
         }
     }, [open, subscriptionData]);
 
@@ -122,21 +129,13 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setRecordValue('');
         setSuggestionChosen(false);
         setRecordType(null);
-        setStateChanged(false);
-        setPriorityChanged(false);
-        setNewCommentChecked(false);
-        setAssignedToChecked(false);
-        setAssignmentGroupChecked(false);
+        setSubscriptionEvents([]);
     }, [
         setChannel,
         setRecordValue,
         setSuggestionChosen,
         setRecordType,
-        setStateChanged,
-        setPriorityChanged,
-        setNewCommentChecked,
-        setAssignedToChecked,
-        setAssignmentGroupChecked,
+        setSubscriptionEvents,
     ]);
 
     // Reset panel states
@@ -269,25 +268,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Handles create subscription
     const createSubscription = () => {
-        let subscriptionEvents = '';
         setApiError(null);
-
-        // Add checked events
-        if (stateChanged) {
-            subscriptionEvents += Constants.SubscriptionEvents.state;
-        }
-        if (priorityChanged) {
-            subscriptionEvents += `${Constants.SubscriptionEvents.priority} `;
-        }
-        if (newCommentChecked) {
-            subscriptionEvents += `${Constants.SubscriptionEvents.commented} `;
-        }
-        if (assignedToChecked) {
-            subscriptionEvents += `${Constants.SubscriptionEvents.assignedTo} `;
-        }
-        if (assignmentGroupChecked) {
-            subscriptionEvents += `${Constants.SubscriptionEvents.assignmentGroup} `;
-        }
 
         // Create subscription payload
         const payload: CreateSubscriptionPayload = {
@@ -297,7 +278,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             type: 'record',
             record_type: recordType as string,
             record_id: recordId as string,
-            subscription_events: subscriptionEvents.trim().split(' ').join(', '),
+            subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
         };
 
@@ -383,16 +364,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     ref={eventsPanelRef}
                     onContinue={createSubscription}
                     onBack={() => setEventsPanelOpen(false)}
-                    stateChanged={stateChanged}
-                    setStateChanged={setStateChanged}
-                    priorityChanged={priorityChanged}
-                    setPriorityChanged={setPriorityChanged}
-                    newCommentChecked={newCommentChecked}
-                    setNewCommentChecked={setNewCommentChecked}
-                    assignedToChecked={assignedToChecked}
-                    setAssignedToChecked={setAssignedToChecked}
-                    assignmentGroupChecked={assignmentGroupChecked}
-                    setAssignmentGroupChecked={setAssignmentGroupChecked}
+                    subscriptionEvents={subscriptionEvents}
+                    setSubscriptionEvents={setSubscriptionEvents}
                     channel={channel as string}
                     record={recordValue}
                     channelOptions={channelOptions}

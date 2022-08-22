@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from 'react';
+import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {Link} from 'react-router-dom';
 
@@ -49,28 +49,25 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
-    const [debouncedGetSuggestions, setDebouncedGetSuggestions] =
-    useState<(args: Record<string, string>) => void>();
     const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
-    const charThresholdToShowSuggestions = 4;
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
 
     // Get record suggestions state
     const getRecordsSuggestions = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload as SearchRecordsParams);
-        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
+        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message as string};
     };
 
     // Get record data state
     const getRecordDataState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getSuggestionDataPayload as GetRecordParams);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data) as string};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message as string};
     };
 
     // Get the suggestions from the API
-    const getSuggestions = ({searchFor}: {searchFor?: string}) => {
+    const getSuggestions = useCallback(({searchFor}: {searchFor?: string}) => {
         setApiError(null);
         if (recordType) {
             setSearchRecordsPayload({recordType, search: searchFor || ''});
@@ -78,7 +75,10 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         } else {
             setSearchRecordsPayload(null);
         }
-    };
+
+        // Disabling the eslint rule at the next line because if we include "makeApiRequest" in the dependency array, it changes constantly;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setApiError, setSearchRecordsPayload, setSearchRecordsPayload, recordType]);
 
     // Handles making API request for fetching the data for the selected record
     const getSuggestionData = (suggestionId: string) => {
@@ -88,10 +88,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     };
 
-    // Initialize the debounced getSuggestion function
-    useEffect(() => {
-        setDebouncedGetSuggestions(() => Utils.debounce(getSuggestions, 500));
-    }, [recordType]);
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
 
     // Handle API state updates in the suggestions
     useEffect(() => {
@@ -119,7 +116,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         setSuggestionChosen(false);
         setRecordId(null);
         if (currentValue) {
-            if (debouncedGetSuggestions && currentValue.length >= charThresholdToShowSuggestions) {
+            if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
                 debouncedGetSuggestions({searchFor: currentValue});
             }
         }
@@ -144,7 +141,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     };
 
     // Returns value to be rendered in the options dropdown and in the input
-    const getInputValue = (suggestion: Record<string, string>) => `${suggestion.number}: ${suggestion.short_description}`;
+    const getInputValue = useCallback((suggestion: Record<string, string>) => `${suggestion.number}: ${suggestion.short_description}`, []);
 
     // Handles action when a suggestion is chosen
     const handleSuggestionClick = (suggestionValue: Record<string, string>) => {
@@ -162,7 +159,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
             return null;
         } else if (typeof value === 'string') {
             return value;
-        } else if (value?.display_value && value?.link) {
+        } else if (value.display_value && value.link) {
             return (
                 <Link
                     to={value.link}
@@ -172,8 +169,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     {value.display_value}
                 </Link>
             );
-        } else if (value?.display_value) {
-            return value.display_value;
         }
 
         return null;

@@ -41,7 +41,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     // Get channelList state
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {error?: string})?.error};
+        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message};
     };
 
     useEffect(() => {
