@@ -11,11 +11,19 @@ export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
 const MMUSERID = 'MMUSERID';
-const RightSidebarHeader = 'Right Sidebar Placeholder Text';
+const RightSidebarHeader = 'Subscriptions';
 const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
-const DefaultCharThresholdToShowSuggestions = 1;
+const DefaultCharThresholdToShowSuggestions = 4;
+
+export enum SubscriptionEventsEnum {
+    state = 'state',
+    priority = 'priority',
+    commented = 'commented',
+    assignedTo = 'assigned_to',
+    assignmentGroup = 'assignment_group',
+}
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
@@ -77,7 +85,7 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
 
 export const PanelDefaultHeights = {
     channelPanel: 151,
-    alertTypePanel: 195,
+    recordTypePanel: 195,
     searchRecordPanel: 203,
     searchRecordPanelExpanded: 372,
     eventsPanel: 500,

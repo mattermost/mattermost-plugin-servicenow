@@ -11,11 +11,11 @@ type EditSubscriptionProps = {
 
 const EditSubscription = ({subscriptionData}: EditSubscriptionProps) => {
     const dispatch = useDispatch();
-    const pluginState = useSelector((state: PluginState) => state);
+    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
 
     return (
         <AddOrEditSubscriptionModal
-            open={pluginState['plugins-mattermost-plugin-servicenow']?.openEditSubscriptionModalReducer?.open}
+            open={pluginState.openEditSubscriptionModalReducer.open}
             close={() => dispatch(hideEditModal())}
             subscriptionData={subscriptionData}
         />
