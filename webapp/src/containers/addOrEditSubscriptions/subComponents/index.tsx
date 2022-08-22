@@ -73,7 +73,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as string};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message as string};
     };
 
     useEffect(() => {
@@ -365,9 +365,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onBack={() => setEventsPanelOpen(false)}
                     subscriptionEvents={subscriptionEvents}
                     setSubscriptionEvents={setSubscriptionEvents}
-                    channel={channel as string}
+                    channel={channelOptions.find((ch) => ch.value === channel) as DropdownOptionType || null}
                     record={recordValue}
-                    channelOptions={channelOptions}
                 />
                 <ResultPanel
                     onPrimaryBtnClick={getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null}

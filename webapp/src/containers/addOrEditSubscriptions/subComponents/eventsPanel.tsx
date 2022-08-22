@@ -14,9 +14,8 @@ type EventsPanelProps = {
     requiredFieldValidationErr?: boolean;
     subscriptionEvents: SubscriptionEventsEnum[];
     setSubscriptionEvents: React.Dispatch<React.SetStateAction<SubscriptionEventsEnum[]>>;
-    channel: string;
+    channel: DropdownOptionType | null;
     record: string;
-    channelOptions: DropdownOptionType[];
 }
 
 const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
@@ -29,7 +28,6 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     setSubscriptionEvents,
     channel,
     record,
-    channelOptions,
 }: EventsPanelProps, eventsPanelRef): JSX.Element => {
     const handleSelectedEventsChange = (selected: boolean, event: SubscriptionEventsEnum) => {
         const filterEvents = (
@@ -53,7 +51,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
             <div className='events-panel__prev-data'>
                 <h4 className='events-panel__prev-data-header'>{'Channel'}</h4>
                 <p className='events-panel__prev-data-text'>
-                    {channelOptions.find((ch) => ch.value === channel)?.label}
+                    {channel?.label}
                 </p>
                 <h4 className='events-panel__prev-data-header record-header'>{'Record'}</h4>
                 <p className='events-panel__prev-data-text'>{record}</p>

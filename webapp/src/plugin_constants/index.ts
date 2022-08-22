@@ -18,6 +18,7 @@ const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 4;
 const DefaultPage = 0;
 const DefaultPageSize = 100;
+const PrivateChannelType = 'P';
 
 export enum SubscriptionEventsEnum {
     state = 'state',
@@ -110,4 +111,5 @@ export default {
     DefaultCharThresholdToShowSuggestions,
     DefaultPage,
     DefaultPageSize,
+    PrivateChannelType,
 };
