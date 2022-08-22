@@ -1,15 +1,16 @@
 .checkbox {
   position: relative;
+  width: fit-content;
 
   &__input-field {
     position: absolute;
     z-index: 1;
     left: 0;
     top: 0;
-    width: 15px;
-    height: 15px;
     margin: 0 !important;
     opacity: 0;
+    height: 17px;
+    width: 100%;
 
     &:checked + .checkbox__box {
       background: var(--button-bg);
@@ -43,6 +44,5 @@
     font-weight: 500;
     margin-left: 12px;
     padding: 0 !important;
-    cursor: auto !important;
   }
 }
