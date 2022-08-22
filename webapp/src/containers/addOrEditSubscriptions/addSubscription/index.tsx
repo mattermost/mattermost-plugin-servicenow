@@ -7,11 +7,11 @@ import AddOrEditSubscriptionModal from '../subComponents';
 
 const AddSubscriptions = () => {
     const dispatch = useDispatch();
-    const pluginState = useSelector((state: PluginState) => state);
+    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
 
     return (
         <AddOrEditSubscriptionModal
-            open={pluginState['plugins-mattermost-plugin-servicenow']?.openAddSubscriptionModalReducer?.open}
+            open={pluginState.openAddSubscriptionModalReducer.open}
             close={() => dispatch(hideAddModal())}
         />
     );

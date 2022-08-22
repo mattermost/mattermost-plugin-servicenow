@@ -146,7 +146,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Returns value to be rendered in the options dropdown and in the input
     const getInputValue = (suggestion: Record<string, string>) => `${suggestion.number}: ${suggestion.short_description}`;
 
-    // Handles action when an suggestion is chosen
+    // Handles action when a suggestion is chosen
     const handleSuggestionClick = (suggestionValue: Record<string, string>) => {
         setSuggestionChosen(true);
         setRecordValue(getInputValue(suggestionValue));
@@ -193,24 +193,25 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     suggestions,
                     renderValue: getInputValue,
                 }}
-                charThresholdToShowSuggestions={charThresholdToShowSuggestions}
                 error={validationMsg || validationFailed}
                 className='search-panel__auto-suggest'
                 loadingSuggestions={getRecordsSuggestions().isLoading}
             />
-            {suggestionChosen && <ul className='search-panel__description'>
-                {
-                    Constants.RecordDataLabelConfig.map((header) => (
-                        <li
-                            key={header.key}
-                            className='d-flex align-items-center search-panel__description-item'
-                        >
-                            <span className='search-panel__description-header text-ellipsis'>{header.label}</span>
-                            <span className='search-panel__description-text text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
-                        </li>
-                    ))
-                }
-            </ul>}
+            {suggestionChosen && (
+                <ul className='search-panel__description'>
+                    {
+                        Constants.RecordDataLabelConfig.map((header) => (
+                            <li
+                                key={header.key}
+                                className='d-flex align-items-center search-panel__description-item'
+                            >
+                                <span className='search-panel__description-header text-ellipsis'>{header.label}</span>
+                                <span className='search-panel__description-text text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                            </li>
+                        ))
+                    }
+                </ul>
+            )}
             <ModalSubTitleAndError error={error}/>
             <ModalFooter
                 onHide={onBack}
