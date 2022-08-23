@@ -302,7 +302,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <ModalLoader loading={showModalLoader} />
+                <ModalLoader loading={showModalLoader}/>
                 <ChannelPanel
                     className={`
                         ${recordTypePanelOpen && 'channel-panel--fade-out'}
@@ -377,7 +377,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     iconClass={apiError && apiResponseValid ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}
                 />
-                {false && <CircularLoader />}
+                {false && <CircularLoader/>}
             </>
         </Modal>
     );
