@@ -7,6 +7,7 @@ export enum ToggleSwitchLabelPositioning {
 }
 
 export const DOWNLOAD_UPDATE_SET_LINK = '/download';
+export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';

@@ -13,7 +13,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -220,7 +220,7 @@ const Rhs = (): JSX.Element => {
                     title='No Account Connected'
                     buttonConfig={{
                         text: 'Connect your account',
-                        href: `${Utils.getBaseUrls().pluginApiBaseUrl}/oauth2/connect`,
+                        link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
                     }}
                     iconClass='fa fa-user-circle'
                 />
