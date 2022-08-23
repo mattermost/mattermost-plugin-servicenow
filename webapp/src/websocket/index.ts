@@ -1,7 +1,7 @@
 import {Store, Action} from 'redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 
-import Constants from 'plugin_constants';
+import {SubscriptionEventsMap} from 'plugin_constants';
 
 import {setConnected} from 'reducers/connectedState';
 import {refetch} from 'reducers/refetchSubscriptions';
@@ -30,16 +30,14 @@ export function handleOpenAddSubscriptionModal(store: Store<GlobalState, Action<
 export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (msg: WebsocketEventParams) => {
         const {data} = msg;
+        const events = data.subscription_events.split(',');
+        const subscriptionEvents = events.map((event) => SubscriptionEventsMap[event]);
         const subscriptionData: EditSubscriptionData = {
             channel: data.channel_id,
             recordId: data.record_id,
             id: data.sys_id,
-            alertType: data.record_type as RecordType,
-            stateChanged: data.subscription_events.includes(Constants.SubscriptionEvents.state),
-            priorityChanged: data.subscription_events.includes(Constants.SubscriptionEvents.priority),
-            newCommentChecked: data.subscription_events.includes(Constants.SubscriptionEvents.commented),
-            assignedToChecked: data.subscription_events.includes(Constants.SubscriptionEvents.assignedTo),
-            assignmentGroupChecked: data.subscription_events.includes(Constants.SubscriptionEvents.assignmentGroup),
+            recordType: data.record_type as RecordType,
+            subscriptionEvents,
         };
         store.dispatch(showEditSubcriptionModal(subscriptionData) as Action);
     };

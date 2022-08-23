@@ -85,9 +85,6 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
 
         setShowModalLoader(channelListState.isLoading);
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getMmApiState" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pluginState]);
 
     // Hide error state once the value is valid

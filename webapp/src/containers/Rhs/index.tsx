@@ -14,7 +14,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEvents} from 'plugin_constants';
+import Constants, {SubscriptionEventsMap} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -91,11 +91,13 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = (subscription: SubscriptionData) => {
+        const events = subscription.subscription_events.split(',');
+        const subscriptionEvents = events.map((event) => SubscriptionEventsMap[event]);
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
             recordType: subscription.record_type as RecordType,
-            subscriptionEvents: subscription.subscription_events.split(',') as unknown as SubscriptionEvents[],
+            subscriptionEvents,
             id: subscription.sys_id,
         };
         dispatch(showEditModal(subscriptionData));
@@ -122,11 +124,11 @@ const Rhs = (): JSX.Element => {
     useEffect(() => {
         const subscriptionsState = getSubscriptionsState();
         if (subscriptionsState.isError && !subscriptionsState.isSuccess) {
-            if (subscriptionsState.error?.id === 'not_connected' && connected) {
+            if (subscriptionsState.error?.id === Constants.ApiErrorIdNotConnected && connected) {
                 dispatch(setConnected(false));
             }
 
-            if (subscriptionsState.error?.id === 'subscriptions_not_configured') {
+            if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsNotConfigured) {
                 setSubscriptionsEnabled(false);
                 if (!connected) {
                     dispatch(setConnected(true));
@@ -238,7 +240,7 @@ const Rhs = (): JSX.Element => {
                     }
                 />
             )}
-            {!connected && (
+            {!connected && !subscriptionsLoading && (
                 <EmptyState
                     title='No Account Connected'
                     buttonConfig={{

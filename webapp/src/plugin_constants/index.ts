@@ -19,6 +19,8 @@ const DefaultCharThresholdToShowSuggestions = 4;
 const DefaultPage = 0;
 const DefaultPageSize = 100;
 const PrivateChannelType = 'P';
+const ApiErrorIdNotConnected = 'not_connected';
+const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 
 export enum SubscriptionEvents {
     state = 'state',
@@ -27,6 +29,14 @@ export enum SubscriptionEvents {
     assignedTo = 'assigned_to',
     assignmentGroup = 'assignment_group',
 }
+
+export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
+    state: SubscriptionEvents.state,
+    priority: SubscriptionEvents.priority,
+    commented: SubscriptionEvents.commented,
+    assigned_to: SubscriptionEvents.assignedTo,
+    assignment_group: SubscriptionEvents.assignmentGroup,
+};
 
 const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNow have not been configured properly.';
 const SubscriptionsConfigErrorSubtitleForUser = 'Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin.';
@@ -129,4 +139,6 @@ export default {
     DefaultPage,
     DefaultPageSize,
     PrivateChannelType,
+    ApiErrorIdNotConnected,
+    ApiErrorIdSubscriptionsNotConfigured,
 };
