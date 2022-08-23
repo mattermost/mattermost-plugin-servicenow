@@ -40,6 +40,14 @@ const pluginApi = createApi({
                 body,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName]: builder.query<SubscriptionData[], FetchSubscriptionsParams>({
+            query: (params) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.fetchSubscriptions.path}`,
+                method: Constants.pluginApiServiceConfigs.fetchSubscriptions.method,
+                params,
+            }),
+        }),
     }),
 });
 

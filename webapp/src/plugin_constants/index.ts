@@ -16,6 +16,8 @@ const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 4;
+const DefaultPage = 0;
+const DefaultPageSize = 100;
 const PrivateChannelType = 'P';
 
 export enum SubscriptionEvents {
@@ -68,6 +70,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createSubscription',
     },
+    fetchSubscriptions: {
+        path: '/subscriptions',
+        method: 'GET',
+        apiServiceName: 'fetchSubscriptions',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -92,5 +99,7 @@ export default {
     ChannelHeaderTooltipText,
     RhsToggleLabel,
     DefaultCharThresholdToShowSuggestions,
+    DefaultPage,
+    DefaultPageSize,
     PrivateChannelType,
 };
