@@ -9,7 +9,7 @@ import ModalHeader from 'components/modal/subComponents/modalHeader';
 import ModalLoader from 'components/modal/subComponents/modalLoader';
 import CircularLoader from 'components/loader/circular';
 
-import Constants, {PanelDefaultHeights, SubscriptionEventsEnum} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -47,7 +47,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [successPanelOpen, setSuccessPanelOpen] = useState(false);
 
     // Events panel values
-    const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEventsEnum[]>([]);
+    const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEvents[]>([]);
 
     // API error
     const [apiError, setApiError] = useState<string | null>(null);
@@ -91,19 +91,19 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             // Set initial values for events panel
             // TODO: update this by updating the subscriptionData sent from "../../Rhs/index.tsx";
             if (subscriptionData.stateChanged) {
-                setSubscriptionEvents([SubscriptionEventsEnum.state]);
+                setSubscriptionEvents([SubscriptionEvents.state]);
             }
             if (subscriptionData.priorityChanged) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.priority]);
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.priority]);
             }
             if (subscriptionData.newCommentChecked) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.commented]);
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.commented]);
             }
             if (subscriptionData.assignedToChecked) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.assignedTo]);
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.assignedTo]);
             }
             if (subscriptionData.assignmentGroupChecked) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEventsEnum.assignmentGroup]);
+                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.assignmentGroup]);
             }
         }
     }, [open, subscriptionData]);
@@ -302,7 +302,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <ModalLoader loading={showModalLoader}/>
+                <ModalLoader loading={showModalLoader} />
                 <ChannelPanel
                     className={`
                         ${recordTypePanelOpen && 'channel-panel--fade-out'}
@@ -377,7 +377,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     iconClass={apiError && apiResponseValid ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}
                 />
-                {false && <CircularLoader/>}
+                {false && <CircularLoader />}
             </>
         </Modal>
     );
