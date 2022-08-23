@@ -29,7 +29,7 @@ export default class Plugin {
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, null);
+        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
 
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store));

@@ -14,7 +14,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants, {SubscriptionEvents} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -37,29 +37,27 @@ const Rhs = (): JSX.Element => {
     const refetchSubscriptions = pluginState.refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
-    const [toBeDeleted, setToBeDeleted] = useState<null | DeleteSubscriptionPayload>(null);
+    const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [invalidDeleteApi, setInvalidDeleteApi] = useState(true);
 
-    // Get record data state
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as APIError};
     };
 
-    // Get delete feed state
     const getDeleteSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as DeleteSubscriptionPayload);
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as APIError};
     };
 
     // Fetch subscriptions from the API
     useEffect(() => {
-        const params: FetchSubscriptionsParams = {page: 0, per_page: 100};
+        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
-            params.channel_id = currentChannelId;
+            subscriptionParams.channel_id = currentChannelId;
         }
-        setFetchSubscriptionParams(params);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, params);
+        setFetchSubscriptionParams(subscriptionParams);
+        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
     }, [showAllSubscriptions]);
 
     // Fetch subscriptions from the API when refetch is set
@@ -68,16 +66,15 @@ const Rhs = (): JSX.Element => {
             return;
         }
 
-        const params: FetchSubscriptionsParams = {page: 0, per_page: 100};
+        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
-            params.channel_id = currentChannelId;
+            subscriptionParams.channel_id = currentChannelId;
         }
-        setFetchSubscriptionParams(params);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, params);
+        setFetchSubscriptionParams(subscriptionParams);
+        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
         dispatch(resetRefetch());
-    }, [refetchSubscriptions]);
+    }, [refetchSubscriptions, showAllSubscriptions]);
 
-    // Delete when a feed gets deleted
     useEffect(() => {
         if (getDeleteSubscriptionState().isSuccess && !invalidDeleteApi) {
             setDeleteConfirmationOpen(false);
@@ -90,19 +87,16 @@ const Rhs = (): JSX.Element => {
         if (getDeleteSubscriptionState().isLoading) {
             setInvalidDeleteApi(false);
         }
-    }, [pluginState, invalidDeleteApi]);
+
+    }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, invalidDeleteApi]);
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = (subscription: SubscriptionData) => {
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
-            alertType: subscription.record_type as RecordType,
-            stateChanged: subscription.subscription_events.includes(Constants.SubscriptionEvents.state),
-            priorityChanged: subscription.subscription_events.includes(Constants.SubscriptionEvents.priority),
-            newCommentChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.commented),
-            assignedToChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.assignedTo),
-            assignmentGroupChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.assignmentGroup),
+            recordType: subscription.record_type as RecordType,
+            subscriptionEvents: subscription.subscription_events.split(',') as unknown as SubscriptionEvents[],
             id: subscription.sys_id,
         };
         dispatch(showEditModal(subscriptionData));
@@ -110,16 +104,13 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when the delete button is clicked
     const handleDeleteClick = (subscription: SubscriptionData) => {
-        const deleteFeedPayload: DeleteSubscriptionPayload = {
-            id: subscription.sys_id,
-        };
-        setToBeDeleted(deleteFeedPayload);
+        setToBeDeleted(subscription.sys_id);
         setDeleteConfirmationOpen(true);
     };
 
     // Handles action when the delete confirmation button is clicked
     const handleDeleteConfirmation = () => {
-        makeApiRequest(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as DeleteSubscriptionPayload);
+        makeApiRequest(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
     };
 
     // Handles action when the delete confirmation modal is closed
@@ -157,6 +148,17 @@ const Rhs = (): JSX.Element => {
         }
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
 
+    // Returns card-body for the subscription cards
+    const getSubscriptionCardBody = (subscription: SubscriptionData): SubscriptionCardBody => ({
+        labelValuePairs: [
+            {
+                label: 'ID',
+                value: subscription.sys_id,
+            },
+        ],
+        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
+    });
+
     const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
     return (
         <div className='rhs-content'>
@@ -165,7 +167,7 @@ const Rhs = (): JSX.Element => {
                     <ToggleSwitch
                         active={showAllSubscriptions}
                         onChange={(newState) => setShowAllSubscriptions(newState)}
-                        label='Show all subscriptions'
+                        label={Constants.RhsToggleLabel}
                     />
                     {(subscriptions?.length > 0 && !subscriptionsLoading) && (
                         <>
@@ -173,10 +175,11 @@ const Rhs = (): JSX.Element => {
                                 {subscriptions.map((subscription) => (
                                     <SubscriptionCard
                                         key={subscription.sys_id}
-                                        header={subscription.sys_id}
+                                        header={`${subscription.number} | ${subscription.short_description}`}
                                         label={subscription.type === 'record' ? 'Record subscription' : 'Bulk subscription'}
                                         onEdit={() => handleEditSubscription(subscription)}
                                         onDelete={() => handleDeleteClick(subscription)}
+                                        cardBody={getSubscriptionCardBody(subscription)}
                                     />
                                 ))}
                             </div>
@@ -239,7 +242,6 @@ const Rhs = (): JSX.Element => {
             {!connected && (
                 <EmptyState
                     title='No Account Connected'
-                    subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
                     buttonConfig={{
                         text: 'Connect your account',
                         href: `${Utils.getBaseUrls().pluginApiBaseUrl}/oauth2/connect`,

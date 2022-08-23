@@ -1,10 +1,7 @@
 /**
- * Keep all plugin related constants here
+* Keep all plugin related constants here
 */
-
-const RightSidebarHeader = 'Right Sidebar Placeholder Text';
-
-export enum ToggleSwitchLabelPositioning{
+export enum ToggleSwitchLabelPositioning {
     Left = 'left',
     Right = 'right',
 }
@@ -14,8 +11,22 @@ export const DOWNLOAD_UPDATE_SET_LINK = '/download';
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
 const MMUSERID = 'MMUSERID';
-
+const RightSidebarHeader = 'Subscriptions';
+const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
+const ChannelHeaderTooltipText = 'ServiceNow';
+const DefaultCharThresholdToShowSuggestions = 4;
+const DefaultPage = 0;
+const DefaultPageSize = 100;
+const PrivateChannelType = 'P';
+
+export enum SubscriptionEvents {
+    state = 'state',
+    priority = 'priority',
+    commented = 'commented',
+    assignedTo = 'assigned_to',
+    assignmentGroup = 'assignment_group',
+}
 
 const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNow have not been configured properly.';
 const SubscriptionsConfigErrorSubtitleForUser = 'Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin.';
@@ -41,13 +52,13 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
-// Subscription event names
-const SubscriptionEvents = {
-    state: 'state',
-    priority: 'priority',
-    commented: 'commented',
-    assignedTo: 'assigned_to',
-    assignmentGroup: 'assignment_group',
+// Map subscription events to texts to be shown in the UI(on cards)
+const SubscriptionEventLabels: Record<string, string> = {
+    state: 'State changed',
+    priority: 'Priority changed',
+    commented: 'New comment',
+    assigned_to: 'Assigned to changed',
+    assignment_group: 'Assignment group changed',
 };
 
 // Plugin api service (RTK query) configs
@@ -91,7 +102,7 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
 
 export const PanelDefaultHeights = {
     channelPanel: 151,
-    alertTypePanel: 195,
+    recordTypePanel: 195,
     searchRecordPanel: 203,
     searchRecordPanelExpanded: 372,
     eventsPanel: 500,
@@ -107,9 +118,15 @@ export default {
     HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
-    SubscriptionEvents,
     MMUSERID,
     SubscriptionsConfigErrorTitle,
     SubscriptionsConfigErrorSubtitleForAdmin,
     SubscriptionsConfigErrorSubtitleForUser,
+    ChannelHeaderTooltipText,
+    RhsToggleLabel,
+    DefaultCharThresholdToShowSuggestions,
+    SubscriptionEventLabels,
+    DefaultPage,
+    DefaultPageSize,
+    PrivateChannelType,
 };
