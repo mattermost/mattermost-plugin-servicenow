@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import BaseCard from 'components/card/base';
 import Popover from 'components/popover';
@@ -16,7 +16,7 @@ type SubscriptionCardProps = {
 }
 
 const SubscriptionCard = ({header, label, cardBody, description, onDelete, onEdit}: SubscriptionCardProps) => {
-    const buttonMenuPopover = (
+    const buttonMenuPopover = useMemo(() => (
         <Popover
             popoverBody={
                 <MenuButtons
@@ -40,7 +40,7 @@ const SubscriptionCard = ({header, label, cardBody, description, onDelete, onEdi
                 <i className='fa fa-ellipsis-v'/>
             </button>
         </Popover>
-    );
+    ), [onEdit, onDelete]);
 
     return (
         <BaseCard className='subscription-card'>

@@ -105,6 +105,3 @@ type EditSubscriptionPayload = {
     sys_id: string;
 }
 
-type DeleteSubscriptionPayload = {
-    id: string;
-}

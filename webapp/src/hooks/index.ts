@@ -12,14 +12,14 @@ export default class Hooks {
         this.store = store;
     }
 
-    slashCommandWillBePostedHook = (message: string, contextArgs: {channel_id: string, team_id: string, root_id: string}) => {
-        if (message?.trim() === '/servicenow subscriptions add') {
-            this.store.dispatch(showAddSubscriptionModal() as unknown as Action<Record<string, unknown>>);
+    slashCommandWillBePostedHook = (message: string, contextArgs: MmHookArgTypes) => {
+        if (message.trim() === '/servicenow subscriptions add') {
+            this.store.dispatch(showAddSubscriptionModal() as Action);
             return Promise.resolve({});
         }
 
-        if (message?.trim() === '/servicenow subscriptions edit') {
-            this.store.dispatch(showEditSubscriptionModal() as unknown as Action<Record<string, unknown>>);
+        if (message.trim() === '/servicenow subscriptions edit') {
+            this.store.dispatch(showEditSubscriptionModal() as Action);
             return Promise.resolve({});
         }
 

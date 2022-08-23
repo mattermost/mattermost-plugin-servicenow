@@ -42,10 +42,9 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
 
-    // Get channelList state
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as string)};
+        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message};
     };
 
     useEffect(() => {
@@ -65,7 +64,20 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
 
         if (channelListState.data) {
-            setChannelOptions(channelListState.data.map((ch) => ({label: <span><i className='fa fa-globe dropdown-option-icon'/>{ch.display_name}</span>, value: ch.id})));
+            setChannelOptions(channelListState.data.map((ch) => ({
+                label: (
+                    <span>
+                        <i
+                            className={`
+                                fa dropdown-option-icon
+                                ${ch.type === Constants.PrivateChannelType ? 'fa-lock' : 'fa-globe'}
+                            `}
+                        />
+                        {ch.display_name}
+                    </span>
+                ),
+                value: ch.id,
+            })));
         }
 
         if (channelListState.error) {

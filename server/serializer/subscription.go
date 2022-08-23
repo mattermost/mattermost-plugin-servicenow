@@ -38,11 +38,9 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 	var subscriptionEvents strings.Builder
 	events := strings.Split(s.SubscriptionEvents, ",")
 	for index, event := range events {
-		event = strings.TrimSpace(event)
+		event = constants.FormattedEventNames[strings.TrimSpace(event)]
 		if index != len(events)-1 {
-			event = constants.FormattedEventNames[event] + ", "
-		} else {
-			event = constants.FormattedEventNames[event]
+			event += ", "
 		}
 		subscriptionEvents.WriteString(event)
 	}
@@ -85,7 +83,7 @@ func (s *SubscriptionPayload) IsValidForUpdation(siteURL string) error {
 	}
 
 	if s.ServerURL != nil && *s.ServerURL != siteURL {
-		return fmt.Errorf("serverURL is different from site URL")
+		return fmt.Errorf("serverURL is different from the site URL")
 	}
 	return nil
 }
@@ -142,7 +140,7 @@ func (s *SubscriptionPayload) IsValidForCreation(siteURL string) error {
 	if s.ServerURL == nil {
 		return fmt.Errorf("serverURL is required")
 	} else if *s.ServerURL != siteURL {
-		return fmt.Errorf("serverURL is different from site URL")
+		return fmt.Errorf("serverURL is different from the site URL")
 	}
 
 	return nil

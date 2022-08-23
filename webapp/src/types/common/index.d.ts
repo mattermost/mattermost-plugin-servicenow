@@ -26,28 +26,17 @@ type DropdownOptionType = {
     value: string;
 }
 
-type ProjectDetails = {
-    mattermostID: string
-    projectID: string,
-    projectName: string,
-    organizationName: string
-}
-
-type SubscriptionDetails = {
-    id: string
-    name: string
-    eventType: eventType
+type MmHookArgTypes = {
+    channel_id: string,
+    team_id: string,
+    root_id: string
 }
 
 type EditSubscriptionData = {
     channel: string,
     recordId: string,
-    alertType: RecordType,
-    stateChanged: boolean;
-    priorityChanged: boolean;
-    newCommentChecked: boolean;
-    assignedToChecked: boolean;
-    assignmentGroupChecked: boolean;
+    recordType: RecordType,
+    subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
 }
 
@@ -58,7 +47,7 @@ type RecordDataLabelConfigType = {
     label: string;
 }
 
-type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | DeleteSubscriptionPayload;
+type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | string;
 
 type SubscriptionCardBody = {
     list?: string[] | JSX.Element[],
