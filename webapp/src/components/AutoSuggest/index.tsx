@@ -8,9 +8,12 @@ import './styles.scss';
 type AutoSuggestProps = {
     inputValue: string;
     onInputValueChange: (newValue: string) => void;
-    onOptionClick: (newValue: string) => void;
+    onOptionClick: (suggestion: Record<string, string>) => void;
     placeholder?: string;
-    suggestions: string[];
+    suggestionConfig: {
+        suggestions: Record<string, string>[],
+        renderValue: (suggestion: Record<string, string>) => string;
+    };
     loadingSuggestions?: boolean;
     charThresholdToShowSuggestions?: number;
     disabled?: boolean;
@@ -23,7 +26,7 @@ const AutoSuggest = ({
     inputValue,
     onInputValueChange,
     placeholder,
-    suggestions,
+    suggestionConfig,
     loadingSuggestions = false,
     charThresholdToShowSuggestions = Constants.DefaultCharThresholdToShowSuggestions,
     disabled,
@@ -36,14 +39,15 @@ const AutoSuggest = ({
     const [focused, setFocused] = useState(false);
     let inputBlurTimer: NodeJS.Timeout;
 
+    const {suggestions, renderValue} = suggestionConfig;
+
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
         setOpen(inputValue.length >= charThresholdToShowSuggestions && focused);
-    }, [charThresholdToShowSuggestions, focused, inputValue]);
+    }, [charThresholdToShowSuggestions, focused, inputValue, loadingSuggestions]);
 
-    const handleSuggestionClick = (suggestedValue: string) => {
+    const handleSuggestionClick = (suggestedValue: Record<string, string>) => {
         onOptionClick(suggestedValue);
-        onInputValueChange(suggestedValue);
         setOpen(false);
     };
 
@@ -83,11 +87,11 @@ const AutoSuggest = ({
                 {
                     suggestions.map((suggestion) => (
                         <li
-                            key={suggestion}
+                            key={renderValue(suggestion)}
                             onClick={() => handleSuggestionClick(suggestion)}
                             className='auto-suggest__suggestion text-ellipses cursor-pointer'
                         >
-                            {suggestion}
+                            {renderValue(suggestion)}
                         </li>
                     ))
                 }

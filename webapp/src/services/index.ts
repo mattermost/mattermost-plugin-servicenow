@@ -10,11 +10,34 @@ const pluginApi = createApi({
     baseQuery: fetchBaseQuery({baseUrl: Utils.getBaseUrls().pluginApiBaseUrl}),
     tagTypes: ['Posts'],
     endpoints: (builder) => ({
-        [Constants.pluginApiServiceConfigs.fetchRecords.apiServiceName]: builder.query<void, void>({
-            query: () => ({
-                headers: {[Constants.HeaderMattermostUserID]: Cookies.get(Constants.MMUSERID)},
-                url: Constants.pluginApiServiceConfigs.fetchRecords.path,
-                method: Constants.pluginApiServiceConfigs.fetchRecords.method,
+        [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelList[], FetchChannelsParams>({
+            query: (params) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getChannels.path}/${params.teamId}`,
+                method: Constants.pluginApiServiceConfigs.getChannels.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.searchRecords.apiServiceName]: builder.query<Suggestion[], SearchRecordsParams>({
+            query: ({recordType, search, perPage}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.searchRecords.path}/${recordType}`,
+                method: Constants.pluginApiServiceConfigs.searchRecords.method,
+                params: {search, perPage: perPage || 10},
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getRecord.apiServiceName]: builder.query<RecordData, GetRecordParams>({
+            query: (params) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getRecord.path}/${params.recordType}/${params.recordId}`,
+                method: Constants.pluginApiServiceConfigs.getRecord.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.createSubscription.apiServiceName]: builder.query<void, CreateSubscriptionPayload | void>({
+            query: (body) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.createSubscription.path}`,
+                method: Constants.pluginApiServiceConfigs.createSubscription.method,
+                body,
             }),
         }),
     }),

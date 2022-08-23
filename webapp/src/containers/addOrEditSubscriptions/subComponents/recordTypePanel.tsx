@@ -11,22 +11,22 @@ type RecordTypePanelProps = {
     onBack?: () => void;
     actionBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
-    recordType: string | null;
-    setRecordType: (value: string) => void;
+    recordType: RecordType | null;
+    setRecordType: (value: RecordType) => void;
 }
 
 const recordTypeOptions: DropdownOptionType[] = [
     {
         label: 'Incident',
-        value: 'Incident',
+        value: 'incident',
     },
     {
         label: 'Problem',
-        value: 'Problem',
+        value: 'problem',
     },
     {
         label: 'Change Request',
-        value: 'Change Request',
+        value: 'change_request',
     },
 ];
 
@@ -60,7 +60,7 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({class
             <Dropdown
                 placeholder='Select Record Type'
                 value={recordType}
-                onChange={(newValue) => setRecordType(newValue)}
+                onChange={(newValue) => setRecordType(newValue as RecordType)}
                 options={recordTypeOptions}
                 required={true}
                 error={validationFailed && 'Required'}
