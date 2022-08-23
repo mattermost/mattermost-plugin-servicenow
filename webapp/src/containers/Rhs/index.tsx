@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
@@ -137,7 +137,7 @@ const Rhs = (): JSX.Element => {
     };
 
     // Returns card-body for the subscription cards
-    const getSubscriptionCardBody = (subscription: SubscriptionData): SubscriptionCardBody => ({
+    const getSubscriptionCardBody = useCallback((subscription: SubscriptionData): SubscriptionCardBody => ({
         labelValuePairs: [
             {
                 label: 'ID',
@@ -145,7 +145,7 @@ const Rhs = (): JSX.Element => {
             },
         ],
         list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
-    });
+    }), []);
 
     return (
         <div className='rhs-content'>
