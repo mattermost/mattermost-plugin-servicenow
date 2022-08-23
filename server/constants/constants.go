@@ -1,7 +1,5 @@
 package constants
 
-import "errors"
-
 const (
 	// Bot related constants
 	BotUserName    = "servicenow"
@@ -57,6 +55,12 @@ const (
 	// Websocket events
 	WSEventConnect    = "connect"
 	WSEventDisconnect = "disconnect"
+
+	// API Errors
+	APIErrorIDNotConnected               = "not_connected"
+	APIErrorNotConnected                 = "You have not connected your Mattermost account to ServiceNow."
+	APIErrorIDSubscriptionsNotConfigured = "subscriptions_not_configured"
+	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 )
 
 var (
@@ -87,8 +91,6 @@ var (
 		SubscriptionRecordTypeIncident:      "Incident",
 		SubscriptionRecordTypeChangeRequest: "Change Request",
 	}
-
-	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
 )
 
 type ServiceNowOAuthToken string

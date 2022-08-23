@@ -28,8 +28,6 @@ const (
 	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
 	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
-	editSubscriptionErrorMessage     = "Something went wrong. Not able to edit subscription. Check server logs for errors."
-	editSubscriptionSuccessMessage   = "Subscription successfully edited."
 	unknownErrorMessage              = "Unknown error."
 	notConnectedMessage              = "You are not connected to ServiceNow."
 )
@@ -218,34 +216,6 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		return deleteSubscriptionErrorMessage
 	}
 	return deleteSubscriptionSuccessMessage
-}
-
-func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	// TODO: Remove this code later. This is just for testing purposes.
-	subscriptionID := params[0]
-	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
-	if err != nil {
-		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return deleteSubscriptionErrorMessage
-	}
-
-	if !valid {
-		return "Invalid subscription ID."
-	}
-
-	subscription := &serializer.SubscriptionPayload{
-		SubscriptionEvents: &params[1],
-	}
-	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Failed to validate subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-
-	if _, err = client.EditSubscription(subscriptionID, subscription); err != nil {
-		p.API.LogError("Unable to edit subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-	return editSubscriptionSuccessMessage
 }
 
 func getAutocompleteData() *model.AutocompleteData {

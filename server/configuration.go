@@ -108,9 +108,6 @@ func (p *Plugin) setConfiguration(configuration *configuration) {
 		panic("setConfiguration called with the existing configuration")
 	}
 
-	if configuration != nil && p.configuration != nil && configuration.ServiceNowBaseURL != p.configuration.ServiceNowBaseURL {
-		p.subscriptionsActivated = false
-	}
 	p.configuration = configuration
 }
 
