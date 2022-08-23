@@ -220,14 +220,14 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	command := parameters[0]
 	parameters = parameters[1:]
 
-	switch {
-	case command == "list":
+	switch command {
+	case "list":
 		return p.handleListSubscriptions(c, args, parameters, client)
-	case command == "add":
+	case "add":
 		return p.handleSubscribe(c, args, parameters, client)
-	case command == "edit":
+	case "edit":
 		return p.handleEditSubscription(c, args, parameters, client)
-	case command == "delete":
+	case "delete":
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
