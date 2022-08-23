@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -21,6 +22,8 @@ type Error struct {
 	Detail  string `json:"detail"`
 	Message string `json:"message"`
 }
+
+var ErrorContentTypeNotJSON = fmt.Errorf("content type of the response is not JSON")
 
 func (c *client) CallJSON(method, path string, in, out interface{}, params url.Values) (responseData []byte, statusCode int, err error) {
 	contentType := "application/json"
@@ -79,6 +82,9 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 
 	switch resp.StatusCode {
 	case http.StatusOK, http.StatusCreated:
+		if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+			return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
+		}
 		if out != nil {
 			if err = json.Unmarshal(responseData, out); err != nil {
 				return responseData, http.StatusInternalServerError, err
@@ -90,6 +96,9 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 		return nil, resp.StatusCode, nil
 	}
 
+	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
+	}
 	errResp := ErrorResponse{}
 	if err = json.Unmarshal(responseData, &errResp); err != nil {
 		return responseData, resp.StatusCode, errors.WithMessagef(err, "status: %s", resp.Status)

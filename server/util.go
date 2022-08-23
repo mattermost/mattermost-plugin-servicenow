@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
@@ -13,7 +14,7 @@ import (
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
 	var sb strings.Builder
 	sb.WriteString("#### Record subscriptions for this channel\n")
-	recordSubscriptionsTableHeader := "| Subscription ID | Record Type | Record ID | Events|\n| :----|:--------| :--------| :-----| :--------|"
+	recordSubscriptionsTableHeader := "| Subscription ID | Record Type | Record Number | Record Short Description | Events|\n| :----|:--------| :--------| :-----| :--------|"
 	sb.WriteString(recordSubscriptionsTableHeader)
 	for _, subscription := range subscriptions {
 		sb.WriteString(subscription.GetFormattedSubscription())
@@ -46,4 +47,27 @@ func (p *Plugin) GetClientFromRequest(r *http.Request) Client {
 	ctx := r.Context()
 	token := ctx.Value(constants.ContextTokenKey).(*oauth2.Token)
 	return p.NewClient(ctx, token)
+}
+
+func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer.SubscriptionResponse, client Client, wg *sync.WaitGroup) {
+	defer wg.Done()
+	record, _, err := client.GetRecordFromServiceNow(subscription.RecordType, subscription.RecordID)
+	if err != nil {
+		p.API.LogError("Error in getting record from ServiceNow", "Record type", subscription.RecordType, "Record ID", subscription.RecordID, "Error", err.Error())
+		return
+	}
+	subscription.Number = record.Number
+	subscription.ShortDescription = record.ShortDescription
+}
+
+func (p *Plugin) getHelpMessage(header string, isSysAdmin bool) string {
+	var sb strings.Builder
+	sb.WriteString(header)
+	helpCommandMessage := strings.ReplaceAll(commandHelp, "|", "`")
+	if isSysAdmin {
+		helpCommandMessage = strings.ReplaceAll(commandHelpForAdmin, "|", "`")
+	}
+
+	sb.WriteString(helpCommandMessage)
+	return sb.String()
 }
