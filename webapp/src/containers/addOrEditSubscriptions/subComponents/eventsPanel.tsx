@@ -1,15 +1,9 @@
-import React, {forwardRef, useState, useEffect} from 'react';
-import {useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-redux/types/store';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
+import React, {forwardRef} from 'react';
 
 import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Checkbox from 'components/checkbox';
-
-import Constants from 'plugin_constants';
-
-import usePluginApi from 'hooks/usePluginApi';
+import {SubscriptionEvents} from 'plugin_constants';
 
 type EventsPanelProps = {
     className?: string;
@@ -18,17 +12,9 @@ type EventsPanelProps = {
     onBack?: () => void;
     actionBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
-    stateChanged: boolean;
-    setStateChanged: (state: boolean) => void;
-    priorityChanged: boolean;
-    setPriorityChanged: (priority: boolean) => void;
-    newCommentChecked: boolean;
-    setNewCommentChecked: (newCommentChecked: boolean) => void;
-    assignedToChecked: boolean;
-    setAssignedToChecked: (assignedTo: boolean) => void;
-    assignmentGroupChecked: boolean;
-    setAssignmentGroupChecked: (assignmentGroup: boolean) => void;
-    channel: string;
+    subscriptionEvents: SubscriptionEvents[];
+    setSubscriptionEvents: React.Dispatch<React.SetStateAction<SubscriptionEvents[]>>;
+    channel: DropdownOptionType | null;
     record: string;
 }
 
@@ -38,38 +24,21 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     onBack,
     onContinue,
     actionBtnDisabled,
-    stateChanged,
-    setStateChanged,
-    priorityChanged,
-    setPriorityChanged,
-    newCommentChecked,
-    setNewCommentChecked,
-    assignedToChecked,
-    setAssignedToChecked,
-    assignmentGroupChecked,
-    setAssignmentGroupChecked,
+    subscriptionEvents,
+    setSubscriptionEvents,
     channel,
     record,
 }: EventsPanelProps, eventsPanelRef): JSX.Element => {
-    const {entities} = useSelector((state: GlobalState) => state);
-    const {state: APIState, getApiState} = usePluginApi();
-    const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
+    const handleSelectedEventsChange = (selected: boolean, event: SubscriptionEvents) => {
+        const filterEvents = (events: SubscriptionEvents[]): SubscriptionEvents[] => (
+            events.filter((currentEvent) => currentEvent !== event)
+        );
 
-    // Update the channelList once it is fetched from the backend
-    useEffect(() => {
-        const channelListState = getChannelState();
-        if (channelListState.data) {
-            setChannelOptions(channelListState.data?.map((ch) => ({label: <span><i className='fa fa-globe dropdown-option-icon'/>{ch.display_name}</span>, value: ch.id})));
-        }
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getMmApiState" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [APIState]);
-
-    // Get channelList state
-    const getChannelState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {error?: string})?.error};
+        return selected ? (
+            setSubscriptionEvents((prev: SubscriptionEvents[]) => ([...prev, event]))
+        ) : (
+            setSubscriptionEvents((prev: SubscriptionEvents[]) => filterEvents(prev))
+        );
     };
 
     return (
@@ -80,40 +49,40 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
             <div className='events-panel__prev-data'>
                 <h4 className='events-panel__prev-data-header'>{'Channel'}</h4>
                 <p className='events-panel__prev-data-text'>
-                    {channelOptions.find((ch) => ch.value === channel)?.label}
+                    {channel?.label}
                 </p>
                 <h4 className='events-panel__prev-data-header record-header'>{'Record'}</h4>
                 <p className='events-panel__prev-data-text'>{record}</p>
             </div>
             <label className='events-panel__label'>{'Available alert:(optional)'}</label>
             <Checkbox
-                checked={stateChanged}
+                checked={subscriptionEvents.includes(SubscriptionEvents.state)}
                 label='State changed'
-                onChange={setStateChanged}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.state)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={priorityChanged}
+                checked={subscriptionEvents.includes(SubscriptionEvents.priority)}
                 label='Priority changed'
-                onChange={setPriorityChanged}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.priority)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={newCommentChecked}
+                checked={subscriptionEvents.includes(SubscriptionEvents.commented)}
                 label='New comment'
-                onChange={setNewCommentChecked}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.commented)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={assignedToChecked}
+                checked={subscriptionEvents.includes(SubscriptionEvents.assignedTo)}
                 label='Assigned to changed'
-                onChange={setAssignedToChecked}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.assignedTo)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={assignmentGroupChecked}
+                checked={subscriptionEvents.includes(SubscriptionEvents.assignmentGroup)}
                 label='Assignment group changed'
-                onChange={setAssignmentGroupChecked}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.assignmentGroup)}
                 className='events-panel__checkbox'
             />
             <ModalSubTitleAndError error={error}/>

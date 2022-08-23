@@ -11,12 +11,12 @@ type EditSubscriptionProps = {
 
 const EditSubscription = ({subscriptionData}: EditSubscriptionProps) => {
     const dispatch = useDispatch();
-    const pluginState = useSelector((state: PluginState) => state);
+    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
 
     // TODO: Add the logic for checking if the user is connected first
     return (
         <AddOrEditSubscriptionModal
-            open={pluginState['plugins-mattermost-plugin-servicenow']?.openEditSubscriptionModalReducer?.open}
+            open={pluginState.openEditSubscriptionModalReducer.open}
             close={() => dispatch(hideEditModal())}
             subscriptionData={subscriptionData}
         />

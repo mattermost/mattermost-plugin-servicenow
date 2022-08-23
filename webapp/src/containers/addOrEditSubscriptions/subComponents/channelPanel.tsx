@@ -21,6 +21,8 @@ type ChannelPanelProps = {
     setShowModalLoader: (show: boolean) => void;
     setApiError: (error: string | null) => void;
     setApiResponseValid: (valid: boolean) => void;
+    channelOptions: DropdownOptionType[],
+    setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
 }
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
@@ -33,16 +35,16 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setShowModalLoader,
     setApiError,
     setApiResponseValid,
+    channelOptions,
+    setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
-    const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
     const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
 
-    // Get channelList state
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as string)};
+        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message};
     };
 
     useEffect(() => {
@@ -62,7 +64,20 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
 
         if (channelListState.data) {
-            setChannelOptions(channelListState.data.map((ch) => ({label: <span><i className='fa fa-globe dropdown-option-icon'/>{ch.display_name}</span>, value: ch.id})));
+            setChannelOptions(channelListState.data.map((ch) => ({
+                label: (
+                    <span>
+                        <i
+                            className={`
+                                fa dropdown-option-icon
+                                ${ch.type === Constants.PrivateChannelType ? 'fa-lock' : 'fa-globe'}
+                            `}
+                        />
+                        {ch.display_name}
+                    </span>
+                ),
+                value: ch.id,
+            })));
         }
 
         if (channelListState.error) {
@@ -75,7 +90,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [APIState]);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
         if (channel) {
             setValidationFailed(false);

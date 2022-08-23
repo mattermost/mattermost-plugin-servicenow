@@ -9,7 +9,7 @@ import {PluginRegistry} from 'types/mattermost-webapp';
 import reducer from 'reducers';
 
 import Rhs from 'containers/Rhs';
-import AddSubscriptions from 'containers/addOrEditSubscriptions/addSubscription';
+import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 
 import Constants from 'plugin_constants';
 
@@ -26,9 +26,9 @@ export default class Plugin {
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
         // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
         registry.registerReducer(reducer);
-        registry.registerRootComponent(AddSubscriptions);
+        registry.registerRootComponent(AddSubscription);
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, null);
+        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
         const hooks = new Hooks(store);
         registry.registerSlashCommandWillBePostedHook(hooks.slashCommandWillBePostedHook);

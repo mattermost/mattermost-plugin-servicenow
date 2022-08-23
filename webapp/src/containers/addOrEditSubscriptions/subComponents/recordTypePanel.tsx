@@ -4,19 +4,19 @@ import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleA
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Dropdown from 'components/dropdown';
 
-type AlertTypePanelProps = {
+type RecordTypePanelProps = {
     className?: string;
     error?: string;
     onContinue?: () => void;
     onBack?: () => void;
     actionBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
-    alertType: RecordType | null;
-    setAlertType: (value: RecordType) => void;
+    recordType: RecordType | null;
+    setRecordType: (value: RecordType) => void;
     setResetRecordPanelStates: (reset: boolean) => void;
 }
 
-const alertTypeOptions: DropdownOptionType[] = [
+const recordTypeOptions: DropdownOptionType[] = [
     {
         label: 'Incident',
         value: 'incident',
@@ -31,28 +31,28 @@ const alertTypeOptions: DropdownOptionType[] = [
     },
 ];
 
-const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({
+const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     className,
     error,
     onContinue,
     onBack,
     actionBtnDisabled,
-    alertType,
-    setAlertType,
+    recordType,
+    setRecordType,
     setResetRecordPanelStates,
-}: AlertTypePanelProps, alertTypePanelRef): JSX.Element => {
+}: RecordTypePanelProps, recordTypePanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
-    // Hide error state once it the value is valid
+    // Hide error state once the value is valid
     useEffect(() => {
-        if (alertType) {
+        if (recordType) {
             setValidationFailed(false);
         }
-    }, [alertType]);
+    }, [recordType]);
 
     // Handle action when the continue button is clicked
     const handleContinue = () => {
-        if (!alertType) {
+        if (!recordType) {
             setValidationFailed(true);
             return;
         }
@@ -64,20 +64,20 @@ const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({
 
     // Handle change in alert type
     const handleAlertTypeChange = (newValue: RecordType) => {
-        setAlertType(newValue);
+        setRecordType(newValue);
         setResetRecordPanelStates(true);
     };
 
     return (
         <div
             className={`modal__body modal-body secondary-panel ${className}`}
-            ref={alertTypePanelRef}
+            ref={recordTypePanelRef}
         >
             <Dropdown
                 placeholder='Select Record Type'
-                value={alertType}
+                value={recordType}
                 onChange={(newValue) => handleAlertTypeChange(newValue as RecordType)}
-                options={alertTypeOptions}
+                options={recordTypeOptions}
                 required={true}
                 error={validationFailed && 'Required'}
             />
@@ -94,4 +94,4 @@ const AlertTypePanel = forwardRef<HTMLDivElement, AlertTypePanelProps>(({
     );
 });
 
-export default AlertTypePanel;
+export default RecordTypePanel;
