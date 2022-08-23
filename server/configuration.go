@@ -25,10 +25,10 @@ type configuration struct {
 	EncryptionSecret            string `json:"EncryptionSecret"`
 	WebhookSecret               string `json:"WebhookSecret"`
 	UpdateSetDownload           string `json:"ServiceNowUpdateSetDownload"`
-	MattermostSiteURL           string
-	PluginID                    string
-	PluginURL                   string
-	PluginURLPath               string
+	MattermostSiteURL           string `json:"-"`
+	PluginID                    string `json:"-"`
+	PluginURL                   string `json:"-"`
+	PluginURLPath               string `json:"-"`
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if

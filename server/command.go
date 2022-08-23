@@ -32,6 +32,15 @@ const (
 * Click on that update set and then click on "Preview Update Set".
 * After the preview is complete, you have to commit the update set by clicking on the button "Commit Update Set".
 * You'll see a warning dialog. You can ignore that and click on "Proceed with Commit".
+
+##### Setting up user permissions in ServiceNow
+Within ServiceNow user roles, add the "x_830655_mm_std.user" role to any user who should have the ability to add or manage subscriptions in Mattermost channels.
+- Go to ServiceNow and search for Users.
+- On the Users page, open any user's profile. 
+- Click on "Roles" tab in the table present below and click on "Edit"
+- Then, search for the "x_830655_mm_std.user" role and add that role to the user's Roles list and click on "Save".
+
+After that, this user will have the permission to add or manage subscriptions from Mattermost.
 `
 
 	helpCommandHeader                       = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
@@ -46,7 +55,10 @@ const (
 	notConnectedMessage                     = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
 	subscriptionsNotConfiguredError         = "It seems that subscriptions for ServiceNow have not been configured properly."
 	subscriptionsNotConfiguredErrorForUser  = subscriptionsNotConfiguredError + " Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin."
-	subscriptionsNotConfiguredErrorForAdmin = subscriptionsNotConfiguredError + "\nTo enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings. The instructions for uploading the update set are available in the plugin's documentation and also can be viewed by running the \"/servicenow help\" command."
+	subscriptionsNotConfiguredErrorForAdmin = subscriptionsNotConfiguredError + " To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings. The instructions for uploading the update set are available in the plugin's documentation and also can be viewed by running the \"/servicenow help\" command."
+	subscriptionsNotAuthorizedError         = "It seems that you are not authorized to manage subscriptions in ServiceNow."
+	subscriptionsNotAuthorizedErrorForUser  = subscriptionsNotAuthorizedError + " Please contact your system administrator."
+	subscriptionsNotAuthorizedErrorForAdmin = subscriptionsNotAuthorizedError + " Please follow the instructions for setting up user permissions available in the plugin's documentation. The instructions can also be viewed by running the \"/servicenow help\" command."
 )
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
@@ -128,6 +140,11 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 					message = subscriptionsNotConfiguredErrorForUser
 					if isSysAdmin {
 						message = subscriptionsNotConfiguredErrorForAdmin
+					}
+				} else if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized) {
+					message = subscriptionsNotAuthorizedErrorForUser
+					if isSysAdmin {
+						message = subscriptionsNotAuthorizedErrorForAdmin
 					}
 				} else {
 					message = unknownErrorMessage

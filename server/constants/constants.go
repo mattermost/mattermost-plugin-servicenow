@@ -62,6 +62,8 @@ const (
 	APIErrorNotConnected                 = "You have not connected your Mattermost account to ServiceNow."
 	APIErrorIDSubscriptionsNotConfigured = "subscriptions_not_configured"
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
+	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
+	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 )
 
 var (

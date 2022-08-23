@@ -53,6 +53,10 @@ func (c *client) ActivateSubscriptions() (int, error) {
 		if strings.Contains(err.Error(), "Invalid table") {
 			return statusCode, fmt.Errorf(constants.APIErrorIDSubscriptionsNotConfigured)
 		}
+		if strings.Contains(err.Error(), "User Not Authorized") {
+			return statusCode, fmt.Errorf(constants.APIErrorIDSubscriptionsNotAuthorized)
+		}
+
 		return statusCode, errors.Wrap(err, "failed to get subscription auth details")
 	}
 
