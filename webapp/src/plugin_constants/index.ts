@@ -18,7 +18,7 @@ const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 4;
 const PrivateChannelType = 'P';
 
-export enum SubscriptionEventsEnum {
+export enum SubscriptionEvents {
     state = 'state',
     priority = 'priority',
     commented = 'commented',
@@ -45,15 +45,6 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
         label: 'Assignment Group',
     },
 ];
-
-// Subscription event names
-const SubscriptionEvents = {
-    state: 'state',
-    priority: 'priority',
-    commented: 'commented',
-    assignedTo: 'assigned_to',
-    assignmentGroup: 'assignment_group',
-};
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
@@ -97,7 +88,6 @@ export default {
     HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
-    SubscriptionEvents,
     MMUSERID,
     ChannelHeaderTooltipText,
     RhsToggleLabel,
