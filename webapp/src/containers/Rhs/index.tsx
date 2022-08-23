@@ -14,7 +14,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEventsMap, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
+import Constants, {SubscriptionEventsMap, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK, DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -231,7 +231,7 @@ const Rhs = (): JSX.Element => {
                     iconClass='fa fa-unlink'
                     buttonConfig={isCurrentUserSysAdmin ? ({
                         text: 'Download update set',
-                        href: `${Utils.getBaseUrls().pluginApiBaseUrl}/download`,
+                        link: Utils.getBaseUrls().pluginApiBaseUrl + DOWNLOAD_UPDATE_SET_LINK,
                         download: true,
                     }) : null
                     }
