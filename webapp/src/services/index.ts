@@ -28,7 +28,7 @@ const pluginApi = createApi({
         [Constants.pluginApiServiceConfigs.getRecord.apiServiceName]: builder.query<RecordData, GetRecordParams>({
             query: (params) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: `${Constants.pluginApiServiceConfigs.getRecord.path}/${params?.recordType}/${params?.recordId}`,
+                url: `${Constants.pluginApiServiceConfigs.getRecord.path}/${params.recordType}/${params.recordId}`,
                 method: Constants.pluginApiServiceConfigs.getRecord.method,
             }),
         }),

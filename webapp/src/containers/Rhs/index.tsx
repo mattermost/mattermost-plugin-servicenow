@@ -13,7 +13,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants, {SubscriptionEvents} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -50,7 +50,6 @@ const Rhs = (): JSX.Element => {
     const [toBeDeleted, setToBeDeleted] = useState<null | DeleteSubscriptionPayload>(null);
     const [invalidDeleteApi, setInvalidDeleteApi] = useState(true);
 
-    // Get record data state
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
@@ -66,7 +65,7 @@ const Rhs = (): JSX.Element => {
 
     // Fetch subscriptions from the API
     useEffect(() => {
-        const subscriptionParams: FetchSubscriptionsParams = {page: 1, per_page: 100};
+        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
             subscriptionParams.channel_id = currentChannelId;
         }
@@ -79,14 +78,14 @@ const Rhs = (): JSX.Element => {
         if (!refetchSubscriptions) {
             return;
         }
-        const params: FetchSubscriptionsParams = {page: 1, per_page: 100};
+        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
-            params.channel_id = currentChannelId;
+            subscriptionParams.channel_id = currentChannelId;
         }
-        setFetchSubscriptionParams(params);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, params);
+        setFetchSubscriptionParams(subscriptionParams);
+        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
         dispatch(resetRefetch());
-    }, [refetchSubscriptions]);
+    }, [refetchSubscriptions, showAllSubscriptions]);
 
     // Delete when a feed gets deleted
     useEffect(() => {
@@ -111,12 +110,8 @@ const Rhs = (): JSX.Element => {
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
-            alertType: subscription.record_type as RecordType,
-            stateChanged: subscription.subscription_events.includes(Constants.SubscriptionEvents.state),
-            priorityChanged: subscription.subscription_events.includes(Constants.SubscriptionEvents.priority),
-            newCommentChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.commented),
-            assignedToChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.assignedTo),
-            assignmentGroupChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.assignmentGroup),
+            recordType: subscription.record_type as RecordType,
+            subscriptionEvents: subscription.subscription_events.split(',') as unknown as SubscriptionEvents[],
             id: subscription.sys_id,
         };
         dispatch(showEditModal());
@@ -145,18 +140,18 @@ const Rhs = (): JSX.Element => {
         <div className='rhs-content'>
             <ToggleSwitch
                 active={showAllSubscriptions}
-                onChange={(newState) => setShowAllSubscriptions(newState)}
+                onChange={setShowAllSubscriptions}
                 label={Constants.RhsToggleLabel}
             />
             {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
             {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
                 <>
                     <div className='rhs-content__cards-container'>
-                        {mockSubscriptions.data?.map((subscription) => (
+                        {mockSubscriptions.data.map((subscription) => (
                             <SubscriptionCard
                                 key={subscription.sys_id}
                                 header={subscription.sys_id}
-                                label={subscription.record_type === 'record' ? 'Single Record' : 'Bulk Record'}
+                                label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
                                 onEdit={() => handleEditSubscription(subscription)}
                                 onDelete={() => handleDeleteClick(subscription)}
                             />

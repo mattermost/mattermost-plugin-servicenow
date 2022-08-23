@@ -7,10 +7,8 @@ type BaseCardProps = {
     className?: string;
 }
 
-const BaseCard = ({children, className = ''}: BaseCardProps) => {
-    return (
-        <div className={`wrapper ${className}`}>{children}</div>
-    );
-};
+const BaseCard = ({children, className = ''}: BaseCardProps) => (
+    <div className={`wrapper ${className}`}>{children}</div>
+);
 
 export default BaseCard;
