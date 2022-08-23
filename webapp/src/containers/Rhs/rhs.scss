@@ -1,0 +1,26 @@
+@import '../../styles/abstract/variables';
+
+.rhs-content {
+  padding: 15px 12px 12px;
+  height: calc(100% - #{$rhs-header-height} - #{$rhs-footer-height});
+
+  .empty-state {
+    // $toggle-section-height - height of the section containing toggle button for showing all the subscription
+    height: calc(100% - #{$toggle-section-height});
+  }
+}
+
+.rhs-btn-container {
+  position: fixed;
+  left: 1px;
+  right: 0;
+  z-index: 1;
+  bottom: 0;
+  background: var(--center-channel-bg);
+  padding: 12px 12px 12px 11px;
+  box-shadow: 9px 2px 5px 5px var(--center-channel-bg);
+}
+
+.rhs-btn {
+  width: 100%;
+}
