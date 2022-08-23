@@ -89,6 +89,8 @@ type SubscriptionData = {
     subscription_events: string;
     channel_id: string;
     sys_id: string;
+    number: string;
+    short_description: string;
 }
 
 type EditSubscriptionPayload = {
