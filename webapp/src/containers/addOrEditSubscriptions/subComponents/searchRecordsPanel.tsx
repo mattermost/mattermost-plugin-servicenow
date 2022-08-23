@@ -56,7 +56,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
-    const [disabledInput, setDisableInput] = useState(false);
+    const [disabledInput, setDisabledInput] = useState(false);
 
     const getRecordsSuggestions = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload as SearchRecordsParams);
@@ -91,25 +91,36 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     };
 
     // Handles resetting the states
-    const resetValues = () => {
+    const resetValues = useCallback(() => {
         setRecordValue('');
         setRecordId(null);
-        setDisableInput(false);
+        setDisabledInput(false);
         setSuggestionChosen(false);
         setGetSuggestionDataPayload(null);
         setSearchRecordsPayload(null);
         setSuggestions([]);
-    };
+    }, [
+        setRecordValue,
+        setRecordId,
+        setDisabledInput,
+        setSuggestionChosen,
+        setGetSuggestionDataPayload,
+        setSearchRecordsPayload,
+        setSuggestions,
+    ]);
 
     const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
 
     // If "recordId" is provided when the component is mounted, then the subscription is being edited, hence fetch the record data from the API
     useEffect(() => {
         if (recordId && !recordValue) {
-            setDisableInput(true);
+            setDisabledInput(true);
             setSuggestionChosen(true);
             getSuggestionData(recordId);
         }
+
+        // Reset the state when the component is unmounted
+        return resetValues;
     }, []);
 
     // If the "resetStates" is set, reset the data
@@ -125,7 +136,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
             const recordDataState = getRecordDataState();
             if (recordDataState.data) {
                 setRecordValue(`${recordDataState.data.number}: ${recordDataState.data.short_description}`);
-                setDisableInput(false);
+                setDisabledInput(false);
             }
         }
     }, [APIState]);
@@ -153,18 +164,13 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (recordDataState.isError) {
             setApiError(recordDataState.error);
         }
-    }, [APIState]);
+    }, [getRecordDataState().isLoading, getRecordDataState().isError]);
 
     // Hide error state once the value is valid
     useEffect(() => {
         setValidationFailed(false);
         setValidationMsg(null);
     }, [recordValue]);
-
-    // Reset the state when the component is unmounted
-    useEffect(() => {
-        return resetValues;
-    }, []);
 
     // handle input value change
     const handleInputChange = (currentValue: string) => {

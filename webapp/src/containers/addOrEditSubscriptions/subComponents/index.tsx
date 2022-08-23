@@ -92,29 +92,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setChannel(subscriptionData.channel);
 
             // Set initial values for record-type panel
-            setRecordType(subscriptionData.alertType);
+            setRecordType(subscriptionData.recordType);
 
             // Set initial values for search-record panel
             setRecordId(subscriptionData.recordId);
             setSuggestionChosen(true);
 
-            // Set initial values for events panel
-            // TODO: update this by updating the subscriptionData sent from "../../Rhs/index.tsx";
-            if (subscriptionData.stateChanged) {
-                setSubscriptionEvents([SubscriptionEvents.state]);
-            }
-            if (subscriptionData.priorityChanged) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.priority]);
-            }
-            if (subscriptionData.newCommentChecked) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.commented]);
-            }
-            if (subscriptionData.assignedToChecked) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.assignedTo]);
-            }
-            if (subscriptionData.assignmentGroupChecked) {
-                setSubscriptionEvents((prev) => [...prev, SubscriptionEvents.assignmentGroup]);
-            }
+            // Set initial value for events panel
+            setSubscriptionEvents(subscriptionData.subscriptionEvents);
         }
     }, [open, subscriptionData]);
 
@@ -140,7 +125,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (editSubscriptionState.isError && apiResponseValid) {
             setApiError(editSubscriptionState.error);
         }
-        if (editSubscriptionState.data) {
+        if (editSubscriptionState.data && apiResponseValid) {
             setSuccessPanelOpen(true);
         }
         setShowModalLoader(editSubscriptionState.isLoading);
@@ -332,7 +317,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         // Set payload
         setEditSubscriptionPayload(payload);
 
-        // Make API request for creating the subscription
+        // Make API request for editing the subscription
         makeApiRequest(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, payload);
     };
 
@@ -350,7 +335,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <ModalLoader loading={showModalLoader} />
+                <ModalLoader loading={showModalLoader}/>
                 <ChannelPanel
                     className={`
                         ${recordTypePanelOpen && 'channel-panel--fade-out'}
@@ -429,7 +414,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     iconClass={apiError && apiResponseValid ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}
                 />
-                {false && <CircularLoader />}
+                {false && <CircularLoader/>}
             </>
         </Modal>
     );

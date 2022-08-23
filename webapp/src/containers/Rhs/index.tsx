@@ -12,7 +12,7 @@ import CircularLoader from 'components/loader/circular';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants, {SubscriptionEvents} from 'plugin_constants';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
@@ -66,12 +66,8 @@ const Rhs = (): JSX.Element => {
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
-            alertType: subscription.record_type as RecordType,
-            stateChanged: subscription.subscription_events.includes(Constants.SubscriptionEvents.state),
-            priorityChanged: subscription.subscription_events.includes(Constants.SubscriptionEvents.priority),
-            newCommentChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.commented),
-            assignedToChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.assignedTo),
-            assignmentGroupChecked: subscription.subscription_events.includes(Constants.SubscriptionEvents.assignmentGroup),
+            recordType: subscription.record_type as RecordType,
+            subscriptionEvents: subscription.subscription_events.split(',') as unknown as SubscriptionEvents[],
             id: subscription.sys_id,
         };
         dispatch(showEditModal());

@@ -35,12 +35,8 @@ type MmHookArgTypes = {
 type EditSubscriptionData = {
     channel: string,
     recordId: string,
-    alertType: RecordType,
-    stateChanged: boolean;
-    priorityChanged: boolean;
-    newCommentChecked: boolean;
-    assignedToChecked: boolean;
-    assignmentGroupChecked: boolean;
+    recordType: RecordType,
+    subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
 }
 
