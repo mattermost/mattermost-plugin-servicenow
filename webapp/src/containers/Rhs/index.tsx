@@ -13,7 +13,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEvents} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -49,7 +49,7 @@ const Rhs = (): JSX.Element => {
     const {makeApiRequest, getApiState} = usePluginApi();
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
-    const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+    const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [invalidDeleteApi, setInvalidDeleteApi] = useState(true);
 
@@ -154,18 +154,18 @@ const Rhs = (): JSX.Element => {
                 <>
                     <ToggleSwitch
                         active={showAllSubscriptions}
-                        onChange={(newState) => setShowAllSubscriptions(newState)}
+                        onChange={setShowAllSubscriptions}
                         label={Constants.RhsToggleLabel}
                     />
                     {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
-                    {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
+                    {mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading && (
                         <>
                             <div className='rhs-content__cards-container'>
                                 {mockSubscriptions.data.map((subscription) => (
                                     <SubscriptionCard
                                         key={subscription.sys_id}
                                         header={`${subscription.number} | ${subscription.short_description}`}
-                                        label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
+                                        label={SubscriptionTypeLabelMap[subscription.type]}
                                         onEdit={() => handleEditSubscription(subscription)}
                                         onDelete={() => handleDeleteClick(subscription)}
                                         cardBody={getSubscriptionCardBody(subscription)}
@@ -196,10 +196,9 @@ const Rhs = (): JSX.Element => {
                     {subscriptionsState.isLoading && <CircularLoader/>}
                     {toBeDeleted && (
                         <Modal
-                            show={deleteConfirmationOpen}
+                            show={isDeleteConfirmationOpen}
                             onHide={hideDeleteConfirmation}
                             title='Confirm Delete Subscription'
-                            cancelBtnText='Cancel'
                             confirmBtnText='Delete'
                             className='delete-confirmation-modal'
                             onConfirm={handleDeleteConfirmation}
@@ -209,9 +208,7 @@ const Rhs = (): JSX.Element => {
                             error={invalidDeleteApi || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
                             confirmBtnClassName='btn-danger'
                         >
-                            <>
-                                <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
-                            </>
+                            <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
                         </Modal>
                     )}
                 </>

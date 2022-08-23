@@ -28,6 +28,11 @@ export enum SubscriptionEvents {
     assignmentGroup = 'assignment_group',
 }
 
+export const SubscriptionTypeLabelMap: Record<string, string> = {
+    record: 'Record subscription',
+    object: 'Bulk subscription',
+};
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
