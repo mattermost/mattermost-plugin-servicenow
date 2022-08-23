@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
@@ -14,7 +14,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEventsMap} from 'plugin_constants';
+import Constants, {SubscriptionEventsMap, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -36,7 +36,7 @@ const Rhs = (): JSX.Element => {
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
     const refetchSubscriptions = pluginState.refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
-    const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+    const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [invalidDeleteApi, setInvalidDeleteApi] = useState(true);
 
@@ -150,7 +150,7 @@ const Rhs = (): JSX.Element => {
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
 
     // Returns card-body for the subscription cards
-    const getSubscriptionCardBody = (subscription: SubscriptionData): SubscriptionCardBody => ({
+    const getSubscriptionCardBody = useCallback((subscription: SubscriptionData): SubscriptionCardBody => ({
         labelValuePairs: [
             {
                 label: 'ID',
@@ -158,7 +158,7 @@ const Rhs = (): JSX.Element => {
             },
         ],
         list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
-    });
+    }), []);
 
     const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
     return (
@@ -167,7 +167,7 @@ const Rhs = (): JSX.Element => {
                 <>
                     <ToggleSwitch
                         active={showAllSubscriptions}
-                        onChange={(newState) => setShowAllSubscriptions(newState)}
+                        onChange={setShowAllSubscriptions}
                         label={Constants.RhsToggleLabel}
                     />
                     {(subscriptions?.length > 0 && !subscriptionsLoading) && (
@@ -177,7 +177,7 @@ const Rhs = (): JSX.Element => {
                                     <SubscriptionCard
                                         key={subscription.sys_id}
                                         header={`${subscription.number} | ${subscription.short_description}`}
-                                        label={subscription.type === 'record' ? 'Record subscription' : 'Bulk subscription'}
+                                        label={SubscriptionTypeLabelMap[subscription.type]}
                                         onEdit={() => handleEditSubscription(subscription)}
                                         onDelete={() => handleDeleteClick(subscription)}
                                         cardBody={getSubscriptionCardBody(subscription)}
@@ -206,10 +206,9 @@ const Rhs = (): JSX.Element => {
                     )}
                     {toBeDeleted && (
                         <Modal
-                            show={deleteConfirmationOpen}
+                            show={isDeleteConfirmationOpen}
                             onHide={hideDeleteConfirmation}
                             title='Confirm Delete Subscription'
-                            cancelBtnText='Cancel'
                             confirmBtnText='Delete'
                             className='delete-confirmation-modal'
                             onConfirm={handleDeleteConfirmation}
@@ -219,9 +218,7 @@ const Rhs = (): JSX.Element => {
                             error={invalidDeleteApi || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error.message}
                             confirmBtnClassName='btn-danger'
                         >
-                            <>
-                                <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
-                            </>
+                            <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
                         </Modal>
                     )}
                 </>
@@ -245,7 +242,7 @@ const Rhs = (): JSX.Element => {
                     title='No Account Connected'
                     buttonConfig={{
                         text: 'Connect your account',
-                        href: `${Utils.getBaseUrls().pluginApiBaseUrl}/oauth2/connect`,
+                        link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
                     }}
                     iconClass='fa fa-user-circle'
                 />

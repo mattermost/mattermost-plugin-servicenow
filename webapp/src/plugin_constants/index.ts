@@ -7,6 +7,7 @@ export enum ToggleSwitchLabelPositioning {
 }
 
 export const DOWNLOAD_UPDATE_SET_LINK = '/download';
+export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
@@ -41,6 +42,11 @@ export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
 const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNow have not been configured properly.';
 const SubscriptionsConfigErrorSubtitleForUser = 'Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin.';
 const SubscriptionsConfigErrorSubtitleForAdmin = 'To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings or you can download it by clicking the button below. The instructions for uploading the update set are available in the plugin\'s documentation and also can be viewed by running the "/servicenow help" command.';
+
+export const SubscriptionTypeLabelMap: Record<string, string> = {
+    record: 'Record subscription',
+    object: 'Bulk subscription',
+};
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [

@@ -60,7 +60,7 @@ type WebsocketEventParams = {
 }
 
 type SubscriptionCardBody = {
-    list?: string[] | JSX.Element[],
+    list?: Array<string | JSX.Element>,
     labelValuePairs?: [
         {
             label: string,
