@@ -14,7 +14,7 @@ import (
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
 	var sb strings.Builder
 	sb.WriteString("#### Record subscriptions for this channel\n")
-	recordSubscriptionsTableHeader := "| Subscription ID | Record Type | Record ID | Events|\n| :----|:--------| :--------| :-----| :--------|"
+	recordSubscriptionsTableHeader := "| Subscription ID | Record Type | Record Number | Record Short Description | Events|\n| :----|:--------| :--------| :-----| :--------|"
 	sb.WriteString(recordSubscriptionsTableHeader)
 	for _, subscription := range subscriptions {
 		sb.WriteString(subscription.GetFormattedSubscription())
@@ -58,4 +58,16 @@ func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer
 	}
 	subscription.Number = record.Number
 	subscription.ShortDescription = record.ShortDescription
+}
+
+func (p *Plugin) getHelpMessage(header string, isSysAdmin bool) string {
+	var sb strings.Builder
+	sb.WriteString(header)
+	helpCommandMessage := strings.ReplaceAll(commandHelp, "|", "`")
+	if isSysAdmin {
+		helpCommandMessage = strings.ReplaceAll(commandHelpForAdmin, "|", "`")
+	}
+
+	sb.WriteString(helpCommandMessage)
+	return sb.String()
 }

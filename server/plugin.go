@@ -37,8 +37,6 @@ func NewPlugin() *Plugin {
 		"subscriptions": p.handleSubscriptions,
 		"subscribe":     p.handleSubscribe,
 		"unsubscribe":   p.handleDeleteSubscription,
-		"help":          p.handleHelp,
-		"":              p.handleHelp,
 	}
 
 	return p

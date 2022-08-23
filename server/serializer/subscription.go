@@ -46,7 +46,7 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 		}
 		subscriptionEvents.WriteString(event)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.RecordID, subscriptionEvents.String())
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String())
 }
 
 type SubscriptionResult struct {
