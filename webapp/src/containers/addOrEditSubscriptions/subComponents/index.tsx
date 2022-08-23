@@ -77,7 +77,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const eventsPanelRef = createRef<HTMLDivElement>();
     const resultPanelRef = createRef<HTMLDivElement>();
 
-    // Dispatch
     const dispatch = useDispatch();
 
     // Get create subscription state

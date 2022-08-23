@@ -47,7 +47,7 @@ const Rhs = (): JSX.Element => {
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
-    const [toBeDeleted, setToBeDeleted] = useState<null | DeleteSubscriptionPayload>(null);
+    const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [invalidDeleteApi, setInvalidDeleteApi] = useState(true);
 
     const getSubscriptionsState = () => {
@@ -55,9 +55,8 @@ const Rhs = (): JSX.Element => {
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
     };
 
-    // Get delete feed state
     const getDeleteSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as DeleteSubscriptionPayload);
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
     };
 
@@ -87,7 +86,6 @@ const Rhs = (): JSX.Element => {
         dispatch(resetRefetch());
     }, [refetchSubscriptions, showAllSubscriptions]);
 
-    // Delete when a feed gets deleted
     useEffect(() => {
         if (getDeleteSubscriptionState().isSuccess && !invalidDeleteApi) {
             setDeleteConfirmationOpen(false);
@@ -103,7 +101,7 @@ const Rhs = (): JSX.Element => {
 
         // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getApiState" in the dependency array, the useEffect runs infinitely.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [APIState, invalidDeleteApi]);
+    }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, invalidDeleteApi]);
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = (subscription: SubscriptionData) => {
@@ -120,13 +118,13 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when the delete button is clicked
     const handleDeleteClick = (subscription: SubscriptionData) => {
-        setToBeDeleted({id: subscription.sys_id});
+        setToBeDeleted(subscription.sys_id);
         setDeleteConfirmationOpen(true);
     };
 
     // Handles action when the delete confirmation button is clicked
     const handleDeleteConfirmation = () => {
-        makeApiRequest(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as DeleteSubscriptionPayload);
+        makeApiRequest(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
     };
 
     // Handles action when the delete confirmation modal is closed
