@@ -1,0 +1,53 @@
+.subscription-card {
+  margin-bottom: 15px;
+
+  &__header {
+    margin-bottom: 8px;
+  }
+
+  &__menu-btn {
+    min-width: 10px;
+  }
+
+  &__header-text {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  &__label {
+    border: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
+    background: rgba(var(--center-channel-color-rgb), 0.04);
+    padding: 4px;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    color: rgba(var(--center-channel-color-rgb), 0.5);
+    display: inline-block;
+  }
+
+  &__body {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    font-size: 14px;
+  }
+
+  &__body-item {
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__body-header {
+    font-weight: 600;
+    margin-right: 10px;
+  }
+
+  &__popover {
+    transform: translateX(-5px);
+  }
+}

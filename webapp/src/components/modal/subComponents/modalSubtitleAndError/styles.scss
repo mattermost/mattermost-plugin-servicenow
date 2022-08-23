@@ -1,0 +1,13 @@
+.modal {
+  &__subtitle {
+    width: 100%;
+    margin: 0 0 16px;
+  }
+  &__error {
+    width: 100%;
+    margin: 0 0 12px;
+    color: var(--error-text);
+    text-transform: capitalize;
+    text-align: center;
+  }
+}
