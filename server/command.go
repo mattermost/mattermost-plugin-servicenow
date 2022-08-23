@@ -44,8 +44,6 @@ const (
 	listSubscriptionsWaitMessage     = "Your subscriptions for this channel will be listed soon. Please wait."
 	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
-	editSubscriptionErrorMessage     = "Something went wrong. Not able to edit subscription. Check server logs for errors."
-	editSubscriptionSuccessMessage   = "Subscription successfully edited."
 	unknownErrorMessage              = "Unknown error."
 	notConnectedMessage              = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
 )
@@ -203,10 +201,6 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	switch {
 	case command == "list":
 		return p.handleListSubscriptions(c, args, parameters, client)
-	case command == "add":
-		return p.handleSubscribe(c, args, parameters, client)
-	case command == "edit":
-		return p.handleEditSubscription(c, args, parameters, client)
 	case command == "delete":
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
@@ -290,34 +284,6 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		return deleteSubscriptionErrorMessage
 	}
 	return deleteSubscriptionSuccessMessage
-}
-
-func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	// TODO: Remove this code later. This is just for testing purposes.
-	subscriptionID := params[0]
-	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
-	if err != nil {
-		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return deleteSubscriptionErrorMessage
-	}
-
-	if !valid {
-		return "Invalid subscription ID."
-	}
-
-	subscription := &serializer.SubscriptionPayload{
-		SubscriptionEvents: &params[1],
-	}
-	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Failed to validate subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-
-	if _, err = client.EditSubscription(subscriptionID, subscription); err != nil {
-		p.API.LogError("Unable to edit subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
-	}
-	return editSubscriptionSuccessMessage
 }
 
 func getAutocompleteData() *model.AutocompleteData {
