@@ -87,7 +87,6 @@ const Rhs = (): JSX.Element => {
         if (getDeleteSubscriptionState().isLoading) {
             setInvalidDeleteApi(false);
         }
-
     }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, invalidDeleteApi]);
 
     // Handles action when edit button is clicked for a subscription
