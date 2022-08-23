@@ -28,7 +28,7 @@ const pluginApi = createApi({
         [Constants.pluginApiServiceConfigs.getRecord.apiServiceName]: builder.query<RecordData, GetRecordParams>({
             query: (params) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: `${Constants.pluginApiServiceConfigs.getRecord.path}/${params?.recordType}/${params?.recordId}`,
+                url: `${Constants.pluginApiServiceConfigs.getRecord.path}/${params.recordType}/${params.recordId}`,
                 method: Constants.pluginApiServiceConfigs.getRecord.method,
             }),
         }),
@@ -56,8 +56,8 @@ const pluginApi = createApi({
                 body,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName]: builder.query<void, DeleteSubscriptionPayload>({
-            query: ({id}) => ({
+        [Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName]: builder.query<void, string>({
+            query: (id) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.deleteSubscription.path}/${id}`,
                 method: Constants.pluginApiServiceConfigs.deleteSubscription.method,
