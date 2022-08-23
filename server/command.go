@@ -136,17 +136,18 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 			if _, err := client.ActivateSubscriptions(); err != nil {
 				message := ""
-				if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
+				switch {
+				case strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured):
 					message = subscriptionsNotConfiguredErrorForUser
 					if isSysAdmin {
 						message = subscriptionsNotConfiguredErrorForAdmin
 					}
-				} else if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized) {
+				case strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized):
 					message = subscriptionsNotAuthorizedErrorForUser
 					if isSysAdmin {
 						message = subscriptionsNotAuthorizedErrorForAdmin
 					}
-				} else {
+				default:
 					message = unknownErrorMessage
 				}
 
@@ -312,7 +313,12 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 
 	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
 
-	subscriptionMap, _ := ConvertSubscriptionToMap(subscription)
+	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
+	if err != nil {
+		p.API.LogError("Unable to convert subscription to map", "Error", err.Error())
+		return editSubscriptionErrorMessage
+	}
+
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenEditSubscriptionModal,
 		subscriptionMap,
