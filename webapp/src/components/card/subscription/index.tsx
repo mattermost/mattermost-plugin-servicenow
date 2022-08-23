@@ -52,7 +52,7 @@ const SubscriptionCard = ({header, label, cardBody, description, onDelete, onEdi
                 {label && <div className='subscription-card__label text-ellipsis'>{label}</div>}
                 {(cardBody || description) && (
                     <ul className='subscription-card__body'>
-                        {cardBody?.list?.map((listItem, index: number) => (
+                        {cardBody?.list?.map((listItem: string | JSX.Element, index: number) => (
                             <li
                                 key={index}
                                 className='subscription-card__body-item subscription-card__body-item--list'
