@@ -9,7 +9,7 @@ import {PluginRegistry} from 'types/mattermost-webapp';
 import reducer from 'reducers';
 
 import Rhs from 'containers/Rhs';
-import AddSubscription from 'containers/addSubscription';
+import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 
 import Constants from 'plugin_constants';
 

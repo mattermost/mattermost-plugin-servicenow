@@ -33,3 +33,14 @@ type MmHookArgTypes = {
     team_id: string,
     root_id: string
 }
+
+type EditSubscriptionData = {
+    channel: string,
+    recordValue: string,
+    alertType: string,
+    stateChanged: boolean;
+    priorityChanged: boolean;
+    newCommentChecked: boolean;
+    assignedToChecked: boolean;
+    assignmentGroupChecked: boolean;
+}
