@@ -43,7 +43,7 @@ const Rhs = (): JSX.Element => {
     const dispatch = useDispatch();
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
     const pluginState = useSelector((state: PluginState) => state);
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequest, getApiState} = usePluginApi();
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
@@ -98,9 +98,6 @@ const Rhs = (): JSX.Element => {
         if (getDeleteSubscriptionState().isLoading) {
             setInvalidDeleteApi(false);
         }
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getApiState" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, invalidDeleteApi]);
 
     // Handles action when edit button is clicked for a subscription
