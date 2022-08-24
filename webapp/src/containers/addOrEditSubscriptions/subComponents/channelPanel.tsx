@@ -19,6 +19,8 @@ type ChannelPanelProps = {
     channel: string | null;
     setChannel: (value: string | null) => void;
     setShowModalLoader: (show: boolean) => void;
+    setApiError: (error: string | null) => void;
+    setApiResponseValid: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
     setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
 }
@@ -31,6 +33,8 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     channel,
     setChannel,
     setShowModalLoader,
+    setApiError,
+    setApiResponseValid,
     channelOptions,
     setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
@@ -44,6 +48,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     };
 
     useEffect(() => {
+        setApiError(null);
         makeApiRequest(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
 
         // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "makeApiRequest" in the dependency array, the useEffect runs infinitely.
@@ -53,6 +58,11 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     // Update the channelList once it is fetched from the backend
     useEffect(() => {
         const channelListState = getChannelState();
+
+        if (channelListState.isLoading) {
+            setApiResponseValid(true);
+        }
+
         if (channelListState.data) {
             setChannelOptions(channelListState.data.map((ch) => ({
                 label: (
@@ -68,6 +78,10 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                 ),
                 value: ch.id,
             })));
+        }
+
+        if (channelListState.error) {
+            setApiError(channelListState.error);
         }
 
         setShowModalLoader(channelListState.isLoading);
@@ -107,6 +121,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                 options={channelOptions}
                 required={true}
                 error={validationFailed && 'Required'}
+                disabled={getChannelState().isLoading}
             />
             <ModalSubTitleAndError error={error}/>
             <ModalFooter

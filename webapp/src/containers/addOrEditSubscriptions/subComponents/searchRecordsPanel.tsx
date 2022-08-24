@@ -30,6 +30,7 @@ type SearchRecordsPanelProps = {
     setShowModalLoader: (show: boolean) => void;
     recordId: string | null;
     setRecordId: (recordId: string | null) => void;
+    resetStates: boolean;
 }
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({
@@ -46,6 +47,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     setApiError,
     setApiResponseValid,
     setRecordId,
+    recordId,
+    resetStates,
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
@@ -53,6 +56,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
+    const [disabledInput, setDisabledInput] = useState(false);
 
     const getRecordsSuggestions = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload as SearchRecordsParams);
@@ -73,10 +77,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         } else {
             setSearchRecordsPayload(null);
         }
-
-        // Disabling the eslint rule at the next line because if we include "makeApiRequest" in the dependency array, it changes constantly;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setApiError, setSearchRecordsPayload, setSearchRecordsPayload, recordType]);
+    }, [recordType]);
 
     // Handles making API request for fetching the data for the selected record
     const getSuggestionData = (suggestionId: string) => {
@@ -86,7 +87,48 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     };
 
+    // Handles resetting the states
+    const resetValues = useCallback(() => {
+        setRecordValue('');
+        setRecordId(null);
+        setDisabledInput(false);
+        setSuggestionChosen(false);
+        setGetSuggestionDataPayload(null);
+        setSearchRecordsPayload(null);
+        setSuggestions([]);
+    }, []);
+
     const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
+
+    // If "recordId" is provided when the component is mounted, then the subscription is being edited, hence fetch the record data from the API
+    useEffect(() => {
+        if (recordId && !recordValue) {
+            setDisabledInput(true);
+            setSuggestionChosen(true);
+            getSuggestionData(recordId);
+        }
+
+        // Reset the state when the component is unmounted
+        return resetValues;
+    }, []);
+
+    // If the "resetStates" is set, reset the data
+    useEffect(() => {
+        if (resetStates) {
+            resetValues();
+        }
+    }, [resetStates]);
+
+    // Set the default "inputValue" when the subscription is being edited
+    useEffect(() => {
+        if (recordId && !recordValue) {
+            const recordDataState = getRecordDataState();
+            if (recordDataState.data) {
+                setRecordValue(`${recordDataState.data.number}: ${recordDataState.data.short_description}`);
+                setDisabledInput(false);
+            }
+        }
+    }, [APIState]);
 
     // Handle API state updates in the suggestions
     useEffect(() => {
@@ -101,6 +143,17 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
             setSuggestions(searchSuggestionsState.data);
         }
     }, [APIState]);
+
+    // Handle API state updates while fetching record data
+    useEffect(() => {
+        const recordDataState = getRecordDataState();
+        if (recordDataState.isLoading) {
+            setApiResponseValid(true);
+        }
+        if (recordDataState.isError) {
+            setApiError(recordDataState.error);
+        }
+    }, [getRecordDataState().isLoading, getRecordDataState().isError]);
 
     // Hide error state once the value is valid
     useEffect(() => {
@@ -188,7 +241,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 }}
                 error={validationMsg || validationFailed}
                 className='search-panel__auto-suggest'
-                loadingSuggestions={getRecordsSuggestions().isLoading}
+                loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
+                disabled={disabledInput}
             />
             {suggestionChosen && (
                 <ul className='search-panel__description'>

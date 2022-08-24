@@ -12,12 +12,27 @@ import CircularLoader from 'components/loader/circular';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants, {SubscriptionEvents} from 'plugin_constants';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 
 import './rhs.scss';
+
+// Mock data
+const mockSubscriptions = {
+    data: [{
+        server_url: 'http://localhost:8065',
+        is_active: true,
+        user_id: 'bhy36f7wupy59xydny96s9xrao',
+        type: 'record',
+        record_type: 'incident',
+        record_id: '9d385017c611228701d22104cc95c371',
+        subscription_events: 'priority, commented',
+        channel_id: '5n4r5bkc6bbgixgyfmjh4oa65c',
+        sys_id: '9d385017c611228701d22104cc95c739',
+    }],
+};
 
 const Rhs = (): JSX.Element => {
     const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
@@ -46,19 +61,14 @@ const Rhs = (): JSX.Element => {
         makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, params);
     }, [refetchSubscriptions, showAllSubscriptions]);
 
-    // TODO: Update this accordingly when integrating edit subscription API
     // Handles action when edit button is clicked for a subscription
-    const handleEditSubscription = () => {
-        // Dummy data
+    const handleEditSubscription = (subscription: SubscriptionData) => {
         const subscriptionData: EditSubscriptionData = {
-            channel: 'WellValue1',
-            recordValue: 'Record 3',
-            alertType: 'change_request',
-            stateChanged: true,
-            priorityChanged: false,
-            newCommentChecked: true,
-            assignedToChecked: true,
-            assignmentGroupChecked: false,
+            channel: subscription.channel_id,
+            recordId: subscription.record_id,
+            recordType: subscription.record_type as RecordType,
+            subscriptionEvents: subscription.subscription_events.split(',') as unknown as SubscriptionEvents[],
+            id: subscription.sys_id,
         };
         dispatch(showEditModal());
         setEditSubscriptionData(subscriptionData);
@@ -71,15 +81,16 @@ const Rhs = (): JSX.Element => {
                 onChange={setShowAllSubscriptions}
                 label={Constants.RhsToggleLabel}
             />
-            {(subscriptionsState.data?.length > 0 && !subscriptionsState.isLoading) && (
+            {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
+            {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
                 <>
                     <div className='rhs-content__cards-container'>
-                        {subscriptionsState.data.map((subscription) => (
+                        {mockSubscriptions.data.map((subscription) => (
                             <SubscriptionCard
                                 key={subscription.sys_id}
                                 header={subscription.sys_id}
                                 label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
-                                onEdit={handleEditSubscription}
+                                onEdit={() => handleEditSubscription(subscription)}
 
                                 // TODO: Update following when the delete functionality has been integrated
                                 onDelete={() => ''}
@@ -96,7 +107,7 @@ const Rhs = (): JSX.Element => {
                     </div>
                 </>
             )}
-            {(!subscriptionsState.data?.length && !subscriptionsState.isLoading) && (
+            {(!mockSubscriptions.data?.length && !subscriptionsState.isLoading) && (
                 <EmptyState
                     title='No Subscriptions Found'
                     buttonConfig={{

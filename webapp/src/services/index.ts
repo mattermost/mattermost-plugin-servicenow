@@ -32,7 +32,7 @@ const pluginApi = createApi({
                 method: Constants.pluginApiServiceConfigs.getRecord.method,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.createSubscription.apiServiceName]: builder.query<void, CreateSubscriptionPayload | void>({
+        [Constants.pluginApiServiceConfigs.createSubscription.apiServiceName]: builder.query<void, CreateSubscriptionPayload>({
             query: (body) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.createSubscription.path}`,
@@ -46,6 +46,14 @@ const pluginApi = createApi({
                 url: `${Constants.pluginApiServiceConfigs.fetchSubscriptions.path}`,
                 method: Constants.pluginApiServiceConfigs.fetchSubscriptions.method,
                 params,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.editSubscription.apiServiceName]: builder.query<void, EditSubscriptionPayload>({
+            query: ({sys_id, ...body}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.editSubscription.path}/${sys_id}`,
+                method: Constants.pluginApiServiceConfigs.editSubscription.method,
+                body,
             }),
         }),
     }),

@@ -75,6 +75,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'fetchSubscriptions',
     },
+    editSubscription: {
+        path: '/subscriptions',
+        method: 'PATCH',
+        apiServiceName: 'editSubscriptions',
+    },
 };
 
 export const PanelDefaultHeights = {

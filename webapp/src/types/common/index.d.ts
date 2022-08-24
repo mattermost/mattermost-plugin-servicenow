@@ -9,7 +9,7 @@ type TabData = {
 
 type HttpMethod = 'GET' | 'POST';
 
-type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions'
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription'
 
 type PluginApiService = {
     path: string,
@@ -34,13 +34,10 @@ type MmHookArgTypes = {
 
 type EditSubscriptionData = {
     channel: string,
-    recordValue: string,
-    alertType: RecordType,
-    stateChanged: boolean;
-    priorityChanged: boolean;
-    newCommentChecked: boolean;
-    assignedToChecked: boolean;
-    assignmentGroupChecked: boolean;
+    recordId: string,
+    recordType: RecordType,
+    subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
+    id: string;
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group';
@@ -50,4 +47,4 @@ type RecordDataLabelConfigType = {
     label: string;
 }
 
-type APIPayloadType = void | FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams;
+type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload;
