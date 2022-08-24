@@ -18,20 +18,20 @@ This plugin integrates ServiceNow with Mattermost by allowing users to subscribe
 ## Features
 
 This plugin contains the following features:
-- Connecting/disconnecting to ServiceNow account using OAuth
-- Creating / editing subscriptions to get notifications for ServiceNow record changes using wizards
-- Ability to open the create/edit subscription modal through UI or by using slash commands
+- Connecting/disconnecting to ServiceNow account using OAuth.
+- Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards.
+- Ability to open the create/edit subscription modal through UI or by using slash commands.
 - Subscriptions to only specific records are supported.
-- Supported record types - incident, problem, change_request
+- Supported record types - incident, problem, change_request.
 - Supported events
   * State changed
   * Priority changed
   * Assigned to changed
   * Assignment group changed
   * New comment added
-- Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription
-- Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command
-- Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command
+- Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
+- Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command.
+- Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command.
 
 ## Installation
 
@@ -49,7 +49,7 @@ This plugin contains the following features:
 There are two methods by which you can connect your Mattermost account to your ServiceNow account.
 
 - **Using slash command**
-    - Run the slash command "/servicenow connect" in any channel.
+    - Run the slash command `/servicenow connect` in any channel.
     - You will get an ephemeral message from the ServiceNow bot containing a link to connect your account.
     - Click on that link. If it asks for login, enter your ServiceNow credentials and click `Allow` to authorize and connect your account.
 
@@ -60,4 +60,4 @@ There are two methods by which you can connect your Mattermost account to your S
     - Click on that button. If it asks for login, enter your ServiceNow credentials and click `Allow` to authorize and connect your account.
 
 After connecting successfully, you will get a direct message from the ServiceNow bot containing a Welcome message and some useful information along with some instructions for the system admins.
-**Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages between two users of the same team, then you will not get any direct message.
+**Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages only between two users of the same team, then you will not get any direct message.

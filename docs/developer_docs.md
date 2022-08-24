@@ -22,20 +22,20 @@ This plugin integrates ServiceNow with Mattermost by allowing users to subscribe
 
 This plugin contains the following features:
 
-- Connecting/disconnecting to ServiceNow account using OAuth
-- Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards
-- Ability to open the create/edit subscription modal through UI or by using slash commands
+- Connecting/disconnecting to ServiceNow account using OAuth.
+- Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards.
+- Ability to open the create/edit subscription modal through UI or by using slash commands.
 - Subscriptions to only specific records are supported.
-- Supported record types - incident, problem, change_request
+- Supported record types - incident, problem, change_request.
 - Supported events
   * State changed
   * Priority changed
   * Assigned to changed
   * Assignment group changed
   * New comment added
-- Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription
-- Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command
-- Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command
+- Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
+- Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command.
+- Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command.
 
 ## Basic Knowledge
 
@@ -64,20 +64,20 @@ This plugin contains the following features:
 There are two methods by which you can connect your Mattermost account to your ServiceNow account.
 
 - **Using slash command**
-    - Run the slash command "/servicenow connect" in any channel.
+    - Run the slash command `/servicenow connect` in any channel.
     - You will get an ephemeral message from the ServiceNow bot containing a link to connect your account.
     - Click on that link. If it asks for login, enter your ServiceNow credentials and click `Allow` to authorize and connect your account.
 
 - **Using the button in the right-hand sidebar**
     - Open the right-hand sidebar by clicking on the ServiceNow icon present in the channel header section of all channels.
-    - You will see a button saying "Connect your account"
+    - You will see a button saying "Connect your account".
 
         ![image](https://user-images.githubusercontent.com/77336594/186386427-6533a3fe-da58-4d14-a60c-f6c3bb8ea7f5.png)
 
     - Click on that button. If it asks for login, enter your ServiceNow credentials and click `Allow` to authorize and connect your account.
 
 After connecting successfully, you will get a direct message from the ServiceNow bot containing a Welcome message and some useful information along with some instructions for the system admins.
-**Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages between two users of the same team, then you will not get any direct message.
+**Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages only between two users of the same team, then you will not get any direct message.
     
 ## Development
 
@@ -161,7 +161,7 @@ The update set was created by creating a new application called **ServiceNow for
 ![image](https://user-images.githubusercontent.com/77336594/186447710-afdd66fc-95fc-4d06-b8de-af6a61a0df9d.png)
 
 As you can see, the application consists of 2 tables, 4 business rules, 4 event registrations, 4 script actions and 2 script includes sections. All of these contain some code. You can explore and modify the code according to your needs.
-Before doing any changes here, you should change the current application scope. Go to the ServiceNow home screen and hover on the globe icon present in the nav bar on the right side along with the Search bar. Below is a screenshot of the icon:
+Before doing any changes here, you should change the current application scope. Go to the ServiceNow home screen and hover on the globe icon present in the nav bar on the right side along with the search bar. Below is a screenshot of the icon:
 
 ![image](https://user-images.githubusercontent.com/77336594/186450580-2f59ce0a-966f-4c73-ab37-93148d9c9c9c.png)
 
