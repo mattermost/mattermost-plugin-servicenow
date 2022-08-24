@@ -42,7 +42,7 @@ export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
 const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNow have not been configured properly.';
 const SubscriptionsConfigErrorSubtitleForUser = 'Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin.';
 const SubscriptionsConfigErrorSubtitleForAdmin = 'To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings or you can download it by clicking the button below. The instructions for uploading the update set are available in the plugin\'s documentation and also can be viewed by running the "/servicenow help" command.';
-
+// Used to get the `SubscriptionType` labels to show in the subscription card
 export const SubscriptionTypeLabelMap: Record<string, string> = {
     record: 'Record subscription',
     object: 'Bulk subscription',
