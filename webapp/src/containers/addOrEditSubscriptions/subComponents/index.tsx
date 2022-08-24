@@ -1,5 +1,5 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
@@ -12,6 +12,8 @@ import CircularLoader from 'components/loader/circular';
 import Constants, {PanelDefaultHeights, SubscriptionEvents} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
+
+import {refetch} from 'reducers/refetchSubscriptions';
 
 import ChannelPanel from './channelPanel';
 import RecordTypePanel from './recordTypePanel';
@@ -75,6 +77,9 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const eventsPanelRef = createRef<HTMLDivElement>();
     const resultPanelRef = createRef<HTMLDivElement>();
 
+    const dispatch = useDispatch();
+
+    // Get create subscription state
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
         return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message as string};
@@ -113,6 +118,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         if (createSubscriptionState.data) {
             setSuccessPanelOpen(true);
+            dispatch(refetch());
         }
         setShowModalLoader(createSubscriptionState.isLoading);
     }, [APIState]);
@@ -127,6 +133,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         if (editSubscriptionState.data && apiResponseValid) {
             setSuccessPanelOpen(true);
+            dispatch(refetch());
         }
         setShowModalLoader(editSubscriptionState.isLoading);
     }, [APIState]);

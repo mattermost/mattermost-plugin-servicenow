@@ -9,10 +9,13 @@ import EmptyState from 'components/emptyState';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 import SubscriptionCard from 'components/card/subscription';
 import CircularLoader from 'components/loader/circular';
+import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
 import Constants, {SubscriptionEvents} from 'plugin_constants';
+
+import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
@@ -43,9 +46,17 @@ const Rhs = (): JSX.Element => {
     const {makeApiRequest, getApiState} = usePluginApi();
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
+    const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+    const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
+    const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
+    };
+
+    const getDeleteSubscriptionState = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
     };
 
@@ -53,13 +64,41 @@ const Rhs = (): JSX.Element => {
 
     // Fetch subscriptions from the API
     useEffect(() => {
-        const params: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
+        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
-            params.channel_id = currentChannelId;
+            subscriptionParams.channel_id = currentChannelId;
         }
-        setFetchSubscriptionParams(params);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, params);
+        setFetchSubscriptionParams(subscriptionParams);
+        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
+    }, [showAllSubscriptions]);
+
+    // Fetch subscriptions from the API when refetch is set
+    useEffect(() => {
+        if (!refetchSubscriptions) {
+            return;
+        }
+        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
+        if (!showAllSubscriptions) {
+            subscriptionParams.channel_id = currentChannelId;
+        }
+        setFetchSubscriptionParams(subscriptionParams);
+        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
+        dispatch(resetRefetch());
     }, [refetchSubscriptions, showAllSubscriptions]);
+
+    useEffect(() => {
+        if (getDeleteSubscriptionState().isSuccess && !deleteApiResponseInvalid) {
+            setDeleteConfirmationOpen(false);
+            dispatch(refetch());
+            setDeleteApiResponseInvalid(true);
+            setToBeDeleted(null);
+        }
+
+        // When a new API request is made, reset the flag set for invalid delete api response
+        if (getDeleteSubscriptionState().isLoading) {
+            setDeleteApiResponseInvalid(false);
+        }
+    }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, deleteApiResponseInvalid]);
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = (subscription: SubscriptionData) => {
@@ -72,6 +111,24 @@ const Rhs = (): JSX.Element => {
         };
         dispatch(showEditModal());
         setEditSubscriptionData(subscriptionData);
+    };
+
+    // Handles action when the delete button is clicked
+    const handleDeleteClick = (subscription: SubscriptionData) => {
+        setToBeDeleted(subscription.sys_id);
+        setDeleteConfirmationOpen(true);
+    };
+
+    // Handles action when the delete confirmation button is clicked
+    const handleDeleteConfirmation = () => {
+        makeApiRequest(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
+    };
+
+    // Handles action when the delete confirmation modal is closed
+    const hideDeleteConfirmation = () => {
+        setDeleteConfirmationOpen(false);
+        setDeleteApiResponseInvalid(true);
+        setToBeDeleted(null);
     };
 
     return (
@@ -91,9 +148,7 @@ const Rhs = (): JSX.Element => {
                                 header={subscription.sys_id}
                                 label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
                                 onEdit={() => handleEditSubscription(subscription)}
-
-                                // TODO: Update following when the delete functionality has been integrated
-                                onDelete={() => ''}
+                                onDelete={() => handleDeleteClick(subscription)}
                             />
                         ))}
                     </div>
@@ -131,6 +186,26 @@ const Rhs = (): JSX.Element => {
             )} */}
             {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
             {subscriptionsState.isLoading && <CircularLoader/>}
+            {toBeDeleted && (
+                <Modal
+                    show={deleteConfirmationOpen}
+                    onHide={hideDeleteConfirmation}
+                    title='Confirm Delete Subscription'
+                    cancelBtnText='Cancel'
+                    confirmBtnText='Delete'
+                    className='delete-confirmation-modal'
+                    onConfirm={handleDeleteConfirmation}
+                    cancelDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
+                    confirmDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
+                    loading={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
+                    error={deleteApiResponseInvalid || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
+                    confirmBtnClassName='btn-danger'
+                >
+                    <>
+                        <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
+                    </>
+                </Modal>
+            )}
         </div>
     );
 };
