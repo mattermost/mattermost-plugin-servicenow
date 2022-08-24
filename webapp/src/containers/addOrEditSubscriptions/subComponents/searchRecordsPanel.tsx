@@ -77,10 +77,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         } else {
             setSearchRecordsPayload(null);
         }
-
-        // Disabling the eslint rule at the next line because if we include "makeApiRequest" in the dependency array, it changes constantly;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setApiError, setSearchRecordsPayload, setSearchRecordsPayload, recordType]);
+    }, [recordType]);
 
     // Handles making API request for fetching the data for the selected record
     const getSuggestionData = (suggestionId: string) => {
@@ -99,15 +96,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         setGetSuggestionDataPayload(null);
         setSearchRecordsPayload(null);
         setSuggestions([]);
-    }, [
-        setRecordValue,
-        setRecordId,
-        setDisabledInput,
-        setSuggestionChosen,
-        setGetSuggestionDataPayload,
-        setSearchRecordsPayload,
-        setSuggestions,
-    ]);
+    }, []);
 
     const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
 
