@@ -1,19 +1,16 @@
 package constants
 
-import "errors"
-
 const (
 	// Bot related constants
 	BotUserName    = "servicenow"
 	BotDisplayName = "ServiceNow"
 	BotDescription = "A bot account created by the ServiceNow plugin."
 
-	HeaderMattermostUserID = "Mattermost-User-ID"
+	HeaderMattermostUserID = "Mattermost-User-Id"
 	CommandTrigger         = "servicenow"
 
-	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin!\n" +
-		"You've connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n" +
-		"##### Slash Commands\n"
+	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin\n" +
+		"You've successfully connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
@@ -57,6 +54,12 @@ const (
 	// Websocket events
 	WSEventConnect    = "connect"
 	WSEventDisconnect = "disconnect"
+
+	// API Errors
+	APIErrorIDNotConnected               = "not_connected"
+	APIErrorNotConnected                 = "You have not connected your Mattermost account to ServiceNow."
+	APIErrorIDSubscriptionsNotConfigured = "subscriptions_not_configured"
+	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 )
 
 var (
@@ -87,8 +90,6 @@ var (
 		SubscriptionRecordTypeIncident:      "Incident",
 		SubscriptionRecordTypeChangeRequest: "Change Request",
 	}
-
-	ErrUpdateSetNotUploaded error = errors.New("update set not uploaded")
 )
 
 type ServiceNowOAuthToken string
