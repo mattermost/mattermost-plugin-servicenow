@@ -67,7 +67,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [editSubscriptionPayload, setEditSubscriptionPayload] = useState<EditSubscriptionPayload | null>(null);
 
     // usePluginApi hook
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequest, getApiState} = usePluginApi();
 
     // Create refs to access height of the panels and providing height to modal-dialog
     // We've made all the panels absolute positioned to apply animations and because they are absolute positioned, their parent container, which is modal-dialog, won't expand the same as their heights
@@ -110,6 +110,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     useEffect(() => {
         const createSubscriptionState = getCreateSubscriptionState();
+
         if (createSubscriptionState.isLoading) {
             setApiResponseValid(true);
         }
@@ -121,7 +122,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             dispatch(refetch());
         }
         setShowModalLoader(createSubscriptionState.isLoading);
-    }, [pluginState]);
+    }, [getCreateSubscriptionState().isLoading, getCreateSubscriptionState().isError, getCreateSubscriptionState().isSuccess, apiResponseValid]);
 
     useEffect(() => {
         const editSubscriptionState = getEditSubscriptionState();
@@ -136,7 +137,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             dispatch(refetch());
         }
         setShowModalLoader(editSubscriptionState.isLoading);
-    }, [pluginState]);
+    }, [getEditSubscriptionState().isLoading, getEditSubscriptionState().isError, getEditSubscriptionState().isSuccess]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
@@ -259,7 +260,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             // eslint-disable-next-line no-unused-expressions
             channelPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
         }
-    }, [eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, channelPanelRef, recordTypePanelRef, searchRecordsPanelRef, eventsPanelRef, resultPanelRef, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
+    }, [eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
 
     // Returns action handler for primary button in the result panel
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
@@ -357,6 +358,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setApiResponseValid={setApiResponseValid}
                     channelOptions={channelOptions}
                     setChannelOptions={setChannelOptions}
+                    actionBtnDisabled={showModalLoader}
                 />
                 <RecordTypePanel
                     className={`
@@ -411,6 +413,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setSubscriptionEvents={setSubscriptionEvents}
                     channel={channelOptions.find((ch) => ch.value === channel) as DropdownOptionType || null}
                     record={recordValue}
+                    actionBtnDisabled={showModalLoader}
                 />
                 <ResultPanel
                     onPrimaryBtnClick={getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null}

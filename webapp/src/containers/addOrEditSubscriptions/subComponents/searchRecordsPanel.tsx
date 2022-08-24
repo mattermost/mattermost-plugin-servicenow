@@ -139,7 +139,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 setDisabledInput(false);
             }
         }
-    }, [pluginState]);
+    }, [getRecordDataState().isSuccess]);
 
     // Handle API state updates in the suggestions
     useEffect(() => {
@@ -153,7 +153,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (searchSuggestionsState.data) {
             setSuggestions(searchSuggestionsState.data);
         }
-    }, [pluginState]);
+    }, [getRecordsSuggestions().isLoading, getRecordsSuggestions().isError, getRecordsSuggestions().isSuccess]);
 
     // Handle API state updates while fetching record data
     useEffect(() => {
@@ -223,13 +223,14 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
             return value;
         } else if (value.display_value && value.link) {
             return (
-                <Link
-                    to={value.link}
+                <a
+                    href={value.link}
                     target='_blank'
+                    rel='noreferrer'
                     className='btn btn-link'
                 >
                     {value.display_value}
-                </Link>
+                </a>
             );
         }
 
@@ -276,8 +277,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 onConfirm={handleContinue}
                 cancelBtnText='Back'
                 confirmBtnText='Continue'
-                confirmDisabled={actionBtnDisabled}
-                cancelDisabled={actionBtnDisabled}
+                confirmDisabled={actionBtnDisabled || getRecordDataState().isLoading}
+                cancelDisabled={actionBtnDisabled || getRecordDataState().isLoading}
             />
         </div>
     );

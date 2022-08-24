@@ -9,7 +9,7 @@ type TabData = {
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription'
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig';
 
 type PluginApiService = {
     path: string,
@@ -61,10 +61,5 @@ type WebsocketEventParams = {
 
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
-    labelValuePairs?: [
-        {
-            label: string,
-            value: string,
-        }
-    ]
+    labelValuePairs?: Array<{label: string, value: string}>
 }

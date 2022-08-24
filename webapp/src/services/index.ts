@@ -10,7 +10,7 @@ const pluginApi = createApi({
     baseQuery: fetchBaseQuery({baseUrl: Utils.getBaseUrls().pluginApiBaseUrl}),
     tagTypes: ['Posts'],
     endpoints: (builder) => ({
-        [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelList[], FetchChannelsParams>({
+        [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelData[], FetchChannelsParams>({
             query: (params) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.getChannels.path}/${params.teamId}`,
@@ -61,6 +61,13 @@ const pluginApi = createApi({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.deleteSubscription.path}/${id}`,
                 method: Constants.pluginApiServiceConfigs.deleteSubscription.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getConfig.apiServiceName]: builder.query<ConfigData, void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getConfig.path}`,
+                method: Constants.pluginApiServiceConfigs.getConfig.method,
             }),
         }),
     }),

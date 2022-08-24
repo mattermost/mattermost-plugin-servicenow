@@ -42,7 +42,10 @@ const debounce: (func: (args: Record<string, string>) => void, limit: number) =>
     };
 };
 
+const getSubscriptionNumberLink = (serviceNowBaseUrl: string, recordType: string, recordId: string): string => `${serviceNowBaseUrl}/nav_to.do?uri=${recordType}.do%3Fsys_id=${recordId}%26sysparm_stack=${recordType}_list.do%3Fsysparm_query=active=true`;
+
 export default {
     getBaseUrls,
     debounce,
+    getSubscriptionNumberLink,
 };

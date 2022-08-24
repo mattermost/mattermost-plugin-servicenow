@@ -16,3 +16,19 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+.icon-text-color {
+  color: var(--center-channel-color);
+
+  &--stroke {
+    * {
+      stroke: var(--center-channel-color);
+    }
+  }
+
+  &--fill {
+    path {
+      fill: var(--center-channel-color);
+    }
+  }
+}

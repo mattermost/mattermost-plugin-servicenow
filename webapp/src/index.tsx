@@ -11,6 +11,8 @@ import reducer from 'reducers';
 import Rhs from 'containers/Rhs';
 import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
+import GetConfig from 'containers/getConfig';
+import {ServiceNowIcon} from 'containers/icons';
 
 import Constants from 'plugin_constants';
 
@@ -28,8 +30,9 @@ export default class Plugin {
         registry.registerReducer(reducer);
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
+        registry.registerRootComponent(GetConfig);
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(<i className='fa fa-cogs'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
+        registry.registerChannelHeaderButtonAction(<ServiceNowIcon/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
 
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store));
