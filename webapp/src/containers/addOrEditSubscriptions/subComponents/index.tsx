@@ -138,13 +138,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setSuggestionChosen(false);
         setRecordType(null);
         setSubscriptionEvents([]);
-    }, [
-        setChannel,
-        setRecordValue,
-        setSuggestionChosen,
-        setRecordType,
-        setSubscriptionEvents,
-    ]);
+    }, []);
 
     // Reset panel states
     const resetPanelStates = useCallback(() => {
@@ -152,18 +146,13 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setSearchRecordsPanelOpen(false);
         setEventsPanelOpen(false);
         setSuccessPanelOpen(false);
-    }, [
-        setRecordTypePanelOpen,
-        setSearchRecordsPanelOpen,
-        setEventsPanelOpen,
-        setSuccessPanelOpen,
-    ]);
+    }, []);
 
     // Reset error states
     const resetError = useCallback(() => {
         setApiResponseValid(false);
         setApiError(null);
-    }, [setApiResponseValid, setApiError]);
+    }, []);
 
     const hideModal = () => {
         // Reset modal states
@@ -187,14 +176,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         resetFieldStates();
         resetPanelStates();
         setCreateSubscriptionPayload(null);
-    }, [resetFieldStates, resetPanelStates, setCreateSubscriptionPayload]);
+    }, []);
 
     // Handle action when back button is clicked on failure modal
     const resetFailureState = useCallback(() => {
         resetPanelStates();
         resetError();
         setCreateSubscriptionPayload(null);
-    }, [resetPanelStates, resetError, setCreateSubscriptionPayload]);
+    }, []);
 
     // Set the height of the modal content according to different panels;
     // Added 65 in the given height because of (header + loader) height
@@ -301,7 +290,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const editSubscription = () => {
         setApiError(null);
 
-        // Create subscription payload
+        // Edit subscription payload
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
             is_active: true,
