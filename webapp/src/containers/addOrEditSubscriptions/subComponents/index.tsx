@@ -117,7 +117,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (createSubscriptionState.isError && apiResponseValid) {
             setApiError(createSubscriptionState.error);
         }
-        if (createSubscriptionState.data) {
+        if (createSubscriptionState.isSuccess && apiResponseValid) {
             setSuccessPanelOpen(true);
             dispatch(refetch());
         }
