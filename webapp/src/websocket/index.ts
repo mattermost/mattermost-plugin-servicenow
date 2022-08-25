@@ -42,3 +42,9 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
         store.dispatch(showEditSubcriptionModal(subscriptionData) as Action);
     };
 }
+
+export function handleRefetchSubscriptions(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(refetch() as Action);
+    };
+}

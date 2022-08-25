@@ -16,7 +16,7 @@ import {ServiceNowIcon} from 'containers/icons';
 import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal} from 'websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleRefetchSubscriptions} from 'websocket';
 
 import App from './app';
 
@@ -40,6 +40,7 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_edit_subscription`, handleOpenEditSubscriptionModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_refetch_subscriptions`, handleRefetchSubscriptions(store));
     }
 }
 

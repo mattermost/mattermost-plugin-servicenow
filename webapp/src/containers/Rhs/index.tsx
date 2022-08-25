@@ -176,6 +176,8 @@ const Rhs = (): JSX.Element => {
             if (!subscriptionsAuthorized) {
                 setSubscriptionsAuthorized(true);
             }
+
+            // TODO: Handle this on the server side
             setSubscriptions(subscriptionsState.data.filter((subscription) => subscription.short_description && subscription.number));
         }
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
