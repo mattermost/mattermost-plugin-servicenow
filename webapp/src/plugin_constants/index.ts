@@ -22,6 +22,7 @@ const DefaultPageSize = 100;
 const PrivateChannelType = 'P';
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
+const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 
 export enum SubscriptionEvents {
     state = 'state',
@@ -42,6 +43,9 @@ export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
 const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNow have not been configured properly.';
 const SubscriptionsConfigErrorSubtitleForUser = 'Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin.';
 const SubscriptionsConfigErrorSubtitleForAdmin = 'To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings or you can download it by clicking the button below. The instructions for uploading the update set are available in the plugin\'s documentation and also can be viewed by running the "/servicenow help" command.';
+const SubscriptionsUnauthorizedErrorTitle = 'It seems that you are not authorized to manage subscriptions in ServiceNow.';
+const SubscriptionsUnauthorizedErrorSubtitleForUser = 'Please contact your system administrator to authorize you for managing subscriptions.';
+const SubscriptionsUnauthorizedErrorSubtitleForAdmin = 'Please follow the instructions for setting up user permissions available in the plugin\'s documentation. The instructions can also be viewed by running the "/servicenow help" command.';
 
 // Used to get the `SubscriptionType` labels to show in the subscription card
 export const SubscriptionTypeLabelMap: Record<string, string> = {
@@ -115,6 +119,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'DELETE',
         apiServiceName: 'deleteSubscription',
     },
+    getConfig: {
+        path: '/config',
+        method: 'GET',
+        apiServiceName: 'getConfig',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -148,4 +157,8 @@ export default {
     PrivateChannelType,
     ApiErrorIdNotConnected,
     ApiErrorIdSubscriptionsNotConfigured,
+    ApiErrorIdSubscriptionsUnauthorized,
+    SubscriptionsUnauthorizedErrorTitle,
+    SubscriptionsUnauthorizedErrorSubtitleForUser,
+    SubscriptionsUnauthorizedErrorSubtitleForAdmin,
 };

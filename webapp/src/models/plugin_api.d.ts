@@ -2,7 +2,7 @@
  * Keep all service related types here
  */
 
-type ChannelList = {
+type ChannelData = {
     create_at: number;
     creator_id: string;
     delete_at: number;
@@ -103,4 +103,13 @@ type EditSubscriptionPayload = {
     subscription_events: string;
     channel_id: string;
     sys_id: string;
+}
+
+type ConfigData = {
+    ServiceNowBaseURL: string;
+    ServiceNowOAuthClientID: string;
+    ServiceNowOAuthClientSecret: string;
+    EncryptionSecret: string;
+    WebhookSecret: string;
+    ServiceNowUpdateSetDownload: string;
 }

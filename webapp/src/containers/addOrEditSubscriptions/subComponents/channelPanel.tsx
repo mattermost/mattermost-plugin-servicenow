@@ -39,12 +39,12 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
 
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelList[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message};
+        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
     };
 
     useEffect(() => {
@@ -67,12 +67,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
             setChannelOptions(channelListState.data.map((ch) => ({
                 label: (
                     <span>
-                        <i
-                            className={`
-                                fa dropdown-option-icon
-                                ${ch.type === Constants.PrivateChannelType ? 'fa-lock' : 'fa-globe'}
-                            `}
-                        />
+                        <i className={`dropdown-option-icon ${ch.type === Constants.PrivateChannelType ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
                         {ch.display_name}
                     </span>
                 ),
@@ -83,9 +78,8 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         if (channelListState.error) {
             setApiError(channelListState.error);
         }
-
         setShowModalLoader(channelListState.isLoading);
-    }, [pluginState]);
+    }, [getChannelState().isLoading, getChannelState().isError, getChannelState().isSuccess]);
 
     // Hide error state once the value is valid
     useEffect(() => {

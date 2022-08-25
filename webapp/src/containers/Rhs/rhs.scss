@@ -12,6 +12,24 @@
 
   .empty-state {
     height: calc(100% - #{$rhs-toggle-section-height});
+    padding: 0 30px;
+  }
+
+  .configuration-err-state{
+    height: 100%;
+  }
+
+  &--error{
+    color: var(--error-text);
+    margin: 16px 0;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .account-not-connected-icon{
+    width: 40px;
+    height: 40px;
   }
 }
 

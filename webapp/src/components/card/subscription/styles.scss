@@ -63,4 +63,24 @@
   &__popover {
     transform: translateX(-5px);
   }
+
+  &__popover-icon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: -5px;
+  }
+
+  &__channel {
+    margin-bottom: 12px;
+    padding: 0 15px;
+  }
+
+  &__channel-text {
+    font-size: 14px;
+    max-width: calc(100% - 20px) !important;
+  }
+
+  .channel-icon {
+    margin-right: 5px;
+  }
 }

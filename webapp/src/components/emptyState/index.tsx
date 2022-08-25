@@ -12,6 +12,8 @@ type EmptyStatePropTypes = {
         action?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     } | null,
     iconClass?: string;
+    icon?: JSX.Element;
+    className?: string;
 }
 
 const EmptyState = ({
@@ -19,11 +21,13 @@ const EmptyState = ({
     subTitle,
     buttonConfig,
     iconClass,
+    className = '',
+    icon,
 }: EmptyStatePropTypes) => (
-    <div className='empty-state d-flex align-items-center justify-content-center'>
+    <div className={`empty-state d-flex align-items-center justify-content-center ${className}`}>
         <div className='d-flex flex-column align-items-center'>
             <div className='empty-state__icon d-flex justify-content-center align-items-center'>
-                <i className={iconClass ?? 'fa fa-wifi'}/>
+                {icon || <i className={iconClass ?? 'fa fa-wifi'}/>}
             </div>
             <p className='empty-state__title'>{title}</p>
             {subTitle && <p className='empty-state__subtitle'>{subTitle}</p>}

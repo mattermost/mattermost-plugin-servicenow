@@ -1,5 +1,7 @@
 import React, {forwardRef} from 'react';
 
+import {CheckIcon} from 'containers/icons';
+
 type ResultPanelProps = {
     iconClass?: string | null;
     header?: string | null;
@@ -17,7 +19,11 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(({header, class
             ref={feedAddedRef}
         >
             <>
-                <i className={`fa result-panel-icon ${iconClass ?? 'fa-check-circle-o'}`}/>
+                {iconClass ? (
+                    <i className={`fa result-panel-icon ${iconClass ?? 'fa-check-circle-o'}`}/>
+                ) : (
+                    <CheckIcon className='result-panel-icon'/>
+                )}
                 <h2 className='result-panel-text text-center'>{header ?? 'Subscription added successfully!'}</h2>
                 {onPrimaryBtnClick && (
                     <button
