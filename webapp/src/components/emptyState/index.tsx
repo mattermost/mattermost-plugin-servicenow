@@ -8,8 +8,9 @@ type EmptyStatePropTypes = {
     buttonConfig?:{
         text: string;
         link?: string;
+        download?: boolean;
         action?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    }
+    } | null,
     iconClass?: string;
 }
 

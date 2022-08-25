@@ -1,7 +1,8 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 type SubscriptionModalState = {
     open: boolean;
+    data?: EditSubscriptionData;
 }
 
 const initialState: SubscriptionModalState = {
@@ -12,8 +13,9 @@ export const openEditSubscriptionModalSlice = createSlice({
     name: 'openEditSubscriptionModal',
     initialState,
     reducers: {
-        showModal: (state) => {
+        showModal: (state, action: PayloadAction<EditSubscriptionData>) => {
             state.open = true;
+            state.data = action.payload;
         },
         hideModal: (state) => {
             state.open = false;
