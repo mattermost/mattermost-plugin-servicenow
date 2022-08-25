@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
@@ -15,18 +16,33 @@ import (
 )
 
 const (
-	commandHelp = `* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
+	commandHelp = `##### Slash Commands
+* |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
 * |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
 * |/servicenow help| - Know about the features of this plugin
 `
+
+	commandHelpForAdmin = commandHelp + "\n\n" + `##### Configure/Enable subscriptions
+* Download the update set XML file from **System Console > Plugins > ServiceNow Plugin > Download ServiceNow Update Set**.
+* Go to ServiceNow and search for Update sets. Then go to "Retrieved Update Sets" under "System Update Sets".
+* Click on "Import Update Set from XML" link.
+* Choose the downloaded XML file from the plugin's config and upload that file.
+* You will be back on the "Retrieved Update Sets" page and you'll be able to see an update set named "ServiceNow for Mattermost Notifications".
+* Click on that update set and then click on "Preview Update Set".
+* After the preview is complete, you have to commit the update set by clicking on the button "Commit Update Set".
+* You'll see a warning dialog. You can ignore that and click on "Proceed with Commit".
+`
+
+	helpCommandHeader                = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
 	disconnectErrorMessage           = "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	disconnectSuccessMessage         = "Disconnected your ServiceNow account."
 	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+	listSubscriptionsWaitMessage     = "Your subscriptions for this channel will be listed soon. Please wait."
 	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
 	unknownErrorMessage              = "Unknown error."
-	notConnectedMessage              = "You are not connected to ServiceNow."
+	notConnectedMessage              = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
 )
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
@@ -54,18 +70,19 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
+	isSysAdmin, err := p.isAuthorizedSysAdmin(args.UserId)
+	if err != nil {
+		text := "Error checking user's permissions"
+		p.API.LogWarn(text, "Error", err.Error())
+		p.postCommandResponse(args, text)
+		return &model.CommandResponse{}, nil
+	}
+
 	config := p.getConfiguration()
 	if validationErr := config.IsValid(); validationErr != nil {
-		isSysAdmin, err := p.isAuthorizedSysAdmin(args.UserId)
-		var text string
-		switch {
-		case err != nil:
-			text = "Error checking user's permissions"
-			p.API.LogWarn(text, "error", err.Error())
-		case isSysAdmin:
+		text := "Please contact your system administrator to correctly configure the ServiceNow plugin."
+		if isSysAdmin {
 			text = fmt.Sprintf("Before using this plugin, you'll need to configure it in the System Console`: %s", validationErr.Error())
-		default:
-			text = "Please contact your system administrator to correctly configure the ServiceNow plugin."
 		}
 
 		p.postCommandResponse(args, text)
@@ -84,26 +101,37 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
+	if action == "" || action == "help" {
+		p.handleHelp(args, isSysAdmin)
+		return &model.CommandResponse{}, nil
+	}
+
 	if f, ok := p.CommandHandlers[action]; ok {
-		user, userErr := p.GetUser(args.UserId)
-		if userErr != nil {
-			if errors.Is(userErr, ErrNotFound) {
-				p.postCommandResponse(args, notConnectedMessage)
-			} else {
-				p.API.LogError("Unable to get user", "Error", userErr.Error())
-				p.postCommandResponse(args, unknownErrorMessage)
+		user := p.checkConnected(args)
+		if user == nil {
+			return &model.CommandResponse{}, nil
+		}
+
+		var client Client
+		if action != "disconnect" {
+			if client = p.GetClientFromUser(args, user); client == nil {
+				return &model.CommandResponse{}, nil
 			}
-			return &model.CommandResponse{}, nil
+
+			if _, err := client.ActivateSubscriptions(); err != nil {
+				message := ""
+				if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
+					message = err.Error()
+				} else {
+					message = unknownErrorMessage
+				}
+
+				p.API.LogError("Unable to check or activate subscriptions in ServiceNow.", "Error", err.Error())
+				p.postCommandResponse(args, message)
+				return &model.CommandResponse{}, nil
+			}
 		}
 
-		token, err := p.ParseAuthToken(user.OAuth2Token)
-		if err != nil {
-			p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-			p.postCommandResponse(args, unknownErrorMessage)
-			return &model.CommandResponse{}, nil
-		}
-
-		client := p.NewClient(context.Background(), token)
 		message := f(c, args, parameters, client)
 		if message != "" {
 			p.postCommandResponse(args, message)
@@ -115,8 +143,34 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	return &model.CommandResponse{}, nil
 }
 
-func (p *Plugin) handleHelp(_ *plugin.Context, _ *model.CommandArgs, _ []string, _ Client) string {
-	return "###### Mattermost ServiceNow Plugin - Slash Command Help\n" + strings.ReplaceAll(commandHelp, "|", "`")
+func (p *Plugin) checkConnected(args *model.CommandArgs) *User {
+	user, userErr := p.GetUser(args.UserId)
+	if userErr != nil {
+		if errors.Is(userErr, ErrNotFound) {
+			p.postCommandResponse(args, fmt.Sprintf(notConnectedMessage, p.GetPluginURL(), constants.PathOAuth2Connect))
+		} else {
+			p.API.LogError("Unable to get user", "Error", userErr.Error())
+			p.postCommandResponse(args, unknownErrorMessage)
+		}
+		return nil
+	}
+
+	return user
+}
+
+func (p *Plugin) GetClientFromUser(args *model.CommandArgs, user *User) Client {
+	token, err := p.ParseAuthToken(user.OAuth2Token)
+	if err != nil {
+		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
+		p.postCommandResponse(args, unknownErrorMessage)
+		return nil
+	}
+
+	return p.NewClient(context.Background(), token)
+}
+
+func (p *Plugin) handleHelp(args *model.CommandArgs, isSysAdmin bool) {
+	p.postCommandResponse(args, p.getHelpMessage(helpCommandHeader, isSysAdmin))
 }
 
 func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client) string {
@@ -152,16 +206,30 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
-	subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, args.UserId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
-	if err != nil {
-		p.API.LogError("Unable to get subscriptions", "Error", err.Error())
-		return listSubscriptionsErrorMessage
-	}
+	go func() {
+		subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, args.UserId, fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+		if err != nil {
+			p.API.LogError("Unable to get subscriptions", "Error", err.Error())
+			p.postCommandResponse(args, listSubscriptionsErrorMessage)
+			return
+		}
 
-	if len(subscriptions) == 0 {
-		return "You don't have any subscriptions active for this channel."
-	}
-	return ParseSubscriptionsToCommandResponse(subscriptions)
+		if len(subscriptions) == 0 {
+			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
+			return
+		}
+
+		wg := sync.WaitGroup{}
+		for _, subscription := range subscriptions {
+			wg.Add(1)
+			go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+		}
+
+		wg.Wait()
+		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptions))
+	}()
+
+	return listSubscriptionsWaitMessage
 }
 
 func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
@@ -277,7 +345,7 @@ func (p *Plugin) isAuthorizedSysAdmin(userID string) (bool, error) {
 		return false, appErr
 	}
 
-	if !strings.Contains(user.Roles, "system_admin") {
+	if !strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
 		return false, nil
 	}
 

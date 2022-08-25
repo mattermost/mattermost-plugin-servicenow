@@ -51,7 +51,7 @@ const Rhs = (): JSX.Element => {
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
-    const [invalidDeleteApi, setInvalidDeleteApi] = useState(true);
+    const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
@@ -90,21 +90,18 @@ const Rhs = (): JSX.Element => {
     }, [refetchSubscriptions, showAllSubscriptions]);
 
     useEffect(() => {
-        if (getDeleteSubscriptionState().isSuccess && !invalidDeleteApi) {
+        if (getDeleteSubscriptionState().isSuccess && !deleteApiResponseInvalid) {
             setDeleteConfirmationOpen(false);
             dispatch(refetch());
-            setInvalidDeleteApi(true);
+            setDeleteApiResponseInvalid(true);
             setToBeDeleted(null);
         }
 
         // When a new API request is made, reset the flag set for invalid delete api response
         if (getDeleteSubscriptionState().isLoading) {
-            setInvalidDeleteApi(false);
+            setDeleteApiResponseInvalid(false);
         }
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getApiState" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, invalidDeleteApi]);
+    }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, deleteApiResponseInvalid]);
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = (subscription: SubscriptionData) => {
@@ -133,7 +130,7 @@ const Rhs = (): JSX.Element => {
     // Handles action when the delete confirmation modal is closed
     const hideDeleteConfirmation = () => {
         setDeleteConfirmationOpen(false);
-        setInvalidDeleteApi(true);
+        setDeleteApiResponseInvalid(true);
         setToBeDeleted(null);
     };
 
@@ -192,25 +189,6 @@ const Rhs = (): JSX.Element => {
                             iconClass='fa fa-bell-slash-o'
                         />
                     )}
-                    {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
-                    {subscriptionsState.isLoading && <CircularLoader/>}
-                    {toBeDeleted && (
-                        <Modal
-                            show={isDeleteConfirmationOpen}
-                            onHide={hideDeleteConfirmation}
-                            title='Confirm Delete Subscription'
-                            confirmBtnText='Delete'
-                            className='delete-confirmation-modal'
-                            onConfirm={handleDeleteConfirmation}
-                            cancelDisabled={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
-                            confirmDisabled={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
-                            loading={!invalidDeleteApi && getDeleteSubscriptionState().isLoading}
-                            error={invalidDeleteApi || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
-                            confirmBtnClassName='btn-danger'
-                        >
-                            <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
-                        </Modal>
-                    )}
                 </>
             )}
             {!connected && (
@@ -222,6 +200,28 @@ const Rhs = (): JSX.Element => {
                     }}
                     iconClass='fa fa-user-circle'
                 />
+            )}
+            {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
+            {subscriptionsState.isLoading && <CircularLoader/>}
+            {toBeDeleted && (
+                <Modal
+                    show={isDeleteConfirmationOpen}
+                    onHide={hideDeleteConfirmation}
+                    title='Confirm Delete Subscription'
+                    cancelBtnText='Cancel'
+                    confirmBtnText='Delete'
+                    className='delete-confirmation-modal'
+                    onConfirm={handleDeleteConfirmation}
+                    cancelDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
+                    confirmDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
+                    loading={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
+                    error={deleteApiResponseInvalid || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
+                    confirmBtnClassName='btn-danger'
+                >
+                    <>
+                        <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
+                    </>
+                </Modal>
             )}
         </div>
     );
