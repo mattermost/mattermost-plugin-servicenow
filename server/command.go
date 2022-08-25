@@ -272,6 +272,9 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 }
 
 func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	if len(params) < 1 {
+		return "Invalid number of params for this command."
+	}
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
@@ -287,6 +290,12 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		p.API.LogError("Unable to delete subscription", "Error", err.Error())
 		return deleteSubscriptionErrorMessage
 	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventRefetchSubscriptions,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
 	return deleteSubscriptionSuccessMessage
 }
 

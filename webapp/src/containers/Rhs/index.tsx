@@ -39,6 +39,7 @@ const Rhs = (): JSX.Element => {
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
+    const [subscriptions, setSubscriptions] = useState<SubscriptionData[]>([]);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
@@ -175,10 +176,13 @@ const Rhs = (): JSX.Element => {
             if (!subscriptionsAuthorized) {
                 setSubscriptionsAuthorized(true);
             }
+
+            // TODO: Handle this on the server side
+            setSubscriptions(subscriptionsState.data.filter((subscription) => subscription.short_description && subscription.number));
         }
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
 
-    const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
+    const {isLoading: subscriptionsLoading} = getSubscriptionsState();
     const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
         <div className='rhs-content'>
