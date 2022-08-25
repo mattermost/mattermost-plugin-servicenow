@@ -13,12 +13,14 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
+
+import Utils from 'utils';
 
 import './rhs.scss';
 
@@ -196,7 +198,7 @@ const Rhs = (): JSX.Element => {
                     title='No Account Connected'
                     buttonConfig={{
                         text: 'Connect your account',
-                        action: () => '',
+                        link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
                     }}
                     iconClass='fa fa-user-circle'
                 />
