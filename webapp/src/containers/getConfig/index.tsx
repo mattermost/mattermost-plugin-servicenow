@@ -11,6 +11,7 @@ const GetConfig = (): JSX.Element => {
         makeApiRequest(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
     }, []);
 
+    // This container is used just for making the API call for fetching the config, it doesn't render anything.
     return <></>;
 };
 

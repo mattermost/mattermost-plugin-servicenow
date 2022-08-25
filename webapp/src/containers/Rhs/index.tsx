@@ -211,27 +211,31 @@ const Rhs = (): JSX.Element => {
                     )}
                 </>
             )}
-            {connected && !subscriptionsLoading && !subscriptionsEnabled && (
-                <EmptyState
-                    title={Constants.SubscriptionsConfigErrorTitle}
-                    subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
-                    buttonConfig={isCurrentUserSysAdmin ? ({
-                        text: 'Download update set',
-                        link: Utils.getBaseUrls().pluginApiBaseUrl + DOWNLOAD_UPDATE_SET_LINK,
-                        download: true,
-                    }) : null
-                    }
-                    className='configuration-err-state'
-                    icon={<UnlinkIcon/>}
-                />
-            )}
-            {connected && !subscriptionsLoading && subscriptionsUnauthorized && (
-                <EmptyState
-                    title={Constants.SubscriptionsUnauthorizedErrorTitle}
-                    subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsUnauthorizedErrorSubtitleForAdmin : Constants.SubscriptionsUnauthorizedErrorSubtitleForUser}
-                    className='configuration-err-state'
-                    icon={<UnlinkIcon/>}
-                />
+            {connected && !subscriptionsLoading && (
+                <>
+                    {!subscriptionsEnabled && (
+                        <EmptyState
+                            title={Constants.SubscriptionsConfigErrorTitle}
+                            subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
+                            buttonConfig={isCurrentUserSysAdmin ? ({
+                                text: 'Download update set',
+                                link: Utils.getBaseUrls().pluginApiBaseUrl + DOWNLOAD_UPDATE_SET_LINK,
+                                download: true,
+                            }) : null
+                            }
+                            className='configuration-err-state'
+                            icon={<UnlinkIcon/>}
+                        />
+                    )}
+                    {subscriptionsUnauthorized && (
+                        <EmptyState
+                            title={Constants.SubscriptionsUnauthorizedErrorTitle}
+                            subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsUnauthorizedErrorSubtitleForAdmin : Constants.SubscriptionsUnauthorizedErrorSubtitleForUser}
+                            className='configuration-err-state'
+                            icon={<UnlinkIcon/>}
+                        />
+                    )}
+                </>
             )}
             {!connected && !subscriptionsLoading && (
                 <EmptyState

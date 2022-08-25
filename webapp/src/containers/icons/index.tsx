@@ -92,7 +92,7 @@ export const CheckIcon = ({className = ''}: IconProps): JSX.Element => (
         width={38}
         height={38}
         viewBox='0 0 38 38'
-        className={`${className}`}
+        className={className}
     >
         {SVGIcons.check}
     </SVGWrapper>
