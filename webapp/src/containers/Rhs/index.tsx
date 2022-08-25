@@ -13,7 +13,7 @@ import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEvents} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
@@ -40,15 +40,16 @@ const mockSubscriptions: {data: SubscriptionData[]} = {
 };
 
 const Rhs = (): JSX.Element => {
+    const pluginState = useSelector((state: PluginState) => state);
+    const connected = pluginState['plugins-mattermost-plugin-servicenow'].connectedReducer.connected;
     const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
     const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
     const dispatch = useDispatch();
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
-    const pluginState = useSelector((state: PluginState) => state);
     const {makeApiRequest, getApiState} = usePluginApi();
     const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
-    const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+    const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
 
@@ -146,63 +147,65 @@ const Rhs = (): JSX.Element => {
 
     return (
         <div className='rhs-content'>
-            <ToggleSwitch
-                active={showAllSubscriptions}
-                onChange={setShowAllSubscriptions}
-                label={Constants.RhsToggleLabel}
-            />
-            {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
-            {(mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading) && (
+            {connected && (
                 <>
-                    <div className='rhs-content__cards-container'>
-                        {mockSubscriptions.data.map((subscription) => (
-                            <SubscriptionCard
-                                key={subscription.sys_id}
-                                header={`${subscription.number} | ${subscription.short_description}`}
-                                label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
-                                onEdit={() => handleEditSubscription(subscription)}
-                                onDelete={() => handleDeleteClick(subscription)}
-                                cardBody={getSubscriptionCardBody(subscription)}
-                            />
-                        ))}
-                    </div>
-                    <div className='rhs-btn-container'>
-                        <button
-                            className='btn btn-primary rhs-btn'
-                            onClick={() => dispatch(showAddModal())}
-                        >
-                            {'Add Subscription'}
-                        </button>
-                    </div>
+                    <ToggleSwitch
+                        active={showAllSubscriptions}
+                        onChange={setShowAllSubscriptions}
+                        label={Constants.RhsToggleLabel}
+                    />
+                    {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
+                    {mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading && (
+                        <>
+                            <div className='rhs-content__cards-container'>
+                                {mockSubscriptions.data.map((subscription) => (
+                                    <SubscriptionCard
+                                        key={subscription.sys_id}
+                                        header={`${subscription.number} | ${subscription.short_description}`}
+                                        label={SubscriptionTypeLabelMap[subscription.type]}
+                                        onEdit={() => handleEditSubscription(subscription)}
+                                        onDelete={() => handleDeleteClick(subscription)}
+                                        cardBody={getSubscriptionCardBody(subscription)}
+                                    />
+                                ))}
+                            </div>
+                            <div className='rhs-btn-container'>
+                                <button
+                                    className='btn btn-primary rhs-btn'
+                                    onClick={() => dispatch(showAddModal())}
+                                >
+                                    {'Add Subscription'}
+                                </button>
+                            </div>
+                        </>
+                    )}
+                    {(!mockSubscriptions.data?.length && !subscriptionsState.isLoading) && (
+                        <EmptyState
+                            title='No Subscriptions Found'
+                            buttonConfig={{
+                                text: 'Add new Subscription',
+                                action: () => dispatch(showAddModal()),
+                            }}
+                            iconClass='fa fa-bell-slash-o'
+                        />
+                    )}
                 </>
             )}
-            {(!mockSubscriptions.data?.length && !subscriptionsState.isLoading) && (
-                <EmptyState
-                    title='No Subscriptions Found'
-                    buttonConfig={{
-                        text: 'Add new Subscription',
-                        action: () => dispatch(showAddModal()),
-                    }}
-                    iconClass='fa fa-bell-slash-o'
-                />
-            )}
-            {/* TODO: Uncomment and update the following during integration */}
-            {/* {!active && (
+            {!connected && (
                 <EmptyState
                     title='No Account Connected'
-                    subTitle='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Adipiscing nulla in tellus est mauris et eros.'
                     buttonConfig={{
                         text: 'Connect your account',
                         action: () => '',
                     }}
                     iconClass='fa fa-user-circle'
                 />
-            )} */}
+            )}
             {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
             {subscriptionsState.isLoading && <CircularLoader/>}
             {toBeDeleted && (
                 <Modal
-                    show={deleteConfirmationOpen}
+                    show={isDeleteConfirmationOpen}
                     onHide={hideDeleteConfirmation}
                     title='Confirm Delete Subscription'
                     cancelBtnText='Cancel'

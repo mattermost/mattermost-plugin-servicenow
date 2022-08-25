@@ -9,6 +9,7 @@ const AddSubscriptions = () => {
     const dispatch = useDispatch();
     const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
 
+    // TODO: Add the logic for checking if the user is connected first
     return (
         <AddOrEditSubscriptionModal
             open={pluginState.openAddSubscriptionModalReducer.open}
