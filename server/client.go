@@ -41,44 +41,38 @@ func (p *Plugin) NewClient(ctx context.Context, token *oauth2.Token) Client {
 }
 
 func (c *client) ActivateSubscriptions() (int, error) {
-	if c.plugin.subscriptionsActivated {
-		return http.StatusOK, nil
-	}
-	serverURL := c.plugin.getConfiguration().MattermostSiteURL
+	pluginConfig := c.plugin.getConfiguration()
 	subscriptionAuthDetails := &serializer.SubscriptionAuthDetails{}
-	queryParams := url.Values{}
-	queryParams.Add(constants.SysQueryParam, fmt.Sprintf("server_url=%s", serverURL))
+	query := fmt.Sprintf("server_url=%s^api_secret=%s", pluginConfig.MattermostSiteURL, pluginConfig.WebhookSecret)
+	queryParams := url.Values{
+		constants.SysQueryParam: {query},
+	}
+
 	// TODO: Add an API call for checking if the update set has been uploaded and if its version matches with the plugin's update set XML file
 	if _, statusCode, err := c.CallJSON(http.MethodGet, constants.PathActivateSubscriptions, nil, subscriptionAuthDetails, queryParams); err != nil {
 		if strings.Contains(err.Error(), "Invalid table") {
-			return statusCode, constants.ErrUpdateSetNotUploaded
+			return statusCode, fmt.Errorf(constants.APIErrorIDSubscriptionsNotConfigured)
 		}
 		return statusCode, errors.Wrap(err, "failed to get subscription auth details")
 	}
 
 	if len(subscriptionAuthDetails.Result) > 0 {
-		c.plugin.subscriptionsActivated = true
 		return http.StatusOK, nil
 	}
 
 	payload := serializer.SubscriptionAuthPayload{
-		ServerURL: serverURL,
-		APISecret: c.plugin.getConfiguration().WebhookSecret,
+		ServerURL: pluginConfig.MattermostSiteURL,
+		APISecret: pluginConfig.WebhookSecret,
 	}
 
 	if _, statusCode, err := c.CallJSON(http.MethodPost, constants.PathActivateSubscriptions, payload, nil, nil); err != nil {
 		return statusCode, errors.Wrap(err, "failed to activate subscriptions for this server")
 	}
 
-	c.plugin.subscriptionsActivated = true
 	return http.StatusOK, nil
 }
 
 func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) (int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return statusCode, err
-	}
-
 	_, statusCode, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, nil, nil)
 	if err != nil {
 		return statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
@@ -88,10 +82,6 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 }
 
 func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return nil, statusCode, err
-	}
-
 	query := "is_active=true"
 	// userID will be intentionally sent empty string if we have to return subscriptions irrespective of user
 	if userID != "" {
@@ -118,10 +108,6 @@ func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([
 }
 
 func (c *client) GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return nil, statusCode, err
-	}
-
 	subscription := &serializer.SubscriptionResult{}
 	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, subscription, nil)
 	if err != nil {
@@ -132,10 +118,6 @@ func (c *client) GetSubscription(subscriptionID string) (*serializer.Subscriptio
 }
 
 func (c *client) DeleteSubscription(subscriptionID string) (int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return statusCode, err
-	}
-
 	_, statusCode, err := c.CallJSON(http.MethodDelete, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), nil, nil, nil)
 	if err != nil {
 		return statusCode, errors.Wrap(err, "failed to delete subscription from ServiceNow")
@@ -144,10 +126,6 @@ func (c *client) DeleteSubscription(subscriptionID string) (int, error) {
 }
 
 func (c *client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return statusCode, err
-	}
-
 	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), subscription, nil, nil)
 	if err != nil {
 		return statusCode, errors.Wrap(err, "failed to update subscription from ServiceNow")
@@ -158,10 +136,6 @@ func (c *client) EditSubscription(subscriptionID string, subscription *serialize
 // CheckForDuplicateSubscription returns true and an error if a duplicate subscription exists in ServiceNow
 // The boolean return type value should be checked only if the error being returned is nil
 func (c *client) CheckForDuplicateSubscription(subscription *serializer.SubscriptionPayload) (bool, int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return false, statusCode, err
-	}
-
 	query := fmt.Sprintf("channel_id=%s^is_active=true^record_id=%s^server_url=%s", *subscription.ChannelID, *subscription.RecordID, *subscription.ServerURL)
 	queryParams := url.Values{
 		constants.SysQueryParam:      {query},
@@ -178,10 +152,6 @@ func (c *client) CheckForDuplicateSubscription(subscription *serializer.Subscrip
 }
 
 func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return nil, statusCode, err
-	}
-
 	query := fmt.Sprintf("short_description LIKE%s ^OR number STARTSWITH%s", searchTerm, searchTerm)
 	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
@@ -201,10 +171,6 @@ func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset 
 }
 
 func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error) {
-	if statusCode, err := c.ActivateSubscriptions(); err != nil {
-		return nil, statusCode, err
-	}
-
 	queryParams := url.Values{
 		constants.SysQueryParamFields:       {"sys_id,number,short_description,state,priority,assigned_to,assignment_group"},
 		constants.SysQueryParamDisplayValue: {"true"},

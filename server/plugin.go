@@ -21,12 +21,11 @@ type Plugin struct {
 
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
-	configuration          *configuration
-	botID                  string
-	router                 *mux.Router
-	store                  Store
-	CommandHandlers        map[string]CommandHandleFunc
-	subscriptionsActivated bool
+	configuration   *configuration
+	botID           string
+	router          *mux.Router
+	store           Store
+	CommandHandlers map[string]CommandHandleFunc
 }
 
 // NewPlugin returns an instance of a Plugin.
@@ -37,8 +36,6 @@ func NewPlugin() *Plugin {
 		"disconnect":    p.handleDisconnect,
 		"subscriptions": p.handleSubscriptions,
 		"unsubscribe":   p.handleDeleteSubscription,
-		"help":          p.handleHelp,
-		"":              p.handleHelp,
 	}
 
 	return p

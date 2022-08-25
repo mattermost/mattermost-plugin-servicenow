@@ -71,12 +71,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return err
 	}
 
-	client := p.NewClient(context.Background(), token)
-	if _, err = client.ActivateSubscriptions(); err != nil {
-		return err
-	}
-
-	if _, err = p.DM(mattermostUserID, fmt.Sprintf("%s%s", constants.ConnectSuccessMessage, strings.ReplaceAll(commandHelp, "|", "`")), user.Username); err != nil {
+	if _, err = p.DM(mattermostUserID, p.getHelpMessage(constants.ConnectSuccessMessage, strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID)), user.Username); err != nil {
 		return err
 	}
 
