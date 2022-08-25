@@ -27,7 +27,7 @@ This plugin contains the following features:
 - Ability to open the create/edit subscription modal through UI or by using slash commands.
 - Subscriptions to only specific records are supported.
 - Supported record types - incident, problem, change_request.
-- Supported events
+- Supported events:
   * State changed
   * Priority changed
   * Assigned to changed
