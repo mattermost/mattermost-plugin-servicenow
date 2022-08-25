@@ -31,7 +31,7 @@ const Rhs = (): JSX.Element => {
     const dispatch = useDispatch();
     const connected = pluginState.connectedReducer.connected;
     const [subscriptionsEnabled, setSubscriptionsEnabled] = useState(true);
-    const [subscriptionsUnauthorized, setSubscriptionsUnauthorized] = useState(true);
+    const [subscriptionsAuthorized, setSubscriptionsAuthorized] = useState(false);
     const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
     const refetchSubscriptions = pluginState.refetchSubscriptionsReducer.refetchSubscriptions;
@@ -42,12 +42,12 @@ const Rhs = (): JSX.Element => {
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     const getDeleteSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     // Fetch all the subscriptions from the API
@@ -147,12 +147,12 @@ const Rhs = (): JSX.Element => {
                     dispatch(setConnected(true));
                 }
                 return;
-            } else if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsUnauthorized && !subscriptionsUnauthorized) {
-                setSubscriptionsUnauthorized(true);
+            } else if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsUnauthorized && subscriptionsAuthorized) {
+                setSubscriptionsAuthorized(false);
             }
 
-            if (subscriptionsUnauthorized && subscriptionsState.error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized) {
-                setSubscriptionsUnauthorized(false);
+            if (!subscriptionsAuthorized && subscriptionsState.error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized) {
+                setSubscriptionsAuthorized(true);
             }
 
             if (!subscriptionsEnabled) {
@@ -172,16 +172,18 @@ const Rhs = (): JSX.Element => {
                 setSubscriptionsEnabled(true);
             }
 
-            if (subscriptionsUnauthorized) {
-                setSubscriptionsUnauthorized(false);
+            if (!subscriptionsAuthorized) {
+                setSubscriptionsAuthorized(true);
             }
         }
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
 
     const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
+    const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
         <div className='rhs-content'>
-            {connected && subscriptionsEnabled && !subscriptionsUnauthorized && (
+            {subscriptionsLoading && <CircularLoader/>}
+            {connected && subscriptionsEnabled && subscriptionsAuthorized && (
                 <>
                     <RhsData
                         showAllSubscriptions={showAllSubscriptions}
@@ -200,10 +202,10 @@ const Rhs = (): JSX.Element => {
                             confirmBtnText='Delete'
                             className='delete-confirmation-modal'
                             onConfirm={handleDeleteConfirmation}
-                            cancelDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
-                            confirmDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
-                            loading={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
-                            error={deleteApiResponseInvalid || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error?.message}
+                            cancelDisabled={!deleteApiResponseInvalid && deletingSubscription}
+                            confirmDisabled={!deleteApiResponseInvalid && deletingSubscription}
+                            loading={!deleteApiResponseInvalid && deletingSubscription}
+                            error={deleteApiResponseInvalid || deletingSubscription || !errorInDeletingSubscription ? '' : deleteSubscriptionError?.message}
                             confirmBtnClassName='btn-danger'
                         >
                             <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
@@ -227,7 +229,7 @@ const Rhs = (): JSX.Element => {
                             icon={<UnlinkIcon/>}
                         />
                     )}
-                    {subscriptionsUnauthorized && (
+                    {!subscriptionsAuthorized && (
                         <EmptyState
                             title={Constants.SubscriptionsUnauthorizedErrorTitle}
                             subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsUnauthorizedErrorSubtitleForAdmin : Constants.SubscriptionsUnauthorizedErrorSubtitleForUser}
@@ -248,7 +250,6 @@ const Rhs = (): JSX.Element => {
                     icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon'/>}
                 />
             )}
-            {subscriptionsLoading && <CircularLoader/>}
         </div>
     );
 };

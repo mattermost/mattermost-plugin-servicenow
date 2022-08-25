@@ -11,13 +11,14 @@ import reducer from 'reducers';
 import Rhs from 'containers/Rhs';
 import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
-import GetConfig from 'containers/getConfig';
 import {ServiceNowIcon} from 'containers/icons';
 
 import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
 import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal} from 'websocket';
+
+import App from './app';
 
 import manifest from './manifest';
 
@@ -30,7 +31,7 @@ export default class Plugin {
         registry.registerReducer(reducer);
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
-        registry.registerRootComponent(GetConfig);
+        registry.registerRootComponent(App);
         const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);

@@ -62,4 +62,3 @@ const SVGIcons: Record<SvgIconNames, JSX.Element> = {
 };
 
 export default SVGIcons;
-

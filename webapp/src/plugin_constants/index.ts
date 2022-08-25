@@ -44,8 +44,8 @@ const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNo
 const SubscriptionsConfigErrorSubtitleForUser = 'Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin.';
 const SubscriptionsConfigErrorSubtitleForAdmin = 'To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings or you can download it by clicking the button below. The instructions for uploading the update set are available in the plugin\'s documentation and also can be viewed by running the "/servicenow help" command.';
 const SubscriptionsUnauthorizedErrorTitle = 'It seems that you are not authorized to manage subscriptions in ServiceNow.';
-const SubscriptionsUnauthorizedErrorSubtitleForUser = SubscriptionsUnauthorizedErrorTitle + ' Please contact your system administrator.';
-const SubscriptionsUnauthorizedErrorSubtitleForAdmin = SubscriptionsUnauthorizedErrorTitle + ' Please follow the instructions for setting up user permissions available in the plugin\'s documentation. The instructions can also be viewed by running the "/servicenow help" command.';
+const SubscriptionsUnauthorizedErrorSubtitleForUser = 'Please contact your system administrator.';
+const SubscriptionsUnauthorizedErrorSubtitleForAdmin = 'Please follow the instructions for setting up user permissions available in the plugin\'s documentation. The instructions can also be viewed by running the "/servicenow help" command.';
 
 // Used to get the `SubscriptionType` labels to show in the subscription card
 export const SubscriptionTypeLabelMap: Record<string, string> = {

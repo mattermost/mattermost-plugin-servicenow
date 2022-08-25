@@ -16,7 +16,10 @@
   }
 
   .dropdown-option-icon {
-    margin: 0 8px -2px 0;
+    margin-right: -2px;
+    position: relative;
+    top: 1px;
+    left: -4px;
   }
 
   .modal__error {

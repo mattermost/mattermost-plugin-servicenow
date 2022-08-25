@@ -4,7 +4,7 @@ import BaseCard from 'components/card/base';
 import Popover from 'components/popover';
 import MenuButtons from 'components/buttons/menuButtons';
 
-import {DeleteIcon, EditIcon, GlobeIcon, LockIcon} from 'containers/icons';
+import {DeleteIcon, EditIcon} from 'containers/icons';
 
 import Constants from 'plugin_constants';
 
@@ -64,7 +64,7 @@ const SubscriptionCard = ({
                 </div>
                 {channel && (
                     <div className='subscription-card__channel d-flex align-items-center'>
-                        {channel.type === Constants.PrivateChannelType ? <LockIcon className='channel-icon'/> : <GlobeIcon className='channel-icon'/>}
+                        <i className={`channel-icon ${channel.type === Constants.PrivateChannelType ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
                         <span className='subscription-card__channel-text text-ellipsis'>{channel.display_name}</span>
                     </div>
                 )}

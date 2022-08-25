@@ -41,12 +41,12 @@ const RhsData = ({
 
     const getChannelState = useCallback(() => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message};
+        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
     }, [getApiState, currentTeamId]);
 
     const getConfigState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: ((apiErr as FetchBaseQueryError)?.data) as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     // Fetch channels to show channel name in the subscription card
@@ -82,7 +82,7 @@ const RhsData = ({
         <>
             <ToggleSwitch
                 active={showAllSubscriptions}
-                onChange={(newState) => setShowAllSubscriptions(newState)}
+                onChange={setShowAllSubscriptions}
                 label={Constants.RhsToggleLabel}
             />
             {error && <p className='rhs-content--error'>{error}</p>}

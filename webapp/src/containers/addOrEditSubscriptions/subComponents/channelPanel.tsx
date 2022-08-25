@@ -7,8 +7,6 @@ import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleA
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Dropdown from 'components/dropdown';
 
-import {GlobeIcon, LockIcon} from 'containers/icons';
-
 import Constants from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
@@ -46,7 +44,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as {message?: string})?.message};
+        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
     };
 
     useEffect(() => {
@@ -69,7 +67,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
             setChannelOptions(channelListState.data.map((ch) => ({
                 label: (
                     <span>
-                        {ch.type === Constants.PrivateChannelType ? <LockIcon className='dropdown-option-icon'/> : <GlobeIcon className='dropdown-option-icon'/>}
+                        <i className={`dropdown-option-icon ${ch.type === Constants.PrivateChannelType ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
                         {ch.display_name}
                     </span>
                 ),

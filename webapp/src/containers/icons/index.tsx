@@ -17,7 +17,7 @@ type IconParamsType = {
     className: string,
 }
 
-const iconParams = (size: number, className: string): IconParamsType => ({
+const getIconParams = (size: number, className: string): IconParamsType => ({
     width: size,
     height: size,
     viewBox: `0 0 ${size} ${size}`,
@@ -26,7 +26,7 @@ const iconParams = (size: number, className: string): IconParamsType => ({
 
 export const ServiceNowIcon = ({className = ''}: IconProps): JSX.Element => (
     <SVGWrapper
-        {...iconParams(16, `icon-text-color--fill ${className}`)}
+        {...getIconParams(16, `icon-text-color--fill ${className}`)}
         viewBox='0 0 28 26'
     >
         {SVGIcons.servicenow}
@@ -34,43 +34,31 @@ export const ServiceNowIcon = ({className = ''}: IconProps): JSX.Element => (
 );
 
 export const BellIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(48, `icon-text-color--fill rhs-state-icon ${className}`)}>
+    <SVGWrapper {...getIconParams(48, `icon-text-color--fill rhs-state-icon ${className}`)}>
         {SVGIcons.bell}
     </SVGWrapper>
 );
 
 export const UnlinkIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(48, `icon-text-color--fill rhs-state-icon ${className}`)}>
+    <SVGWrapper {...getIconParams(48, `icon-text-color--fill rhs-state-icon ${className}`)}>
         {SVGIcons.unlink}
     </SVGWrapper>
 );
 
-export const GlobeIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(14, `icon-text-color--fill ${className}`)}>
-        {SVGIcons.globe}
-    </SVGWrapper>
-);
-
-export const LockIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(14, `icon-text-color--fill ${className}`)}>
-        {SVGIcons.lock}
-    </SVGWrapper>
-);
-
 export const EditIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(16, `icon-text-color--stroke ${className}`)}>
+    <SVGWrapper {...getIconParams(16, `icon-text-color--stroke ${className}`)}>
         {SVGIcons.edit}
     </SVGWrapper>
 );
 
 export const DeleteIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(16, `icon-text-color--stroke ${className}`)}>
+    <SVGWrapper {...getIconParams(16, `icon-text-color--stroke ${className}`)}>
         {SVGIcons.delete}
     </SVGWrapper>
 );
 
 export const CheckIcon = ({className = ''}: IconProps): JSX.Element => (
-    <SVGWrapper {...iconParams(38, className)}>
+    <SVGWrapper {...getIconParams(38, className)}>
         {SVGIcons.check}
     </SVGWrapper>
 );
