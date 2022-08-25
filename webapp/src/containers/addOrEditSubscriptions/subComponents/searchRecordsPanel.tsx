@@ -52,7 +52,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
@@ -128,7 +128,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 setDisabledInput(false);
             }
         }
-    }, [APIState]);
+    }, [pluginState]);
 
     // Handle API state updates in the suggestions
     useEffect(() => {
@@ -142,7 +142,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (searchSuggestionsState.data) {
             setSuggestions(searchSuggestionsState.data);
         }
-    }, [APIState]);
+    }, [pluginState]);
 
     // Handle API state updates while fetching record data
     useEffect(() => {

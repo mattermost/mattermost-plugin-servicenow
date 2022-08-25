@@ -39,7 +39,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
 
     const getChannelState = () => {
@@ -85,10 +85,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
 
         setShowModalLoader(channelListState.isLoading);
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "getMmApiState" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [APIState]);
+    }, [pluginState]);
 
     // Hide error state once the value is valid
     useEffect(() => {

@@ -67,7 +67,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [editSubscriptionPayload, setEditSubscriptionPayload] = useState<EditSubscriptionPayload | null>(null);
 
     // usePluginApi hook
-    const {state: APIState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
 
     // Create refs to access height of the panels and providing height to modal-dialog
     // We've made all the panels absolute positioned to apply animations and because they are absolute positioned, their parent container, which is modal-dialog, won't expand the same as their heights
@@ -121,7 +121,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             dispatch(refetch());
         }
         setShowModalLoader(createSubscriptionState.isLoading);
-    }, [APIState]);
+    }, [pluginState]);
 
     useEffect(() => {
         const editSubscriptionState = getEditSubscriptionState();
@@ -136,7 +136,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             dispatch(refetch());
         }
         setShowModalLoader(editSubscriptionState.isLoading);
-    }, [APIState]);
+    }, [pluginState]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {

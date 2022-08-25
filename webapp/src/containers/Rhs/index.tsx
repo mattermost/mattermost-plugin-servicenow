@@ -1,55 +1,40 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
+import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
+import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import ToggleSwitch from 'components/toggleSwitch';
 
 import EmptyState from 'components/emptyState';
-import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 import SubscriptionCard from 'components/card/subscription';
 import CircularLoader from 'components/loader/circular';
 import Modal from 'components/modal';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
+import Constants, {SubscriptionEventsMap, SubscriptionTypeLabelMap, CONNECT_ACCOUNT_LINK, DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
 
 import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
+import {setConnected} from 'reducers/connectedState';
 
 import Utils from 'utils';
 
 import './rhs.scss';
 
-// Mock data
-const mockSubscriptions: {data: SubscriptionData[]} = {
-    data: [{
-        server_url: 'http://localhost:8065',
-        is_active: true,
-        user_id: 'bhy36f7wupy59xydny96s9xrao',
-        type: 'record',
-        record_type: 'incident',
-        record_id: '9d385017c611228701d22104cc95c371',
-        subscription_events: 'priority,commented',
-        channel_id: '5n4r5bkc6bbgixgyfmjh4oa65c',
-        sys_id: '9d385017c611228701d22104cc95c739',
-        number: 'INC00010001',
-        short_description: 'Test Incident',
-    }],
-};
-
 const Rhs = (): JSX.Element => {
-    const pluginState = useSelector((state: PluginState) => state);
-    const connected = pluginState['plugins-mattermost-plugin-servicenow'].connectedReducer.connected;
-    const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
-    const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
+    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const isCurrentUserSysAdmin = useSelector((state: GlobalState) => getCurrentUser(state).roles.includes(MMConstants.SYSTEM_ADMIN_ROLE));
     const dispatch = useDispatch();
+    const connected = pluginState.connectedReducer.connected;
+    const [subscriptionsEnabled, setSubscriptionsEnabled] = useState(true);
+    const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
-    const {makeApiRequest, getApiState} = usePluginApi();
-    const refetchSubscriptions = pluginState['plugins-mattermost-plugin-servicenow'].refetchSubscriptionsReducer.refetchSubscriptions;
+    const refetchSubscriptions = pluginState.refetchSubscriptionsReducer.refetchSubscriptions;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
@@ -57,15 +42,13 @@ const Rhs = (): JSX.Element => {
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as APIError};
     };
 
     const getDeleteSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as string};
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: ((apiErr as FetchBaseQueryError)?.data) as APIError};
     };
-
-    const subscriptionsState = getSubscriptionsState();
 
     // Fetch subscriptions from the API
     useEffect(() => {
@@ -82,6 +65,7 @@ const Rhs = (): JSX.Element => {
         if (!refetchSubscriptions) {
             return;
         }
+
         const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
         if (!showAllSubscriptions) {
             subscriptionParams.channel_id = currentChannelId;
@@ -107,15 +91,16 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = (subscription: SubscriptionData) => {
+        const events = subscription.subscription_events.split(',');
+        const subscriptionEvents = events.map((event) => SubscriptionEventsMap[event]);
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
             recordType: subscription.record_type as RecordType,
-            subscriptionEvents: subscription.subscription_events.split(',') as unknown as SubscriptionEvents[],
+            subscriptionEvents,
             id: subscription.sys_id,
         };
-        dispatch(showEditModal());
-        setEditSubscriptionData(subscriptionData);
+        dispatch(showEditModal(subscriptionData));
     };
 
     // Handles action when the delete button is clicked
@@ -136,6 +121,34 @@ const Rhs = (): JSX.Element => {
         setToBeDeleted(null);
     };
 
+    useEffect(() => {
+        const subscriptionsState = getSubscriptionsState();
+        if (subscriptionsState.isError && !subscriptionsState.isSuccess) {
+            if (subscriptionsState.error?.id === Constants.ApiErrorIdNotConnected && connected) {
+                dispatch(setConnected(false));
+            }
+
+            if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsNotConfigured) {
+                setSubscriptionsEnabled(false);
+                if (!connected) {
+                    dispatch(setConnected(true));
+                }
+            } else if (!subscriptionsEnabled) {
+                setSubscriptionsEnabled(true);
+            }
+        }
+
+        if (!subscriptionsState.isError && subscriptionsState.isSuccess && subscriptionsState.data) {
+            if (!connected) {
+                dispatch(setConnected(true));
+            }
+
+            if (!subscriptionsEnabled) {
+                setSubscriptionsEnabled(true);
+            }
+        }
+    }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
+
     // Returns card-body for the subscription cards
     const getSubscriptionCardBody = useCallback((subscription: SubscriptionData): SubscriptionCardBody => ({
         labelValuePairs: [
@@ -147,20 +160,20 @@ const Rhs = (): JSX.Element => {
         list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
     }), []);
 
+    const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
     return (
         <div className='rhs-content'>
-            {connected && (
+            {connected && subscriptionsEnabled && (
                 <>
                     <ToggleSwitch
                         active={showAllSubscriptions}
                         onChange={setShowAllSubscriptions}
                         label={Constants.RhsToggleLabel}
                     />
-                    {/* TODO: Replace "mockSubscriptions" by "subscriptionState" */}
-                    {mockSubscriptions.data?.length > 0 && !subscriptionsState.isLoading && (
+                    {(subscriptions?.length > 0 && !subscriptionsLoading) && (
                         <>
                             <div className='rhs-content__cards-container'>
-                                {mockSubscriptions.data.map((subscription) => (
+                                {subscriptions.map((subscription) => (
                                     <SubscriptionCard
                                         key={subscription.sys_id}
                                         header={`${subscription.number} | ${subscription.short_description}`}
@@ -181,7 +194,7 @@ const Rhs = (): JSX.Element => {
                             </div>
                         </>
                     )}
-                    {(!mockSubscriptions.data?.length && !subscriptionsState.isLoading) && (
+                    {!subscriptions?.length && !subscriptionsLoading && (
                         <EmptyState
                             title='No Subscriptions Found'
                             buttonConfig={{
@@ -193,7 +206,21 @@ const Rhs = (): JSX.Element => {
                     )}
                 </>
             )}
-            {!connected && (
+            {subscriptionsLoading && <CircularLoader/>}
+            {connected && !subscriptionsLoading && !subscriptionsEnabled && (
+                <EmptyState
+                    title={Constants.SubscriptionsConfigErrorTitle}
+                    subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
+                    iconClass='fa fa-unlink'
+                    buttonConfig={isCurrentUserSysAdmin ? ({
+                        text: 'Download update set',
+                        link: Utils.getBaseUrls().pluginApiBaseUrl + DOWNLOAD_UPDATE_SET_LINK,
+                        download: true,
+                    }) : null
+                    }
+                />
+            )}
+            {!connected && !subscriptionsLoading && (
                 <EmptyState
                     title='No Account Connected'
                     buttonConfig={{
@@ -203,8 +230,6 @@ const Rhs = (): JSX.Element => {
                     iconClass='fa fa-user-circle'
                 />
             )}
-            {editSubscriptionData && <EditSubscription subscriptionData={editSubscriptionData}/>}
-            {subscriptionsState.isLoading && <CircularLoader/>}
             {toBeDeleted && (
                 <Modal
                     show={isDeleteConfirmationOpen}
@@ -217,7 +242,7 @@ const Rhs = (): JSX.Element => {
                     cancelDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
                     confirmDisabled={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
                     loading={!deleteApiResponseInvalid && getDeleteSubscriptionState().isLoading}
-                    error={deleteApiResponseInvalid || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error}
+                    error={deleteApiResponseInvalid || getDeleteSubscriptionState().isLoading || !getDeleteSubscriptionState().isError ? '' : getDeleteSubscriptionState().error.message}
                     confirmBtnClassName='btn-danger'
                 >
                     <>
