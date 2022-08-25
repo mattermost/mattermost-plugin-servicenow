@@ -32,17 +32,33 @@ const (
 * Click on that update set and then click on "Preview Update Set".
 * After the preview is complete, you have to commit the update set by clicking on the button "Commit Update Set".
 * You'll see a warning dialog. You can ignore that and click on "Proceed with Commit".
+
+##### Setting up user permissions in ServiceNow
+Within ServiceNow user roles, add the "x_830655_mm_std.user" role to any user who should have the ability to add or manage subscriptions in Mattermost channels.
+- Go to ServiceNow and search for Users.
+- On the Users page, open any user's profile. 
+- Click on "Roles" tab in the table present below and click on "Edit"
+- Then, search for the "x_830655_mm_std.user" role and add that role to the user's Roles list and click on "Save".
+
+After that, this user will have the permission to add or manage subscriptions from Mattermost.
 `
 
-	helpCommandHeader                = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
-	disconnectErrorMessage           = "Something went wrong. Not able to disconnect user. Check server logs for errors."
-	disconnectSuccessMessage         = "Disconnected your ServiceNow account."
-	listSubscriptionsErrorMessage    = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
-	listSubscriptionsWaitMessage     = "Your subscriptions for this channel will be listed soon. Please wait."
-	deleteSubscriptionErrorMessage   = "Something went wrong. Not able to delete subscription. Check server logs for errors."
-	deleteSubscriptionSuccessMessage = "Subscription successfully deleted."
-	unknownErrorMessage              = "Unknown error."
-	notConnectedMessage              = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
+	helpCommandHeader                       = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
+	disconnectErrorMessage                  = "Something went wrong. Not able to disconnect user. Check server logs for errors."
+	disconnectSuccessMessage                = "Disconnected your ServiceNow account."
+	listSubscriptionsErrorMessage           = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
+	listSubscriptionsWaitMessage            = "Your subscriptions for this channel will be listed soon. Please wait."
+	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
+	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
+	editSubscriptionErrorMessage            = "Something went wrong. Check server logs for errors."
+	unknownErrorMessage                     = "Something went wrong."
+	notConnectedMessage                     = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
+	subscriptionsNotConfiguredError         = "It seems that subscriptions for ServiceNow have not been configured properly."
+	subscriptionsNotConfiguredErrorForUser  = subscriptionsNotConfiguredError + " Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin."
+	subscriptionsNotConfiguredErrorForAdmin = subscriptionsNotConfiguredError + " To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings. The instructions for uploading the update set are available in the plugin's documentation and also can be viewed by running the \"/servicenow help\" command."
+	subscriptionsNotAuthorizedError         = "It seems that you are not authorized to manage subscriptions in ServiceNow."
+	subscriptionsNotAuthorizedErrorForUser  = subscriptionsNotAuthorizedError + " Please contact your system administrator."
+	subscriptionsNotAuthorizedErrorForAdmin = subscriptionsNotAuthorizedError + " Please follow the instructions for setting up user permissions available in the plugin's documentation. The instructions can also be viewed by running the \"/servicenow help\" command."
 )
 
 type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client) string
@@ -120,9 +136,18 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 			if _, err := client.ActivateSubscriptions(); err != nil {
 				message := ""
-				if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
-					message = err.Error()
-				} else {
+				switch {
+				case strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured):
+					message = subscriptionsNotConfiguredErrorForUser
+					if isSysAdmin {
+						message = subscriptionsNotConfiguredErrorForAdmin
+					}
+				case strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized):
+					message = subscriptionsNotAuthorizedErrorForUser
+					if isSysAdmin {
+						message = subscriptionsNotAuthorizedErrorForAdmin
+					}
+				default:
 					message = unknownErrorMessage
 				}
 
@@ -195,14 +220,28 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	command := parameters[0]
 	parameters = parameters[1:]
 
-	switch {
-	case command == "list":
+	switch command {
+	case "list":
 		return p.handleListSubscriptions(c, args, parameters, client)
-	case command == "delete":
+	case "add":
+		return p.handleSubscribe(c, args, parameters, client)
+	case "edit":
+		return p.handleEditSubscription(c, args, parameters, client)
+	case "delete":
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
+}
+
+func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenAddSubscriptionModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
@@ -249,6 +288,44 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		return deleteSubscriptionErrorMessage
 	}
 	return deleteSubscriptionSuccessMessage
+}
+
+func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	if len(params) < 1 {
+		return "Invalid number of params for this command."
+	}
+	subscriptionID := params[0]
+	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
+	if err != nil {
+		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
+		return editSubscriptionErrorMessage
+	}
+
+	if !valid {
+		return "Invalid subscription ID."
+	}
+
+	subscription, _, err := client.GetSubscription(subscriptionID)
+	if err != nil {
+		p.API.LogError("Unable to get subscription", "Error", err.Error())
+		return editSubscriptionErrorMessage
+	}
+
+	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
+
+	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
+	if err != nil {
+		p.API.LogError("Unable to convert subscription to map", "Error", err.Error())
+		return editSubscriptionErrorMessage
+	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenEditSubscriptionModal,
+		subscriptionMap,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
 }
 
 func getAutocompleteData() *model.AutocompleteData {
@@ -337,17 +414,4 @@ func parseCommand(input string) (command, action string, parameters []string) {
 
 func (p *Plugin) postCommandResponse(args *model.CommandArgs, text string) {
 	p.Ephemeral(args.UserId, args.ChannelId, args.RootId, text)
-}
-
-func (p *Plugin) isAuthorizedSysAdmin(userID string) (bool, error) {
-	user, appErr := p.API.GetUser(userID)
-	if appErr != nil {
-		return false, appErr
-	}
-
-	if !strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
-		return false, nil
-	}
-
-	return true, nil
 }

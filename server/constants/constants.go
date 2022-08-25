@@ -52,14 +52,18 @@ const (
 	PathParamRecordID       = "record_id"
 
 	// Websocket events
-	WSEventConnect    = "connect"
-	WSEventDisconnect = "disconnect"
+	WSEventConnect                   = "connect"
+	WSEventDisconnect                = "disconnect"
+	WSEventOpenAddSubscriptionModal  = "add_subscription"
+	WSEventOpenEditSubscriptionModal = "edit_subscription"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
 	APIErrorNotConnected                 = "You have not connected your Mattermost account to ServiceNow."
 	APIErrorIDSubscriptionsNotConfigured = "subscriptions_not_configured"
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
+	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
+	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 )
 
 var (

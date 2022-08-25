@@ -44,6 +44,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -62,6 +63,22 @@ func (p *Plugin) handleAPIError(w http.ResponseWriter, apiErr *serializer.APIErr
 	w.WriteHeader(apiErr.StatusCode)
 
 	if _, err = w.Write(errorBytes); err != nil {
+		p.API.LogError("Failed to write JSON response", "error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *Plugin) writeJSON(w http.ResponseWriter, v interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	b, err := json.Marshal(v)
+	if err != nil {
+		p.API.LogError("Failed to marshal JSON response", "error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if _, err = w.Write(b); err != nil {
 		p.API.LogError("Failed to write JSON response", "error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -112,7 +129,12 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 		client := p.GetClientFromRequest(r)
 		if _, err := client.ActivateSubscriptions(); err != nil {
 			if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
-				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusInternalServerError, Message: constants.APIErrorSubscriptionsNotConfigured})
+				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusBadRequest, Message: constants.APIErrorSubscriptionsNotConfigured})
+				return
+			}
+
+			if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized) {
+				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotAuthorized, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorSubscriptionsNotAuthorized})
 				return
 			}
 
@@ -125,6 +147,10 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 	}
 }
 
+func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
+	p.writeJSON(w, p.getConfiguration())
+}
+
 func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
 	resp := &serializer.ConnectedResponse{
 		Connected: false,
@@ -135,11 +161,7 @@ func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
 		resp.Connected = true
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	p.writeJSON(w, resp)
 }
 
 // checkAuthBySecret verifies if provided request is performed by an authorized source.
@@ -396,10 +418,7 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(requiredChannels); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	p.writeJSON(w, requiredChannels)
 }
 
 func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
@@ -456,11 +475,7 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(record); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	p.writeJSON(w, record)
 }
 
 func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
