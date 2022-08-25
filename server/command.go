@@ -51,7 +51,7 @@ After that, this user will have the permission to add or manage subscriptions fr
 	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
 	editSubscriptionErrorMessage            = "Something went wrong. Check server logs for errors."
-	unknownErrorMessage                     = "Unknown error."
+	unknownErrorMessage                     = "Something went wrong."
 	notConnectedMessage                     = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
 	subscriptionsNotConfiguredError         = "It seems that subscriptions for ServiceNow have not been configured properly."
 	subscriptionsNotConfiguredErrorForUser  = subscriptionsNotConfiguredError + " Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin."
@@ -342,14 +342,11 @@ func getAutocompleteData() *model.AutocompleteData {
 	subscribeList := model.NewAutocompleteData("list", "", "List the current channel subscriptions")
 	subscriptions.AddCommand(subscribeList)
 
-	subscriptionsAdd := model.NewAutocompleteData("add", "[record_type] [record_id]", "Subscribe to the record changes in ServiceNow")
-	subscriptionsAdd.AddTextArgument("Type of the record to subscribe to. Can be one of: problem, incident, change_request", "[record_type]", "")
-	subscriptionsAdd.AddTextArgument("ID of the record to subscribe to. It is referred as sys_id in ServiceNow.", "[record_id]", "")
+	subscriptionsAdd := model.NewAutocompleteData("add", "", "Subscribe to the record changes in ServiceNow")
 	subscriptions.AddCommand(subscriptionsAdd)
 
-	subscriptionsEdit := model.NewAutocompleteData("edit", "[subscription_id] [subscription_type]", "Edit the subscriptions created to the record changes in ServiceNow")
+	subscriptionsEdit := model.NewAutocompleteData("edit", "[subscription_id]", "Edit the subscriptions created to the record changes in ServiceNow")
 	subscriptionsEdit.AddTextArgument("ID of the subscription", "[subscription_id]", "")
-	subscriptionsEdit.AddTextArgument("Type of the subscription. Can be on of: priority, state", "[subscription_type]", "")
 	subscriptions.AddCommand(subscriptionsEdit)
 
 	subscriptionsDelete := model.NewAutocompleteData("delete", "[subscription_id]", "Unsubscribe to the record changes in ServiceNow")

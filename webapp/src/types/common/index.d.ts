@@ -9,9 +9,7 @@ type TabData = {
 
 type HttpMethod = 'GET' | 'POST';
 
-const pluginStateKey = 'plugins-mattermost-plugin-servicenow';
-
-type ApiServiceName = 'fetchRecords'
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription'
 
 type PluginApiService = {
     path: string,
@@ -20,7 +18,7 @@ type PluginApiService = {
 }
 
 type PluginState = {
-    [pluginStateKey]: RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
+    'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
 }
 
 type DropdownOptionType = {
@@ -36,11 +34,22 @@ type MmHookArgTypes = {
 
 type EditSubscriptionData = {
     channel: string,
-    recordValue: string,
-    alertType: string,
-    stateChanged: boolean;
-    priorityChanged: boolean;
-    newCommentChecked: boolean;
-    assignedToChecked: boolean;
-    assignmentGroupChecked: boolean;
+    recordId: string,
+    recordType: RecordType,
+    subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
+    id: string;
+}
+
+type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group';
+
+type RecordDataLabelConfigType = {
+    key: RecordDataKeys;
+    label: string;
+}
+
+type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | string;
+
+type SubscriptionCardBody = {
+    list?: Array<string | JSX.Element>,
+    labelValuePairs?: Array<{label: string, value: string}>,
 }
