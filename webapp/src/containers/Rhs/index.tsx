@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
@@ -23,7 +23,7 @@ import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 import './rhs.scss';
 
 // Mock data
-const mockSubscriptions = {
+const mockSubscriptions: {data: SubscriptionData[]} = {
     data: [{
         server_url: 'http://localhost:8065',
         is_active: true,
@@ -31,9 +31,11 @@ const mockSubscriptions = {
         type: 'record',
         record_type: 'incident',
         record_id: '9d385017c611228701d22104cc95c371',
-        subscription_events: 'priority, commented',
+        subscription_events: 'priority,commented',
         channel_id: '5n4r5bkc6bbgixgyfmjh4oa65c',
         sys_id: '9d385017c611228701d22104cc95c739',
+        number: 'INC00010001',
+        short_description: 'Test Incident',
     }],
 };
 
@@ -131,6 +133,17 @@ const Rhs = (): JSX.Element => {
         setToBeDeleted(null);
     };
 
+    // Returns card-body for the subscription cards
+    const getSubscriptionCardBody = useCallback((subscription: SubscriptionData): SubscriptionCardBody => ({
+        labelValuePairs: [
+            {
+                label: 'ID',
+                value: subscription.sys_id,
+            },
+        ],
+        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
+    }), []);
+
     return (
         <div className='rhs-content'>
             <ToggleSwitch
@@ -145,10 +158,11 @@ const Rhs = (): JSX.Element => {
                         {mockSubscriptions.data.map((subscription) => (
                             <SubscriptionCard
                                 key={subscription.sys_id}
-                                header={subscription.sys_id}
+                                header={`${subscription.number} | ${subscription.short_description}`}
                                 label={subscription.type === 'record' ? 'Single Record' : 'Bulk Record'}
                                 onEdit={() => handleEditSubscription(subscription)}
                                 onDelete={() => handleDeleteClick(subscription)}
+                                cardBody={getSubscriptionCardBody(subscription)}
                             />
                         ))}
                     </div>
