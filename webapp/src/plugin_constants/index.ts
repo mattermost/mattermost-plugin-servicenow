@@ -47,6 +47,7 @@ const SubscriptionsUnauthorizedErrorTitle = 'It seems that you are not authorize
 const SubscriptionsUnauthorizedErrorSubtitleForUser = SubscriptionsUnauthorizedErrorTitle + ' Please contact your system administrator.';
 const SubscriptionsUnauthorizedErrorSubtitleForAdmin = SubscriptionsUnauthorizedErrorTitle + ' Please follow the instructions for setting up user permissions available in the plugin\'s documentation. The instructions can also be viewed by running the "/servicenow help" command.';
 
+// Used to get the `SubscriptionType` labels to show in the subscription card
 export const SubscriptionTypeLabelMap: Record<string, string> = {
     record: 'Record subscription',
     object: 'Bulk subscription',
