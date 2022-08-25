@@ -50,11 +50,6 @@ type RecordDataLabelConfigType = {
 type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | string;
 
 type SubscriptionCardBody = {
-    list?: string[] | JSX.Element[],
-    labelValuePairs?: [
-        {
-            label: string,
-            value: string,
-        }
-    ]
+    list?: Array<string | JSX.Element>,
+    labelValuePairs?: Array<{label: string, value: string}>,
 }
