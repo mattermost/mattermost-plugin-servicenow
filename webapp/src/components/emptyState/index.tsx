@@ -7,7 +7,8 @@ type EmptyStatePropTypes = {
     subTitle?: string,
     buttonConfig?:{
         text: string;
-        action: (event: React.MouseEvent<HTMLButtonElement>) => void;
+        link?: string;
+        action?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     }
     iconClass?: string;
 }
@@ -25,13 +26,23 @@ const EmptyState = ({
             </div>
             <p className='empty-state__title'>{title}</p>
             {subTitle && <p className='empty-state__subtitle'>{subTitle}</p>}
-            {buttonConfig && (
+            {buttonConfig?.action && (
                 <button
                     onClick={buttonConfig.action}
                     className='empty-state__btn btn btn-primary'
                 >
                     {buttonConfig.text}
                 </button>
+            )}
+            {buttonConfig?.link && (
+                <a
+                    target='_blank'
+                    rel='noreferrer'
+                    href={buttonConfig.link}
+                    className='empty-state__btn btn btn-primary'
+                >
+                    {buttonConfig.text}
+                </a>
             )}
         </div>
     </div>
