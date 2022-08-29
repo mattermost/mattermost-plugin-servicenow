@@ -1,5 +1,4 @@
-import React, {useEffect, useState} from 'react';
-import {clearTimeout} from 'timers';
+import React, {useEffect, useRef, useState} from 'react';
 
 import Constants from 'plugin_constants';
 
@@ -35,67 +34,85 @@ const AutoSuggest = ({
     className = '',
     onOptionClick,
 }: AutoSuggestProps) => {
-    const [open, setOpen] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [focused, setFocused] = useState(false);
-    let inputBlurTimer: NodeJS.Timeout;
+    const textInputFieldRef = useRef<HTMLInputElement>(null);
+    const autoSuggestRef = useRef<HTMLDivElement>(null);
 
     const {suggestions, renderValue} = suggestionConfig;
 
     // Show suggestions depending on the input value, number of characters and whether the input is in focused state
     useEffect(() => {
-        setOpen(inputValue.length >= charThresholdToShowSuggestions && focused);
-    }, [charThresholdToShowSuggestions, focused, inputValue, loadingSuggestions]);
+        setShowSuggestions(inputValue.length >= charThresholdToShowSuggestions && focused);
+    }, [charThresholdToShowSuggestions, focused, inputValue]);
+
+    useEffect(() => {
+        if (focused) {
+            // eslint-disable-next-line no-unused-expressions
+            textInputFieldRef.current?.focus();
+        } else {
+            // eslint-disable-next-line no-unused-expressions
+            textInputFieldRef.current?.blur();
+        }
+    }, [focused]);
+
+    // Close the auto-suggest popover when the user clicks outside
+    useEffect(() => {
+        const handleCloseAutoSuggest = (e: MouseEvent) => !autoSuggestRef.current?.contains(e.target as Element) && setFocused(false);
+
+        document.addEventListener('click', handleCloseAutoSuggest);
+
+        return () => document.removeEventListener('click', handleCloseAutoSuggest);
+    }, []);
 
     const handleSuggestionClick = (suggestedValue: Record<string, string>) => {
         onOptionClick(suggestedValue);
-        setOpen(false);
+        setFocused(false);
     };
 
-    useEffect(() => {
-        return () => {
-            clearTimeout(inputBlurTimer);
-        };
-    }, []);
-
-    const handleBlur = () => {
-        // Hide focused state
-        inputBlurTimer = setTimeout(() => {
-            setFocused(false);
-        }, 200);
-    };
+    // Prevent the text input field(which is the field visible in the UI) from blurring if "focused" is set to "true"
+    const handleBlur = () => focused && textInputFieldRef.current?.focus();
 
     return (
-        <div className={`auto-suggest ${disabled && 'auto-suggest--disabled'} ${error && 'auto-suggest--error'} ${className}`}>
+        <div
+            className={`auto-suggest ${disabled && 'auto-suggest--disabled'} ${error && 'auto-suggest--error'} ${className}`}
+            ref={autoSuggestRef}
+        >
             <div className={`auto-suggest__field cursor-pointer d-flex align-items-center justify-content-between ${focused && 'auto-suggest__field--focused'}`}>
                 <input
+                    type='checkbox'
+                    className='auto-suggest__toggle-input'
+                    checked={focused}
+                    disabled={disabled}
+                    onClick={() => setFocused(true)}
+                />
+                <input
+                    ref={textInputFieldRef}
                     placeholder={`${placeholder ?? ''}${required ? '*' : ''}`}
                     value={inputValue}
                     onChange={(e) => onInputValueChange(e.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={handleBlur}
                     className='auto-suggest__input'
                     disabled={disabled}
+                    onBlur={handleBlur}
                 />
                 {loadingSuggestions ? (
                     <div className='auto-suggest__loader'/>
                 ) : (
-                    <i className={`fa fa-angle-down auto-suggest__field-angle ${open && 'auto-suggest__field-angle--rotated'}`}/>
+                    <i className={`fa fa-angle-down auto-suggest__field-angle ${showSuggestions && 'auto-suggest__field-angle--rotated'}`}/>
                 )}
             </div>
             {inputValue.length < charThresholdToShowSuggestions && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
-            <ul className={`auto-suggest__suggestions ${open && 'auto-suggest__suggestions--open'}`}>
-                {
-                    suggestions.map((suggestion) => (
-                        <li
-                            key={renderValue(suggestion)}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            className='auto-suggest__suggestion text-ellipses cursor-pointer'
-                        >
-                            {renderValue(suggestion)}
-                        </li>
-                    ))
-                }
-                {!suggestions.length && <li className='auto-suggest__suggestion cursor-pointer'>{'Nothing to show'}</li>}
+            <ul className={`auto-suggest__suggestions ${showSuggestions && 'auto-suggest__suggestions--open'}`}>
+                {!loadingSuggestions && suggestions.map((suggestion) => (
+                    <li
+                        key={renderValue(suggestion)}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className='auto-suggest__suggestion text-ellipses cursor-pointer'
+                    >
+                        {renderValue(suggestion)}
+                    </li>
+                ))}
+                {(!suggestions.length || loadingSuggestions) && <li className='auto-suggest__suggestion cursor-pointer'>{'Nothing to show'}</li>}
             </ul>
             {typeof error === 'string' && <p className='auto-suggest__err-text'>{error}</p>}
         </div>

@@ -4,12 +4,13 @@
 
   &__field {
     height: 50px;
-    border: 2px solid rgba(var(--center-channel-color-rgb), 0.16);
+    border: 1px solid rgba(var(--center-channel-color-rgb), 0.1);
     border-radius: 4px;
     padding: 0 14px;
 
     &--open {
-      border-color: rgba(var(--center-channel-color-rgb), 0.4);
+      border-color: rgba(var(--center-channel-color-rgb), 0.2);
+
       & .dropdown__field-text--placeholder {
         color: rgba(var(--center-channel-color-rgb), 0.7);
       }
@@ -96,7 +97,7 @@
     left: 0;
     right: 0;
     top: 50px;
-    border: 2px solid rgba(var(--center-channel-color-rgb), 0.4);
+    border: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
     border-radius: 4px;
     max-height: 0;
     overflow: auto;
@@ -105,6 +106,7 @@
     background: var(--center-channel-bg);
     padding: 0;
     z-index: 2000;
+    box-shadow: 0px 8px 24px rgba(var(--center-channel-color-rgb), 0.2);
 
     &--open {
       opacity: 1;
@@ -119,7 +121,7 @@
     max-width: 100%;
 
     &:hover {
-      background: rgba(var(--center-channel-text-rgb), 0.1);
+      background: rgba(var(--center-channel-text-rgb), 0.06);
     }
   }
 

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import './styles.scss';
 
@@ -18,6 +18,7 @@ type DropdownProps = {
 
 const Dropdown = ({value, placeholder, options, onChange, customOption, loadingOptions, disabled, error, required}: DropdownProps): JSX.Element => {
     const [open, setOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Handles closing the popover and updating the value when someone selects an option
     const handleInputChange = (newOption: DropdownOptionType) => {
@@ -47,15 +48,20 @@ const Dropdown = ({value, placeholder, options, onChange, customOption, loadingO
 
     const getLabel = (optionValue: string | null) => getOptions().find((option) => option.value === optionValue);
 
-    const handleInputBlur = () => {
-        // Delaying the closing of the option menu so that when someone chooses any option, the function to update the value is getting called and the updates are happening
-        setTimeout(() => {
-            setOpen(false);
-        }, 250);
-    };
+    // Close the dropdown popover when the user clicks outside
+    useEffect(() => {
+        const handleCloseDropdown = (e: MouseEvent) => !dropdownRef.current?.contains(e.target as Element) && setOpen(false);
+
+        document.addEventListener('click', handleCloseDropdown);
+
+        return () => document.removeEventListener('click', handleCloseDropdown);
+    }, []);
 
     return (
-        <div className={`dropdown ${error && 'dropdown--error'}`}>
+        <div
+            className={`dropdown ${error && 'dropdown--error'}`}
+            ref={dropdownRef}
+        >
             <div
                 className={`dropdown__field cursor-pointer d-flex align-items-center justify-content-between ${open && 'dropdown__field--open'} ${disabled && 'dropdown__field--disabled'}`}
             >
@@ -69,9 +75,10 @@ const Dropdown = ({value, placeholder, options, onChange, customOption, loadingO
                 {!loadingOptions && <i className={`fa fa-angle-down dropdown__field-angle ${open && 'dropdown__field-angle--rotated'}`}/>}
                 {loadingOptions && <div className='dropdown__loader'/>}
                 <input
+                    type='checkbox'
                     className='dropdown__field-input cursor-pointer'
-                    onFocus={() => setOpen(true)}
-                    onBlur={handleInputBlur}
+                    checked={open}
+                    onChange={(e) => setOpen(e.target.checked)}
                     disabled={disabled}
                 />
             </div>
