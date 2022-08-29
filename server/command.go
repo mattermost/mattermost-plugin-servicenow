@@ -48,6 +48,7 @@ After that, this user will have the permission to add or manage subscriptions fr
 	disconnectSuccessMessage                = "Disconnected your ServiceNow account."
 	listSubscriptionsErrorMessage           = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
 	listSubscriptionsWaitMessage            = "Your subscriptions for this channel will be listed soon. Please wait."
+	genericWaitMessage                      = "Your request is being processed. Please wait."
 	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
 	editSubscriptionErrorMessage            = "Something went wrong. Check server logs for errors."
@@ -275,28 +276,37 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 	if len(params) < 1 {
 		return "Invalid number of params for this command."
 	}
-	subscriptionID := params[0]
-	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
-	if err != nil {
-		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return deleteSubscriptionErrorMessage
-	}
 
-	if !valid {
-		return "Invalid subscription ID."
-	}
+	go func() {
+		subscriptionID := params[0]
+		valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
+		if err != nil {
+			p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
+			p.postCommandResponse(args, deleteSubscriptionErrorMessage)
+			return
+		}
 
-	if _, err = client.DeleteSubscription(subscriptionID); err != nil {
-		p.API.LogError("Unable to delete subscription", "Error", err.Error())
-		return deleteSubscriptionErrorMessage
-	}
+		if !valid {
+			p.postCommandResponse(args, "Invalid subscription ID.")
+			return
+		}
 
-	p.API.PublishWebSocketEvent(
-		constants.WSEventSubscriptionDeleted,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-	return deleteSubscriptionSuccessMessage
+		if _, err = client.DeleteSubscription(subscriptionID); err != nil {
+			p.API.LogError("Unable to delete subscription", "Error", err.Error())
+			p.postCommandResponse(args, deleteSubscriptionErrorMessage)
+			return
+		}
+
+		p.API.PublishWebSocketEvent(
+			constants.WSEventSubscriptionDeleted,
+			nil,
+			&model.WebsocketBroadcast{UserId: args.UserId},
+		)
+
+		p.postCommandResponse(args, deleteSubscriptionSuccessMessage)
+	}()
+
+	return genericWaitMessage
 }
 
 func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
