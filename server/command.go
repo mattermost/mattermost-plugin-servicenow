@@ -292,7 +292,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 	}
 
 	p.API.PublishWebSocketEvent(
-		constants.WSEventRefetchSubscriptions,
+		constants.WSEventSubscriptionDeleted,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)

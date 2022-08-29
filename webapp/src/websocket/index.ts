@@ -1,4 +1,5 @@
 import {Store, Action} from 'redux';
+
 import {GlobalState} from 'mattermost-redux/types/store';
 
 import {SubscriptionEventsMap} from 'plugin_constants';
@@ -8,10 +9,15 @@ import {refetch} from 'reducers/refetchSubscriptions';
 import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
 
-export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(true) as Action);
-        store.dispatch(refetch() as Action);
+
+        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
+        if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
+            store.dispatch(refetch() as Action);
+        }
     };
 }
 
@@ -43,8 +49,12 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
     };
 }
 
-export function handleRefetchSubscriptions(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(refetch() as Action);
+        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
+        if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
+            store.dispatch(refetch() as Action);
+        }
     };
 }

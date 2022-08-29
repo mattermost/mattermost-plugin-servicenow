@@ -67,7 +67,7 @@ const RhsData = ({
             {getConfigState().data?.ServiceNowBaseURL ? (
                 <a
                     className='color--link'
-                    href={Utils.getSubscriptionNumberLink(getConfigState().data?.ServiceNowBaseURL as string, subscription.record_type, subscription.sys_id)}
+                    href={Utils.getSubscriptionNumberLink(getConfigState().data?.ServiceNowBaseURL as string, subscription.record_type, subscription.record_id)}
                     rel='noreferrer'
                     target='_blank'
                 >

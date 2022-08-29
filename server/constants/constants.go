@@ -56,7 +56,7 @@ const (
 	WSEventDisconnect                = "disconnect"
 	WSEventOpenAddSubscriptionModal  = "add_subscription"
 	WSEventOpenEditSubscriptionModal = "edit_subscription"
-	WSEventRefetchSubscriptions      = "refetch_subscriptions"
+	WSEventSubscriptionDeleted       = "subscription_deleted"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
