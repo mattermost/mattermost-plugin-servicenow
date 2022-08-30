@@ -103,7 +103,9 @@ const AutoSuggest = ({
             </div>
             {inputValue.length < charThresholdToShowSuggestions && focused && <p className='auto-suggest__get-suggestion-warn'>{`Please enter at least ${charThresholdToShowSuggestions} characters to get suggestions.`}</p>}
             <ul className={`auto-suggest__suggestions ${showSuggestions && 'auto-suggest__suggestions--open'}`}>
-                {!loadingSuggestions && suggestions.map((suggestion) => (
+                {!suggestions.length || loadingSuggestions ? (
+                    <li className='auto-suggest__suggestion cursor-pointer'>{'Nothing to show'}</li>
+                ) : suggestions.map((suggestion) => (
                     <li
                         key={renderValue(suggestion)}
                         onClick={() => handleSuggestionClick(suggestion)}
@@ -112,7 +114,6 @@ const AutoSuggest = ({
                         {renderValue(suggestion)}
                     </li>
                 ))}
-                {(!suggestions.length || loadingSuggestions) && <li className='auto-suggest__suggestion cursor-pointer'>{'Nothing to show'}</li>}
             </ul>
             {typeof error === 'string' && <p className='auto-suggest__err-text'>{error}</p>}
         </div>
