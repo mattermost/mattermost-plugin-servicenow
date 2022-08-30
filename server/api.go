@@ -324,6 +324,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
+	subscriptions = filterSubscriptionsOnRecordData(subscriptions)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	result, err := json.Marshal(subscriptions)
