@@ -51,8 +51,8 @@ After that, this user will have the permission to add or manage subscriptions fr
 	genericWaitMessage                      = "Your request is being processed. Please wait."
 	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
-	editSubscriptionErrorMessage            = "Something went wrong. Check server logs for errors."
-	unknownErrorMessage                     = "Something went wrong."
+	genericErrorMessage                     = "Something went wrong."
+	invalidSubscriptionIDMessage            = "Invalid subscription ID."
 	notConnectedMessage                     = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
 	subscriptionsNotConfiguredError         = "It seems that subscriptions for ServiceNow have not been configured properly."
 	subscriptionsNotConfiguredErrorForUser  = subscriptionsNotConfiguredError + " Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin."
@@ -149,7 +149,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 						message = subscriptionsNotAuthorizedErrorForAdmin
 					}
 				default:
-					message = unknownErrorMessage
+					message = genericErrorMessage
 				}
 
 				p.API.LogError("Unable to check or activate subscriptions in ServiceNow.", "Error", err.Error())
@@ -176,7 +176,7 @@ func (p *Plugin) checkConnected(args *model.CommandArgs) *User {
 			p.postCommandResponse(args, fmt.Sprintf(notConnectedMessage, p.GetPluginURL(), constants.PathOAuth2Connect))
 		} else {
 			p.API.LogError("Unable to get user", "Error", userErr.Error())
-			p.postCommandResponse(args, unknownErrorMessage)
+			p.postCommandResponse(args, genericErrorMessage)
 		}
 		return nil
 	}
@@ -188,7 +188,7 @@ func (p *Plugin) GetClientFromUser(args *model.CommandArgs, user *User) Client {
 	token, err := p.ParseAuthToken(user.OAuth2Token)
 	if err != nil {
 		p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-		p.postCommandResponse(args, unknownErrorMessage)
+		p.postCommandResponse(args, genericErrorMessage)
 		return nil
 	}
 
@@ -287,7 +287,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		}
 
 		if !valid {
-			p.postCommandResponse(args, "Invalid subscription ID.")
+			p.postCommandResponse(args, invalidSubscriptionIDMessage)
 			return
 		}
 
@@ -317,17 +317,17 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to validate the subscription ID", "Error", err.Error())
-		return editSubscriptionErrorMessage
+		return genericErrorMessage
 	}
 
 	if !valid {
-		return "Invalid subscription ID."
+		return invalidSubscriptionIDMessage
 	}
 
 	subscription, _, err := client.GetSubscription(subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to get subscription", "Error", err.Error())
-		return editSubscriptionErrorMessage
+		return genericErrorMessage
 	}
 
 	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
@@ -335,7 +335,7 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
 	if err != nil {
 		p.API.LogError("Unable to convert subscription to map", "Error", err.Error())
-		return editSubscriptionErrorMessage
+		return genericErrorMessage
 	}
 
 	p.API.PublishWebSocketEvent(
