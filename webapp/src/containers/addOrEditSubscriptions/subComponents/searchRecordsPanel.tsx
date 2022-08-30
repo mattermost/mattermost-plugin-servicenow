@@ -31,6 +31,7 @@ type SearchRecordsPanelProps = {
     recordId: string | null;
     setRecordId: (recordId: string | null) => void;
     resetStates: boolean;
+    setResetStates: (reset: boolean) => void;
 }
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({
@@ -49,6 +50,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     setRecordId,
     recordId,
     resetStates,
+    setResetStates,
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
@@ -116,6 +118,9 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     useEffect(() => {
         if (resetStates) {
             resetValues();
+
+            // Set the resetState to "false" once we've reset the states
+            setResetStates(false);
         }
     }, [resetStates]);
 

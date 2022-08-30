@@ -389,6 +389,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     recordId={recordId}
                     setRecordId={setRecordId}
                     resetStates={resetRecordPanelStates}
+                    setResetStates={setResetRecordPanelStates}
                 />
                 <EventsPanel
                     className={`
