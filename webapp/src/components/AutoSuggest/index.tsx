@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import Constants from 'plugin_constants';
 
@@ -65,13 +65,13 @@ const AutoSuggest = ({
         return () => document.removeEventListener('click', handleCloseAutoSuggest);
     }, []);
 
-    const handleSuggestionClick = (suggestedValue: Record<string, string>) => {
+    const handleSuggestionClick = useCallback((suggestedValue: Record<string, string>) => {
         onOptionClick(suggestedValue);
         setFocused(false);
-    };
+    }, [onOptionClick]);
 
     // Prevent the text input field(which is the field visible in the UI) from blurring if "focused" is set to "true"
-    const handleBlur = () => focused && textInputFieldRef.current?.focus();
+    const handleBlur = useCallback(() => focused && textInputFieldRef.current?.focus(), []);
 
     return (
         <div
