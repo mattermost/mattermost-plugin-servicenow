@@ -25,6 +25,7 @@ const (
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord              = "record"
+	SubscriptionTypeBulk                = "object"
 	SubscriptionRecordTypeProblem       = "problem"
 	SubscriptionRecordTypeIncident      = "incident"
 	SubscriptionRecordTypeChangeRequest = "change_request"
@@ -38,18 +39,19 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage             = 0
-	DefaultPerPage          = 20
-	MaxPerPage              = 100
-	QueryParamPage          = "page"
-	QueryParamPerPage       = "per_page"
-	QueryParamChannelID     = "channel_id"
-	QueryParamUserID        = "user_id"
-	QueryParamSearchTerm    = "search"
-	PathParamSubscriptionID = "subscription_id"
-	PathParamTeamID         = "team_id"
-	PathParamRecordType     = "record_type"
-	PathParamRecordID       = "record_id"
+	DefaultPage                = 0
+	DefaultPerPage             = 20
+	MaxPerPage                 = 100
+	QueryParamPage             = "page"
+	QueryParamPerPage          = "per_page"
+	QueryParamChannelID        = "channel_id"
+	QueryParamUserID           = "user_id"
+	QueryParamSubscriptionType = "subscription_type"
+	QueryParamSearchTerm       = "search"
+	PathParamSubscriptionID    = "subscription_id"
+	PathParamTeamID            = "team_id"
+	PathParamRecordType        = "record_type"
+	PathParamRecordID          = "record_id"
 
 	// Websocket events
 	WSEventConnect                   = "connect"
@@ -68,6 +70,11 @@ const (
 )
 
 var (
+	ValidSubscriptionTypes = map[string]bool{
+		SubscriptionTypeRecord: true,
+		SubscriptionTypeBulk:   true,
+	}
+
 	ValidSubscriptionRecordTypes = map[string]bool{
 		SubscriptionRecordTypeIncident:      true,
 		SubscriptionRecordTypeProblem:       true,

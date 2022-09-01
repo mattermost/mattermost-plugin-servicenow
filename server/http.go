@@ -67,6 +67,9 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "invalid character '<'") {
+			return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
+		}
 		return nil, http.StatusInternalServerError, err
 	}
 
@@ -82,9 +85,6 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 
 	switch resp.StatusCode {
 	case http.StatusOK, http.StatusCreated:
-		if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
-			return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
-		}
 		if out != nil {
 			if err = json.Unmarshal(responseData, out); err != nil {
 				return responseData, http.StatusInternalServerError, err
@@ -96,9 +96,6 @@ func (c *client) call(method, path, contentType string, inBody io.Reader, out in
 		return nil, resp.StatusCode, nil
 	}
 
-	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
-		return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
-	}
 	errResp := ErrorResponse{}
 	if err = json.Unmarshal(responseData, &errResp); err != nil {
 		return responseData, resp.StatusCode, errors.WithMessagef(err, "status: %s", resp.Status)

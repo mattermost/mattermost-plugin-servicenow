@@ -46,7 +46,11 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 		}
 		subscriptionEvents.WriteString(event)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String())
+
+	if s.Type == constants.SubscriptionTypeRecord {
+		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String())
+	}
+	return fmt.Sprintf("\n|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String())
 }
 
 type SubscriptionResult struct {
@@ -66,8 +70,17 @@ func (s *SubscriptionPayload) IsValidForUpdation(siteURL string) error {
 		return fmt.Errorf("channelID is not valid")
 	}
 
-	if s.Type != nil && *s.Type != constants.SubscriptionTypeRecord {
+	if s.Type == nil {
+		return fmt.Errorf("type is required")
+	}
+
+	if !constants.ValidSubscriptionTypes[*s.Type] {
 		return fmt.Errorf("type is not valid")
+	}
+
+	if *s.Type == constants.SubscriptionTypeBulk {
+		recordID := ""
+		s.RecordID = &recordID
 	}
 
 	if s.RecordType != nil && !constants.ValidSubscriptionRecordTypes[*s.RecordType] {
@@ -105,8 +118,19 @@ func (s *SubscriptionPayload) IsValidForCreation(siteURL string) error {
 
 	if s.Type == nil {
 		return fmt.Errorf("type is required")
-	} else if *s.Type != constants.SubscriptionTypeRecord {
+	} else if !constants.ValidSubscriptionTypes[*s.Type] {
 		return fmt.Errorf("type is not valid")
+	}
+
+	if *s.Type == constants.SubscriptionTypeRecord {
+		if s.RecordID == nil {
+			return fmt.Errorf("recordID is required")
+		} else if valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, *s.RecordID); err != nil || !valid {
+			return fmt.Errorf("recordID is not valid")
+		}
+	} else {
+		recordID := ""
+		s.RecordID = &recordID
 	}
 
 	if s.RecordType == nil {
@@ -131,12 +155,6 @@ func (s *SubscriptionPayload) IsValidForCreation(siteURL string) error {
 		return fmt.Errorf("isActive is required")
 	} else if !*s.IsActive {
 		return fmt.Errorf("isActive must be true for creating subscription")
-	}
-
-	if s.RecordID == nil {
-		return fmt.Errorf("recordID is required")
-	} else if valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, *s.RecordID); err != nil || !valid {
-		return fmt.Errorf("recordID is not valid")
 	}
 
 	if s.ServerURL == nil {
