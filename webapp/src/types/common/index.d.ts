@@ -34,6 +34,7 @@ type MmHookArgTypes = {
 
 type EditSubscriptionData = {
     channel: string,
+    type: SubscriptionType,
     recordId: string,
     recordType: RecordType,
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],

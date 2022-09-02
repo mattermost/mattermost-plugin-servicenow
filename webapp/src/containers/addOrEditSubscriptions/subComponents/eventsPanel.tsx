@@ -3,7 +3,8 @@ import React, {forwardRef} from 'react';
 import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Checkbox from 'components/checkbox';
-import {SubscriptionEvents} from 'plugin_constants';
+
+import {SubscriptionEvents, RecordTypeLabelMap} from 'plugin_constants';
 
 type EventsPanelProps = {
     className?: string;
@@ -16,6 +17,7 @@ type EventsPanelProps = {
     setSubscriptionEvents: React.Dispatch<React.SetStateAction<SubscriptionEvents[]>>;
     channel: DropdownOptionType | null;
     record: string;
+    recordType: RecordType;
 }
 
 const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
@@ -28,6 +30,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     setSubscriptionEvents,
     channel,
     record,
+    recordType,
 }: EventsPanelProps, eventsPanelRef): JSX.Element => {
     const handleSelectedEventsChange = (selected: boolean, event: SubscriptionEvents) => {
         const filterEvents = (events: SubscriptionEvents[]): SubscriptionEvents[] => (
@@ -51,38 +54,38 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                 <p className='events-panel__prev-data-text'>
                     {channel?.label}
                 </p>
-                <h4 className='events-panel__prev-data-header record-header'>{'Record'}</h4>
-                <p className='events-panel__prev-data-text'>{record}</p>
+                <h4 className='events-panel__prev-data-header record-header'>{record ? 'Record' : 'Record type'}</h4>
+                <p className='events-panel__prev-data-text'>{record || RecordTypeLabelMap[recordType]}</p>
             </div>
             <label className='events-panel__label'>{'Available events:(optional)'}</label>
             <Checkbox
-                checked={subscriptionEvents.includes(SubscriptionEvents.state)}
+                checked={subscriptionEvents.includes(SubscriptionEvents.STATE)}
                 label='State changed'
-                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.state)}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.STATE)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={subscriptionEvents.includes(SubscriptionEvents.priority)}
+                checked={subscriptionEvents.includes(SubscriptionEvents.PRIORITY)}
                 label='Priority changed'
-                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.priority)}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.PRIORITY)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={subscriptionEvents.includes(SubscriptionEvents.commented)}
+                checked={subscriptionEvents.includes(SubscriptionEvents.COMMENTED)}
                 label='New comment'
-                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.commented)}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.COMMENTED)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={subscriptionEvents.includes(SubscriptionEvents.assignedTo)}
+                checked={subscriptionEvents.includes(SubscriptionEvents.ASSIGNED_TO)}
                 label='Assigned to changed'
-                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.assignedTo)}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.ASSIGNED_TO)}
                 className='events-panel__checkbox'
             />
             <Checkbox
-                checked={subscriptionEvents.includes(SubscriptionEvents.assignmentGroup)}
+                checked={subscriptionEvents.includes(SubscriptionEvents.ASSIGNMENT_GROUP)}
                 label='Assignment group changed'
-                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.assignmentGroup)}
+                onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.ASSIGNMENT_GROUP)}
                 className='events-panel__checkbox'
             />
             <ModalSubTitleAndError error={error}/>
