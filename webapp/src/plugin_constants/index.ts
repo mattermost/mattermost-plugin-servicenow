@@ -25,6 +25,7 @@ const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 
 export enum SubscriptionEvents {
+    CREATED = 'created',
     STATE = 'state',
     PRIORITY = 'priority',
     COMMENTED = 'commented',
@@ -33,6 +34,7 @@ export enum SubscriptionEvents {
 }
 
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
+    created: SubscriptionEvents.CREATED,
     state: SubscriptionEvents.STATE,
     priority: SubscriptionEvents.PRIORITY,
     commented: SubscriptionEvents.COMMENTED,
@@ -81,7 +83,8 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
 ];
 
 // Map subscription events to texts to be shown in the UI(on cards)
-const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
+export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
+    [SubscriptionEvents.CREATED]: 'New record created',
     [SubscriptionEvents.STATE]: 'State changed',
     [SubscriptionEvents.PRIORITY]: 'Priority changed',
     [SubscriptionEvents.COMMENTED]: 'New comment',
@@ -159,7 +162,6 @@ export default {
     ChannelHeaderTooltipText,
     RhsToggleLabel,
     DefaultCharThresholdToShowSuggestions,
-    SubscriptionEventLabels,
     DefaultPage,
     DefaultPageSize,
     PrivateChannelType,
