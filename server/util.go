@@ -25,16 +25,16 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 		}
 	}
 
-	if recordSubscriptions.Len() > 0 {
-		sb.WriteString("#### Record subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events |\n| :----|:--------| :--------| :-----| :--------|")
-		sb.WriteString(recordSubscriptions.String())
-	}
-
 	if bulkSubscriptions.Len() > 0 {
-		sb.WriteString("\n#### Bulk subscriptions for this channel\n")
+		sb.WriteString("#### Bulk subscriptions for this channel\n")
 		sb.WriteString("| Subscription ID | Record Type | Events |\n| :----|:--------| :--------|")
 		sb.WriteString(bulkSubscriptions.String())
+	}
+
+	if recordSubscriptions.Len() > 0 {
+		sb.WriteString("\n#### Record subscriptions for this channel\n")
+		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events |\n| :----|:--------| :--------| :-----| :--------|")
+		sb.WriteString(recordSubscriptions.String())
 	}
 
 	return sb.String()

@@ -86,7 +86,8 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 }
 
 func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
-	query := "is_active=true"
+	query := fmt.Sprintf("is_active=true^server_url=%s", c.plugin.getConfiguration().MattermostSiteURL)
+
 	// userID will be intentionally sent empty string if we have to return subscriptions irrespective of user
 	if userID != "" {
 		query = fmt.Sprintf("%s^user_id=%s", query, userID)
@@ -101,6 +102,7 @@ func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit,
 		query = fmt.Sprintf("%s^type=%s", query, subscriptionType)
 	}
 
+	query = fmt.Sprintf("%s^ORDERBYDESCsys_updated_on", query)
 	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
 		constants.SysQueryParamLimit:  {limit},
