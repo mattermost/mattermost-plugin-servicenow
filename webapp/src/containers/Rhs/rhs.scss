@@ -15,6 +15,12 @@
     padding: 0 30px;
   }
 
+  .error-state{
+    .err-icon{
+      color: rgba(var(--center-channel-color-rgb), 0.7);
+    }
+  }
+
   .configuration-err-state{
     height: 100%;
   }
