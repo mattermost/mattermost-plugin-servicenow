@@ -342,10 +342,10 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 
 	wg.Wait()
 	recordSubscriptions = filterSubscriptionsOnRecordData(recordSubscriptions)
-	subscriptions = append(bulkSubscriptions, recordSubscriptions...)
+	bulkSubscriptions = append(bulkSubscriptions, recordSubscriptions...)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	result, err := json.Marshal(subscriptions)
+	result, err := json.Marshal(bulkSubscriptions)
 	if err != nil || string(result) == "null" {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
 		_, _ = w.Write([]byte("[]"))

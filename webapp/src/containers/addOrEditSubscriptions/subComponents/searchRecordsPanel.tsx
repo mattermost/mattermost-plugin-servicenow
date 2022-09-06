@@ -1,6 +1,5 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-import {Link} from 'react-router-dom';
 
 import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
 import ModalFooter from 'components/modal/subComponents/modalFooter';
