@@ -1,5 +1,7 @@
 import React, {useMemo} from 'react';
 
+import {General as MMConstants} from 'mattermost-redux/constants';
+
 import BaseCard from 'components/card/base';
 import Popover from 'components/popover';
 import MenuButtons from 'components/buttons/menuButtons';
@@ -64,7 +66,7 @@ const SubscriptionCard = ({
                 </div>
                 {channel && (
                     <div className='subscription-card__channel d-flex align-items-center'>
-                        <i className={`channel-icon ${channel.type === Constants.PrivateChannelType ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
+                        <i className={`channel-icon ${channel.type === MMConstants.PRIVATE_CHANNEL ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
                         <span className='subscription-card__channel-text text-ellipsis'>{channel.display_name}</span>
                     </div>
                 )}

@@ -19,7 +19,6 @@ const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 4;
 const DefaultPage = 0;
 const DefaultPageSize = 100;
-const PrivateChannelType = 'P';
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
@@ -164,7 +163,6 @@ export default {
     DefaultCharThresholdToShowSuggestions,
     DefaultPage,
     DefaultPageSize,
-    PrivateChannelType,
     ApiErrorIdNotConnected,
     ApiErrorIdSubscriptionsNotConfigured,
     ApiErrorIdSubscriptionsUnauthorized,

@@ -1,6 +1,7 @@
 import React, {forwardRef, useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
+import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
@@ -67,7 +68,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
             setChannelOptions(channelListState.data.map((ch) => ({
                 label: (
                     <span>
-                        <i className={`dropdown-option-icon ${ch.type === Constants.PrivateChannelType ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
+                        <i className={`dropdown-option-icon ${ch.type === MMConstants.PRIVATE_CHANNEL ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
                         {ch.display_name}
                     </span>
                 ),
