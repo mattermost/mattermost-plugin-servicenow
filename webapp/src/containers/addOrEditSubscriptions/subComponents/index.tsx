@@ -16,11 +16,11 @@ import usePluginApi from 'hooks/usePluginApi';
 import {refetch} from 'reducers/refetchSubscriptions';
 
 import ChannelPanel from './channelPanel';
-import SubscriptionTypePanel from './subscriptionTypePanel';
-import RecordTypePanel from './recordTypePanel';
 import EventsPanel from './eventsPanel';
-import SearchRecordsPanel from './searchRecordsPanel';
+import RecordTypePanel from './recordTypePanel';
 import ResultPanel from './resultPanel';
+import SearchRecordsPanel from './searchRecordsPanel';
+import SubscriptionTypePanel from './subscriptionTypePanel';
 
 import './styles.scss';
 
@@ -324,7 +324,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             user_id: Cookies.get(Constants.MMUSERID) ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
-            record_id: recordId as string || '',
+            record_id: recordId || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
             sys_id: subscriptionData?.id as string,
