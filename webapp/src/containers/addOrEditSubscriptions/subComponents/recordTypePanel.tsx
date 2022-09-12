@@ -1,8 +1,6 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import Dropdown from 'components/dropdown';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
 
 import {RecordTypeLabelMap} from 'plugin_constants';
 
@@ -72,7 +70,7 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
 
     return (
         <div
-            className={`modal__body modal-body secondary-panel ${className}`}
+            className={`modal__body modal-body wizard__secondary-panel ${className}`}
             ref={recordTypePanelRef}
         >
             <Dropdown
@@ -83,7 +81,7 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
                 required={true}
                 error={validationFailed && 'Required'}
             />
-            <ModalSubTitleAndError error={error}/>
+            <ModalSubtitleAndError error={error}/>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}

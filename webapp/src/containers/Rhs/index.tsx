@@ -5,10 +5,7 @@ import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import EmptyState from 'components/emptyState';
-import CircularLoader from 'components/loader/circular';
-import Modal from 'components/modal';
-import {ServiceNowIcon, UnlinkIcon} from 'containers/icons';
+import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from 'mm-ui-library';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -182,7 +179,7 @@ const Rhs = (): JSX.Element => {
     const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
     const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
-        <div className='rhs-content'>
+        <div className='rhs-content position-relative padding-top-15 padding-bottom-12 padding-h-12'>
             {subscriptionsLoading && <CircularLoader/>}
             {connected && subscriptionsEnabled && subscriptionsAuthorized && (
                 <>
@@ -197,21 +194,15 @@ const Rhs = (): JSX.Element => {
                         isCurrentUserSysAdmin={isCurrentUserSysAdmin}
                     />
                     {toBeDeleted && (
-                        <Modal
+                        <ConfirmationDialog
+                            title={Constants.DeleteSubscriptionHeading}
+                            confirmationMsg={Constants.DeleteSubscriptionMsg}
                             show={isDeleteConfirmationOpen}
                             onHide={hideDeleteConfirmation}
-                            title='Confirm Delete Subscription'
-                            confirmBtnText='Delete'
-                            className='delete-confirmation-modal'
-                            onConfirm={handleDeleteConfirmation}
-                            cancelDisabled={!deleteApiResponseInvalid && deletingSubscription}
-                            confirmDisabled={!deleteApiResponseInvalid && deletingSubscription}
                             loading={!deleteApiResponseInvalid && deletingSubscription}
+                            onConfirm={handleDeleteConfirmation}
                             error={deleteApiResponseInvalid || deletingSubscription || !errorInDeletingSubscription ? '' : deleteSubscriptionError?.message}
-                            confirmBtnClassName='btn-danger'
-                        >
-                            <p className='delete-confirmation-modal__text'>{'Are you sure you want to delete the subscription?'}</p>
-                        </Modal>
+                        />
                     )}
                 </>
             )}

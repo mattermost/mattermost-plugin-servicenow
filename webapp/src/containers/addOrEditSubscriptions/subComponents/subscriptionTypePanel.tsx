@@ -1,8 +1,6 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import Dropdown from 'components/dropdown';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
 
 import {SubscriptionTypeLabelMap} from 'plugin_constants';
 
@@ -71,7 +69,7 @@ const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelPr
                 required={true}
                 error={validationFailed && 'Required'}
             />
-            <ModalSubTitleAndError error={error}/>
+            <ModalSubtitleAndError error={error}/>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}

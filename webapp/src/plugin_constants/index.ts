@@ -26,6 +26,10 @@ const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 const GeneralErrorMessage = 'Something went wrong';
 const GeneralErrorSubtitleForUser = 'Please contact your system administrator';
 const GeneralErrorSubtitleForAdmin = 'Please check your server logs';
+const SubscriptionAddedMsg = 'Subscription added successfully!';
+const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
+const DeleteSubscriptionHeading = 'Confirm Delete Subscription';
+const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 
 export enum SubscriptionEvents {
     STATE = 'state',
@@ -175,4 +179,8 @@ export default {
     GeneralErrorMessage,
     GeneralErrorSubtitleForUser,
     GeneralErrorSubtitleForAdmin,
+    SubscriptionAddedMsg,
+    SubscriptionUpdatedMsg,
+    DeleteSubscriptionHeading,
+    DeleteSubscriptionMsg,
 };

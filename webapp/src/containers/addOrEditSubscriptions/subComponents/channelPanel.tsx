@@ -3,9 +3,7 @@ import {useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import Dropdown from 'components/dropdown';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
 
 import Constants from 'plugin_constants';
 
@@ -50,9 +48,6 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     useEffect(() => {
         setApiError(null);
         makeApiRequest(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "makeApiRequest" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Update the channelList once it is fetched from the backend
@@ -102,19 +97,19 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     return (
         <div
-            className={`modal__body modal-body channel-panel ${className}`}
+            className={`modal__body modal-body channel-panel wizard__primary-panel ${className}`}
             ref={channelPanelRef}
         >
             <Dropdown
                 placeholder='Select Channel'
                 value={channel}
-                onChange={(newValue) => setChannel(newValue)}
+                onChange={setChannel}
                 options={channelOptions}
                 required={true}
                 error={validationFailed && 'Required'}
                 disabled={getChannelState().isLoading}
             />
-            <ModalSubTitleAndError error={error}/>
+            <ModalSubtitleAndError error={error}/>
             <ModalFooter
                 onConfirm={handleContinue}
                 confirmBtnText='Continue'

@@ -1,11 +1,7 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-import {Link} from 'react-router-dom';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import AutoSuggest from 'components/AutoSuggest';
-import SkeletonLoader from 'components/loader/skeleton';
+import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from 'mm-ui-library';
 
 import Constants from 'plugin_constants';
 
@@ -54,7 +50,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequest, getApiState} = usePluginApi();
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
@@ -221,7 +217,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     href={value.link}
                     target='_blank'
                     rel='noreferrer'
-                    className='btn btn-link'
+                    className='btn btn-link padding-0'
                 >
                     {value.display_value}
                 </a>
@@ -233,7 +229,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     return (
         <div
-            className={`modal__body modal-body search-panel secondary-panel ${className}`}
+            className={`modal__body modal-body search-panel wizard__secondary-panel ${className}`}
             ref={searchRecordPanelRef}
         >
             <AutoSuggest
@@ -246,26 +242,26 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     renderValue: getInputValue,
                 }}
                 error={validationMsg || validationFailed}
-                className='search-panel__auto-suggest'
+                className='search-panel__auto-suggest margin-bottom-30'
                 loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
                 disabled={disabledInput}
             />
             {suggestionChosen && (
-                <ul className='search-panel__description'>
+                <ul className='search-panel__description margin-top-25 padding-0 font-14'>
                     {
                         Constants.RecordDataLabelConfig.map((header) => (
                             <li
                                 key={header.key}
-                                className='d-flex align-items-center search-panel__description-item'
+                                className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                             >
-                                <span className='search-panel__description-header text-ellipsis'>{header.label}</span>
-                                <span className='search-panel__description-text text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
+                                <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
                             </li>
                         ))
                     }
                 </ul>
             )}
-            <ModalSubTitleAndError error={error}/>
+            <ModalSubtitleAndError error={error}/>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}
