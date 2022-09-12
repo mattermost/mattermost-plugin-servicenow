@@ -4,7 +4,7 @@ import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleA
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Dropdown from 'components/dropdown';
 
-import {SubscriptionTypeLabelMap} from 'plugin_constants';
+import {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 type SubscriptionTypePanelProps = {
     className?: string;
@@ -19,12 +19,12 @@ type SubscriptionTypePanelProps = {
 
 const subscriptionTypeOptions: DropdownOptionType[] = [
     {
-        label: SubscriptionTypeLabelMap.record,
-        value: 'record',
+        label: SubscriptionTypeLabelMap[SubscriptionType.RECORD],
+        value: SubscriptionType.RECORD,
     },
     {
-        label: SubscriptionTypeLabelMap.object,
-        value: 'object',
+        label: SubscriptionTypeLabelMap[SubscriptionType.BULK],
+        value: SubscriptionType.BULK,
     },
 ];
 

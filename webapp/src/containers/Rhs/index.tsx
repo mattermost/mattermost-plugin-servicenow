@@ -108,7 +108,7 @@ const Rhs = (): JSX.Element => {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
             type: subscription.type,
-            recordType: subscription.record_type as RecordType,
+            recordType: subscription.record_type,
             subscriptionEvents,
             id: subscription.sys_id,
         };

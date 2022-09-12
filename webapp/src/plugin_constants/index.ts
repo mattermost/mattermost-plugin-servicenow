@@ -33,6 +33,17 @@ export enum SubscriptionEvents {
     ASSIGNMENT_GROUP = 'assignment_group',
 }
 
+export enum SubscriptionType {
+    RECORD = 'record',
+    BULK = 'object',
+}
+
+export enum RecordType {
+    INCIDENT = 'incident',
+    PROBLEM = 'problem',
+    CHANGE_REQUEST = 'change_request',
+}
+
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
     created: SubscriptionEvents.CREATED,
     state: SubscriptionEvents.STATE,
@@ -51,15 +62,15 @@ const SubscriptionsUnauthorizedErrorSubtitleForAdmin = 'Please follow the instru
 
 // Used to get the `SubscriptionType` labels to show in the UI
 export const SubscriptionTypeLabelMap: Record<SubscriptionType, string> = {
-    record: 'Record subscription',
-    object: 'Bulk subscription',
+    [SubscriptionType.RECORD]: 'Record subscription',
+    [SubscriptionType.BULK]: 'Bulk subscription',
 };
 
 // Used to get the `RecordType` labels to show in the UI
 export const RecordTypeLabelMap: Record<RecordType, string> = {
-    incident: 'Incident',
-    problem: 'Problem',
-    change_request: 'Change Request',
+    [RecordType.INCIDENT]: 'Incident',
+    [RecordType.PROBLEM]: 'Problem',
+    [RecordType.CHANGE_REQUEST]: 'Change Request',
 };
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details

@@ -2,6 +2,7 @@
  * Utils
  */
 
+import {SubscriptionType, RecordType} from 'plugin_constants';
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {
@@ -43,7 +44,7 @@ const debounce: (func: (args: Record<string, string>) => void, limit: number) =>
 };
 
 const getSubscriptionHeaderLink = (serviceNowBaseUrl: string, subscriptionType: SubscriptionType, recordType: RecordType, recordId: string): string => (
-    subscriptionType === 'record' ?
+    subscriptionType === SubscriptionType.RECORD ?
         `${serviceNowBaseUrl}/nav_to.do?uri=${recordType}.do%3Fsys_id=${recordId}%26sysparm_stack=${recordType}_list.do%3Fsysparm_query=active=true` :
         `${serviceNowBaseUrl}/nav_to.do?uri=${recordType}_list.do%3Fsysparm_query=active=true`
 );

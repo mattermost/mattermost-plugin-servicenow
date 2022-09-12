@@ -7,7 +7,7 @@ import ToggleSwitch from 'components/toggleSwitch';
 import EmptyState from 'components/emptyState';
 import SubscriptionCard from 'components/card/subscription';
 
-import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
 import {BellIcon} from 'containers/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
@@ -27,9 +27,9 @@ type RhsDataProps = {
 }
 
 const BulkSubscriptionHeaders: Record<RecordType, string> = {
-    incident: 'Incidents',
-    problem: 'Problems',
-    change_request: 'Change Requests',
+    [RecordType.INCIDENT]: 'Incidents',
+    [RecordType.PROBLEM]: 'Problems',
+    [RecordType.CHANGE_REQUEST]: 'Change Requests',
 };
 
 const RhsData = ({
@@ -69,7 +69,7 @@ const RhsData = ({
     }), []);
 
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
-        const isSubscriptionTypeRecord = subscription.type === 'record';
+        const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
         const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type];
         const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
 
