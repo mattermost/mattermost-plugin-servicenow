@@ -9,7 +9,7 @@ import ModalHeader from 'components/modal/subComponents/modalHeader';
 import ModalLoader from 'components/modal/subComponents/modalLoader';
 import CircularLoader from 'components/loader/circular';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -387,7 +387,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
                     `}
                     ref={recordTypePanelRef}
-                    onContinue={() => (subscriptionType === 'record' ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
+                    onContinue={() => (subscriptionType === SubscriptionType.RECORD ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
                     onBack={() => setRecordTypePanelOpen(false)}
                     recordType={recordType}
                     setRecordType={setRecordType}

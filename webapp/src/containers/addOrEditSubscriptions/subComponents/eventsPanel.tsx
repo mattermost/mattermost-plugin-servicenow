@@ -4,7 +4,7 @@ import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleA
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Checkbox from 'components/checkbox';
 
-import {SubscriptionEvents, RecordTypeLabelMap} from 'plugin_constants';
+import {SubscriptionEvents, RecordTypeLabelMap, RecordType} from 'plugin_constants';
 
 type EventsPanelProps = {
     className?: string;
