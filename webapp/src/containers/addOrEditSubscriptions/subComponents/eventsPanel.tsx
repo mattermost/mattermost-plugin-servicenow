@@ -4,7 +4,7 @@ import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleA
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Checkbox from 'components/checkbox';
 
-import {SubscriptionEvents, RecordTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
+import {SubscriptionEvents, RecordTypeLabelMap, RecordType, SubscriptionType, SubscriptionEventLabels} from 'plugin_constants';
 
 type EventsPanelProps = {
     className?: string;
@@ -56,11 +56,11 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                 <p className='events-panel__prev-data-text'>
                     {channel?.label}
                 </p>
-                <h4 className='events-panel__prev-data-header record-header'>{subscriptionType === 'record' ? 'Record' : 'Record type'}</h4>
-                <p className='events-panel__prev-data-text'>{subscriptionType === 'record' ? record : RecordTypeLabelMap[recordType]}</p>
+                <h4 className='events-panel__prev-data-header record-header'>{subscriptionType === SubscriptionType.RECORD ? 'Record' : 'Record type'}</h4>
+                <p className='events-panel__prev-data-text'>{subscriptionType === SubscriptionType.RECORD ? record : RecordTypeLabelMap[recordType]}</p>
             </div>
             <label className='events-panel__label'>{'Available events:'}</label>
-            {subscriptionType === 'object' && (
+            {subscriptionType === SubscriptionType.BULK && (
                 <Checkbox
                     checked={subscriptionEvents.includes(SubscriptionEvents.CREATED)}
                     label={SubscriptionEventLabels[SubscriptionEvents.CREATED]}

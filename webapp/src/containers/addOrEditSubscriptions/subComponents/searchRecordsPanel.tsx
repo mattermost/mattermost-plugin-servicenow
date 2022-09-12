@@ -6,7 +6,7 @@ import ModalFooter from 'components/modal/subComponents/modalFooter';
 import AutoSuggest from 'components/AutoSuggest';
 import SkeletonLoader from 'components/loader/skeleton';
 
-import Constants from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 import Utils from 'utils';
 
@@ -53,7 +53,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequest, getApiState} = usePluginApi();
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
