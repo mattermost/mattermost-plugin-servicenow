@@ -70,18 +70,20 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
 
     return (
         <div
-            className={`modal__body modal-body wizard__secondary-panel ${className}`}
+            className={`modal__body wizard__secondary-panel ${className}`}
             ref={recordTypePanelRef}
         >
-            <Dropdown
-                placeholder='Select Record Type'
-                value={recordType}
-                onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
-                options={recordTypeOptions}
-                required={true}
-                error={validationFailed && 'Required'}
-            />
-            <ModalSubtitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+                <Dropdown
+                    placeholder='Select Record Type'
+                    value={recordType}
+                    onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
+                    options={recordTypeOptions}
+                    required={true}
+                    error={validationFailed && 'Required'}
+                />
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}

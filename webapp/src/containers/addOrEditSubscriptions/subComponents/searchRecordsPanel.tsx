@@ -229,39 +229,41 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     return (
         <div
-            className={`modal__body modal-body search-panel wizard__secondary-panel ${className}`}
+            className={`modal__body search-panel wizard__secondary-panel ${className}`}
             ref={searchRecordPanelRef}
         >
-            <AutoSuggest
-                inputValue={recordValue}
-                onInputValueChange={handleInputChange}
-                onOptionClick={handleSuggestionClick}
-                placeholder='Search Records'
-                suggestionConfig={{
-                    suggestions,
-                    renderValue: getInputValue,
-                }}
-                error={validationMsg || validationFailed}
-                className='search-panel__auto-suggest margin-bottom-30'
-                loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
-                disabled={disabledInput}
-            />
-            {suggestionChosen && (
-                <ul className='search-panel__description margin-top-25 padding-0 font-14'>
-                    {
-                        Constants.RecordDataLabelConfig.map((header) => (
-                            <li
-                                key={header.key}
-                                className='d-flex align-items-center search-panel__description-item margin-bottom-10'
-                            >
-                                <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
-                            </li>
-                        ))
-                    }
-                </ul>
-            )}
-            <ModalSubtitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+                <AutoSuggest
+                    inputValue={recordValue}
+                    onInputValueChange={handleInputChange}
+                    onOptionClick={handleSuggestionClick}
+                    placeholder='Search Records'
+                    suggestionConfig={{
+                        suggestions,
+                        renderValue: getInputValue,
+                    }}
+                    error={validationMsg || validationFailed}
+                    className='search-panel__auto-suggest margin-bottom-30'
+                    loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
+                    disabled={disabledInput}
+                />
+                {suggestionChosen && (
+                    <ul className='search-panel__description margin-top-25 padding-0 font-14'>
+                        {
+                            Constants.RecordDataLabelConfig.map((header) => (
+                                <li
+                                    key={header.key}
+                                    className='d-flex align-items-center search-panel__description-item margin-bottom-10'
+                                >
+                                    <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                )}
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}

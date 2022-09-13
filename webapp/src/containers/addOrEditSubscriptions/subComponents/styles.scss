@@ -5,15 +5,21 @@
     margin-bottom: 12px;
   }
 
+  .wizard__body-container {
+    min-height: 146px;
+  }
+
   .dropdown-option-icon {
     @include positioning(relative, 1px, "", "", -4px);
     margin-right: -2px;
   }
 
-  .channel-panel {
-    .dropdown__options-list--open {
-      max-height: 80px;
-    }
+  .plugin-dropdown__options-list--open {
+    max-height: 124px;
+  }
+
+  .subscription-type-panel {
+    min-height: 128px;
   }
 
   .events-panel {

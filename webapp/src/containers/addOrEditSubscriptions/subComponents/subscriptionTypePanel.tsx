@@ -58,18 +58,20 @@ const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelPr
 
     return (
         <div
-            className={`modal__body modal-body secondary-panel ${className}`}
+            className={`modal__body wizard__secondary-panel ${className}`}
             ref={subscriptionTypePanelRef}
         >
-            <Dropdown
-                placeholder='Select Subscription Type'
-                value={subscriptionType}
-                onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
-                options={subscriptionTypeOptions}
-                required={true}
-                error={validationFailed && 'Required'}
-            />
-            <ModalSubtitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 subscription-type-panel'>
+                <Dropdown
+                    placeholder='Select Subscription Type'
+                    value={subscriptionType}
+                    onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
+                    options={subscriptionTypeOptions}
+                    required={true}
+                    error={validationFailed && 'Required'}
+                />
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}

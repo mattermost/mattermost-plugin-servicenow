@@ -97,19 +97,21 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     return (
         <div
-            className={`modal__body modal-body channel-panel wizard__primary-panel ${className}`}
+            className={`modal__body channel-panel wizard__primary-panel ${className}`}
             ref={channelPanelRef}
         >
-            <Dropdown
-                placeholder='Select Channel'
-                value={channel}
-                onChange={setChannel}
-                options={channelOptions}
-                required={true}
-                error={validationFailed && 'Required'}
-                disabled={getChannelState().isLoading}
-            />
-            <ModalSubtitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+                <Dropdown
+                    placeholder='Select Channel'
+                    value={channel}
+                    onChange={setChannel}
+                    options={channelOptions}
+                    required={true}
+                    error={validationFailed && 'Required'}
+                    disabled={getChannelState().isLoading}
+                />
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onConfirm={handleContinue}
                 confirmBtnText='Continue'
