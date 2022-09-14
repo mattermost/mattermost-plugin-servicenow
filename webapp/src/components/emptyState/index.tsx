@@ -45,6 +45,7 @@ const EmptyState = ({
                     rel='noreferrer'
                     href={buttonConfig.link}
                     className='empty-state__btn btn btn-primary'
+                    download={buttonConfig.download}
                 >
                     {buttonConfig.text}
                 </a>
