@@ -17,7 +17,7 @@ type Client interface {
 	ActivateSubscriptions() (int, error)
 	CreateSubscription(*serializer.SubscriptionPayload) (int, error)
 	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error)
-	GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
+	GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
 	DeleteSubscription(subscriptionID string) (int, error)
 	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error)
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
@@ -85,7 +85,7 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 	return statusCode, nil
 }
 
-func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
+func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
 	query := "is_active=true"
 	// userID will be intentionally sent empty string if we have to return subscriptions irrespective of user
 	if userID != "" {
@@ -94,6 +94,11 @@ func (c *client) GetAllSubscriptions(channelID, userID, limit, offset string) ([
 	// channelID will be intentionally sent empty string if we have to return subscriptions for whole server
 	if channelID != "" {
 		query = fmt.Sprintf("%s^channel_id=%s", query, channelID)
+	}
+
+	// subscriptionType will be intentionally sent an empty string if we have to return subscriptions of all types
+	if subscriptionType != "" {
+		query = fmt.Sprintf("%s^type=%s", query, subscriptionType)
 	}
 
 	queryParams := url.Values{
@@ -140,7 +145,7 @@ func (c *client) EditSubscription(subscriptionID string, subscription *serialize
 // CheckForDuplicateSubscription returns true and an error if a duplicate subscription exists in ServiceNow
 // The boolean return type value should be checked only if the error being returned is nil
 func (c *client) CheckForDuplicateSubscription(subscription *serializer.SubscriptionPayload) (bool, int, error) {
-	query := fmt.Sprintf("channel_id=%s^is_active=true^record_id=%s^server_url=%s", *subscription.ChannelID, *subscription.RecordID, *subscription.ServerURL)
+	query := fmt.Sprintf("channel_id=%s^is_active=true^type=%s^record_type=%s^record_id=%s^server_url=%s", *subscription.ChannelID, *subscription.Type, *subscription.RecordType, *subscription.RecordID, *subscription.ServerURL)
 	queryParams := url.Values{
 		constants.SysQueryParam:      {query},
 		constants.SysQueryParamLimit: {fmt.Sprint(constants.DefaultPerPage)},

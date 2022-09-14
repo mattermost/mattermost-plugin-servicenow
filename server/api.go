@@ -257,21 +257,21 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
-	subcription, err := serializer.SubscriptionFromJSON(r.Body)
+	subscription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
 		return
 	}
 
-	if err = subcription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
+	if err = subscription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
 		p.API.LogError("Error in validating the request body", "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
 		return
 	}
 
 	client := p.GetClientFromRequest(r)
-	exists, statusCode, err := client.CheckForDuplicateSubscription(subcription)
+	exists, statusCode, err := client.CheckForDuplicateSubscription(subscription)
 	if err != nil {
 		p.API.LogError("Error in checking for duplicate subscription", "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: err.Error()})
@@ -283,12 +283,15 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if statusCode, err = client.CreateSubscription(subcription); err != nil {
+	if statusCode, err = client.CreateSubscription(subscription); err != nil {
 		p.API.LogError("Error in creating subscription", "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: err.Error()})
 		return
 	}
 
+	// Here, we are setting the Content-Type header even when it is being set in the "returnStatusOK" function
+	// because after "WriteHeader" is called, no headers can be set, so we have to set it before the call to "WriteHeader"
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	returnStatusOK(w)
 }
@@ -297,20 +300,27 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	channelID := r.URL.Query().Get(constants.QueryParamChannelID)
 	if channelID != "" && !model.IsValidId(channelID) {
 		p.API.LogError("Invalid query param", "Query param", constants.QueryParamChannelID)
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Query param channelID is not valid"})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Query param %s is not valid", constants.QueryParamChannelID)})
 		return
 	}
 
 	userID := r.URL.Query().Get(constants.QueryParamUserID)
 	if userID != "" && !model.IsValidId(userID) {
 		p.API.LogError("Invalid query param", "Query param", constants.QueryParamUserID)
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Query param userID is not valid"})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Query param %s is not valid", constants.QueryParamUserID)})
+		return
+	}
+
+	subscriptionType := r.URL.Query().Get(constants.QueryParamSubscriptionType)
+	if subscriptionType != "" && !constants.ValidSubscriptionTypes[subscriptionType] {
+		p.API.LogError("Invalid query param", "Query param", constants.QueryParamSubscriptionType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Query param %s is not valid", constants.QueryParamSubscriptionType)})
 		return
 	}
 
 	client := p.GetClientFromRequest(r)
 	page, perPage := GetPageAndPerPage(r)
-	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, subscriptionType, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
 		p.API.LogError("Error in getting all subscriptions", "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting all subscriptions. Error: %s", err.Error())})
@@ -319,6 +329,9 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 
 	wg := sync.WaitGroup{}
 	for _, subscription := range subscriptions {
+		if subscription.Type == constants.SubscriptionTypeBulk {
+			continue
+		}
 		wg.Add(1)
 		go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
 	}

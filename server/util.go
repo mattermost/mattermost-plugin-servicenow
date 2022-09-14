@@ -15,12 +15,28 @@ import (
 
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
 	var sb strings.Builder
-	sb.WriteString("#### Record subscriptions for this channel\n")
-	recordSubscriptionsTableHeader := "| Subscription ID | Record Type | Record Number | Record Short Description | Events|\n| :----|:--------| :--------| :-----| :--------|"
-	sb.WriteString(recordSubscriptionsTableHeader)
+	var recordSubscriptions strings.Builder
+	var bulkSubscriptions strings.Builder
 	for _, subscription := range subscriptions {
-		sb.WriteString(subscription.GetFormattedSubscription())
+		if subscription.Type == constants.SubscriptionTypeRecord {
+			recordSubscriptions.WriteString(subscription.GetFormattedSubscription())
+		} else {
+			bulkSubscriptions.WriteString(subscription.GetFormattedSubscription())
+		}
 	}
+
+	if recordSubscriptions.Len() > 0 {
+		sb.WriteString("#### Record subscriptions for this channel\n")
+		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events |\n| :----|:--------| :--------| :-----| :--------|")
+		sb.WriteString(recordSubscriptions.String())
+	}
+
+	if bulkSubscriptions.Len() > 0 {
+		sb.WriteString("\n#### Bulk subscriptions for this channel\n")
+		sb.WriteString("| Subscription ID | Record Type | Events |\n| :----|:--------| :--------|")
+		sb.WriteString(bulkSubscriptions.String())
+	}
+
 	return sb.String()
 }
 
@@ -108,7 +124,7 @@ func ConvertSubscriptionToMap(subscription *serializer.SubscriptionResponse) (ma
 func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionResponse) []*serializer.SubscriptionResponse {
 	n := 0
 	for _, subscription := range subscripitons {
-		if subscription.Number != "" && subscription.ShortDescription != "" {
+		if subscription.Type == constants.SubscriptionTypeBulk || (subscription.Number != "" && subscription.ShortDescription != "") {
 			subscripitons[n] = subscription
 			n++
 		}
