@@ -21,7 +21,7 @@ func TestActivateSubscriptions(t *testing.T) {
 		description   string
 		statusCode    int
 		err           error
-		expectedError error
+		expectedError string
 	}{
 		{
 			description: "ActivateSubscriptions: valid",
@@ -31,25 +31,25 @@ func TestActivateSubscriptions(t *testing.T) {
 			description:   "ActivateSubscriptions: user not authorized with error",
 			statusCode:    http.StatusForbidden,
 			err:           errors.New("mockError: User Not Authorized"),
-			expectedError: errors.New(constants.APIErrorIDSubscriptionsNotAuthorized),
+			expectedError: constants.APIErrorIDSubscriptionsNotAuthorized,
 		},
 		{
 			description:   "ActivateSubscriptions: user not authorized with status forbidden",
 			statusCode:    http.StatusForbidden,
 			err:           errors.New("mockError"),
-			expectedError: errors.New(constants.APIErrorIDSubscriptionsNotAuthorized),
+			expectedError: constants.APIErrorIDSubscriptionsNotAuthorized,
 		},
 		{
 			description:   "ActivateSubscriptions: invalid table",
 			statusCode:    http.StatusInternalServerError,
 			err:           errors.New("mockError: Invalid table"),
-			expectedError: errors.New(constants.APIErrorIDSubscriptionsNotConfigured),
+			expectedError: constants.APIErrorIDSubscriptionsNotConfigured,
 		},
 		{
 			description:   "ActivateSubscriptions: failed to get subscription auth details",
 			statusCode:    http.StatusInternalServerError,
 			err:           errors.New("mockError"),
-			expectedError: errors.New("failed to get subscription auth details: mockError"),
+			expectedError: "failed to get subscription auth details: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -59,8 +59,8 @@ func TestActivateSubscriptions(t *testing.T) {
 
 			statusCode, err := c.ActivateSubscriptions()
 
-			if testCase.expectedError != nil {
-				assert.EqualError(t, testCase.expectedError, err.Error())
+			if testCase.expectedError != "" {
+				assert.EqualError(t, err, testCase.expectedError)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -77,7 +77,7 @@ func TestCreateSubscription(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "CreateSubscription: valid",
@@ -87,7 +87,7 @@ func TestCreateSubscription(t *testing.T) {
 			description: "CreateSubscription: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("failed to create subscription in ServiceNow: mockError"),
+			expectedErr: "failed to create subscription in ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -97,8 +97,8 @@ func TestCreateSubscription(t *testing.T) {
 
 			statusCode, err := c.CreateSubscription(&serializer.SubscriptionPayload{})
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -116,7 +116,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "GetAllSubscriptions: valid",
@@ -126,7 +126,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			description: "GetAllSubscriptions: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("failed to get subscriptions from ServiceNow: mockError"),
+			expectedErr: "failed to get subscriptions from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -136,8 +136,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 
 			_, statusCode, err := c.GetAllSubscriptions("mockChannelID", "mockUserID", "mockSubscriptionType", "mockLimit", "mockOffset")
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -154,7 +154,7 @@ func TestGetSubscription(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "GetSubscription: valid",
@@ -164,7 +164,7 @@ func TestGetSubscription(t *testing.T) {
 			description: "GetSubscription: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("failed to get subscription from ServiceNow: mockError"),
+			expectedErr: "failed to get subscription from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -174,8 +174,8 @@ func TestGetSubscription(t *testing.T) {
 
 			_, statusCode, err := c.GetSubscription("mockSubscriptionID")
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -192,7 +192,7 @@ func TestDeleteSubscription(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "DeleteSubscription: valid",
@@ -202,7 +202,7 @@ func TestDeleteSubscription(t *testing.T) {
 			description: "DeleteSubscription: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("failed to delete subscription from ServiceNow: mockError"),
+			expectedErr: "failed to delete subscription from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -212,8 +212,8 @@ func TestDeleteSubscription(t *testing.T) {
 
 			statusCode, err := c.DeleteSubscription("mockSubscriptionID")
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -230,7 +230,7 @@ func TestEditSubscription(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "EditSubscription: valid",
@@ -240,7 +240,7 @@ func TestEditSubscription(t *testing.T) {
 			description: "EditSubscription: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("failed to update subscription from ServiceNow: mockError"),
+			expectedErr: "failed to update subscription from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -250,8 +250,8 @@ func TestEditSubscription(t *testing.T) {
 
 			statusCode, err := c.EditSubscription("mockSubscriptionID", &serializer.SubscriptionPayload{})
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -268,7 +268,7 @@ func TestCheckForDuplicateSubscription(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "CheckForDuplicateSubscription: valid",
@@ -278,7 +278,7 @@ func TestCheckForDuplicateSubscription(t *testing.T) {
 			description: "CheckForDuplicateSubscription: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("failed to get subscriptions from ServiceNow: mockError"),
+			expectedErr: "failed to get subscriptions from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -299,8 +299,8 @@ func TestCheckForDuplicateSubscription(t *testing.T) {
 				ServerURL:  &mockServerURL,
 			})
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -317,7 +317,7 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "SearchRecordsInServiceNow: valid",
@@ -327,7 +327,7 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 			description: "SearchRecordsInServiceNow: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("mockError"),
+			expectedErr: "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -337,8 +337,8 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 
 			_, statusCode, err := c.SearchRecordsInServiceNow("mockTable", "mockSearchItem", "mockLimit", "mockOffset")
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -355,7 +355,7 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 		description string
 		statusCode  int
 		err         error
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			description: "GetRecordFromServiceNow: valid",
@@ -365,7 +365,7 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 			description: "GetRecordFromServiceNow: with error",
 			statusCode:  http.StatusInternalServerError,
 			err:         errors.New("mockError"),
-			expectedErr: errors.New("mockError"),
+			expectedErr: "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -375,8 +375,8 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 
 			_, statusCode, err := c.GetRecordFromServiceNow("mockTable", "mockSysID")
 
-			if testCase.expectedErr != nil {
-				assert.EqualError(t, err, testCase.expectedErr.Error())
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
