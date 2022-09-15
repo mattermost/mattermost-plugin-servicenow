@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-type RefetchSubscriptionState = {
+export type RefetchSubscriptionState = {
     refetchSubscriptions: boolean;
 };
 

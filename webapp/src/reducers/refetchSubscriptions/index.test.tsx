@@ -1,8 +1,4 @@
-import reducer, {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
-
-type RefetchSubscriptionState = {
-    refetchSubscriptions: boolean;
-};
+import reducer, {refetch, resetRefetch, RefetchSubscriptionState} from 'reducers/refetchSubscriptions';
 
 test('should change state of refetchSubscriptions to "true"', () => {
     const previousState: RefetchSubscriptionState = {

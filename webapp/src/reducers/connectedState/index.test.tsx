@@ -1,8 +1,4 @@
-import reducer, {setConnected} from 'reducers/connectedState';
-
-type ConnectedState = {
-    connected: boolean;
-};
+import reducer, {setConnected, ConnectedState} from 'reducers/connectedState';
 
 test('should change state of connected to true on payload value equal to "true"', () => {
     const previousState: ConnectedState = {

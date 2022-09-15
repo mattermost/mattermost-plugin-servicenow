@@ -1,9 +1,4 @@
-import reducer, {showModal, hideModal} from 'reducers/editSubscriptionModal';
-
-type SubscriptionModalState = {
-    open: boolean;
-    data?: EditSubscriptionData;
-}
+import reducer, {showModal, hideModal, SubscriptionModalState} from 'reducers/editSubscriptionModal';
 
 test('should change state of open to "true" and data value to "payload"', () => {
     const previousState: SubscriptionModalState = {
