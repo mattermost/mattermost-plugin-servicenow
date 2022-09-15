@@ -433,6 +433,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionEvents={subscriptionEvents}
                     setSubscriptionEvents={setSubscriptionEvents}
                     channel={channelOptions.find((ch) => ch.value === channel) as DropdownOptionType || null}
+                    subscriptionType={subscriptionType as SubscriptionType}
                     record={recordValue}
                     recordType={recordType as RecordType}
                     actionBtnDisabled={showModalLoader}

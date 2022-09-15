@@ -7,7 +7,7 @@ import ToggleSwitch from 'components/toggleSwitch';
 import EmptyState from 'components/emptyState';
 import SubscriptionCard from 'components/card/subscription';
 
-import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
 import {BellIcon} from 'containers/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
@@ -65,7 +65,7 @@ const RhsData = ({
             label: 'ID',
             value: subscription.sys_id,
         }],
-        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event as SubscriptionEvents]),
+        list: subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]),
     }), []);
 
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {

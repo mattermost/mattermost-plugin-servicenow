@@ -34,6 +34,7 @@ const (
 	SubscriptionEventCommented          = "commented"
 	SubscriptionEventAssignedTo         = "assigned_to"
 	SubscriptionEventAssignmentGroup    = "assignment_group"
+	SubscriptionEventCreated            = "created"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -82,6 +83,7 @@ var (
 	}
 
 	ValidSubscriptionEvents = map[string]bool{
+		SubscriptionEventCreated:         true,
 		SubscriptionEventPriority:        true,
 		SubscriptionEventState:           true,
 		SubscriptionEventCommented:       true,
@@ -90,6 +92,7 @@ var (
 	}
 
 	FormattedEventNames = map[string]string{
+		SubscriptionEventCreated:         "New record created",
 		SubscriptionEventPriority:        "Priority changed",
 		SubscriptionEventState:           "State changed",
 		SubscriptionEventCommented:       "New comment",
