@@ -327,20 +327,25 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var bulkSubscriptions []*serializer.SubscriptionResponse
+	var recordSubscriptions []*serializer.SubscriptionResponse
 	wg := sync.WaitGroup{}
 	for _, subscription := range subscriptions {
 		if subscription.Type == constants.SubscriptionTypeBulk {
+			bulkSubscriptions = append(bulkSubscriptions, subscription)
 			continue
 		}
 		wg.Add(1)
 		go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+		recordSubscriptions = append(recordSubscriptions, subscription)
 	}
 
 	wg.Wait()
-	subscriptions = filterSubscriptionsOnRecordData(subscriptions)
+	recordSubscriptions = filterSubscriptionsOnRecordData(recordSubscriptions)
+	bulkSubscriptions = append(bulkSubscriptions, recordSubscriptions...)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	result, err := json.Marshal(subscriptions)
+	result, err := json.Marshal(bulkSubscriptions)
 	if err != nil || string(result) == "null" {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
 		_, _ = w.Write([]byte("[]"))
