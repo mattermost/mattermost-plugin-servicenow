@@ -7,7 +7,7 @@ import ToggleSwitch from 'components/toggleSwitch';
 import EmptyState from 'components/emptyState';
 import SubscriptionCard from 'components/card/subscription';
 
-import Constants, {SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap} from 'plugin_constants';
 import {BellIcon} from 'containers/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
@@ -25,6 +25,12 @@ type RhsDataProps = {
     handleDeleteClick: (subscriptionData: SubscriptionData) => void;
     error?: string;
 }
+
+const BulkSubscriptionHeaders: Record<RecordType, string> = {
+    [RecordType.INCIDENT]: 'Incidents',
+    [RecordType.PROBLEM]: 'Problems',
+    [RecordType.CHANGE_REQUEST]: 'Change Requests',
+};
 
 const RhsData = ({
     showAllSubscriptions,
@@ -59,24 +65,30 @@ const RhsData = ({
             label: 'ID',
             value: subscription.sys_id,
         }],
-        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event]),
+        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event as SubscriptionEvents]),
     }), []);
 
-    const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => (
-        <>
-            {getConfigState().data?.ServiceNowBaseURL ? (
-                <a
-                    className='color--link'
-                    href={Utils.getSubscriptionNumberLink(getConfigState().data?.ServiceNowBaseURL as string, subscription.record_type, subscription.record_id)}
-                    rel='noreferrer'
-                    target='_blank'
-                >
-                    {subscription.number}
-                </a>
-            ) : subscription.number}
-            {` | ${subscription.short_description}`}
-        </>
-    ), [getConfigState().data?.ServiceNowBaseURL]);
+    const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
+        const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
+        const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type];
+        const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
+
+        return (
+            <>
+                {serviceNowBaseURL ? (
+                    <a
+                        className='color--link'
+                        href={Utils.getSubscriptionHeaderLink(serviceNowBaseURL, subscription.type, subscription.record_type, subscription.record_id)}
+                        rel='noreferrer'
+                        target='_blank'
+                    >
+                        {header}
+                    </a>
+                ) : header}
+                {isSubscriptionTypeRecord && ` | ${subscription.short_description}`}
+            </>
+        );
+    }, [getConfigState().data?.ServiceNowBaseURL]);
 
     return (
         <>

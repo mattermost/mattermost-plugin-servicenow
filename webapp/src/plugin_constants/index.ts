@@ -25,19 +25,30 @@ const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 
 export enum SubscriptionEvents {
-    state = 'state',
-    priority = 'priority',
-    commented = 'commented',
-    assignedTo = 'assigned_to',
-    assignmentGroup = 'assignment_group',
+    STATE = 'state',
+    PRIORITY = 'priority',
+    COMMENTED = 'commented',
+    ASSIGNED_TO = 'assigned_to',
+    ASSIGNMENT_GROUP = 'assignment_group',
+}
+
+export enum SubscriptionType {
+    RECORD = 'record',
+    BULK = 'object',
+}
+
+export enum RecordType {
+    INCIDENT = 'incident',
+    PROBLEM = 'problem',
+    CHANGE_REQUEST = 'change_request',
 }
 
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
-    state: SubscriptionEvents.state,
-    priority: SubscriptionEvents.priority,
-    commented: SubscriptionEvents.commented,
-    assigned_to: SubscriptionEvents.assignedTo,
-    assignment_group: SubscriptionEvents.assignmentGroup,
+    state: SubscriptionEvents.STATE,
+    priority: SubscriptionEvents.PRIORITY,
+    commented: SubscriptionEvents.COMMENTED,
+    assigned_to: SubscriptionEvents.ASSIGNED_TO,
+    assignment_group: SubscriptionEvents.ASSIGNMENT_GROUP,
 };
 
 const SubscriptionsConfigErrorTitle = 'It seems that subscriptions for ServiceNow have not been configured properly.';
@@ -47,10 +58,17 @@ const SubscriptionsUnauthorizedErrorTitle = 'It seems that you are not authorize
 const SubscriptionsUnauthorizedErrorSubtitleForUser = 'Please contact your system administrator to authorize you for managing subscriptions.';
 const SubscriptionsUnauthorizedErrorSubtitleForAdmin = 'Please follow the instructions for setting up user permissions available in the plugin\'s documentation. The instructions can also be viewed by running the "/servicenow help" command.';
 
-// Used to get the `SubscriptionType` labels to show in the subscription card
-export const SubscriptionTypeLabelMap: Record<string, string> = {
-    record: 'Record subscription',
-    object: 'Bulk subscription',
+// Used to get the `SubscriptionType` labels to show in the UI
+export const SubscriptionTypeLabelMap: Record<SubscriptionType, string> = {
+    [SubscriptionType.RECORD]: 'Record subscription',
+    [SubscriptionType.BULK]: 'Bulk subscription',
+};
+
+// Used to get the `RecordType` labels to show in the UI
+export const RecordTypeLabelMap: Record<RecordType, string> = {
+    [RecordType.INCIDENT]: 'Incident',
+    [RecordType.PROBLEM]: 'Problem',
+    [RecordType.CHANGE_REQUEST]: 'Change Request',
 };
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
@@ -74,12 +92,12 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
 ];
 
 // Map subscription events to texts to be shown in the UI(on cards)
-const SubscriptionEventLabels: Record<string, string> = {
-    state: 'State changed',
-    priority: 'Priority changed',
-    commented: 'New comment',
-    assigned_to: 'Assigned to changed',
-    assignment_group: 'Assignment group changed',
+const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
+    [SubscriptionEvents.STATE]: 'State changed',
+    [SubscriptionEvents.PRIORITY]: 'Priority changed',
+    [SubscriptionEvents.COMMENTED]: 'New comment',
+    [SubscriptionEvents.ASSIGNED_TO]: 'Assigned to changed',
+    [SubscriptionEvents.ASSIGNMENT_GROUP]: 'Assignment group changed',
 };
 
 // Plugin api service (RTK query) configs
@@ -128,6 +146,7 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
 
 export const PanelDefaultHeights = {
     channelPanel: 151,
+    subscriptionTypePanel: 195,
     recordTypePanel: 195,
     searchRecordPanel: 203,
     searchRecordPanelExpanded: 372,

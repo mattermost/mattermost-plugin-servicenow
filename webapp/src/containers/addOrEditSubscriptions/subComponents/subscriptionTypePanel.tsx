@@ -4,57 +4,51 @@ import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleA
 import ModalFooter from 'components/modal/subComponents/modalFooter';
 import Dropdown from 'components/dropdown';
 
-import {RecordTypeLabelMap, RecordType} from 'plugin_constants';
+import {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
-type RecordTypePanelProps = {
+type SubscriptionTypePanelProps = {
     className?: string;
     error?: string;
     onContinue?: () => void;
     onBack?: () => void;
     actionBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
-    recordType: RecordType | null;
-    setRecordType: (value: RecordType) => void;
-    setResetRecordPanelStates: (reset: boolean) => void;
+    subscriptionType: SubscriptionType | null;
+    setSubscriptionType: (value: SubscriptionType) => void;
 }
 
-const recordTypeOptions: DropdownOptionType[] = [
+const subscriptionTypeOptions: DropdownOptionType[] = [
     {
-        label: RecordTypeLabelMap[RecordType.INCIDENT],
-        value: RecordType.INCIDENT,
+        label: SubscriptionTypeLabelMap[SubscriptionType.RECORD],
+        value: SubscriptionType.RECORD,
     },
     {
-        label: RecordTypeLabelMap[RecordType.PROBLEM],
-        value: RecordType.PROBLEM,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
-        value: RecordType.CHANGE_REQUEST,
+        label: SubscriptionTypeLabelMap[SubscriptionType.BULK],
+        value: SubscriptionType.BULK,
     },
 ];
 
-const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
+const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelProps>(({
     className,
     error,
     onContinue,
     onBack,
     actionBtnDisabled,
-    recordType,
-    setRecordType,
-    setResetRecordPanelStates,
-}: RecordTypePanelProps, recordTypePanelRef): JSX.Element => {
+    subscriptionType,
+    setSubscriptionType,
+}: SubscriptionTypePanelProps, subscriptionTypePanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
     // Hide error state once the value is valid
     useEffect(() => {
-        if (recordType) {
+        if (subscriptionType) {
             setValidationFailed(false);
         }
-    }, [recordType]);
+    }, [subscriptionType]);
 
     // Handle action when the continue button is clicked
     const handleContinue = () => {
-        if (!recordType) {
+        if (!subscriptionType) {
             setValidationFailed(true);
             return;
         }
@@ -64,22 +58,16 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
         }
     };
 
-    // Handle change in record type
-    const handleRecordTypeChange = (newValue: RecordType) => {
-        setRecordType(newValue);
-        setResetRecordPanelStates(true);
-    };
-
     return (
         <div
             className={`modal__body modal-body secondary-panel ${className}`}
-            ref={recordTypePanelRef}
+            ref={subscriptionTypePanelRef}
         >
             <Dropdown
-                placeholder='Select Record Type'
-                value={recordType}
-                onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
-                options={recordTypeOptions}
+                placeholder='Select Subscription Type'
+                value={subscriptionType}
+                onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
+                options={subscriptionTypeOptions}
                 required={true}
                 error={validationFailed && 'Required'}
             />
@@ -96,4 +84,4 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     );
 });
 
-export default RecordTypePanel;
+export default SubscriptionTypePanel;

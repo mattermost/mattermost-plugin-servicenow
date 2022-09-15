@@ -33,8 +33,6 @@ type FetchChannelsParams = {
     teamId: string;
 }
 
-type RecordType = 'incident' | 'problem' | 'change_request';
-
 type SearchRecordsParams = {
     recordType: RecordType;
     search: string;
@@ -66,8 +64,8 @@ type CreateSubscriptionPayload = {
     server_url: string;
     is_active: boolean;
     user_id: string;
-    type: string;
-    record_type: string;
+    type: import('../plugin_constants').SubscriptionType;
+    record_type: import('../plugin_constants').RecordType;
     record_id: string;
     subscription_events: string;
     channel_id: string;
@@ -83,8 +81,8 @@ type SubscriptionData = {
     server_url: string;
     is_active: boolean;
     user_id: string;
-    type: string;
-    record_type: string;
+    type: import('../plugin_constants').SubscriptionType;
+    record_type: import('../plugin_constants').RecordType;
     record_id: string;
     subscription_events: string;
     channel_id: string;
@@ -97,8 +95,8 @@ type EditSubscriptionPayload = {
     server_url: string;
     is_active: boolean;
     user_id: string;
-    type: string;
-    record_type: string;
+    type: import('../plugin_constants').SubscriptionType;
+    record_type: import('../plugin_constants').RecordType;
     record_id: string;
     subscription_events: string;
     channel_id: string;

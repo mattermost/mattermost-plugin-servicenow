@@ -107,7 +107,8 @@ const Rhs = (): JSX.Element => {
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
-            recordType: subscription.record_type as RecordType,
+            type: subscription.type,
+            recordType: subscription.record_type,
             subscriptionEvents,
             id: subscription.sys_id,
         };
