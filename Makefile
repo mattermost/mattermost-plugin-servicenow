@@ -4,6 +4,9 @@ CURL ?= $(shell command -v curl 2> /dev/null)
 MM_DEBUG ?=
 MANIFEST_FILE ?= plugin.json
 GOPATH ?= $(shell go env GOPATH)
+# We need to export GOBIN to allow it to be set
+# for processes spawned from the Makefile
+export GOBIN ?= $(PWD)/bin
 GO_TEST_FLAGS ?= -race
 GO_BUILD_FLAGS ?=
 MM_UTILITIES_DIR ?= ../mattermost-utilities
@@ -38,6 +41,16 @@ all: check-style test dist
 .PHONY: apply
 apply:
 	./build/bin/manifest apply
+
+.PHONY: plugin-layers
+plugin-layers: ## Extract interface from Plugin struct
+	$(GO) install github.com/reflog/struct2interface@v0.6.1
+	$(GOBIN)/struct2interface -f "server/plugin" -o "server/plugin/plugin_iface.go" -p "plugin" -s "Plugin" -i "PluginIface"
+
+.PHONY: plugin-mocks
+plugin-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/v2/...@v2.14.0
+	$(GOBIN)/mockery --dir server/plugin --name "PluginIface" --output server/mocks --filename mock_plugin.go --note 'Regenerate this file using `make plugin-mocks`.'
 
 ## Runs eslint and golangci-lint
 .PHONY: check-style

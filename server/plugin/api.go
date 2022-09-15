@@ -1,4 +1,4 @@
-package main
+package plugin
 
 import (
 	"context"
@@ -27,7 +27,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	r.Use(p.withRecovery)
 
 	p.handleStaticFiles(r)
-	s := r.PathPrefix("/api/v1").Subrouter()
+	s := r.PathPrefix(constants.PathPrefix).Subrouter()
 
 	// Add custom routes here
 	s.HandleFunc(constants.PathOAuth2Connect, p.checkAuth(p.httpOAuth2Connect)).Methods(http.MethodGet)
