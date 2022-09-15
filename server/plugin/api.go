@@ -346,8 +346,13 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	result, err := json.Marshal(bulkSubscriptions)
-	if err != nil || string(result) == "null" {
+	if err != nil {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
 	} else if _, err = w.Write(result); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())
@@ -467,8 +472,13 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	result, err := json.Marshal(records)
-	if err != nil || string(result) == "null" {
+	if err != nil {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
 	} else if _, err = w.Write(result); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())

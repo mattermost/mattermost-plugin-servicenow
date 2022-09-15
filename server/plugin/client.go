@@ -97,7 +97,7 @@ func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit,
 		query = fmt.Sprintf("%s^channel_id=%s", query, channelID)
 	}
 
-	// subscriptionType will be intentionally sent empty string if we have to return subscriptions of all types
+	// subscriptionType will be intentionally sent an empty string if we have to return subscriptions of all types
 	if subscriptionType != "" {
 		query = fmt.Sprintf("%s^type=%s", query, subscriptionType)
 	}
