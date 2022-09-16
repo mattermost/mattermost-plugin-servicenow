@@ -49,8 +49,18 @@ plugin-layers: ## Extract interface from Plugin struct
 
 .PHONY: plugin-mocks
 plugin-mocks: ## Creates mock files.
-	$(GO) install github.com/vektra/mockery/v2/...@v2.14.0
+	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
 	$(GOBIN)/mockery --dir server/plugin --name "PluginIface" --output server/mocks --filename mock_plugin.go --note 'Regenerate this file using `make plugin-mocks`.'
+
+.PHONY: store-mocks
+store-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
+	$(GOBIN)/mockery --dir server/plugin --name "Store" --output server/mocks --filename mock_store.go --note 'Regenerate this file using `make store-mocks`.'
+
+.PHONY: client-mocks
+client-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
+	$(GOBIN)/mockery --dir server/plugin --name "Client" --output server/mocks --filename mock_client.go --note 'Regenerate this file using `make client-mocks`.'
 
 ## Runs eslint and golangci-lint
 .PHONY: check-style

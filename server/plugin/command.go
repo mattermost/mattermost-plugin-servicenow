@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-plugin-api/experimental/command"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
@@ -169,7 +170,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	return &model.CommandResponse{}, nil
 }
 
-func (p *Plugin) checkConnected(args *model.CommandArgs) *User {
+func (p *Plugin) checkConnected(args *model.CommandArgs) *serializer.User {
 	user, userErr := p.GetUser(args.UserId)
 	if userErr != nil {
 		if errors.Is(userErr, ErrNotFound) {
@@ -184,7 +185,7 @@ func (p *Plugin) checkConnected(args *model.CommandArgs) *User {
 	return user
 }
 
-func (p *Plugin) GetClientFromUser(args *model.CommandArgs, user *User) Client {
+func (p *Plugin) GetClientFromUser(args *model.CommandArgs, user *serializer.User) Client {
 	token, err := p.ParseAuthToken(user.OAuth2Token)
 	if err != nil {
 		p.API.LogError("Unable to parse oauth token", "Error", err.Error())

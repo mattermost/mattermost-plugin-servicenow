@@ -3,6 +3,7 @@ package plugin
 import (
 	"time"
 
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"github.com/pkg/errors"
@@ -26,8 +27,8 @@ type Store interface {
 }
 
 type UserStore interface {
-	LoadUser(mattermostUserID string) (*User, error)
-	StoreUser(user *User) error
+	LoadUser(mattermostUserID string) (*serializer.User, error)
+	StoreUser(user *serializer.User) error
 	DeleteUser(mattermostUserID string) error
 }
 
@@ -54,8 +55,8 @@ func (p *Plugin) NewStore(api plugin.API) Store {
 	}
 }
 
-func (s *pluginStore) LoadUser(mattermostUserID string) (*User, error) {
-	user := User{}
+func (s *pluginStore) LoadUser(mattermostUserID string) (*serializer.User, error) {
+	user := serializer.User{}
 	if err := kvstore.LoadJSON(s.userKV, mattermostUserID, &user); err != nil {
 		return nil, err
 	}
@@ -63,7 +64,7 @@ func (s *pluginStore) LoadUser(mattermostUserID string) (*User, error) {
 	return &user, nil
 }
 
-func (s *pluginStore) StoreUser(user *User) error {
+func (s *pluginStore) StoreUser(user *serializer.User) error {
 	if err := kvstore.StoreJSON(s.userKV, user.MattermostUserID, user); err != nil {
 		return err
 	}
