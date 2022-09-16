@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Channel Panel Should render correctly 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "store": Object {
+        "clearActions": [Function],
+        "dispatch": [Function],
+        "getActions": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+      },
+      "subscription": Subscription {
+        "handleChangeWrapper": [Function],
+        "listeners": Object {
+          "notify": [Function],
+        },
+        "onStateChange": [Function],
+        "parentSub": undefined,
+        "store": Object {
+          "clearActions": [Function],
+          "dispatch": [Function],
+          "getActions": [Function],
+          "getState": [Function],
+          "replaceReducer": [Function],
+          "subscribe": [Function],
+        },
+        "unsubscribe": null,
+      },
+    }
+  }
+>
+  <ForwardRef
+    actionBtnDisabled={true}
+    channel="mockChannel"
+    channelOptions={
+      Array [
+        Object {
+          "label": "Channel 1",
+          "value": "Channel 1",
+        },
+        Object {
+          "label": "Channel 2",
+          "value": "Channel 2",
+        },
+        Object {
+          "label": "Channel 3",
+          "value": "Channel 3",
+        },
+      ]
+    }
+    className="mockClassName"
+    error="mockError"
+    onContinue={[MockFunction]}
+    setApiError={[MockFunction]}
+    setApiResponseValid={[MockFunction]}
+    setChannel={[MockFunction]}
+    setChannelOptions={[MockFunction]}
+    setShowModalLoader={[MockFunction]}
+  />
+</ContextProvider>
+`;
