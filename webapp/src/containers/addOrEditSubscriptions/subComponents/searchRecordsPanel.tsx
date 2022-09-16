@@ -3,7 +3,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from 'mm-ui-library';
 
-import Constants from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 import Utils from 'utils';
 

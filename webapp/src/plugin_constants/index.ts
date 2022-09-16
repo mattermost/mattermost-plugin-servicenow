@@ -19,19 +19,19 @@ const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 4;
 const DefaultPage = 0;
 const DefaultPageSize = 100;
-const PrivateChannelType = 'P';
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 const GeneralErrorMessage = 'Something went wrong';
-const GeneralErrorSubtitleForUser = 'Please contact your system administrator';
-const GeneralErrorSubtitleForAdmin = 'Please check your server logs';
+const GeneralErrorSubtitleForUser = 'Please contact your system administrator.';
+const GeneralErrorSubtitleForAdmin = 'Please check the server logs.';
 const SubscriptionAddedMsg = 'Subscription added successfully!';
 const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
 const DeleteSubscriptionHeading = 'Confirm Delete Subscription';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 
 export enum SubscriptionEvents {
+    CREATED = 'created',
     STATE = 'state',
     PRIORITY = 'priority',
     COMMENTED = 'commented',
@@ -39,7 +39,19 @@ export enum SubscriptionEvents {
     ASSIGNMENT_GROUP = 'assignment_group',
 }
 
+export enum SubscriptionType {
+    RECORD = 'record',
+    BULK = 'object',
+}
+
+export enum RecordType {
+    INCIDENT = 'incident',
+    PROBLEM = 'problem',
+    CHANGE_REQUEST = 'change_request',
+}
+
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
+    created: SubscriptionEvents.CREATED,
     state: SubscriptionEvents.STATE,
     priority: SubscriptionEvents.PRIORITY,
     commented: SubscriptionEvents.COMMENTED,
@@ -56,15 +68,15 @@ const SubscriptionsUnauthorizedErrorSubtitleForAdmin = 'Please follow the instru
 
 // Used to get the `SubscriptionType` labels to show in the UI
 export const SubscriptionTypeLabelMap: Record<SubscriptionType, string> = {
-    record: 'Record subscription',
-    object: 'Bulk subscription',
+    [SubscriptionType.RECORD]: 'Record subscription',
+    [SubscriptionType.BULK]: 'Bulk subscription',
 };
 
 // Used to get the `RecordType` labels to show in the UI
 export const RecordTypeLabelMap: Record<RecordType, string> = {
-    incident: 'Incident',
-    problem: 'Problem',
-    change_request: 'Change Request',
+    [RecordType.INCIDENT]: 'Incident',
+    [RecordType.PROBLEM]: 'Problem',
+    [RecordType.CHANGE_REQUEST]: 'Change Request',
 };
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
@@ -88,7 +100,8 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
 ];
 
 // Map subscription events to texts to be shown in the UI(on cards)
-const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
+export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
+    [SubscriptionEvents.CREATED]: 'New record created',
     [SubscriptionEvents.STATE]: 'State changed',
     [SubscriptionEvents.PRIORITY]: 'Priority changed',
     [SubscriptionEvents.COMMENTED]: 'New comment',
@@ -166,10 +179,8 @@ export default {
     ChannelHeaderTooltipText,
     RhsToggleLabel,
     DefaultCharThresholdToShowSuggestions,
-    SubscriptionEventLabels,
     DefaultPage,
     DefaultPageSize,
-    PrivateChannelType,
     ApiErrorIdNotConnected,
     ApiErrorIdSubscriptionsNotConfigured,
     ApiErrorIdSubscriptionsUnauthorized,

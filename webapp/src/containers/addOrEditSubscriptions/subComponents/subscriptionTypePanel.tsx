@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
 
-import {SubscriptionTypeLabelMap} from 'plugin_constants';
+import {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 type SubscriptionTypePanelProps = {
     className?: string;
@@ -17,12 +17,12 @@ type SubscriptionTypePanelProps = {
 
 const subscriptionTypeOptions: DropdownOptionType[] = [
     {
-        label: SubscriptionTypeLabelMap.record,
-        value: 'record',
+        label: SubscriptionTypeLabelMap[SubscriptionType.RECORD],
+        value: SubscriptionType.RECORD,
     },
     {
-        label: SubscriptionTypeLabelMap.object,
-        value: 'object',
+        label: SubscriptionTypeLabelMap[SubscriptionType.BULK],
+        value: SubscriptionType.BULK,
     },
 ];
 

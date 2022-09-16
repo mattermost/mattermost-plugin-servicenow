@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
 
-import {RecordTypeLabelMap} from 'plugin_constants';
+import {RecordTypeLabelMap, RecordType} from 'plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;
@@ -18,16 +18,16 @@ type RecordTypePanelProps = {
 
 const recordTypeOptions: DropdownOptionType[] = [
     {
-        label: RecordTypeLabelMap.incident,
-        value: 'incident',
+        label: RecordTypeLabelMap[RecordType.INCIDENT],
+        value: RecordType.INCIDENT,
     },
     {
-        label: RecordTypeLabelMap.problem,
-        value: 'problem',
+        label: RecordTypeLabelMap[RecordType.PROBLEM],
+        value: RecordType.PROBLEM,
     },
     {
-        label: RecordTypeLabelMap.change_request,
-        value: 'change_request',
+        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
+        value: RecordType.CHANGE_REQUEST,
     },
 ];
 

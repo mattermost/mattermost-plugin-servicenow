@@ -6,7 +6,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, CircularLoader, ResultPanel} from 'mm-ui-library';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -320,7 +320,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             user_id: Cookies.get(Constants.MMUSERID) ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
-            record_id: recordId as string || '',
+            record_id: recordId || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
             sys_id: subscriptionData?.id as string,
@@ -383,7 +383,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={recordTypePanelRef}
-                    onContinue={() => (subscriptionType === 'record' ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
+                    onContinue={() => (subscriptionType === SubscriptionType.RECORD ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
                     onBack={() => setRecordTypePanelOpen(false)}
                     recordType={recordType}
                     setRecordType={setRecordType}
@@ -422,6 +422,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionEvents={subscriptionEvents}
                     setSubscriptionEvents={setSubscriptionEvents}
                     channel={channelOptions.find((ch) => ch.value === channel) as DropdownOptionType || null}
+                    subscriptionType={subscriptionType as SubscriptionType}
                     record={recordValue}
                     recordType={recordType as RecordType}
                     actionBtnDisabled={showModalLoader}
