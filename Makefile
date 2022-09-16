@@ -7,7 +7,7 @@ GOPATH ?= $(shell go env GOPATH)
 # We need to export GOBIN to allow it to be set
 # for processes spawned from the Makefile
 export GOBIN ?= $(PWD)/bin
-GO_TEST_FLAGS ?= -race
+GO_TEST_FLAGS ?= -race -gcflags=-l
 GO_BUILD_FLAGS ?=
 MM_UTILITIES_DIR ?= ../mattermost-utilities
 DLV_DEBUG_PORT := 2346
