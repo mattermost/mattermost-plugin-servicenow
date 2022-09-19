@@ -40,10 +40,10 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
         const subscriptionEvents = events.map((event) => SubscriptionEventsMap[event]);
         const subscriptionData: EditSubscriptionData = {
             channel: data.channel_id,
-            type: data.type,
+            type: data.type as SubscriptionType,
             recordId: data.record_id,
             id: data.sys_id,
-            recordType: data.record_type,
+            recordType: data.record_type as RecordType,
             subscriptionEvents,
         };
         store.dispatch(showEditSubcriptionModal(subscriptionData) as Action);
