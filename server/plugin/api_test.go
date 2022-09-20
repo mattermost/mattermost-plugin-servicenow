@@ -187,6 +187,7 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 			defer result.Body.Close()
 
 			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+
 			if test.ExpectedCount != -1 {
 				var channels []*model.Channel
 				err := json.NewDecoder(result.Body).Decode(&channels)
@@ -327,6 +328,7 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 			defer result.Body.Close()
 
 			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+
 			if test.ExpectedCount != -1 {
 				var channels []*model.Channel
 				err := json.NewDecoder(result.Body).Decode(&channels)
