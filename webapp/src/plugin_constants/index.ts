@@ -158,7 +158,7 @@ export const PanelDefaultHeights = {
     subscriptionTypePanel: 195,
     recordTypePanel: 210,
     searchRecordPanel: 210,
-    searchRecordPanelExpanded: 380,
+    searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
     panelHeader: 65,

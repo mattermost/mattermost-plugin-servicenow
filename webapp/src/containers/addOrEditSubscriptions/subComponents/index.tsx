@@ -217,16 +217,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.successPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            resultPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (eventsPanelOpen) {
             height = eventsPanelRef.current?.offsetHeight || PanelDefaultHeights.eventsPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            eventsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (searchRecordsPanelOpen) {
@@ -237,32 +233,24 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             }
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            searchRecordsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (recordTypePanelOpen) {
             height = recordTypePanelRef.current?.offsetHeight || PanelDefaultHeights.recordTypePanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            recordTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (subscriptionTypePanelOpen) {
             height = subscriptionTypePanelRef.current?.offsetHeight || PanelDefaultHeights.subscriptionTypePanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            subscriptionTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (!subscriptionTypePanelOpen && !recordTypePanelOpen && !searchRecordsPanelOpen && !eventsPanelOpen) {
             height = channelPanelRef.current?.offsetHeight || PanelDefaultHeights.channelPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            channelPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
         }
     }, [subscriptionTypePanelOpen, eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
 
