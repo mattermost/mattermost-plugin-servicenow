@@ -11,7 +11,7 @@ import (
 )
 
 func GetSecret() string {
-	return "1234567890abcdefghij"
+	return "test-secret"
 }
 
 func GetID() string {
@@ -33,6 +33,7 @@ func GetChannels(count int, channelType string) []*model.Channel {
 	if channelType == "" {
 		channelType = model.CHANNEL_OPEN
 	}
+
 	channels := make([]*model.Channel, count)
 	for i := 0; i < count; i++ {
 		channels[i] = GetChannel(channelType)
@@ -95,7 +96,7 @@ func GetServiceNowPartialRecords(count int) []*serializer.ServiceNowPartialRecor
 func GetSerializerUser() *serializer.User {
 	return &serializer.User{
 		MattermostUserID: GetID(),
-		OAuth2Token:      "adfafdafadsfas",
+		OAuth2Token:      "test-oauthtoken",
 	}
 }
 
