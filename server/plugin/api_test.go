@@ -767,6 +767,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			defer result.Body.Close()
 
 			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+
 			if test.ExpectedCount != -1 {
 				var subscripitons []*serializer.SubscriptionResponse
 				err := json.NewDecoder(result.Body).Decode(&subscripitons)
@@ -913,11 +914,9 @@ func TestEditSubscription(t *testing.T) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					http.StatusForbidden, fmt.Errorf("edit subscription error"),
 				)
-
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "edit subscription error",
