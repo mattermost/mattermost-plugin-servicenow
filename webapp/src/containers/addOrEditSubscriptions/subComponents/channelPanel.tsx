@@ -144,15 +144,8 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                     error={validationFailed && 'Required'}
                     disabled={getChannelState().isLoading}
                     loadingSuggestions={getChannelState().isLoading}
+                    charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
                 />
-                {/* <Dropdown
-                    placeholder='Select Channel'
-                    value={channel}
-                    onChange={setChannel}
-                    options={channelOptions}
-                    required={true}
-                    error={validationFailed && 'Required'}
-                /> */}
                 <ModalSubtitleAndError error={error}/>
             </div>
             <ModalFooter
