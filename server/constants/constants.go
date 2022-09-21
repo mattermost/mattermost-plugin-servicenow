@@ -70,6 +70,15 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 )
 
+// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
+const (
+	EmptyServiceNowURLErrorMessage               = "serviceNow server URL should not be empty"
+	EmptyServiceNowOAuthClientIDErrorMessage     = "serviceNow OAuth clientID should not be empty"
+	EmptyServiceNowOAuthClientSecretErrorMessage = "serviceNow OAuth clientSecret should not be empty"
+	EmptyEncryptionSecretErrorMessage            = "encryption secret should not be empty"
+	EmptyWebhookSecretErrorMessage               = "webhook secret should not be empty"
+)
+
 var (
 	ValidSubscriptionTypes = map[string]bool{
 		SubscriptionTypeRecord: true,

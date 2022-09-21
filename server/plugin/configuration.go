@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/pkg/errors"
 )
 
@@ -52,19 +53,19 @@ func (c *configuration) ProcessConfiguration() error {
 // IsValid checks if all the required fields are set.
 func (c *configuration) IsValid() error {
 	if len(c.ServiceNowBaseURL) == 0 {
-		return errors.New("serviceNow server URL should not be empty")
+		return errors.New(constants.EmptyServiceNowURLErrorMessage)
 	}
 	if len(c.WebhookSecret) == 0 {
-		return errors.New("webhook secret should not be empty")
+		return errors.New(constants.EmptyWebhookSecretErrorMessage)
 	}
 	if c.ServiceNowOAuthClientID == "" {
-		return errors.New("serviceNow OAuth clientID should not be empty")
+		return errors.New(constants.EmptyServiceNowOAuthClientIDErrorMessage)
 	}
 	if c.ServiceNowOAuthClientSecret == "" {
-		return errors.New("serviceNow OAuth clientSecret should not be empty")
+		return errors.New(constants.EmptyServiceNowOAuthClientSecretErrorMessage)
 	}
 	if c.EncryptionSecret == "" {
-		return errors.New("encryption secret should not be empty")
+		return errors.New(constants.EmptyEncryptionSecretErrorMessage)
 	}
 
 	return nil
