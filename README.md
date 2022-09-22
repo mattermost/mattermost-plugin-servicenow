@@ -22,7 +22,7 @@ This plugin contains the following features:
 - Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards.
 - Ability to open the create/edit subscription modal through UI or by using slash commands.
 - Ability to create a record or bulk subscription.
-- A record subscription is for subscribing to changes to a specific record and a Bulk subscription allows subscribing to all records of a particular type.
+- A record subscription is for subscribing to changes in a specific record and a Bulk subscription allows subscribing to all records of a particular type.
 - Supported record types - incident, problem, change_request.
 - Supported events:
   * State changed
@@ -66,4 +66,4 @@ After connecting successfully, you will get a direct message from the ServiceNow
 
 ---
 
-Made with &#9829; by [Brightscout](http://www.brightscout.com)
+Made with &#9829; by [Brightscout](https://www.brightscout.com)
