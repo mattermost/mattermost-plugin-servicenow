@@ -183,7 +183,7 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 	}
 }
 
-func TestSearchRecordsInServiceNow(t *testing.T) {
+func TestAPISearchRecordsInServiceNow(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSearchRecords)
 	requestMethod := http.MethodGet
 	limit, offset := testutils.GetLimitAndOffset()
