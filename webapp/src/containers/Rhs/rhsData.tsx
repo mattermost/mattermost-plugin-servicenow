@@ -24,6 +24,7 @@ type RhsDataProps = {
     handleEditSubscription: (subscriptionData: SubscriptionData) => void;
     handleDeleteClick: (subscriptionData: SubscriptionData) => void;
     error?: string;
+    isCurrentUserSysAdmin: boolean;
 }
 
 const BulkSubscriptionHeaders: Record<RecordType, string> = {
@@ -40,6 +41,7 @@ const RhsData = ({
     handleEditSubscription,
     handleDeleteClick,
     error,
+    isCurrentUserSysAdmin,
 }: RhsDataProps) => {
     const dispatch = useDispatch();
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -97,7 +99,14 @@ const RhsData = ({
                 onChange={setShowAllSubscriptions}
                 label={Constants.RhsToggleLabel}
             />
-            {error && <p className='rhs-content--error'>{error}</p>}
+            {error && (
+                <EmptyState
+                    title={Constants.GeneralErrorMessage}
+                    subTitle={isCurrentUserSysAdmin ? Constants.GeneralErrorSubtitleForAdmin : Constants.GeneralErrorSubtitleForUser}
+                    iconClass='fa fa-exclamation-triangle err-icon'
+                    className='error-state'
+                />
+            )}
             {subscriptions?.length > 0 && !loadingSubscriptions && (
                 <>
                     <div className='rhs-content__cards-container'>

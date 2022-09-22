@@ -194,6 +194,7 @@ const Rhs = (): JSX.Element => {
                         handleEditSubscription={handleEditSubscription}
                         handleDeleteClick={handleDeleteClick}
                         error={getSubscriptionsState().error?.message}
+                        isCurrentUserSysAdmin={isCurrentUserSysAdmin}
                     />
                     {toBeDeleted && (
                         <Modal
