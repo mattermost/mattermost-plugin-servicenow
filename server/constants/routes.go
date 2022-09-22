@@ -1,6 +1,7 @@
 package constants
 
 const (
+	PathPrefix                 = "/api/v1"
 	PathOAuth2Connect          = "/oauth2/connect"
 	PathOAuth2Complete         = "/oauth2/complete"
 	PathDownloadUpdateSet      = "/download"

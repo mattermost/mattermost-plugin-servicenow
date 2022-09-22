@@ -22,6 +22,9 @@ const DefaultPageSize = 100;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
+const GeneralErrorMessage = 'Something went wrong';
+const GeneralErrorSubtitleForUser = 'Please contact your system administrator.';
+const GeneralErrorSubtitleForAdmin = 'Please check the server logs.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -180,4 +183,7 @@ export default {
     SubscriptionsUnauthorizedErrorTitle,
     SubscriptionsUnauthorizedErrorSubtitleForUser,
     SubscriptionsUnauthorizedErrorSubtitleForAdmin,
+    GeneralErrorMessage,
+    GeneralErrorSubtitleForUser,
+    GeneralErrorSubtitleForAdmin,
 };
