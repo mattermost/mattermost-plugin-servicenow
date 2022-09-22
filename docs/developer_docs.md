@@ -21,11 +21,11 @@ This plugin integrates ServiceNow with Mattermost by allowing users to subscribe
 ## Features
 
 This plugin contains the following features:
-
 - Connecting/disconnecting to ServiceNow account using OAuth.
 - Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards.
 - Ability to open the create/edit subscription modal through UI or by using slash commands.
-- Subscriptions to only specific records are supported.
+- Ability to create a record or bulk subscription.
+- A record subscription is for subscribing to changes to a specific record and a Bulk subscription allows subscribing to all records of a particular type.
 - Supported record types - incident, problem, change_request.
 - Supported events:
   * State changed
@@ -33,6 +33,7 @@ This plugin contains the following features:
   * Assigned to changed
   * Assignment group changed
   * New comment added
+  * New record created (only for bulk subscriptions)
 - Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
 - Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command.
 - Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command.
@@ -170,3 +171,7 @@ As you can see in the screenshot, the application scope is "ServiceNow for Matte
 ![image](https://user-images.githubusercontent.com/77336594/186453112-412f2f2c-1f8d-446f-acc9-202c2197c6c0.png)
 
 Then, you can merge this update set and the update set that you uploaded so that you can have all the changes in one update set. After both the update sets are merged, you can export the latest update as an XML file.
+
+---
+
+Made with &#9829; by [Brightscout](http://www.brightscout.com)

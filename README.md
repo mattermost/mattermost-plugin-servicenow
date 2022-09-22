@@ -21,7 +21,8 @@ This plugin contains the following features:
 - Connecting/disconnecting to ServiceNow account using OAuth.
 - Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards.
 - Ability to open the create/edit subscription modal through UI or by using slash commands.
-- Subscriptions to only specific records are supported.
+- Ability to create a record or bulk subscription.
+- A record subscription is for subscribing to changes to a specific record and a Bulk subscription allows subscribing to all records of a particular type.
 - Supported record types - incident, problem, change_request.
 - Supported events:
   * State changed
@@ -29,6 +30,7 @@ This plugin contains the following features:
   * Assigned to changed
   * Assignment group changed
   * New comment added
+  * New record created (only for bulk subscriptions)
 - Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
 - Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command.
 - Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command.
@@ -61,3 +63,7 @@ There are two methods by which you can connect your Mattermost account to your S
 
 After connecting successfully, you will get a direct message from the ServiceNow bot containing a Welcome message and some useful information along with some instructions for the system admins.
 **Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages only between two users of the same team, then you will not get any direct message.
+
+---
+
+Made with &#9829; by [Brightscout](http://www.brightscout.com)
