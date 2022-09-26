@@ -27,7 +27,7 @@ const GeneralErrorSubtitleForUser = 'Please contact your system administrator.';
 const GeneralErrorSubtitleForAdmin = 'Please check the server logs.';
 const SubscriptionAddedMsg = 'Subscription added successfully!';
 const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
-const DeleteSubscriptionHeading = 'Confirm Delete Subscription';
+const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const RequiredMsg = 'Required';
 
