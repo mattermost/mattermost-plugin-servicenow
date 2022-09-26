@@ -4,7 +4,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {CustomModal as Modal, ModalHeader, ModalLoader, CircularLoader, ResultPanel} from 'mm-ui-library';
+import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@Brightscout/mm-ui-library';
 
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
 
@@ -429,7 +429,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         onClick: hideModal,
                     }}
                 />
-                {false && <CircularLoader/>}
             </>
         </Modal>
     );

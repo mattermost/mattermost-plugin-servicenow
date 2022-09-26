@@ -2,6 +2,8 @@
  * Keep all service related types here
  */
 
+type SubscriptionType = import('../plugin_constants').SubscriptionType;
+type RecordType = import('../plugin_constants').RecordType;
 type ChannelData = {
     create_at: number;
     creator_id: string;
@@ -51,8 +53,8 @@ type Suggestion = {
 }
 
 type RecordData = {
-    assigned_to: string | { display_value: string, link: string };
-    assignment_group: string | { display_value: string, link: string };
+    assigned_to: string | {display_value: string, link: string};
+    assignment_group: string | {display_value: string, link: string};
     number: string;
     priority: string;
     short_description: string;
@@ -64,8 +66,8 @@ type CreateSubscriptionPayload = {
     server_url: string;
     is_active: boolean;
     user_id: string;
-    type: import('../plugin_constants').SubscriptionType;
-    record_type: import('../plugin_constants').RecordType;
+    type: SubscriptionType;
+    record_type: RecordType;
     record_id: string;
     subscription_events: string;
     channel_id: string;
@@ -81,8 +83,8 @@ type SubscriptionData = {
     server_url: string;
     is_active: boolean;
     user_id: string;
-    type: import('../plugin_constants').SubscriptionType;
-    record_type: import('../plugin_constants').RecordType;
+    type: SubscriptionType;
+    record_type: RecordType;
     record_id: string;
     subscription_events: string;
     channel_id: string;
@@ -95,8 +97,8 @@ type EditSubscriptionPayload = {
     server_url: string;
     is_active: boolean;
     user_id: string;
-    type: import('../plugin_constants').SubscriptionType;
-    record_type: import('../plugin_constants').RecordType;
+    type: SubscriptionType;
+    record_type: RecordType;
     record_id: string;
     subscription_events: string;
     channel_id: string;

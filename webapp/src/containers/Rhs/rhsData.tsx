@@ -3,7 +3,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from 'mm-ui-library';
+import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@Brightscout/mm-ui-library';
 
 import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
 
@@ -136,7 +136,7 @@ const RhsData = ({
                         text: 'Add new Subscription',
                         action: () => dispatch(showAddModal()),
                     }}
-                    icon={<BellIcon/>}
+                    icon={<BellIcon />}
                 />
             )}
         </>

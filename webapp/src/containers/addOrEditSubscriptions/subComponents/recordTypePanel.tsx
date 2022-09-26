@@ -1,8 +1,8 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@Brightscout/mm-ui-library';
 
-import {RecordTypeLabelMap, RecordType} from 'plugin_constants';
+import Constants, {RecordTypeLabelMap, RecordType} from 'plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;
@@ -80,7 +80,7 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
                     onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
                     options={recordTypeOptions}
                     required={true}
-                    error={validationFailed && 'Required'}
+                    error={validationFailed && Constants.RequiredMsg}
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>

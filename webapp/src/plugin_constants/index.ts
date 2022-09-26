@@ -30,6 +30,7 @@ const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
 const DeleteSubscriptionHeading = 'Confirm Delete Subscription';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const CharThresholdToSuggestChannel = 0;
+const RequiredMsg = 'Required';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -196,4 +197,5 @@ export default {
     DeleteSubscriptionHeading,
     DeleteSubscriptionMsg,
     CharThresholdToSuggestChannel,
+    RequiredMsg,
 };

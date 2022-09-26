@@ -4,7 +4,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from 'mm-ui-library';
+import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@Brightscout/mm-ui-library';
 
 import Constants from 'plugin_constants';
 
@@ -141,7 +141,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                         renderValue: (suggestion) => getChannelAutoSuggestOptionJSX(suggestion.channelName, suggestion.channelType),
                     }}
                     required={true}
-                    error={validationFailed && 'Required'}
+                    error={validationFailed && Constants.RequiredMsg}
                     disabled={getChannelState().isLoading}
                     loadingSuggestions={getChannelState().isLoading}
                     charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
