@@ -6,7 +6,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 // eslint-disable-next-line import/no-unresolved
 import {PluginRegistry} from 'types/mattermost-webapp';
 
-import {ServiceNowIcon} from '@Brightscout/mm-ui-library';
+import {ServiceNowIcon} from 'mattermost-ui-library';
 
 import reducer from 'reducers';
 

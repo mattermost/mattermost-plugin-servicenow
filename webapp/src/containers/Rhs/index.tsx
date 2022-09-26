@@ -5,7 +5,7 @@ import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from '@Brightscout/mm-ui-library';
+import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from 'mattermost-ui-library';
 
 import usePluginApi from 'hooks/usePluginApi';
 

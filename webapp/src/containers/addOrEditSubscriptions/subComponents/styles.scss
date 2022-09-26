@@ -1,4 +1,4 @@
-@import "@Brightscout/mm-ui-library/build/styles/abstract/_mixins";
+@import "mattermost-ui-library/build/styles/abstract/_mixins";
 
 .rhs-modal {
   .plugin-dropdown {
@@ -14,7 +14,7 @@
     margin-right: -2px;
   }
 
-  .auto-suggest__suggestions--open{
+  .auto-suggest__suggestions--open {
     max-height: 124px;
   }
 
