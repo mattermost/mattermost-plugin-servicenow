@@ -136,7 +136,7 @@ const RhsData = ({
                         text: 'Add new Subscription',
                         action: () => dispatch(showAddModal()),
                     }}
-                    icon={<BellIcon />}
+                    icon={<BellIcon/>}
                 />
             )}
         </>

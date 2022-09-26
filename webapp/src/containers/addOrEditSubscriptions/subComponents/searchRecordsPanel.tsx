@@ -165,8 +165,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // handle input value change
     const handleInputChange = (currentValue: string) => {
         setRecordValue(currentValue);
-        setSuggestionChosen(false);
         setRecordId(null);
+        setSuggestionChosen(false);
         if (currentValue) {
             if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
                 debouncedGetSuggestions({searchFor: currentValue});
@@ -195,12 +195,15 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Returns value to be rendered in the options dropdown and in the input
     const getInputValue = useCallback((suggestion: Record<string, string>) => `${suggestion.number}: ${suggestion.short_description}`, []);
 
-    // Handles action when a suggestion is chosen
-    const handleSuggestionClick = (suggestionValue: Record<string, string>) => {
-        setSuggestionChosen(true);
-        setRecordValue(getInputValue(suggestionValue));
-        setRecordId(suggestionValue.sys_id);
-        getSuggestionData(suggestionValue.sys_id);
+    // Handles action when a suggestion is chosen or the chosen suggestion is reset
+    const handleSuggestionClick = (suggestionValue: Record<string, string> | null) => {
+        setSuggestionChosen(Boolean(suggestionValue));
+        setRecordValue(suggestionValue ? getInputValue(suggestionValue) : '');
+        setRecordId(suggestionValue?.sys_id || null);
+
+        if (suggestionValue) {
+            getSuggestionData(suggestionValue.sys_id);
+        }
     };
 
     // Returns value for record data header
@@ -236,7 +239,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 <AutoSuggest
                     inputValue={recordValue}
                     onInputValueChange={handleInputChange}
-                    onOptionClick={handleSuggestionClick}
+                    onChangeSelectedSuggestion={handleSuggestionClick}
                     placeholder='Search Records'
                     suggestionConfig={{
                         suggestions,
@@ -245,6 +248,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     error={validationMsg || validationFailed}
                     className='search-panel__auto-suggest margin-bottom-30'
                     loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
+                    charThresholdToShowSuggestions={Constants.DefaultCharThresholdToShowSuggestions}
                     disabled={disabledInput}
                 />
                 {suggestionChosen && (
@@ -256,13 +260,13 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader /> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
                                 </li>
                             ))
                         }
                     </ul>
                 )}
-                <ModalSubtitleAndError error={error} />
+                <ModalSubtitleAndError error={error}/>
             </div>
             <ModalFooter
                 onHide={onBack}

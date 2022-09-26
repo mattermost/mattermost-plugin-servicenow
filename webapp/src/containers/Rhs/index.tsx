@@ -180,7 +180,7 @@ const Rhs = (): JSX.Element => {
     const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
         <div className='rhs-content position-relative padding-top-15 padding-bottom-12 padding-h-12'>
-            {subscriptionsLoading && <CircularLoader />}
+            {subscriptionsLoading && <CircularLoader/>}
             {connected && subscriptionsEnabled && subscriptionsAuthorized && (
                 <>
                     <RhsData
@@ -219,7 +219,7 @@ const Rhs = (): JSX.Element => {
                             }) : null
                             }
                             className='configuration-err-state'
-                            icon={<UnlinkIcon />}
+                            icon={<UnlinkIcon/>}
                         />
                     )}
                     {!subscriptionsAuthorized && (
@@ -227,7 +227,7 @@ const Rhs = (): JSX.Element => {
                             title={Constants.SubscriptionsUnauthorizedErrorTitle}
                             subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsUnauthorizedErrorSubtitleForAdmin : Constants.SubscriptionsUnauthorizedErrorSubtitleForUser}
                             className='configuration-err-state'
-                            icon={<UnlinkIcon />}
+                            icon={<UnlinkIcon/>}
                         />
                     )}
                 </>
@@ -240,7 +240,7 @@ const Rhs = (): JSX.Element => {
                         link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
                     }}
                     className='configuration-err-state'
-                    icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon' />}
+                    icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon'/>}
                 />
             )}
         </div>
