@@ -429,7 +429,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         onClick: hideModal,
                     }}
                 />
-                {false && <CircularLoader/>}
             </>
         </Modal>
     );

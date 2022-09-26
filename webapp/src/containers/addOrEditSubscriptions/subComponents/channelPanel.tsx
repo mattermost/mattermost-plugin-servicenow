@@ -108,7 +108,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                     onChange={setChannel}
                     options={channelOptions}
                     required={true}
-                    error={validationFailed && 'Required'}
+                    error={validationFailed && Constants.RequiredMsg}
                     disabled={getChannelState().isLoading}
                 />
                 <ModalSubtitleAndError error={error}/>

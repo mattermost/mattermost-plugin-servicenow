@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
 
-import {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 type SubscriptionTypePanelProps = {
     className?: string;
@@ -68,7 +68,7 @@ const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelPr
                     onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
                     options={subscriptionTypeOptions}
                     required={true}
-                    error={validationFailed && 'Required'}
+                    error={validationFailed && Constants.RequiredMsg}
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>

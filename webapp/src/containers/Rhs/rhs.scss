@@ -3,7 +3,7 @@
 
 .rhs-content {
   height: calc(100% - #{$rhs-header-height});
-  
+
   &__cards-container {
     height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
     overflow-y: auto;
