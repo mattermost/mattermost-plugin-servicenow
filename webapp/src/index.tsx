@@ -34,7 +34,7 @@ export default class Plugin {
         registry.registerRootComponent(EditSubscription);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(<ServiceNowIcon />, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
+        registry.registerChannelHeaderButtonAction(<ServiceNowIcon/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
 
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));

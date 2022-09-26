@@ -49,7 +49,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     // Set the suggestions when the input value of the auto-suggest changes;
     useEffect(() => {
-        const channelsToSuggest = getChannelState().data?.filter((ch) => ch.display_name.toLowerCase().startsWith(channelAutoSuggestValue.toLowerCase())) || [];
+        const channelsToSuggest = getChannelState().data?.filter((ch) => ch.display_name.toLowerCase().includes(channelAutoSuggestValue.toLowerCase())) || [];
         setChannelSuggestions([
             ...channelsToSuggest.map((ch) => ({
                 channelName: ch.display_name,

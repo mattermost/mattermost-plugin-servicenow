@@ -260,13 +260,13 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader /> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
                                 </li>
                             ))
                         }
                     </ul>
                 )}
-                <ModalSubtitleAndError error={error} />
+                <ModalSubtitleAndError error={error}/>
             </div>
             <ModalFooter
                 onHide={onBack}
