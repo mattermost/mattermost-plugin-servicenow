@@ -1,6 +1,6 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mattermost-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mattermost-ui-lib';
 
 import Constants, {RecordTypeLabelMap, RecordType} from 'plugin_constants';
 

@@ -1,7 +1,7 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from 'mattermost-ui-library';
+import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from 'mattermost-ui-lib';
 
 import Constants, {RecordType} from 'plugin_constants';
 

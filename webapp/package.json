@@ -69,7 +69,7 @@
     "core-js": "3.6.5",
     "js-cookie": "3.0.1",
     "mattermost-redux": "5.27.0",
-    "mattermost-ui-library": "^1.0.0",
+    "mattermost-ui-lib": "^1.0.1",
     "react": "16.13.1",
     "react-bootstrap": "2.4.0",
     "react-redux": "7.2.0",

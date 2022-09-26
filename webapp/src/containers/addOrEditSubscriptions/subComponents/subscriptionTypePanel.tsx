@@ -1,6 +1,6 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mattermost-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mattermost-ui-lib';
 
 import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
