@@ -3,6 +3,7 @@ package testutils
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
@@ -102,4 +103,18 @@ func GetSerializerUser() *serializer.User {
 
 func GetLimitAndOffset() (limit, offset string) {
 	return fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPerPage * constants.DefaultPage)
+}
+
+func GetSearchTerm(valid bool) string {
+	l := constants.CharacterThresholdForSearchingRecords
+	if !valid {
+		l--
+	}
+
+	var sb strings.Builder
+	for i := 0; i < l; i++ {
+		sb.WriteString("s")
+	}
+
+	return sb.String()
 }
