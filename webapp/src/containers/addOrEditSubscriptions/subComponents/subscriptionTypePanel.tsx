@@ -1,6 +1,6 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@Brightscout/mm-ui-library';
 
 import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 

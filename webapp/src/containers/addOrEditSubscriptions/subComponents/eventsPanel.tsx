@@ -1,6 +1,6 @@
 import React, {forwardRef} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Checkbox} from 'mm-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Checkbox} from '@Brightscout/mm-ui-library';
 
 import {SubscriptionEvents, RecordTypeLabelMap, RecordType, SubscriptionType, SubscriptionEventLabels} from 'plugin_constants';
 
