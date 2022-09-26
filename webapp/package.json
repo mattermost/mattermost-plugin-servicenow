@@ -64,7 +64,7 @@
     "webpack-cli": "3.3.12"
   },
   "dependencies": {
-    "@Brightscout/mm-ui-library": "1.0.1",
+    "@Brightscout/mm-ui-library": "^1.0.3",
     "@reduxjs/toolkit": "1.8.3",
     "bootstrap": "5.1.3",
     "core-js": "3.6.5",
