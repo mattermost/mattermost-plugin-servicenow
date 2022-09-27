@@ -3,6 +3,7 @@ package testutils
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
@@ -141,4 +142,18 @@ func GetSubscriptions(count int) []*serializer.SubscriptionResponse {
 	}
 
 	return subscriptions
+}
+
+func GetSearchTerm(valid bool) string {
+	l := constants.CharacterThresholdForSearchingRecords
+	if !valid {
+		l--
+	}
+
+	var sb strings.Builder
+	for i := 0; i < l; i++ {
+		sb.WriteString("s")
+	}
+
+	return sb.String()
 }

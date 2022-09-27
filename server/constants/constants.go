@@ -40,19 +40,20 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage                = 0
-	DefaultPerPage             = 20
-	MaxPerPage                 = 100
-	QueryParamPage             = "page"
-	QueryParamPerPage          = "per_page"
-	QueryParamChannelID        = "channel_id"
-	QueryParamUserID           = "user_id"
-	QueryParamSubscriptionType = "subscription_type"
-	QueryParamSearchTerm       = "search"
-	PathParamSubscriptionID    = "subscription_id"
-	PathParamTeamID            = "team_id"
-	PathParamRecordType        = "record_type"
-	PathParamRecordID          = "record_id"
+	DefaultPage                           = 0
+	DefaultPerPage                        = 20
+	MaxPerPage                            = 100
+	CharacterThresholdForSearchingRecords = 3
+	QueryParamPage                        = "page"
+	QueryParamPerPage                     = "per_page"
+	QueryParamChannelID                   = "channel_id"
+	QueryParamUserID                      = "user_id"
+	QueryParamSubscriptionType            = "subscription_type"
+	QueryParamSearchTerm                  = "search"
+	PathParamSubscriptionID               = "subscription_id"
+	PathParamTeamID                       = "team_id"
+	PathParamRecordType                   = "record_type"
+	PathParamRecordID                     = "record_id"
 
 	// Websocket events
 	WSEventConnect                   = "connect"
@@ -77,6 +78,8 @@ const (
 	EmptyServiceNowOAuthClientSecretErrorMessage = "serviceNow OAuth clientSecret should not be empty"
 	EmptyEncryptionSecretErrorMessage            = "encryption secret should not be empty"
 	EmptyWebhookSecretErrorMessage               = "webhook secret should not be empty"
+	ErrorInvalidRecordType                       = "Invalid record type"
+	ErrorNotAuthorized                           = "Not authorized"
 )
 
 var (
