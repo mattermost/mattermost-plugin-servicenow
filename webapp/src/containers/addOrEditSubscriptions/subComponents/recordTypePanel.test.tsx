@@ -2,6 +2,8 @@ import React from 'react';
 
 import {shallow, ShallowWrapper} from 'enzyme';
 
+import {ModalSubtitleAndError} from 'mm-ui-library';
+
 import RecordTypePanel from './recordTypePanel';
 
 const mockOnContinue = jest.fn();
@@ -46,5 +48,23 @@ describe('Record Type Panel', () => {
         expect(component.find('Dropdown')).toHaveLength(1);
         expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
         expect(component.find('ModalFooter')).toHaveLength(1);
+    });
+
+    it('Should render the error correctly', () => {
+        expect(component.contains(
+            <ModalSubtitleAndError error={recordTypePanelProps.error}/>,
+        )).toBeTruthy();
+    });
+
+    it('Should fire change event when dropdown value is changed', () => {
+        const changeDropdown = (changeNumber: number) => {
+            component.find('Dropdown').simulate('change');
+            expect(recordTypePanelProps.setRecordType).toHaveBeenCalledTimes(changeNumber);
+            expect(recordTypePanelProps.setResetRecordPanelStates).toHaveBeenCalledTimes(changeNumber);
+        };
+
+        // Click the checkbox
+        changeDropdown(1);
+        changeDropdown(2);
     });
 });
