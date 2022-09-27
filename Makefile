@@ -4,7 +4,10 @@ CURL ?= $(shell command -v curl 2> /dev/null)
 MM_DEBUG ?=
 MANIFEST_FILE ?= plugin.json
 GOPATH ?= $(shell go env GOPATH)
-GO_TEST_FLAGS ?= -race
+# We need to export GOBIN to allow it to be set
+# for processes spawned from the Makefile
+export GOBIN ?= $(PWD)/bin
+GO_TEST_FLAGS ?= -race -gcflags=-l
 GO_BUILD_FLAGS ?=
 MM_UTILITIES_DIR ?= ../mattermost-utilities
 DLV_DEBUG_PORT := 2346
@@ -38,6 +41,16 @@ all: check-style test dist
 .PHONY: apply
 apply:
 	./build/bin/manifest apply
+
+.PHONY: store-mocks
+store-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
+	$(GOBIN)/mockery --dir server/plugin --name "Store" --output server/mocks --filename mock_store.go --note 'Regenerate this file using `make store-mocks`.'
+
+.PHONY: client-mocks
+client-mocks: ## Creates mock files.
+	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
+	$(GOBIN)/mockery --dir server/plugin --name "Client" --output server/mocks --filename mock_client.go --note 'Regenerate this file using `make client-mocks`.'
 
 ## Runs eslint and golangci-lint
 .PHONY: check-style

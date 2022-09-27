@@ -1,4 +1,4 @@
-package main
+package plugin
 
 import (
 	"context"
@@ -6,15 +6,11 @@ import (
 	"strings"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
-
-type User struct {
-	MattermostUserID string
-	OAuth2Token      string
-}
 
 func (p *Plugin) InitOAuth2(mattermostUserID string) (string, error) {
 	if _, err := p.GetUser(mattermostUserID); err == nil {
@@ -62,7 +58,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return err
 	}
 
-	u := &User{
+	u := &serializer.User{
 		MattermostUserID: mattermostUserID,
 		OAuth2Token:      encryptedToken,
 	}
@@ -77,7 +73,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 	return nil
 }
 
-func (p *Plugin) GetUser(mattermostUserID string) (*User, error) {
+func (p *Plugin) GetUser(mattermostUserID string) (*serializer.User, error) {
 	storedUser, err := p.store.LoadUser(mattermostUserID)
 	if err != nil {
 		return nil, err
