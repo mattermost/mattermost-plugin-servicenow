@@ -133,7 +133,7 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 			ExpectedCount:      3,
 		},
 		"invalid team id": {
-			TeamID: "dfs",
+			TeamID: "testTeamID",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogError", "Invalid team id").Return()
 				return api
@@ -235,15 +235,15 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 			ExpectedCount:      3,
 		},
 		"invalid record type": {
-			RecordType: "wrong",
+			RecordType: "testRecordType",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogError", mock.AnythingOfType("string"), "Record type", "wrong").Return()
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
 				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedCount:        -1,
-			ExpectedErrorMessage: "Invalid record type",
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
 		"invalid search term": {
 			RecordType: constants.SubscriptionRecordTypeIncident,
@@ -372,14 +372,14 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 			ExpectedStatusCode: http.StatusOK,
 		},
 		"invalid record type": {
-			RecordType: "wrong",
+			RecordType: "testRecordType",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogError", mock.AnythingOfType("string"), "Record type", "wrong").Return()
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
 				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
-			ExpectedErrorMessage: "Invalid record type",
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
 		"failed to get record": {
 			RecordType: constants.SubscriptionRecordTypeIncident,
@@ -663,7 +663,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			ExpectedCount:      4,
 		},
 		"invalid channel id": {
-			ChannelID: "dsf",
+			ChannelID: "testChannelID",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogError", mock.AnythingOfType("string"), "Query param", constants.QueryParamChannelID).Return()
 				return api
@@ -674,7 +674,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			ExpectedErrorMessage: constants.QueryParamChannelID,
 		},
 		"invalid user id": {
-			UserID: "dsf",
+			UserID: "testUserID",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogError", mock.AnythingOfType("string"), "Query param", constants.QueryParamUserID).Return()
 				return api
@@ -685,7 +685,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			ExpectedErrorMessage: constants.QueryParamUserID,
 		},
 		"invalid subscription type": {
-			SubscriptionType: "dsf",
+			SubscriptionType: "testSubscriptionType",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogError", mock.AnythingOfType("string"), "Query param", constants.QueryParamSubscriptionType).Return()
 				return api
@@ -972,7 +972,7 @@ func TestCheckAuth(t *testing.T) {
 		err := json.NewDecoder(result.Body).Decode(&resp)
 		require.Nil(t, err)
 
-		assert.Contains(resp.Message, "Not authorized")
+		assert.Contains(resp.Message, constants.ErrorNotAuthorized)
 	})
 }
 

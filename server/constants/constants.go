@@ -71,6 +71,11 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 )
 
+const (
+	ErrorInvalidRecordType = "Invalid record type"
+	ErrorNotAuthorized     = "Not authorized"
+)
+
 var (
 	ValidSubscriptionTypes = map[string]bool{
 		SubscriptionTypeRecord: true,

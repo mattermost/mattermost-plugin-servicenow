@@ -89,7 +89,7 @@ func (p *Plugin) checkAuth(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Header.Get(constants.HeaderMattermostUserID)
 		if userID == "" {
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, Message: "Not authorized"})
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, Message: constants.ErrorNotAuthorized})
 			return
 		}
 
@@ -450,7 +450,7 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while searching", "Record type", recordType)
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Invalid record type"})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
 
@@ -491,7 +491,7 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Invalid record type"})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
 
