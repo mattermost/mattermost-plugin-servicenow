@@ -455,8 +455,8 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	}
 
 	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
-	if len(searchTerm) < 4 {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "The search term must be at least 4 characters long."})
+	if len(searchTerm) < constants.CharacterThresholdForSearchingRecords {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("The search term must be at least %d characters long.", constants.CharacterThresholdForSearchingRecords)})
 		return
 	}
 

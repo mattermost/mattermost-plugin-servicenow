@@ -42,16 +42,6 @@ all: check-style test dist
 apply:
 	./build/bin/manifest apply
 
-.PHONY: plugin-layers
-plugin-layers: ## Extract interface from Plugin struct
-	$(GO) install github.com/reflog/struct2interface@v0.6.1
-	$(GOBIN)/struct2interface -f "server/plugin" -o "server/plugin/plugin_iface.go" -p "plugin" -s "Plugin" -i "PluginIface"
-
-.PHONY: plugin-mocks
-plugin-mocks: ## Creates mock files.
-	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
-	$(GOBIN)/mockery --dir server/plugin --name "PluginIface" --output server/mocks --filename mock_plugin.go --note 'Regenerate this file using `make plugin-mocks`.'
-
 .PHONY: store-mocks
 store-mocks: ## Creates mock files.
 	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
