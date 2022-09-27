@@ -38,12 +38,14 @@ func TestDM(t *testing.T) {
 
 			p.SetAPI(mockAPI)
 
-			_, err := p.DM("mockUserID", "mockFormat")
+			resp, err := p.DM("mockUserID", "mockFormat")
 
 			if testCase.mockChannelErr != nil || testCase.mockPostErr != nil {
 				assert.Error(t, err)
+				assert.Equal(t, resp, "")
 			} else {
 				assert.NoError(t, err)
+				assert.NotNil(t, resp)
 			}
 		})
 	}

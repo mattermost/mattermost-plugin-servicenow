@@ -25,7 +25,7 @@ type mockAesgcm struct{}
 
 func (a *mockAesgcm) NonceSize() int { return 1 }
 
-func (a *mockAesgcm) Overhead() int { return 1 }
+func (a *mockAesgcm) Overhead() int { return 0 }
 
 func (a *mockAesgcm) Seal(dst, nonce, plaintext, additionalData []byte) []byte { return []byte("mock") }
 
@@ -46,17 +46,17 @@ func Test_NewEncodedAuthToken(t *testing.T) {
 			description: "NewEncodedAuthToken: oAuth token is encoded successfully",
 		},
 		{
-			description:    "NewEncodedAuthToken: failed to create oAuth token because aes.NewCipher gives error",
+			description:    "NewEncodedAuthToken: failed to create the oAuth token because aes.NewCipher gives error",
 			expectedError:  "failed to create auth token: mockError",
 			newCipherError: errors.New("mockError"),
 		},
 		{
-			description:   "NewEncodedAuthToken: failed to create oAuth token because cipher.NewGCM gives error",
+			description:   "NewEncodedAuthToken: failed to create the oAuth token because cipher.NewGCM gives error",
 			expectedError: "failed to create auth token: mockError",
 			newGCMError:   errors.New("mockError"),
 		},
 		{
-			description:   "NewEncodedAuthToken: failed to create oAuth token because io.ReadFull gives error",
+			description:   "NewEncodedAuthToken: failed to create the oAuth token because io.ReadFull gives error",
 			expectedError: "failed to create auth token: mockError",
 			readFullError: errors.New("mockError"),
 		},
@@ -76,11 +76,10 @@ func Test_NewEncodedAuthToken(t *testing.T) {
 				return &mockAesgcm{}, testCase.newGCMError
 			})
 			monkey.Patch(io.ReadFull, func(_ io.Reader, _ []byte) (int, error) {
-				return 1, testCase.readFullError
+				return 0, testCase.readFullError
 			})
 
 			tok := &oauth2.Token{}
-
 			res, err := p.NewEncodedAuthToken(tok)
 			if testCase.expectedError != "" {
 				assert.EqualError(t, err, testCase.expectedError)
@@ -108,23 +107,23 @@ func Test_ParseAuthToken(t *testing.T) {
 			encodedToken: "mockEncodedToken",
 		},
 		{
-			description:    "ParseAuthToken: failed to decode oAuth token because aes.NewCipher gives error",
+			description:    "ParseAuthToken: failed to decode the oAuth token because aes.NewCipher gives error",
 			expectedError:  "mockError",
 			newCipherError: errors.New("mockError"),
 			encodedToken:   "mockEncodedToken",
 		},
 		{
-			description:   "ParseAuthToken: failed to decode oAuth token because cipher.NewGCM gives error",
+			description:   "ParseAuthToken: failed to decode the oAuth token because cipher.NewGCM gives error",
 			expectedError: "mockError",
 			newGCMError:   errors.New("mockError"),
 			encodedToken:  "mockEncodedToken",
 		},
 		{
-			description:   "ParseAuthToken: failed to decode oAuth token because token is too short",
+			description:   "ParseAuthToken: failed to decode the oAuth token because token is too short",
 			expectedError: "token too short",
 		},
 		{
-			description:    "ParseAuthToken: failed to decode oAuth token because json.Unmarshal gives error",
+			description:    "ParseAuthToken: failed to decode the oAuth token because json.Unmarshal gives error",
 			expectedError:  "mockError",
 			unmarshalError: errors.New("mockError"),
 			encodedToken:   "mockEncodedToken",
