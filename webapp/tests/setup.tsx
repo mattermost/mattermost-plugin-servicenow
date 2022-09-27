@@ -2,7 +2,3 @@
 // See LICENSE.txt for license information.
 
 import 'mattermost-webapp/tests/setup';
-
-import configureStore from 'redux-mock-store';
-
-export {configureStore};
