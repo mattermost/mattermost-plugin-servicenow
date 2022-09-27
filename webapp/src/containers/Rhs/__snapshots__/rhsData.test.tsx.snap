@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Search Record Panel Should render correctly 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "store": Object {
+        "clearActions": [Function],
+        "dispatch": [Function],
+        "getActions": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+      },
+      "subscription": Subscription {
+        "handleChangeWrapper": [Function],
+        "listeners": Object {
+          "notify": [Function],
+        },
+        "onStateChange": [Function],
+        "parentSub": undefined,
+        "store": Object {
+          "clearActions": [Function],
+          "dispatch": [Function],
+          "getActions": [Function],
+          "getState": [Function],
+          "replaceReducer": [Function],
+          "subscribe": [Function],
+        },
+        "unsubscribe": null,
+      },
+    }
+  }
+>
+  <RhsData
+    error="mockError"
+    handleDeleteClick={[MockFunction]}
+    handleEditSubscription={[MockFunction]}
+    isCurrentUserSysAdmin={true}
+    loadingSubscriptions={true}
+    setShowAllSubscriptions={[MockFunction]}
+    showAllSubscriptions={true}
+    subscriptions={Array []}
+  />
+</ContextProvider>
+`;

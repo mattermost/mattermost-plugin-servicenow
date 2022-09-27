@@ -41,6 +41,7 @@ const channelPanelProps = {
 
 describe('Channel Panel', () => {
     let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+
     const initialState = {};
     const mockStore = configureStore();
 
@@ -60,4 +61,18 @@ describe('Channel Panel', () => {
     it('Should render correctly', () => {
         expect(component).toMatchSnapshot();
     });
+
+    // it('Should apply the passed className prop', () => {
+    //     expect(component.find(ChannelPanel).hasClass(channelPanelProps.className)).toBeTruthy();
+    // });
+
+    // it('Should render the events panel body correctly', () => {
+    //     expect(component.find(".Dropdown")).toHaveLength(1);
+    // });
+
+    // it('Should render the error correctly', () => {
+    //     expect(component.contains(
+    //         <ModalSubtitleAndError error={channelPanelProps.error}/>,
+    //     )).toBeTruthy();
+    // });
 });

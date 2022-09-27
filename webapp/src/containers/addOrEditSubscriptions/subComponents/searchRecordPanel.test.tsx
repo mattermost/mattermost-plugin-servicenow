@@ -3,7 +3,6 @@ import {Provider} from 'react-redux';
 
 import {shallow, ShallowWrapper} from 'enzyme';
 
-import plugin_constants from 'plugin_constants';
 import {configureStore} from '../../../../tests/setup';
 
 import SearchRecordsPanel from './searchRecordsPanel';
@@ -61,5 +60,9 @@ describe('Search Record Panel', () => {
 
     it('Should render correctly', () => {
         expect(component).toMatchSnapshot();
+    });
+
+    it('Should apply the passed className prop', () => {
+        expect(component.find(SearchRecordsPanel).hasClass(searchRecordPanelProps.className)).toBeTruthy();
     });
 });
