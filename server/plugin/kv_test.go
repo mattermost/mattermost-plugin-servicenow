@@ -28,10 +28,10 @@ func Test_LoadUser(t *testing.T) {
 			description: "User is not loaded successfully from KV store",
 			setupTest: func() {
 				monkey.Patch(kvstore.LoadJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
-					return fmt.Errorf("user load error")
+					return fmt.Errorf("error in loading user")
 				})
 			},
-			expectedError: fmt.Errorf("user load error"),
+			expectedError: fmt.Errorf("error in loading user"),
 		},
 	} {
 		t.Run(test.description, func(t *testing.T) {
@@ -39,8 +39,11 @@ func Test_LoadUser(t *testing.T) {
 			s := pluginStore{}
 
 			test.setupTest()
-			_, err := s.LoadUser("mock-userID")
+			user, err := s.LoadUser("mock-userID")
 			assert.EqualValues(t, test.expectedError, err)
+			if test.expectedError == nil {
+				assert.Equal(t, &serializer.User{}, user)
+			}
 		})
 	}
 }
@@ -63,10 +66,10 @@ func TestStoreUser(t *testing.T) {
 			description: "User is not stored successfully",
 			setupTest: func() {
 				monkey.Patch(kvstore.StoreJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
-					return fmt.Errorf("user store error")
+					return fmt.Errorf("error in storing user")
 				})
 			},
-			expectedError: fmt.Errorf("user store error"),
+			expectedError: fmt.Errorf("error in storing user"),
 		},
 	} {
 		t.Run(test.description, func(t *testing.T) {

@@ -53,19 +53,19 @@ func (c *configuration) ProcessConfiguration() error {
 // IsValid checks if all the required fields are set.
 func (c *configuration) IsValid() error {
 	if len(c.ServiceNowBaseURL) == 0 {
-		return errors.New(constants.EmptyServiceNowURLErrorMessage)
+		return errors.New(constants.ErrorEmptyServiceNowURL)
 	}
 	if len(c.WebhookSecret) == 0 {
-		return errors.New(constants.EmptyWebhookSecretErrorMessage)
+		return errors.New(constants.ErrorEmptyWebhookSecret)
 	}
 	if c.ServiceNowOAuthClientID == "" {
-		return errors.New(constants.EmptyServiceNowOAuthClientIDErrorMessage)
+		return errors.New(constants.ErrorEmptyServiceNowOAuthClientID)
 	}
 	if c.ServiceNowOAuthClientSecret == "" {
-		return errors.New(constants.EmptyServiceNowOAuthClientSecretErrorMessage)
+		return errors.New(constants.ErrorEmptyServiceNowOAuthClientSecret)
 	}
 	if c.EncryptionSecret == "" {
-		return errors.New(constants.EmptyEncryptionSecretErrorMessage)
+		return errors.New(constants.ErrorEmptyEncryptionSecret)
 	}
 
 	return nil

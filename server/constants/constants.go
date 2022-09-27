@@ -73,13 +73,13 @@ const (
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 const (
-	EmptyServiceNowURLErrorMessage               = "serviceNow server URL should not be empty"
-	EmptyServiceNowOAuthClientIDErrorMessage     = "serviceNow OAuth clientID should not be empty"
-	EmptyServiceNowOAuthClientSecretErrorMessage = "serviceNow OAuth clientSecret should not be empty"
-	EmptyEncryptionSecretErrorMessage            = "encryption secret should not be empty"
-	EmptyWebhookSecretErrorMessage               = "webhook secret should not be empty"
-	ErrorInvalidRecordType                       = "Invalid record type"
-	ErrorNotAuthorized                           = "Not authorized"
+	ErrorEmptyServiceNowURL               = "serviceNow server URL should not be empty"
+	ErrorEmptyServiceNowOAuthClientID     = "serviceNow OAuth clientID should not be empty"
+	ErrorEmptyServiceNowOAuthClientSecret = "serviceNow OAuth clientSecret should not be empty"
+	ErrorEmptyEncryptionSecret            = "encryption secret should not be empty"
+	ErrorEmptyWebhookSecret               = "webhook secret should not be empty"
+	ErrorInvalidRecordType                = "Invalid record type"
+	ErrorNotAuthorized                    = "Not authorized"
 )
 
 var (

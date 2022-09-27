@@ -30,7 +30,7 @@ func TestInitOAuth2(t *testing.T) {
 			expectedErrorMessage: "user is already connected to ServiceNow",
 		},
 		{
-			description: "OAuth2 is initialized successfully",
+			description: "OAuth2 configuration URL is returned successfully",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("LoadUser", testutils.GetID()).Return(nil, fmt.Errorf("mockErrMessage"))
 				s.On("StoreOAuth2State", mock.AnythingOfType("string")).Return(nil)
@@ -67,7 +67,7 @@ func TestInitOAuth2(t *testing.T) {
 
 func TestCompleteOAuth2(t *testing.T) {
 	for name, test := range map[string]struct {
-		authedUserID         string
+		authenticatedUserID  string
 		code                 string
 		state                string
 		setupStore           func(*mock_plugin.Store)
@@ -76,9 +76,9 @@ func TestCompleteOAuth2(t *testing.T) {
 		expectedErrorMessage string
 	}{
 		"success": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUserID",
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUserID",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
 				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(nil)
@@ -99,27 +99,27 @@ func TestCompleteOAuth2(t *testing.T) {
 			},
 		},
 		"missing userID, code or state": {
-			authedUserID:         "",
+			authenticatedUserID:  "",
 			setupStore:           func(s *mock_plugin.Store) {},
 			setupAPI:             func(a *plugintest.API) {},
 			setupPlugin:          func(p *Plugin) {},
 			expectedErrorMessage: "missing user, code or state",
 		},
 		"failed to verify state": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUserID",
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUserID",
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(fmt.Errorf("mockErrMessage"))
+				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(fmt.Errorf("failed to verify state"))
 			},
 			setupAPI:             func(a *plugintest.API) {},
 			setupPlugin:          func(p *Plugin) {},
-			expectedErrorMessage: "mockErrMessage",
+			expectedErrorMessage: "failed to verify state",
 		},
-		"user ID mismatch": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUser",
+		"failed to match user ID": {
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUser",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUser").Return(nil)
 			},
@@ -128,24 +128,24 @@ func TestCompleteOAuth2(t *testing.T) {
 			expectedErrorMessage: "mismatch",
 		},
 		"failed to get Mattermost user": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUserID",
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUserID",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
 				err := testutils.GetBadRequestAppError()
-				err.Message = "mockErrMessage"
+				err.Message = "failed to get MM user"
 				a.On("GetUser", "mockUserID").Return(nil, err)
 			},
 			setupPlugin:          func(p *Plugin) {},
-			expectedErrorMessage: "mockErrMessage",
+			expectedErrorMessage: "failed to get MM user",
 		},
 		"failed to exchange token": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUserID",
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUserID",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
 			},
@@ -154,15 +154,15 @@ func TestCompleteOAuth2(t *testing.T) {
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-					return nil, fmt.Errorf("token error")
+					return nil, fmt.Errorf("failed to exchange token")
 				})
 			},
-			expectedErrorMessage: "token error",
+			expectedErrorMessage: "failed to exchange token",
 		},
 		"failed to encrypt token": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUserID",
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUserID",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
 			},
@@ -180,12 +180,12 @@ func TestCompleteOAuth2(t *testing.T) {
 			expectedErrorMessage: "encryption error",
 		},
 		"failed to store user": {
-			authedUserID: "mockUserID",
-			code:         "mockCode",
-			state:        "mockState_mockUserID",
+			authenticatedUserID: "mockUserID",
+			code:                "mockCode",
+			state:               "mockState_mockUserID",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
-				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(fmt.Errorf("store user error"))
+				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(fmt.Errorf("failed to store user"))
 			},
 			setupAPI: func(a *plugintest.API) {
 				a.On("GetUser", "mockUserID").Return(&model.User{}, nil)
@@ -198,7 +198,7 @@ func TestCompleteOAuth2(t *testing.T) {
 					return "mockToken", nil
 				})
 			},
-			expectedErrorMessage: "store user error",
+			expectedErrorMessage: "failed to store user",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -211,7 +211,7 @@ func TestCompleteOAuth2(t *testing.T) {
 
 			p := setupTestPlugin(api, store)
 			test.setupPlugin(p)
-			err := p.CompleteOAuth2(test.authedUserID, test.code, test.state)
+			err := p.CompleteOAuth2(test.authenticatedUserID, test.code, test.state)
 			if test.expectedErrorMessage != "" {
 				require.NotNil(t, err)
 				require.Contains(t, err.Error(), test.expectedErrorMessage)

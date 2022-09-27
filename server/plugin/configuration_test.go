@@ -33,7 +33,7 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:            "mockEncryptionSecret",
 				WebhookSecret:               "mockWebhookSecret",
 			},
-			errMsg: constants.EmptyServiceNowURLErrorMessage,
+			errMsg: constants.ErrorEmptyServiceNowURL,
 		},
 		{
 			description: "invalid configuration: ServiceNowOAuthClientID empty",
@@ -44,7 +44,7 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:            "mockEncryptionSecret",
 				WebhookSecret:               "mockWebhookSecret",
 			},
-			errMsg: constants.EmptyServiceNowOAuthClientIDErrorMessage,
+			errMsg: constants.ErrorEmptyServiceNowOAuthClientID,
 		},
 		{
 			description: "invalid configuration: ServiceNowOAuthClientSecret empty",
@@ -55,7 +55,7 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:            "mockEncryptionSecret",
 				WebhookSecret:               "mockWebhookSecret",
 			},
-			errMsg: constants.EmptyServiceNowOAuthClientSecretErrorMessage,
+			errMsg: constants.ErrorEmptyServiceNowOAuthClientSecret,
 		},
 		{
 			description: "invalid configuration: EncryptionSecret empty",
@@ -66,7 +66,7 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:            "",
 				WebhookSecret:               "mockWebhookSecret",
 			},
-			errMsg: constants.EmptyEncryptionSecretErrorMessage,
+			errMsg: constants.ErrorEmptyEncryptionSecret,
 		},
 		{
 			description: "invalid configuration: WebhookSecret empty",
@@ -77,7 +77,7 @@ func TestIsValid(t *testing.T) {
 				EncryptionSecret:            "mockEncryptionSecret",
 				WebhookSecret:               "",
 			},
-			errMsg: constants.EmptyWebhookSecretErrorMessage,
+			errMsg: constants.ErrorEmptyWebhookSecret,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
