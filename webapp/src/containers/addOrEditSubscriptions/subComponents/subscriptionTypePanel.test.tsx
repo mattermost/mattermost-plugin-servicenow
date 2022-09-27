@@ -2,7 +2,7 @@ import React from 'react';
 
 import {shallow, ShallowWrapper} from 'enzyme';
 
-import {ModalSubtitleAndError} from 'mm-ui-library';
+import {ModalSubtitleAndError} from 'mattermost-ui-lib';
 
 import SubscriptionTypePanel from './subscriptionTypePanel';
 

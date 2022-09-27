@@ -1,9 +1,9 @@
 @import "../../styles/abstract/variables";
-@import "mm-ui-library/build/styles/abstract/_mixins";
+@import "mattermost-ui-lib/build/styles/abstract/_mixins";
 
 .rhs-content {
   height: calc(100% - #{$rhs-header-height});
-  
+
   &__cards-container {
     height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
     overflow-y: auto;

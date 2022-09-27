@@ -2,6 +2,8 @@
  * Keep all service related types here
  */
 
+type SubscriptionType = import('../plugin_constants').SubscriptionType;
+type RecordType = import('../plugin_constants').RecordType;
 type ChannelData = {
     create_at: number;
     creator_id: string;
@@ -33,9 +35,6 @@ type FetchChannelsParams = {
     teamId: string;
 }
 
-type RecordType = 'incident' | 'problem' | 'change_request';
-type SubscriptionType = 'record' | 'object';
-
 type SearchRecordsParams = {
     recordType: RecordType;
     search: string;
@@ -54,8 +53,8 @@ type Suggestion = {
 }
 
 type RecordData = {
-    assigned_to: string | { display_value: string, link: string };
-    assignment_group: string | { display_value: string, link: string };
+    assigned_to: string | {display_value: string, link: string};
+    assignment_group: string | {display_value: string, link: string};
     number: string;
     priority: string;
     short_description: string;

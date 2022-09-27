@@ -1,4 +1,4 @@
-@import "mm-ui-library/build/styles/abstract/_mixins";
+@import "mattermost-ui-lib/build/styles/abstract/_mixins";
 
 .rhs-modal {
   .plugin-dropdown {
@@ -12,6 +12,10 @@
   .dropdown-option-icon {
     @include positioning(relative, 1px, "", "", -4px);
     margin-right: -2px;
+  }
+
+  .auto-suggest__suggestions--open {
+    max-height: 124px;
   }
 
   .plugin-dropdown__options-list--open {

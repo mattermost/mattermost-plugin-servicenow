@@ -4,9 +4,9 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {CustomModal as Modal, ModalHeader, ModalLoader, CircularLoader, ResultPanel} from 'mm-ui-library';
+import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from 'mattermost-ui-lib';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -217,16 +217,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.successPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            resultPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (eventsPanelOpen) {
             height = eventsPanelRef.current?.offsetHeight || PanelDefaultHeights.eventsPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            eventsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (searchRecordsPanelOpen) {
@@ -237,32 +233,24 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             }
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            searchRecordsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (recordTypePanelOpen) {
             height = recordTypePanelRef.current?.offsetHeight || PanelDefaultHeights.recordTypePanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            recordTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (subscriptionTypePanelOpen) {
             height = subscriptionTypePanelRef.current?.offsetHeight || PanelDefaultHeights.subscriptionTypePanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            subscriptionTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (!subscriptionTypePanelOpen && !recordTypePanelOpen && !searchRecordsPanelOpen && !eventsPanelOpen) {
             height = channelPanelRef.current?.offsetHeight || PanelDefaultHeights.channelPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            channelPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
         }
     }, [subscriptionTypePanelOpen, eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
 
@@ -320,7 +308,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             user_id: Cookies.get(Constants.MMUSERID) ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
-            record_id: recordId as string || '',
+            record_id: recordId || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
             sys_id: subscriptionData?.id as string,
@@ -383,7 +371,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={recordTypePanelRef}
-                    onContinue={() => (subscriptionType === 'record' ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
+                    onContinue={() => (subscriptionType === SubscriptionType.RECORD ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
                     onBack={() => setRecordTypePanelOpen(false)}
                     recordType={recordType}
                     setRecordType={setRecordType}
@@ -422,6 +410,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionEvents={subscriptionEvents}
                     setSubscriptionEvents={setSubscriptionEvents}
                     channel={channelOptions.find((ch) => ch.value === channel) as DropdownOptionType || null}
+                    subscriptionType={subscriptionType as SubscriptionType}
                     record={recordValue}
                     recordType={recordType as RecordType}
                     actionBtnDisabled={showModalLoader}
@@ -440,7 +429,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         onClick: hideModal,
                     }}
                 />
-                {false && <CircularLoader/>}
             </>
         </Modal>
     );
