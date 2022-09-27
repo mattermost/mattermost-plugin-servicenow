@@ -24,17 +24,21 @@ const (
 	UpdateSetVersion            = "v1.0"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
-	SubscriptionTypeRecord              = "record"
-	SubscriptionTypeBulk                = "object"
-	SubscriptionRecordTypeProblem       = "problem"
-	SubscriptionRecordTypeIncident      = "incident"
-	SubscriptionRecordTypeChangeRequest = "change_request"
-	SubscriptionEventPriority           = "priority"
-	SubscriptionEventState              = "state"
-	SubscriptionEventCommented          = "commented"
-	SubscriptionEventAssignedTo         = "assigned_to"
-	SubscriptionEventAssignmentGroup    = "assignment_group"
-	SubscriptionEventCreated            = "created"
+	SubscriptionTypeRecord           = "record"
+	SubscriptionTypeBulk             = "object"
+	RecordTypeProblem                = "problem"
+	RecordTypeIncident               = "incident"
+	RecordTypeChangeRequest          = "change_request"
+	RecordTypeKnowledge              = "kb_knowledge"
+	RecordTypeTask                   = "task"
+	RecordTypeChangeTask             = "change_task"
+	RecordTypeFollowOnTask           = "cert_follow_on_task"
+	SubscriptionEventPriority        = "priority"
+	SubscriptionEventState           = "state"
+	SubscriptionEventCommented       = "commented"
+	SubscriptionEventAssignedTo      = "assigned_to"
+	SubscriptionEventAssignmentGroup = "assignment_group"
+	SubscriptionEventCreated         = "created"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -78,9 +82,19 @@ var (
 	}
 
 	ValidSubscriptionRecordTypes = map[string]bool{
-		SubscriptionRecordTypeIncident:      true,
-		SubscriptionRecordTypeProblem:       true,
-		SubscriptionRecordTypeChangeRequest: true,
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+	}
+
+	ValidRecordTypesForSearching = map[string]bool{
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+		RecordTypeKnowledge:     true,
+		RecordTypeTask:          true,
+		RecordTypeChangeTask:    true,
+		RecordTypeFollowOnTask:  true,
 	}
 
 	ValidSubscriptionEvents = map[string]bool{
@@ -102,9 +116,9 @@ var (
 	}
 
 	FormattedRecordTypes = map[string]string{
-		SubscriptionRecordTypeProblem:       "Problem",
-		SubscriptionRecordTypeIncident:      "Incident",
-		SubscriptionRecordTypeChangeRequest: "Change Request",
+		RecordTypeProblem:       "Problem",
+		RecordTypeIncident:      "Incident",
+		RecordTypeChangeRequest: "Change Request",
 	}
 )
 
