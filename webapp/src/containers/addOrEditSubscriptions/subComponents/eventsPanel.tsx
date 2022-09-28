@@ -56,7 +56,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                 <p className='events-panel__prev-data-text'>
                     {channel?.label}
                 </p>
-                <h4 className='events-panel__prev-data-header record-header'>{subscriptionType === SubscriptionType.RECORD ? 'Record' : 'Record type'}</h4>
+                <h4 className='events-panel__prev-data-header record-header'>{`Record${subscriptionType === SubscriptionType.BULK && ' type'}`}</h4>
                 <p className='events-panel__prev-data-text'>{subscriptionType === SubscriptionType.RECORD ? record : RecordTypeLabelMap[recordType]}</p>
             </div>
             <label className='events-panel__label'>{'Available events:'}</label>

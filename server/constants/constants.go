@@ -40,19 +40,20 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage                = 0
-	DefaultPerPage             = 20
-	MaxPerPage                 = 100
-	QueryParamPage             = "page"
-	QueryParamPerPage          = "per_page"
-	QueryParamChannelID        = "channel_id"
-	QueryParamUserID           = "user_id"
-	QueryParamSubscriptionType = "subscription_type"
-	QueryParamSearchTerm       = "search"
-	PathParamSubscriptionID    = "subscription_id"
-	PathParamTeamID            = "team_id"
-	PathParamRecordType        = "record_type"
-	PathParamRecordID          = "record_id"
+	DefaultPage                           = 0
+	DefaultPerPage                        = 20
+	MaxPerPage                            = 100
+	CharacterThresholdForSearchingRecords = 3
+	QueryParamPage                        = "page"
+	QueryParamPerPage                     = "per_page"
+	QueryParamChannelID                   = "channel_id"
+	QueryParamUserID                      = "user_id"
+	QueryParamSubscriptionType            = "subscription_type"
+	QueryParamSearchTerm                  = "search"
+	PathParamSubscriptionID               = "subscription_id"
+	PathParamTeamID                       = "team_id"
+	PathParamRecordType                   = "record_type"
+	PathParamRecordID                     = "record_id"
 
 	// Websocket events
 	WSEventConnect                   = "connect"
@@ -68,6 +69,11 @@ const (
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
+)
+
+const (
+	ErrorInvalidRecordType = "Invalid record type"
+	ErrorNotAuthorized     = "Not authorized"
 )
 
 var (
