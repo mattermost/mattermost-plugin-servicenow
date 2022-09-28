@@ -77,7 +77,7 @@ func TestActivateSubscriptions(t *testing.T) {
 	}
 }
 
-func TestCreateSubscription(t *testing.T) {
+func TestCreateSubscriptionClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
@@ -120,7 +120,7 @@ func TestCreateSubscription(t *testing.T) {
 	}
 }
 
-func TestGetAllSubscriptions(t *testing.T) {
+func TestGetAllSubscriptionsClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	c.plugin = &Plugin{}
@@ -207,7 +207,7 @@ func TestGetSubscription(t *testing.T) {
 	}
 }
 
-func TestDeleteSubscription(t *testing.T) {
+func TestDeleteSubscriptionClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
@@ -250,7 +250,7 @@ func TestDeleteSubscription(t *testing.T) {
 	}
 }
 
-func TestEditSubscription(t *testing.T) {
+func TestEditSubscriptionClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
@@ -390,7 +390,7 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 	}
 }
 
-func TestGetRecordFromServiceNow(t *testing.T) {
+func TestGetRecordFromServiceNowClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
