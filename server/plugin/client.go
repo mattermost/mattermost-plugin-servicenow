@@ -183,7 +183,6 @@ func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset 
 
 func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error) {
 	queryParams := url.Values{
-		constants.SysQueryParamFields:       {"sys_id,number,short_description,state,priority,assigned_to,assignment_group"},
 		constants.SysQueryParamDisplayValue: {"true"},
 	}
 

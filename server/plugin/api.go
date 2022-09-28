@@ -489,7 +489,7 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidSubscriptionRecordTypes[recordType] {
+	if !constants.ValidRecordTypesForSearching[recordType] {
 		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
