@@ -105,6 +105,45 @@ func GetLimitAndOffset() (limit, offset string) {
 	return fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPerPage * constants.DefaultPage)
 }
 
+func GetServiceNowRecord() *serializer.ServiceNowRecord {
+	return &serializer.ServiceNowRecord{
+		SysID:            GetServiceNowSysID(),
+		Number:           GetServiceNowNumber(),
+		ShortDescription: GetServiceNowShortDescription(),
+		State:            "New",
+		Priority:         "High",
+		AssignedTo:       "",
+		AssignmentGroup:  "",
+	}
+}
+
+func GetSubscription(subscriptionType string) *serializer.SubscriptionResponse {
+	return &serializer.SubscriptionResponse{
+		SysID:              GetServiceNowSysID(),
+		UserID:             GetID(),
+		ChannelID:          GetID(),
+		RecordType:         constants.SubscriptionRecordTypeProblem,
+		SubscriptionEvents: constants.SubscriptionEventPriority + "," + constants.SubscriptionEventState,
+		IsActive:           "true",
+		Type:               subscriptionType,
+		Number:             GetServiceNowNumber(),
+		ShortDescription:   GetServiceNowShortDescription(),
+	}
+}
+
+func GetSubscriptions(count int) []*serializer.SubscriptionResponse {
+	subscriptions := make([]*serializer.SubscriptionResponse, count)
+	for i := 0; i < count; i++ {
+		if i%2 == 0 {
+			subscriptions[i] = GetSubscription(constants.SubscriptionTypeBulk)
+		} else {
+			subscriptions[i] = GetSubscription(constants.SubscriptionTypeRecord)
+		}
+	}
+
+	return subscriptions
+}
+
 func GetSearchTerm(valid bool) string {
 	l := constants.CharacterThresholdForSearchingRecords
 	if !valid {
