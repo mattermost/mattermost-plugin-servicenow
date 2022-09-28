@@ -13,34 +13,46 @@ import (
 func TestDM(t *testing.T) {
 	p := Plugin{}
 	for _, testCase := range []struct {
-		description    string
-		mockChannelErr *model.AppError
-		mockPostErr    *model.AppError
+		description   string
+		setupAPI      func(*plugintest.API)
+		expectedError string
 	}{
 		{
 			description: "DM: message is successfully posted",
+			setupAPI: func(a *plugintest.API) {
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return(nil)
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return(nil)
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), nil)
+				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), nil)
+			},
 		},
 		{
-			description:    "DM: channel is not found",
-			mockChannelErr: &model.AppError{},
+			description: "DM: channel is not found",
+			setupAPI: func(a *plugintest.API) {
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return("LogError error")
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), testutils.GetInternalServerAppError())
+			},
+			expectedError: "mockError",
 		},
 		{
 			description: "DM: error in CreatePost method",
-			mockPostErr: &model.AppError{},
+			setupAPI: func(a *plugintest.API) {
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return(nil)
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return("LogError error")
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), nil)
+				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), testutils.GetInternalServerAppError())
+			},
+			expectedError: "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			mockAPI := &plugintest.API{}
-			mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return("LogInfo error")
-			mockAPI.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return("LogError error")
-			mockAPI.On("GetDirectChannel", mock.Anything, mock.Anything).Return(&model.Channel{}, testCase.mockChannelErr)
-			mockAPI.On("CreatePost", mock.Anything).Return(&model.Post{}, testCase.mockPostErr)
-
+			testCase.setupAPI(mockAPI)
 			p.SetAPI(mockAPI)
 
 			resp, err := p.DM("mockUserID", "mockFormat")
 
-			if testCase.mockChannelErr != nil || testCase.mockPostErr != nil {
+			if testCase.expectedError != "" {
 				assert.Error(t, err)
 				assert.Equal(t, resp, "")
 			} else {
@@ -56,16 +68,18 @@ func TestEphemeral(t *testing.T) {
 	mockAPI := &plugintest.API{}
 	for _, testCase := range []struct {
 		description string
+		setupAPI    func(*plugintest.API)
 	}{
 		{
 			description: "Ephemeral: post is successfully created",
+			setupAPI: func(a *plugintest.API) {
+				a.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(testutils.GetPost())
+			},
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			mockAPI.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(&model.Post{})
-
+			testCase.setupAPI(mockAPI)
 			p.SetAPI(mockAPI)
-
 			p.Ephemeral("mockUserID", "mockChannelID", "mockRootID", "mockFormat")
 
 			mockAPI.AssertNumberOfCalls(t, "SendEphemeralPost", 1)

@@ -36,49 +36,68 @@ func (a *mockAesgcm) Open(dst, nonce, ciphertext, additionalData []byte) ([]byte
 func Test_NewEncodedAuthToken(t *testing.T) {
 	defer monkey.UnpatchAll()
 	for _, testCase := range []struct {
-		description    string
-		expectedError  string
-		newCipherError error
-		newGCMError    error
-		readFullError  error
+		description   string
+		setupPlugin   func()
+		expectedError string
 	}{
 		{
 			description: "NewEncodedAuthToken: oAuth token is encoded successfully",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, nil
+				})
+				monkey.Patch(io.ReadFull, func(_ io.Reader, _ []byte) (int, error) {
+					return 0, nil
+				})
+			},
 		},
 		{
-			description:    "NewEncodedAuthToken: failed to create the oAuth token because aes.NewCipher gives error",
-			expectedError:  "failed to create auth token: mockError",
-			newCipherError: errors.New("mockError"),
-		},
-		{
-			description:   "NewEncodedAuthToken: failed to create the oAuth token because cipher.NewGCM gives error",
+			description: "NewEncodedAuthToken: failed to create the oAuth token because aes.NewCipher gives error",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, errors.New("mockError")
+				})
+			},
 			expectedError: "failed to create auth token: mockError",
-			newGCMError:   errors.New("mockError"),
 		},
 		{
-			description:   "NewEncodedAuthToken: failed to create the oAuth token because io.ReadFull gives error",
+			description: "NewEncodedAuthToken: failed to create the oAuth token because cipher.NewGCM gives error",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, errors.New("mockError")
+				})
+			},
 			expectedError: "failed to create auth token: mockError",
-			readFullError: errors.New("mockError"),
+		},
+		{
+			description: "NewEncodedAuthToken: failed to create the oAuth token because io.ReadFull gives error",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, nil
+				})
+				monkey.Patch(io.ReadFull, func(_ io.Reader, _ []byte) (int, error) {
+					return 0, errors.New("mockError")
+				})
+			},
+			expectedError: "failed to create auth token: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			p := Plugin{}
-
+			testCase.setupPlugin()
 			p.setConfiguration(
 				&configuration{
 					EncryptionSecret: "mockEncryptionSecret",
 				})
-
-			monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
-				return &mockBLock{}, testCase.newCipherError
-			})
-			monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
-				return &mockAesgcm{}, testCase.newGCMError
-			})
-			monkey.Patch(io.ReadFull, func(_ io.Reader, _ []byte) (int, error) {
-				return 0, testCase.readFullError
-			})
-
 			tok := &oauth2.Token{}
 			res, err := p.NewEncodedAuthToken(tok)
 			if testCase.expectedError != "" {
@@ -95,58 +114,85 @@ func Test_NewEncodedAuthToken(t *testing.T) {
 func Test_ParseAuthToken(t *testing.T) {
 	defer monkey.UnpatchAll()
 	for _, testCase := range []struct {
-		description    string
-		expectedError  string
-		newCipherError error
-		newGCMError    error
-		encodedToken   string
-		unmarshalError error
+		description   string
+		expectedError string
+		setupPlugin   func()
+		encodedToken  string
 	}{
 		{
 			description:  "ParseAuthToken: oAuth2 token is parsed successfully",
 			encodedToken: "mockEncodedToken",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, nil
+				})
+				monkey.Patch(json.Unmarshal, func(_ []byte, _ interface{}) error {
+					return nil
+				})
+			},
 		},
 		{
-			description:    "ParseAuthToken: failed to decode the oAuth token because aes.NewCipher gives error",
-			expectedError:  "mockError",
-			newCipherError: errors.New("mockError"),
-			encodedToken:   "mockEncodedToken",
+			description:   "ParseAuthToken: failed to decode the oAuth token because aes.NewCipher gives error",
+			expectedError: "mockError",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, errors.New("mockError")
+				})
+			},
+			encodedToken: "mockEncodedToken",
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because cipher.NewGCM gives error",
 			expectedError: "mockError",
-			newGCMError:   errors.New("mockError"),
-			encodedToken:  "mockEncodedToken",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, errors.New("mockError")
+				})
+			},
+			encodedToken: "mockEncodedToken",
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because token is too short",
 			expectedError: "token too short",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, nil
+				})
+			},
 		},
 		{
-			description:    "ParseAuthToken: failed to decode the oAuth token because json.Unmarshal gives error",
-			expectedError:  "mockError",
-			unmarshalError: errors.New("mockError"),
-			encodedToken:   "mockEncodedToken",
+			description:   "ParseAuthToken: failed to decode the oAuth token because json.Unmarshal gives error",
+			expectedError: "mockError",
+			setupPlugin: func() {
+				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
+					return &mockBLock{}, nil
+				})
+				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
+					return &mockAesgcm{}, nil
+				})
+				monkey.Patch(json.Unmarshal, func(_ []byte, _ interface{}) error {
+					return errors.New("mockError")
+				})
+			},
+			encodedToken: "mockEncodedToken",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			p := Plugin{}
-
+			testCase.setupPlugin()
 			p.setConfiguration(
 				&configuration{
 					EncryptionSecret: "mockEncryptionSecret",
 				})
-
-			monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
-				return &mockBLock{}, testCase.newCipherError
-			})
-			monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
-				return &mockAesgcm{}, testCase.newGCMError
-			})
-			monkey.Patch(json.Unmarshal, func(_ []byte, _ interface{}) error {
-				return testCase.unmarshalError
-			})
-
 			res, err := p.ParseAuthToken(testCase.encodedToken)
 			if testCase.expectedError != "" {
 				assert.EqualError(t, err, testCase.expectedError)

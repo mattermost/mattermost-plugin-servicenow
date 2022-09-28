@@ -25,6 +25,12 @@ func GetChannel(channelType string) *model.Channel {
 	}
 }
 
+func GetPost() *model.Post {
+	return &model.Post{
+		Id: api4.GenerateTestId(),
+	}
+}
+
 func GetChannels(count int, channelType string) []*model.Channel {
 	if count == 0 {
 		return nil
