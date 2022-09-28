@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	mock_plugin "github.com/Brightscout/mattermost-plugin-servicenow/server/mocks"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
 	"github.com/mattermost/mattermost-server/v5/model"
@@ -27,7 +28,7 @@ func TestInitOAuth2(t *testing.T) {
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("LoadUser", testutils.GetID()).Return(nil, nil)
 			},
-			expectedErrorMessage: "user is already connected to ServiceNow",
+			expectedErrorMessage: constants.ErrorUserAlreadyConnected,
 		},
 		{
 			description: "OAuth2 configuration URL is returned successfully",
@@ -103,7 +104,7 @@ func TestCompleteOAuth2(t *testing.T) {
 			setupStore:           func(s *mock_plugin.Store) {},
 			setupAPI:             func(a *plugintest.API) {},
 			setupPlugin:          func(p *Plugin) {},
-			expectedErrorMessage: "missing user, code or state",
+			expectedErrorMessage: constants.ErrorMissingUserCodeState,
 		},
 		"failed to verify state": {
 			authenticatedUserID: "mockUserID",
@@ -125,7 +126,7 @@ func TestCompleteOAuth2(t *testing.T) {
 			},
 			setupAPI:             func(a *plugintest.API) {},
 			setupPlugin:          func(p *Plugin) {},
-			expectedErrorMessage: "mismatch",
+			expectedErrorMessage: constants.ErrorUserIDMismatchInOAuth,
 		},
 		"failed to get Mattermost user": {
 			authenticatedUserID: "mockUserID",

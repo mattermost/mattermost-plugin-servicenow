@@ -17,7 +17,7 @@ func Test_LoadUser(t *testing.T) {
 		expectedError error
 	}{
 		{
-			description: "User is loaded successfully from KV store using mattermostID",
+			description: "User is loaded successfully from the KV store using mattermostID",
 			setupTest: func() {
 				monkey.Patch(kvstore.LoadJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return nil
@@ -25,7 +25,7 @@ func Test_LoadUser(t *testing.T) {
 			},
 		},
 		{
-			description: "User is not loaded successfully from KV store",
+			description: "User is not loaded successfully from the KV store",
 			setupTest: func() {
 				monkey.Patch(kvstore.LoadJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return fmt.Errorf("error in loading user")
@@ -55,7 +55,7 @@ func TestStoreUser(t *testing.T) {
 		expectedError error
 	}{
 		{
-			description: "User is stored successfully in KV store",
+			description: "User is stored successfully in the KV store",
 			setupTest: func() {
 				monkey.Patch(kvstore.StoreJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return nil

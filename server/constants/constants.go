@@ -80,6 +80,9 @@ const (
 	ErrorEmptyWebhookSecret               = "webhook secret should not be empty"
 	ErrorInvalidRecordType                = "Invalid record type"
 	ErrorNotAuthorized                    = "Not authorized"
+	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
+	ErrorMissingUserCodeState             = "missing user, code or state"
+	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
 )
 
 var (
