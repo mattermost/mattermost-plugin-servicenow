@@ -27,10 +27,14 @@ jobs:
           node-version: 14.x
           registry-url: https://npm.pkg.github.com/
 
+      - uses: actions/checkout@v2
+
+      - name: npmrcgen
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > webapp/.npmrc
+
       - name: Install golangci
         run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.36.0
-
-      - uses: actions/checkout@v2
 
       - name: Cache go modules
         uses: actions/cache@v2
