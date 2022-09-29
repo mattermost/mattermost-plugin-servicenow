@@ -4,10 +4,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import Modal from 'components/modal/customModal';
-import ModalHeader from 'components/modal/subComponents/modalHeader';
-import ModalLoader from 'components/modal/subComponents/modalLoader';
-import CircularLoader from 'components/loader/circular';
+import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
 
@@ -16,11 +13,10 @@ import usePluginApi from 'hooks/usePluginApi';
 import {refetch} from 'reducers/refetchSubscriptions';
 
 import ChannelPanel from './channelPanel';
-import EventsPanel from './eventsPanel';
-import RecordTypePanel from './recordTypePanel';
-import ResultPanel from './resultPanel';
-import SearchRecordsPanel from './searchRecordsPanel';
 import SubscriptionTypePanel from './subscriptionTypePanel';
+import RecordTypePanel from './recordTypePanel';
+import EventsPanel from './eventsPanel';
+import SearchRecordsPanel from './searchRecordsPanel';
 
 import './styles.scss';
 
@@ -221,16 +217,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.successPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            resultPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (eventsPanelOpen) {
             height = eventsPanelRef.current?.offsetHeight || PanelDefaultHeights.eventsPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            eventsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (searchRecordsPanelOpen) {
@@ -241,32 +233,24 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             }
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            searchRecordsPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (recordTypePanelOpen) {
             height = recordTypePanelRef.current?.offsetHeight || PanelDefaultHeights.recordTypePanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            recordTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (subscriptionTypePanelOpen) {
             height = subscriptionTypePanelRef.current?.offsetHeight || PanelDefaultHeights.subscriptionTypePanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            subscriptionTypePanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
             return;
         }
         if (!subscriptionTypePanelOpen && !recordTypePanelOpen && !searchRecordsPanelOpen && !eventsPanelOpen) {
             height = channelPanelRef.current?.offsetHeight || PanelDefaultHeights.channelPanel;
 
             setModalDialogHeight(height);
-            // eslint-disable-next-line no-unused-expressions
-            channelPanelRef.current?.setAttribute('style', `max-height:${height}px;overflow:auto`);
         }
     }, [subscriptionTypePanelOpen, eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
 
@@ -285,9 +269,9 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (apiError && apiResponseValid) {
             return apiError;
         } else if (subscriptionData) {
-            return 'Subscription updated successfully! ';
+            return Constants.SubscriptionUpdatedMsg;
         }
-        return null;
+        return Constants.SubscriptionAddedMsg;
     }, [apiError, apiResponseValid, subscriptionData]);
 
     // Handles create subscription
@@ -343,7 +327,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             onHide={hideModal}
 
             // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-            className='rhs-modal add-edit-subscription-modal'
+            className='rhs-modal add-edit-subscription-modal wizard'
         >
             <>
                 <ModalHeader
@@ -354,8 +338,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 <ModalLoader loading={showModalLoader}/>
                 <ChannelPanel
                     className={`
-                        ${subscriptionTypePanelOpen && 'channel-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'channel-panel--fade-out'}
+                        ${subscriptionTypePanelOpen && 'wizard__primary-panel--fade-out'}
+                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__primary-panel--fade-out'}
                     `}
                     ref={channelPanelRef}
                     onContinue={() => setSubscriptionTypePanelOpen(true)}
@@ -370,9 +354,9 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 />
                 <SubscriptionTypePanel
                     className={`
-                        ${subscriptionTypePanelOpen && 'secondary-panel--slide-in'}
-                        ${(recordTypePanelOpen || searchRecordsPanelOpen || eventsPanelOpen) && 'secondary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
+                        ${subscriptionTypePanelOpen && 'wizard__secondary-panel--slide-in'}
+                        ${(recordTypePanelOpen || searchRecordsPanelOpen || eventsPanelOpen) && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={subscriptionTypePanelRef}
                     onContinue={() => setRecordTypePanelOpen(true)}
@@ -382,9 +366,9 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 />
                 <RecordTypePanel
                     className={`
-                        ${recordTypePanelOpen && 'secondary-panel--slide-in'}
-                        ${(searchRecordsPanelOpen || eventsPanelOpen) && 'secondary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
+                        ${recordTypePanelOpen && 'wizard__secondary-panel--slide-in'}
+                        ${(searchRecordsPanelOpen || eventsPanelOpen) && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={recordTypePanelRef}
                     onContinue={() => (subscriptionType === SubscriptionType.RECORD ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
@@ -395,19 +379,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 />
                 <SearchRecordsPanel
                     className={`
-                        ${searchRecordsPanelOpen && 'secondary-panel--slide-in'}
-                        ${eventsPanelOpen && 'secondary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
+                        ${searchRecordsPanelOpen && 'wizard__secondary-panel--slide-in'}
+                        ${eventsPanelOpen && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={searchRecordsPanelRef}
-                    onContinue={() => {
-                        if (recordValue) {
-                            setEventsPanelOpen(true);
-                        } else {
-                            setApiError('Please select a record(This is placeholder text for error).');
-                            setApiResponseValid(true);
-                        }
-                    }}
+                    onContinue={() => setEventsPanelOpen(true)}
                     onBack={() => setSearchRecordsPanelOpen(false)}
                     recordValue={recordValue}
                     setRecordValue={setRecordValue}
@@ -424,8 +401,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 />
                 <EventsPanel
                     className={`
-                        ${eventsPanelOpen && 'secondary-panel--slide-in'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'secondary-panel--fade-out'}
+                        ${eventsPanelOpen && 'wizard__secondary-panel--slide-in'}
+                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={eventsPanelRef}
                     onContinue={subscriptionData ? editSubscription : createSubscription}
@@ -439,15 +416,19 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     actionBtnDisabled={showModalLoader}
                 />
                 <ResultPanel
-                    onPrimaryBtnClick={getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null}
-                    onSecondaryBtnClick={hideModal}
-                    className={`${(successPanelOpen || (apiError && apiResponseValid)) && 'secondary-panel--slide-in'}`}
+                    className={`${(successPanelOpen || (apiError && apiResponseValid)) && 'wizard__secondary-panel--slide-in'}`}
                     ref={resultPanelRef}
-                    primaryBtnText={getResultPanelPrimaryBtnActionOrText(false) as string | null}
                     iconClass={apiError && apiResponseValid ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}
+                    primaryBtn={{
+                        text: getResultPanelPrimaryBtnActionOrText(false) as string,
+                        onClick: getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null,
+                    }}
+                    secondaryBtn={{
+                        text: 'Close',
+                        onClick: hideModal,
+                    }}
                 />
-                {false && <CircularLoader/>}
             </>
         </Modal>
     );

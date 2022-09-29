@@ -1,12 +1,10 @@
-import React, {forwardRef, useEffect, useState} from 'react';
+import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import Dropdown from 'components/dropdown';
+import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/mattermost-ui-library';
 
 import Constants from 'plugin_constants';
 
@@ -36,9 +34,10 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setShowModalLoader,
     setApiError,
     setApiResponseValid,
-    channelOptions,
     setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
+    const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
+    const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
     const [validationFailed, setValidationFailed] = useState(false);
     const {makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
@@ -48,12 +47,21 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
     };
 
+    // Set the suggestions when the input value of the auto-suggest changes;
+    useEffect(() => {
+        const channelsToSuggest = getChannelState().data?.filter((ch) => ch.display_name.toLowerCase().includes(channelAutoSuggestValue.toLowerCase())) || [];
+        setChannelSuggestions([
+            ...channelsToSuggest.map((ch) => ({
+                channelName: ch.display_name,
+                channelType: ch.type,
+                channelID: ch.id,
+            })),
+        ]);
+    }, [channelAutoSuggestValue, getChannelState().isSuccess]);
+
     useEffect(() => {
         setApiError(null);
         makeApiRequest(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-
-        // Disabling the react-hooks/exhaustive-deps rule at the next line because if we include "makeApiRequest" in the dependency array, the useEffect runs infinitely.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Update the channelList once it is fetched from the backend
@@ -87,6 +95,11 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         if (channel) {
             setValidationFailed(false);
         }
+
+        // When the channel value is reset, reset the channel auto-suggest input as well;
+        if (!channel) {
+            setChannelAutoSuggestValue('');
+        }
     }, [channel]);
 
     // Handle action when the continue button is clicked
@@ -101,21 +114,40 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
     };
 
+    // Returns the JSX that should be rendered when the options are shown
+    const getChannelAutoSuggestOptionJSX = useCallback((channelName: string, channelType: string) => (
+        <span>
+            <i className={`dropdown-option-icon ${channelType === MMConstants.PRIVATE_CHANNEL ? 'icon icon-lock-outline' : 'icon icon-globe'}`}/>
+            {channelName}
+        </span>
+    ), []);
+
+    // Set the channelID when any of the suggestion is selected
+    const handleChannelSelection = (channelSuggestion: Record<string, string> | null) => setChannel(channelSuggestion?.channelID || null);
+
     return (
         <div
-            className={`modal__body modal-body channel-panel ${className}`}
+            className={`modal__body channel-panel wizard__primary-panel ${className}`}
             ref={channelPanelRef}
         >
-            <Dropdown
-                placeholder='Select Channel'
-                value={channel}
-                onChange={(newValue) => setChannel(newValue)}
-                options={channelOptions}
-                required={true}
-                error={validationFailed && 'Required'}
-                disabled={getChannelState().isLoading}
-            />
-            <ModalSubTitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+                <AutoSuggest
+                    placeholder='Select Channel'
+                    inputValue={channelAutoSuggestValue}
+                    onInputValueChange={setChannelAutoSuggestValue}
+                    onChangeSelectedSuggestion={handleChannelSelection}
+                    suggestionConfig={{
+                        suggestions: channelSuggestions,
+                        renderValue: (suggestion) => getChannelAutoSuggestOptionJSX(suggestion.channelName, suggestion.channelType),
+                    }}
+                    required={true}
+                    error={validationFailed && Constants.RequiredMsg}
+                    disabled={getChannelState().isLoading}
+                    loadingSuggestions={getChannelState().isLoading}
+                    charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
+                />
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onConfirm={handleContinue}
                 confirmBtnText='Continue'

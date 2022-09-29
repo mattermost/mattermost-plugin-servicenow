@@ -1,171 +1,58 @@
+@import "@brightscout/mattermost-ui-library/build/styles/abstract/_mixins";
+
 .rhs-modal {
-  .modal-dialog {
-    position: relative;
-  }
-
-  .modal-content {
-    overflow: hidden;
-  }
-
-  .modal__body {
-    overflow: auto !important;
-  }
-
-  .dropdown {
+  .plugin-dropdown {
     margin-bottom: 12px;
   }
 
+  .wizard__body-container {
+    min-height: 146px;
+  }
+
   .dropdown-option-icon {
+    @include positioning(relative, 1px, "", "", -4px);
     margin-right: -2px;
-    position: relative;
-    top: 1px;
-    left: -4px;
   }
 
-  .modal__error {
-    margin-bottom: 0;
-    text-align: center;
+  .auto-suggest__suggestions--open {
+    max-height: 124px;
   }
 
-  .modal__footer {
-    padding: 16px 0 !important;
+  .plugin-dropdown__options-list--open {
+    max-height: 124px;
   }
 
-  .secondary-panel {
-    transition: all 300ms ease;
-    transform: translateX(101%);
-    position: absolute !important;
-    left: 0;
-    right: 0;
-    top: 61px;
-
-    &--slide-in {
-      transform: translateX(0);
-    }
-
-    &--fade-out {
-      transition: all 50ms ease;
-      opacity: 0;
-      visibility: hidden;
-    }
-  }
-
-  .channel-panel {
-    transition: all 300ms ease;
-
-    &--fade-out {
-      opacity: 0;
-      transition: all 50ms ease;
-      visibility: hidden;
-      position: absolute !important;
-      top: 61px;
-      left: 0;
-      right: 0;
-    }
-
-    .dropdown__options-list--open {
-      max-height: 80px;
-    }
-
-    .modal__confirm-btn {
-      margin: 0;
-    }
-  }
-
-  .result-panel-icon {
-    font-size: 58px;
-    color: var(--button-bg);
-
-    path {
-      fill: var(--button-bg);
-    }
-
-    &--error {
-      color: var(--error-text);
-    }
-  }
-
-  .result-panel-text {
-    font-size: 20px;
-    margin: 24px 0;
-    max-width: 100%;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-
-  .result-panel-close-btn {
-    margin-top: 12px;
-    padding: 0;
+  .subscription-type-panel {
+    min-height: 128px;
   }
 
   .events-panel {
     &__label {
-      font-size: 16px;
       color: rgba(var(--center-channel-color-rgb), 0.8);
-      margin-bottom: 12px;
-      font-weight: 400;
-    }
-
-    &__checkbox {
-      margin-bottom: 20px;
     }
 
     &__prev-data {
       border: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
-      border-radius: 8px;
-      padding: 8px 24px;
-      margin-bottom: 24px;
     }
 
     &__prev-data-header {
-      font-size: 14px;
-      font-weight: 400;
       color: rgba(var(--center-channel-color-rgb), 0.4);
-      margin: 0;
-
-      &.record-header {
-        margin-top: 16px;
-      }
-    }
-
-    &__prev-data-text {
-      font-size: 14px;
-      font-weight: 500;
-      margin: 4px 0;
     }
   }
 
   .search-panel {
-    &__auto-suggest {
-      margin-bottom: 30px;
-    }
-
     &__description {
-      margin-top: 24px;
-      padding: 0;
       list-style-type: none;
-      font-size: 14px;
-    }
-
-    &__description-item {
-      margin-bottom: 8px;
     }
 
     &__description-header {
-      margin-right: 10px;
       color: rgba(var(--center-channel-color-rgb), 0.4);
       width: 125px;
     }
 
     &__description-text {
-      font-weight: 500;
-      color: var(--center-channel-color);
       min-width: 200px;
       max-width: calc(100% - 140px);
-
-      a.btn {
-        padding: 0;
-      }
     }
   }
 }

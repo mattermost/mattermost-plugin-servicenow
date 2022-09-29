@@ -1,10 +1,7 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import AutoSuggest from 'components/AutoSuggest';
-import SkeletonLoader from 'components/loader/skeleton';
+import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
 import Constants, {RecordType} from 'plugin_constants';
 
@@ -168,8 +165,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // handle input value change
     const handleInputChange = (currentValue: string) => {
         setRecordValue(currentValue);
-        setSuggestionChosen(false);
         setRecordId(null);
+        setSuggestionChosen(false);
         if (currentValue) {
             if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
                 debouncedGetSuggestions({searchFor: currentValue});
@@ -198,12 +195,15 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Returns value to be rendered in the options dropdown and in the input
     const getInputValue = useCallback((suggestion: Record<string, string>) => `${suggestion.number}: ${suggestion.short_description}`, []);
 
-    // Handles action when a suggestion is chosen
-    const handleSuggestionClick = (suggestionValue: Record<string, string>) => {
-        setSuggestionChosen(true);
-        setRecordValue(getInputValue(suggestionValue));
-        setRecordId(suggestionValue.sys_id);
-        getSuggestionData(suggestionValue.sys_id);
+    // Handles action when a suggestion is chosen or the chosen suggestion is reset
+    const handleSuggestionClick = (suggestionValue: Record<string, string> | null) => {
+        setSuggestionChosen(Boolean(suggestionValue));
+        setRecordValue(suggestionValue ? getInputValue(suggestionValue) : '');
+        setRecordId(suggestionValue?.sys_id || null);
+
+        if (suggestionValue) {
+            getSuggestionData(suggestionValue.sys_id);
+        }
     };
 
     // Returns value for record data header
@@ -220,7 +220,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     href={value.link}
                     target='_blank'
                     rel='noreferrer'
-                    className='btn btn-link'
+                    className='btn btn-link padding-0'
                 >
                     {value.display_value}
                 </a>
@@ -232,39 +232,42 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     return (
         <div
-            className={`modal__body modal-body search-panel secondary-panel ${className}`}
+            className={`modal__body search-panel wizard__secondary-panel ${className}`}
             ref={searchRecordPanelRef}
         >
-            <AutoSuggest
-                inputValue={recordValue}
-                onInputValueChange={handleInputChange}
-                onOptionClick={handleSuggestionClick}
-                placeholder='Search Records'
-                suggestionConfig={{
-                    suggestions,
-                    renderValue: getInputValue,
-                }}
-                error={validationMsg || validationFailed}
-                className='search-panel__auto-suggest'
-                loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
-                disabled={disabledInput}
-            />
-            {suggestionChosen && (
-                <ul className='search-panel__description'>
-                    {
-                        Constants.RecordDataLabelConfig.map((header) => (
-                            <li
-                                key={header.key}
-                                className='d-flex align-items-center search-panel__description-item'
-                            >
-                                <span className='search-panel__description-header text-ellipsis'>{header.label}</span>
-                                <span className='search-panel__description-text text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
-                            </li>
-                        ))
-                    }
-                </ul>
-            )}
-            <ModalSubTitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+                <AutoSuggest
+                    inputValue={recordValue}
+                    onInputValueChange={handleInputChange}
+                    onChangeSelectedSuggestion={handleSuggestionClick}
+                    placeholder='Search Records'
+                    suggestionConfig={{
+                        suggestions,
+                        renderValue: getInputValue,
+                    }}
+                    error={validationMsg || validationFailed}
+                    className='search-panel__auto-suggest margin-bottom-30'
+                    loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
+                    charThresholdToShowSuggestions={Constants.DefaultCharThresholdToShowSuggestions}
+                    disabled={disabledInput}
+                />
+                {suggestionChosen && (
+                    <ul className='search-panel__description margin-top-25 padding-0 font-14'>
+                        {
+                            Constants.RecordDataLabelConfig.map((header) => (
+                                <li
+                                    key={header.key}
+                                    className='d-flex align-items-center search-panel__description-item margin-bottom-10'
+                                >
+                                    <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                )}
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}
