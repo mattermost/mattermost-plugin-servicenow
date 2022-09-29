@@ -31,10 +31,11 @@ func (c *client) CallJSON(method, path string, in, out interface{}, params url.V
 	if err = json.NewEncoder(buf).Encode(in); err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
-	return c.call(method, path, contentType, buf, out, params)
+	return c.Call(method, path, contentType, buf, out, params)
 }
 
-func (c *client) call(method, path, contentType string, inBody io.Reader, out interface{}, params url.Values) (responseData []byte, statusCode int, err error) {
+// TODO: Write a unit test for this function
+func (c *client) Call(method, path, contentType string, inBody io.Reader, out interface{}, params url.Values) (responseData []byte, statusCode int, err error) {
 	errContext := fmt.Sprintf("serviceNow: Call failed: method:%s, path:%s", method, path)
 	pathURL, err := url.Parse(path)
 	if err != nil {
