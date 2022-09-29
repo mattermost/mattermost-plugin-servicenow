@@ -2,15 +2,15 @@ import React from 'react';
 
 import {shallow, ShallowWrapper} from 'enzyme';
 
-import {ModalSubtitleAndError} from 'mattermost-ui-lib';
+import {ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
+
+import {SubscriptionType} from 'plugin_constants';
 
 import SubscriptionTypePanel from './subscriptionTypePanel';
 
 const mockOnContinue = jest.fn();
 const mockOnBack = jest.fn();
 const mockSetSubscriptionType = jest.fn();
-
-const mockSubscriptionType: SubscriptionType = 'record';
 
 const subscriptionTypePanelProps = {
     className: 'mockClassName',
@@ -19,7 +19,7 @@ const subscriptionTypePanelProps = {
     onContinue: mockOnContinue,
     actionBtnDisabled: true,
     requiredFieldValidationErr: true,
-    subscriptionType: mockSubscriptionType,
+    subscriptionType: SubscriptionType.RECORD,
     setSubscriptionType: mockSetSubscriptionType,
 };
 

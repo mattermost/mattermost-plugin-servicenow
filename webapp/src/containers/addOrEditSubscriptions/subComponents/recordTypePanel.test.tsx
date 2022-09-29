@@ -2,7 +2,9 @@ import React from 'react';
 
 import {shallow, ShallowWrapper} from 'enzyme';
 
-import {ModalSubtitleAndError} from 'mattermost-ui-lib';
+import {ModalSubtitleAndError, ModalFooter} from '@brightscout/mattermost-ui-library';
+
+import {RecordType} from 'plugin_constants';
 
 import RecordTypePanel from './recordTypePanel';
 
@@ -11,8 +13,6 @@ const mockOnBack = jest.fn();
 const mockSetRecordType = jest.fn();
 const mockSetResetRecordPanelStates = jest.fn();
 
-const mockRecordType: RecordType = 'incident';
-
 const recordTypePanelProps = {
     className: 'mockClassName',
     error: 'mockError',
@@ -20,7 +20,7 @@ const recordTypePanelProps = {
     onContinue: mockOnContinue,
     actionBtnDisabled: true,
     requiredFieldValidationErr: true,
-    recordType: mockRecordType,
+    recordType: RecordType.INCIDENT,
     setRecordType: mockSetRecordType,
     setResetRecordPanelStates: mockSetResetRecordPanelStates,
 };

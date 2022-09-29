@@ -4,7 +4,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from 'mattermost-ui-lib';
+import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
 

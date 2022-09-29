@@ -3,7 +3,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from 'mattermost-ui-lib';
+import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
 
 import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
 

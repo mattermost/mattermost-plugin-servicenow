@@ -1,6 +1,6 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mattermost-ui-lib';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
 import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
