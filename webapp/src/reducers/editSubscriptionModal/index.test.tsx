@@ -1,3 +1,4 @@
+import {RecordType, SubscriptionType} from 'plugin_constants';
 import reducer, {showModal, hideModal, SubscriptionModalState} from 'reducers/editSubscriptionModal';
 
 test('should change state of open to "true" and data value to "payload"', () => {
@@ -8,9 +9,9 @@ test('should change state of open to "true" and data value to "payload"', () => 
         channel: 'mockChanel',
         id: 'mockId',
         recordId: 'mockRecordId',
-        recordType: 'incident',
+        recordType: RecordType.INCIDENT,
         subscriptionEvents: [],
-        type: 'object',
+        type: SubscriptionType.RECORD,
     };
     expect(reducer(previousState, showModal(payload))).toEqual(
         {open: true, data: payload},
