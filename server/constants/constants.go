@@ -71,9 +71,18 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 )
 
+// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 const (
-	ErrorInvalidRecordType = "Invalid record type"
-	ErrorNotAuthorized     = "Not authorized"
+	ErrorEmptyServiceNowURL               = "serviceNow server URL should not be empty"
+	ErrorEmptyServiceNowOAuthClientID     = "serviceNow OAuth clientID should not be empty"
+	ErrorEmptyServiceNowOAuthClientSecret = "serviceNow OAuth clientSecret should not be empty"
+	ErrorEmptyEncryptionSecret            = "encryption secret should not be empty"
+	ErrorEmptyWebhookSecret               = "webhook secret should not be empty"
+	ErrorInvalidRecordType                = "Invalid record type"
+	ErrorNotAuthorized                    = "Not authorized"
+	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
+	ErrorMissingUserCodeState             = "missing user, code or state"
+	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
 )
 
 var (
