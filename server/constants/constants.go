@@ -34,24 +34,26 @@ const (
 	SubscriptionEventCommented          = "commented"
 	SubscriptionEventAssignedTo         = "assigned_to"
 	SubscriptionEventAssignmentGroup    = "assignment_group"
+	SubscriptionEventCreated            = "created"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage                = 0
-	DefaultPerPage             = 20
-	MaxPerPage                 = 100
-	QueryParamPage             = "page"
-	QueryParamPerPage          = "per_page"
-	QueryParamChannelID        = "channel_id"
-	QueryParamUserID           = "user_id"
-	QueryParamSubscriptionType = "subscription_type"
-	QueryParamSearchTerm       = "search"
-	PathParamSubscriptionID    = "subscription_id"
-	PathParamTeamID            = "team_id"
-	PathParamRecordType        = "record_type"
-	PathParamRecordID          = "record_id"
+	DefaultPage                           = 0
+	DefaultPerPage                        = 20
+	MaxPerPage                            = 100
+	CharacterThresholdForSearchingRecords = 3
+	QueryParamPage                        = "page"
+	QueryParamPerPage                     = "per_page"
+	QueryParamChannelID                   = "channel_id"
+	QueryParamUserID                      = "user_id"
+	QueryParamSubscriptionType            = "subscription_type"
+	QueryParamSearchTerm                  = "search"
+	PathParamSubscriptionID               = "subscription_id"
+	PathParamTeamID                       = "team_id"
+	PathParamRecordType                   = "record_type"
+	PathParamRecordID                     = "record_id"
 
 	// Websocket events
 	WSEventConnect                   = "connect"
@@ -69,6 +71,20 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 )
 
+// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
+const (
+	ErrorEmptyServiceNowURL               = "serviceNow server URL should not be empty"
+	ErrorEmptyServiceNowOAuthClientID     = "serviceNow OAuth clientID should not be empty"
+	ErrorEmptyServiceNowOAuthClientSecret = "serviceNow OAuth clientSecret should not be empty"
+	ErrorEmptyEncryptionSecret            = "encryption secret should not be empty"
+	ErrorEmptyWebhookSecret               = "webhook secret should not be empty"
+	ErrorInvalidRecordType                = "Invalid record type"
+	ErrorNotAuthorized                    = "Not authorized"
+	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
+	ErrorMissingUserCodeState             = "missing user, code or state"
+	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
+)
+
 var (
 	ValidSubscriptionTypes = map[string]bool{
 		SubscriptionTypeRecord: true,
@@ -82,6 +98,7 @@ var (
 	}
 
 	ValidSubscriptionEvents = map[string]bool{
+		SubscriptionEventCreated:         true,
 		SubscriptionEventPriority:        true,
 		SubscriptionEventState:           true,
 		SubscriptionEventCommented:       true,
@@ -90,6 +107,7 @@ var (
 	}
 
 	FormattedEventNames = map[string]string{
+		SubscriptionEventCreated:         "New record created",
 		SubscriptionEventPriority:        "Priority changed",
 		SubscriptionEventState:           "State changed",
 		SubscriptionEventCommented:       "New comment",

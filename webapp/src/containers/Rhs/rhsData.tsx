@@ -3,9 +3,9 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from 'mm-ui-library';
+import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionEvents, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -25,9 +25,9 @@ type RhsDataProps = {
 }
 
 const BulkSubscriptionHeaders: Record<RecordType, string> = {
-    incident: 'Incidents',
-    problem: 'Problems',
-    change_request: 'Change Requests',
+    [RecordType.INCIDENT]: 'Incidents',
+    [RecordType.PROBLEM]: 'Problems',
+    [RecordType.CHANGE_REQUEST]: 'Change Requests',
 };
 
 const RhsData = ({
@@ -64,11 +64,11 @@ const RhsData = ({
             label: 'ID',
             value: subscription.sys_id,
         }],
-        list: subscription.subscription_events.split(',').map((event) => Constants.SubscriptionEventLabels[event as SubscriptionEvents]),
+        list: subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]),
     }), []);
 
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
-        const isSubscriptionTypeRecord = subscription.type === 'record';
+        const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
         const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type];
         const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
 

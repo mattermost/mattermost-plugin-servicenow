@@ -1,8 +1,8 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Dropdown} from 'mm-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import {SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 type SubscriptionTypePanelProps = {
     className?: string;
@@ -17,12 +17,12 @@ type SubscriptionTypePanelProps = {
 
 const subscriptionTypeOptions: DropdownOptionType[] = [
     {
-        label: SubscriptionTypeLabelMap.record,
-        value: 'record',
+        label: SubscriptionTypeLabelMap[SubscriptionType.RECORD],
+        value: SubscriptionType.RECORD,
     },
     {
-        label: SubscriptionTypeLabelMap.object,
-        value: 'object',
+        label: SubscriptionTypeLabelMap[SubscriptionType.BULK],
+        value: SubscriptionType.BULK,
     },
 ];
 
@@ -68,7 +68,7 @@ const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelPr
                     onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
                     options={subscriptionTypeOptions}
                     required={true}
-                    error={validationFailed && 'Required'}
+                    error={validationFailed && Constants.RequiredMsg}
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>

@@ -1,8 +1,8 @@
 import React, {forwardRef} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Checkbox} from 'mm-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Checkbox} from '@brightscout/mattermost-ui-library';
 
-import {SubscriptionEvents, RecordTypeLabelMap} from 'plugin_constants';
+import {SubscriptionEvents, RecordTypeLabelMap, RecordType, SubscriptionType, SubscriptionEventLabels} from 'plugin_constants';
 
 type EventsPanelProps = {
     className?: string;
@@ -14,6 +14,7 @@ type EventsPanelProps = {
     subscriptionEvents: SubscriptionEvents[];
     setSubscriptionEvents: React.Dispatch<React.SetStateAction<SubscriptionEvents[]>>;
     channel: DropdownOptionType | null;
+    subscriptionType: SubscriptionType;
     record: string;
     recordType: RecordType;
 }
@@ -27,6 +28,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     subscriptionEvents,
     setSubscriptionEvents,
     channel,
+    subscriptionType,
     record,
     recordType,
 }: EventsPanelProps, eventsPanelRef): JSX.Element => {
@@ -53,39 +55,47 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                     <p className='events-panel__prev-data-text font-14 wt-400 margin-v-5'>
                         {channel?.label}
                     </p>
-                    <h4 className='events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header'>{record ? 'Record' : 'Record type'}</h4>
-                    <p className='events-panel__prev-data-text font-14 wt-400 margin-v-5'>{record || RecordTypeLabelMap[recordType]}</p>
+                    <h4 className='events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header'>{`Record${subscriptionType === SubscriptionType.BULK && ' type'}`}</h4>
+                    <p className='events-panel__prev-data-text font-14 wt-400 margin-v-5'>{subscriptionType === SubscriptionType.RECORD ? record : RecordTypeLabelMap[recordType]}</p>
                 </div>
-                <label className='events-panel__label font-16 margin-bottom-12 wt-400'>{'Available events:(optional)'}</label>
+                <label className='events-panel__label font-16 margin-bottom-12 wt-400'>{'Available events:'}</label>
+                {subscriptionType === SubscriptionType.BULK && (
+                    <Checkbox
+                        checked={subscriptionEvents.includes(SubscriptionEvents.CREATED)}
+                        label={SubscriptionEventLabels[SubscriptionEvents.CREATED]}
+                        onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.CREATED)}
+                        className='margin-bottom-20'
+                    />
+                )}
                 <Checkbox
                     checked={subscriptionEvents.includes(SubscriptionEvents.STATE)}
-                    label='State changed'
+                    label={SubscriptionEventLabels[SubscriptionEvents.STATE]}
                     onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.STATE)}
                     className='margin-bottom-20'
                 />
                 <Checkbox
                     checked={subscriptionEvents.includes(SubscriptionEvents.PRIORITY)}
-                    label='Priority changed'
+                    label={SubscriptionEventLabels[SubscriptionEvents.PRIORITY]}
                     onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.PRIORITY)}
                     className='margin-bottom-20'
                 />
                 <Checkbox
                     checked={subscriptionEvents.includes(SubscriptionEvents.COMMENTED)}
-                    label='New comment'
+                    label={SubscriptionEventLabels[SubscriptionEvents.COMMENTED]}
                     onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.COMMENTED)}
                     className='margin-bottom-20'
                 />
                 <Checkbox
                     checked={subscriptionEvents.includes(SubscriptionEvents.ASSIGNED_TO)}
-                    label='Assigned to changed'
+                    label={SubscriptionEventLabels[SubscriptionEvents.ASSIGNED_TO]}
                     onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.ASSIGNED_TO)}
                     className='margin-bottom-20'
                 />
                 <Checkbox
                     checked={subscriptionEvents.includes(SubscriptionEvents.ASSIGNMENT_GROUP)}
-                    label='Assignment group changed'
+                    label={SubscriptionEventLabels[SubscriptionEvents.ASSIGNMENT_GROUP]}
                     onChange={(selected: boolean) => handleSelectedEventsChange(selected, SubscriptionEvents.ASSIGNMENT_GROUP)}
-                    className='margin-bottom-20'
+                    className='events-panel__checkbox'
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>

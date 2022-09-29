@@ -125,7 +125,9 @@ func (s *SubscriptionPayload) IsValidForCreation(siteURL string) error {
 	if *s.Type == constants.SubscriptionTypeRecord {
 		if s.RecordID == nil {
 			return fmt.Errorf("recordID is required")
-		} else if valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, *s.RecordID); err != nil || !valid {
+		}
+
+		if valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, *s.RecordID); err != nil || !valid {
 			return fmt.Errorf("recordID is not valid")
 		}
 	} else {

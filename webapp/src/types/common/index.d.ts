@@ -2,11 +2,6 @@
  * Keep all common types here which are to be used throughout the project
 */
 
-type TabData = {
-    title: string,
-    tabPanel: JSX.Element
-}
-
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig';

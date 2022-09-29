@@ -5,7 +5,7 @@ import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from 'mm-ui-library';
+import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -105,7 +105,7 @@ const Rhs = (): JSX.Element => {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
             type: subscription.type,
-            recordType: subscription.record_type as RecordType,
+            recordType: subscription.record_type,
             subscriptionEvents,
             id: subscription.sys_id,
         };

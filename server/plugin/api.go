@@ -1,4 +1,4 @@
-package main
+package plugin
 
 import (
 	"context"
@@ -27,7 +27,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	r.Use(p.withRecovery)
 
 	p.handleStaticFiles(r)
-	s := r.PathPrefix("/api/v1").Subrouter()
+	s := r.PathPrefix(constants.PathPrefix).Subrouter()
 
 	// Add custom routes here
 	s.HandleFunc(constants.PathOAuth2Connect, p.checkAuth(p.httpOAuth2Connect)).Methods(http.MethodGet)
@@ -89,7 +89,7 @@ func (p *Plugin) checkAuth(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Header.Get(constants.HeaderMattermostUserID)
 		if userID == "" {
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, Message: "Not authorized"})
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, Message: constants.ErrorNotAuthorized})
 			return
 		}
 
@@ -327,22 +327,32 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var bulkSubscriptions []*serializer.SubscriptionResponse
+	var recordSubscriptions []*serializer.SubscriptionResponse
 	wg := sync.WaitGroup{}
 	for _, subscription := range subscriptions {
 		if subscription.Type == constants.SubscriptionTypeBulk {
+			bulkSubscriptions = append(bulkSubscriptions, subscription)
 			continue
 		}
 		wg.Add(1)
 		go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+		recordSubscriptions = append(recordSubscriptions, subscription)
 	}
 
 	wg.Wait()
-	subscriptions = filterSubscriptionsOnRecordData(subscriptions)
+	recordSubscriptions = filterSubscriptionsOnRecordData(recordSubscriptions)
+	bulkSubscriptions = append(bulkSubscriptions, recordSubscriptions...)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	result, err := json.Marshal(subscriptions)
-	if err != nil || string(result) == "null" {
+	result, err := json.Marshal(bulkSubscriptions)
+	if err != nil {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
 	} else if _, err = w.Write(result); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())
@@ -440,13 +450,13 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while searching", "Record type", recordType)
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Invalid record type"})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
 
 	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
-	if len(searchTerm) < 4 {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "The search term must be at least 4 characters long."})
+	if len(searchTerm) < constants.CharacterThresholdForSearchingRecords {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("The search term must be at least %d characters long.", constants.CharacterThresholdForSearchingRecords)})
 		return
 	}
 
@@ -462,8 +472,13 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	result, err := json.Marshal(records)
-	if err != nil || string(result) == "null" {
+	if err != nil {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(result) == "null" {
 		_, _ = w.Write([]byte("[]"))
 	} else if _, err = w.Write(result); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())
@@ -476,7 +491,7 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidSubscriptionRecordTypes[recordType] {
 		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Invalid record type"})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
 
