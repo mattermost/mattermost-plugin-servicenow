@@ -9,6 +9,7 @@ import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/matt
 import Constants from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
+import {getRequiredChannelName} from 'utils';
 
 type ChannelPanelProps = {
     className?: string;
@@ -37,7 +38,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setChannelOptions,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
-    const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
+    const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState(channel ?? '');
     const [validationFailed, setValidationFailed] = useState(false);
     const {makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
@@ -73,6 +74,10 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
 
         if (channelListState.data) {
+            if (channel) {
+                setChannelAutoSuggestValue(getRequiredChannelName(channel, channelListState.data));
+            }
+
             setChannelOptions(channelListState.data.map((ch) => ({
                 label: (
                     <span>
@@ -123,7 +128,10 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     ), []);
 
     // Set the channelID when any of the suggestion is selected
-    const handleChannelSelection = (channelSuggestion: Record<string, string> | null) => setChannel(channelSuggestion?.channelID || null);
+    const handleChannelSelection = (channelSuggestion: Record<string, string> | null) => {
+        setChannelAutoSuggestValue(channelSuggestion?.channelName || '');
+        setChannel(channelSuggestion?.channelID || null);
+    };
 
     return (
         <div
