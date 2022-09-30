@@ -9,7 +9,7 @@ import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/matt
 import Constants from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
-import {getChannelNameFromID} from 'utils';
+import {getRequiredChannelName} from 'utils';
 
 type ChannelPanelProps = {
     className?: string;
@@ -75,7 +75,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
         if (channelListState.data) {
             if (channel) {
-                setChannelAutoSuggestValue(getChannelNameFromID(channel, channelListState.data));
+                setChannelAutoSuggestValue(getRequiredChannelName(channel, channelListState.data));
             }
 
             setChannelOptions(channelListState.data.map((ch) => ({
