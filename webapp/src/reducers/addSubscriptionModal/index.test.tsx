@@ -1,6 +1,6 @@
 import reducer, {showModal, hideModal, SubscriptionModalState} from 'reducers/addSubscriptionModal';
 
-test('should change state of open to "true"', () => {
+test('should change the state of open to "true"', () => {
     const previousState: SubscriptionModalState = {
         open: false,
     };
@@ -9,7 +9,7 @@ test('should change state of open to "true"', () => {
     );
 });
 
-test('should change state of open to "false"', () => {
+test('should change the state of open to "false"', () => {
     const previousState: SubscriptionModalState = {
         open: true,
     };

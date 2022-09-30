@@ -1,7 +1,7 @@
 import {RecordType, SubscriptionType} from 'plugin_constants';
 import reducer, {showModal, hideModal, SubscriptionModalState} from 'reducers/editSubscriptionModal';
 
-test('should change state of open to "true" and data value to "payload"', () => {
+test('should change the state of open to "true" and data value to "payload"', () => {
     const previousState: SubscriptionModalState = {
         open: false,
     };
@@ -18,7 +18,7 @@ test('should change state of open to "true" and data value to "payload"', () => 
     );
 });
 
-test('should change state of open to "false"', () => {
+test('should change the state of open to "false"', () => {
     const previousState: SubscriptionModalState = {
         open: true,
     };
