@@ -78,6 +78,7 @@ const (
 const (
 	ErrorInvalidRecordType = "Invalid record type"
 	ErrorNotAuthorized     = "Not authorized"
+	ErrorGeneric           = "Something went wrong."
 )
 
 var (
@@ -124,6 +125,19 @@ var (
 		RecordTypeProblem:       "Problem",
 		RecordTypeIncident:      "Incident",
 		RecordTypeChangeRequest: "Change Request",
+	}
+
+	RecordTypesSupportingComments = map[string]bool{
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+		RecordTypeTask:          true,
+		RecordTypeChangeTask:    true,
+		RecordTypeFollowOnTask:  true,
+	}
+
+	RecordTypesSupportingStateUpdation = map[string]bool{
+		RecordTypeIncident: true,
 	}
 )
 

@@ -43,6 +43,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
@@ -106,7 +107,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDNotConnected, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorNotConnected})
 			} else {
 				p.API.LogError("Unable to get user", "Error", err.Error())
-				p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Something went wrong. Error: %s", err.Error())})
+				p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s Error: %s", constants.ErrorGeneric, err.Error())})
 			}
 			return
 		}
@@ -114,7 +115,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 		token, err := p.ParseAuthToken(user.OAuth2Token)
 		if err != nil {
 			p.API.LogError("Unable to parse oauth token", "Error", err.Error())
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Something went wrong. Error: %s", err.Error())})
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s Error: %s", constants.ErrorGeneric, err.Error())})
 			return
 		}
 
@@ -519,6 +520,50 @@ func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError("Unable to create post", "Error", postErr.Error())
 	}
+	returnStatusOK(w)
+}
+
+func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	channelID := pathParams[constants.QueryParamChannelID]
+	if !model.IsValidId(channelID) {
+		p.API.LogError("Invalid channel id")
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Invalid channel id"})
+		return
+	}
+
+	record, err := serializer.ServiceNowRecordFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		return
+	}
+
+	if !constants.ValidRecordTypesForSearching[record.RecordType] {
+		p.API.LogError("Invalid record type while trying to share record", "Record type", record.RecordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	if err := record.HandleNestedFields(); err != nil {
+		p.API.LogError("Invalid request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Invalid request body. Error: %s", err.Error())})
+		return
+	}
+
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	user, userErr := p.API.GetUser(userID)
+	if userErr != nil {
+		p.API.LogError("Unable to get user", "Error", userErr.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGeneric})
+		return
+	}
+
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, user.Username)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError("Unable to create post", "Error", postErr.Error())
+	}
+
 	returnStatusOK(w)
 }
 
