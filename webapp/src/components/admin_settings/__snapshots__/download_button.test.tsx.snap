@@ -17,6 +17,7 @@ exports[`Download Button Should render correctly 1`] = `
       <Button
         active={false}
         disabled={false}
+        type="button"
         variant="primary"
       >
         Download
