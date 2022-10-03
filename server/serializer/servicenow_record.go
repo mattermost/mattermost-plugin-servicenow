@@ -30,12 +30,26 @@ type ServiceNowRecord struct {
 	Author           interface{} `json:"author,omitempty"`
 }
 
+type NestedField struct {
+	DisplayValue string `json:"display_value"`
+	Link         string `json:"link"`
+}
+
 type ServiceNowPartialRecordsResult struct {
 	Result []*ServiceNowPartialRecord `json:"result"`
 }
 
 type ServiceNowRecordResult struct {
 	Result *ServiceNowRecord `json:"result"`
+}
+
+func (nf *NestedField) LoadFromMap(m map[string]interface{}) error {
+	data, err := json.Marshal(m)
+	if err == nil {
+		err = json.Unmarshal(data, nf)
+	}
+
+	return err
 }
 
 func ServiceNowRecordFromJSON(data io.Reader) (*ServiceNowRecord, error) {
@@ -167,5 +181,10 @@ func GetNestedFieldValue(field interface{}) (string, error) {
 		return "", fmt.Errorf("error in parsing field")
 	}
 
-	return fmt.Sprintf("[%s](%s)", jsonObject["display_value"], jsonObject["link"]), nil
+	nf := NestedField{}
+	if err := nf.LoadFromMap(jsonObject); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("[%s](%s)", nf.DisplayValue, nf.Link), nil
 }
