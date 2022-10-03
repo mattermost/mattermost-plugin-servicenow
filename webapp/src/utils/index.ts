@@ -49,8 +49,11 @@ const getSubscriptionHeaderLink = (serviceNowBaseUrl: string, subscriptionType: 
         `${serviceNowBaseUrl}/nav_to.do?uri=${recordType}_list.do%3Fsysparm_query=active=true`
 );
 
+export const getRequiredChannelName = (channelId: string, channelList: ChannelData[]): string => channelList.find((ch) => ch.id === channelId)?.display_name ?? '';
+
 export default {
     getBaseUrls,
     debounce,
     getSubscriptionHeaderLink,
+    getRequiredChannelName,
 };
