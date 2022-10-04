@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-type SubscriptionModalState = {
+export type SubscriptionModalState = {
     open: boolean;
     data?: EditSubscriptionData;
 }
