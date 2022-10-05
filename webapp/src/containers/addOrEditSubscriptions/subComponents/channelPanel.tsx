@@ -9,7 +9,6 @@ import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from 'mattermost-ui-lib
 import Constants from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
-import {getRequiredChannelName} from 'utils';
 
 type ChannelPanelProps = {
     className?: string;
@@ -40,7 +39,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     editing = false,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
-    const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState(channel ?? '');
+    const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
     const [validationFailed, setValidationFailed] = useState(false);
     const {makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
@@ -77,10 +76,6 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
 
         if (channelListState.data) {
-            if (channel) {
-                setChannelAutoSuggestValue(getRequiredChannelName(channel, channelListState.data));
-            }
-
             setChannelOptions(channelListState.data.map((ch) => ({
                 label: (
                     <span>
