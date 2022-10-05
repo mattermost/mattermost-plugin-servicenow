@@ -14,7 +14,6 @@ const mockSetSubscriptionType = jest.fn();
 
 const subscriptionTypePanelProps = {
     className: 'mockClassName',
-    error: 'mockError',
     onBack: mockOnBack,
     onContinue: mockOnContinue,
     actionBtnDisabled: true,
@@ -27,7 +26,11 @@ describe('Subscription Type Panel', () => {
     let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
     beforeEach(() => {
-        component = shallow(<SubscriptionTypePanel {...subscriptionTypePanelProps}/>);
+        component = shallow(
+            <SubscriptionTypePanel
+                {...subscriptionTypePanelProps}
+                error={'mockError'}
+            />);
     });
 
     it('Should render correctly', () => {
@@ -46,8 +49,14 @@ describe('Subscription Type Panel', () => {
 
     it('Should render the error correctly', () => {
         expect(component.contains(
-            <ModalSubtitleAndError error={subscriptionTypePanelProps.error}/>,
+            <ModalSubtitleAndError error={'mockError'}/>,
         )).toBeTruthy();
+    });
+
+    it('Should not render the error, if error is not passed', () => {
+        expect(component.contains(
+            <ModalSubtitleAndError/>,
+        )).toBeFalsy();
     });
 
     it('Should fire change event when dropdown value is changed', () => {

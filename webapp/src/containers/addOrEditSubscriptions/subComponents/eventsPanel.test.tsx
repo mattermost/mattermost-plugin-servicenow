@@ -21,7 +21,6 @@ const mockChannel: DropdownOptionType = {
 
 const eventsPanelProps = {
     className: 'mockClassName',
-    error: 'mockError',
     onBack: mockOnBack,
     onContinue: mockOnContinue,
     actionBtnDisabled: true,
@@ -40,6 +39,7 @@ describe('Events Panel', () => {
                 {...eventsPanelProps}
                 subscriptionType={SubscriptionType.RECORD}
                 record={'mockRecord'}
+                error={'mockError'}
             />);
     });
 
@@ -93,8 +93,14 @@ describe('Events Panel', () => {
 
     it('Should render the error correctly', () => {
         expect(component.contains(
-            <ModalSubtitleAndError error={eventsPanelProps.error}/>,
+            <ModalSubtitleAndError error={'mockError'}/>,
         )).toBeTruthy();
+    });
+
+    it('Should not render the error, if error is not passed', () => {
+        expect(component.contains(
+            <ModalSubtitleAndError/>,
+        )).toBeFalsy();
     });
 
     it('Should render the footer correctly', () => {
