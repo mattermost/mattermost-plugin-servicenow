@@ -15,7 +15,6 @@ const mockSetResetRecordPanelStates = jest.fn();
 
 const recordTypePanelProps = {
     className: 'mockClassName',
-    error: 'mockError',
     onBack: mockOnBack,
     onContinue: mockOnContinue,
     actionBtnDisabled: true,
@@ -32,6 +31,7 @@ describe('Record Type Panel', () => {
         component = shallow(
             <RecordTypePanel
                 {...recordTypePanelProps}
+                error={'mockError'}
             />);
     });
 
@@ -51,8 +51,14 @@ describe('Record Type Panel', () => {
 
     it('Should render the error correctly', () => {
         expect(component.contains(
-            <ModalSubtitleAndError error={recordTypePanelProps.error}/>,
+            <ModalSubtitleAndError error={'mockError'}/>,
         )).toBeTruthy();
+    });
+
+    it('Should not render the error, if error is not passed', () => {
+        expect(component.contains(
+            <ModalSubtitleAndError/>,
+        )).toBeFalsy();
     });
 
     it('Should fire change event when dropdown value is changed', () => {
