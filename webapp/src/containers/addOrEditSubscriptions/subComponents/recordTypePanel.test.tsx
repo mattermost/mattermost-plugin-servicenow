@@ -32,10 +32,6 @@ describe('Record Type Panel', () => {
         component = shallow(<RecordTypePanel {...recordTypePanelProps}/>);
     });
 
-    afterEach(() => {
-        component.unmount();
-    });
-
     it('Should render correctly', () => {
         expect(component).toMatchSnapshot();
     });

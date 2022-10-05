@@ -24,10 +24,6 @@ describe('Download Button', () => {
         component = shallow(<DownloadButtons {...downloadButtonProps}/>);
     });
 
-    afterEach(() => {
-        component.unmount();
-    });
-
     it('Should render correctly', () => {
         expect(component).toMatchSnapshot();
     });

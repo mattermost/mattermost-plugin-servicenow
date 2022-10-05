@@ -30,10 +30,6 @@ describe('Subscription Type Panel', () => {
         component = shallow(<SubscriptionTypePanel {...subscriptionTypePanelProps}/>);
     });
 
-    afterEach(() => {
-        component.unmount();
-    });
-
     it('Should render correctly', () => {
         expect(component).toMatchSnapshot();
     });
