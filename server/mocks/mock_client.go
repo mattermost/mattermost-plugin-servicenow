@@ -129,29 +129,27 @@ func (_m *Client) EditSubscription(subscriptionID string, subscription *serializ
 	return r0, r1
 }
 
-// GetAllComments provides a mock function with given fields: recordID, limit, offset
-func (_m *Client) GetAllComments(recordID string, limit string, offset string) ([]*serializer.ServiceNowComment, int, error) {
-	ret := _m.Called(recordID, limit, offset)
+// GetAllComments provides a mock function with given fields: recordType, recordID
+func (_m *Client) GetAllComments(recordType string, recordID string) (string, int, error) {
+	ret := _m.Called(recordType, recordID)
 
-	var r0 []*serializer.ServiceNowComment
-	if rf, ok := ret.Get(0).(func(string, string, string) []*serializer.ServiceNowComment); ok {
-		r0 = rf(recordID, limit, offset)
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(recordType, recordID)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*serializer.ServiceNowComment)
-		}
+		r0 = ret.Get(0).(string)
 	}
 
 	var r1 int
-	if rf, ok := ret.Get(1).(func(string, string, string) int); ok {
-		r1 = rf(recordID, limit, offset)
+	if rf, ok := ret.Get(1).(func(string, string) int); ok {
+		r1 = rf(recordType, recordID)
 	} else {
 		r1 = ret.Get(1).(int)
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(string, string, string) error); ok {
-		r2 = rf(recordID, limit, offset)
+	if rf, ok := ret.Get(2).(func(string, string) error); ok {
+		r2 = rf(recordType, recordID)
 	} else {
 		r2 = ret.Error(2)
 	}

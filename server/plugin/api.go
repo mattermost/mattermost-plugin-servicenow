@@ -570,19 +570,28 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.ValidRecordTypesForSearching[recordType] {
+		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
 	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
-	page, perPage := GetPageAndPerPage(r)
-	comments, statusCode, err := client.GetAllComments(recordID, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	comments, statusCode, err := client.GetAllComments(recordType, recordID)
 	if err != nil {
 		p.API.LogError("Error in getting all comments", "Record ID", recordID, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting all comments. Error: %s", err.Error())})
 		return
 	}
 
+	page, perPage := GetPageAndPerPage(r)
+	commentsArray := ProcessComments(comments, page, perPage)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	result, err := json.Marshal(comments)
+	result, err := json.Marshal(commentsArray)
 	if err != nil {
 		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
 		_, _ = w.Write([]byte("[]"))

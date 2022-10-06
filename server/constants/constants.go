@@ -12,7 +12,6 @@ const (
 	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin\n" +
 		"You've successfully connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n"
 
-	ServiceNowCommentsTableName               = "sys_journal_field"
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
 	SysQueryParam                             = "sysparm_query"
