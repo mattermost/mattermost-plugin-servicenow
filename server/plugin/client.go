@@ -23,6 +23,7 @@ type Client interface {
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
 	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
 	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
+	GetAllComments(recordID, limit, offset string) ([]*serializer.ServiceNowComment, int, error)
 }
 
 type client struct {
@@ -172,7 +173,7 @@ func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset 
 	}
 
 	records := &serializer.ServiceNowPartialRecordsResult{}
-	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", tableName, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, records, queryParams)
 	if err != nil {
 		return nil, statusCode, err
@@ -187,11 +188,29 @@ func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.S
 	}
 
 	record := &serializer.ServiceNowRecordResult{}
-	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", tableName, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, sysID), nil, record, queryParams)
 	if err != nil {
 		return nil, statusCode, err
 	}
 
 	return record.Result, statusCode, nil
+}
+
+func (c *client) GetAllComments(recordID, limit, offset string) ([]*serializer.ServiceNowComment, int, error) {
+	query := fmt.Sprintf("element_id=%s^ORDERBYDESCsys_created_on", recordID)
+	queryParams := url.Values{
+		constants.SysQueryParam:       {query},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+	}
+
+	comments := &serializer.ServiceNowCommentsResult{}
+	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", constants.ServiceNowCommentsTableName, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, comments, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return comments.Result, statusCode, nil
 }

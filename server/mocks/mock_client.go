@@ -129,6 +129,36 @@ func (_m *Client) EditSubscription(subscriptionID string, subscription *serializ
 	return r0, r1
 }
 
+// GetAllComments provides a mock function with given fields: recordID, limit, offset
+func (_m *Client) GetAllComments(recordID string, limit string, offset string) ([]*serializer.ServiceNowComment, int, error) {
+	ret := _m.Called(recordID, limit, offset)
+
+	var r0 []*serializer.ServiceNowComment
+	if rf, ok := ret.Get(0).(func(string, string, string) []*serializer.ServiceNowComment); ok {
+		r0 = rf(recordID, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*serializer.ServiceNowComment)
+		}
+	}
+
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string, string, string) int); ok {
+		r1 = rf(recordID, limit, offset)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string, string, string) error); ok {
+		r2 = rf(recordID, limit, offset)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // GetAllSubscriptions provides a mock function with given fields: channelID, userID, subscriptionType, limit, offset
 func (_m *Client) GetAllSubscriptions(channelID string, userID string, subscriptionType string, limit string, offset string) ([]*serializer.SubscriptionResponse, int, error) {
 	ret := _m.Called(channelID, userID, subscriptionType, limit, offset)
