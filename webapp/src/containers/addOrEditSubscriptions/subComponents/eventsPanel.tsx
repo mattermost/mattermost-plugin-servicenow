@@ -1,6 +1,6 @@
 import React, {forwardRef} from 'react';
 
-import {ModalSubtitleAndError, ModalFooter, Checkbox} from '@brightscout/mattermost-ui-library';
+import {ModalSubtitleAndError, ModalFooter, Checkbox} from 'mattermost-ui-library';
 
 import {SubscriptionEvents, RecordTypeLabelMap, RecordType, SubscriptionType, SubscriptionEventLabels} from 'plugin_constants';
 
