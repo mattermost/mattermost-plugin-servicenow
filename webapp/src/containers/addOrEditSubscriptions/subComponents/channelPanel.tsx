@@ -4,7 +4,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from 'mattermost-ui-library';
+import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/mattermost-ui-library';
 
 import Constants from 'plugin_constants';
 

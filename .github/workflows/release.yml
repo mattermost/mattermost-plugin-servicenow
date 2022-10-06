@@ -19,13 +19,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-          registry-url: https://npm.pkg.github.com/
 
       - uses: actions/checkout@v2
-
-      - name: Create npmrc file
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > webapp/.npmrc
 
       - name: Cache go modules
         uses: actions/cache@v2
