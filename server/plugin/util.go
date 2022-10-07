@@ -19,21 +19,21 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 	var bulkSubscriptions strings.Builder
 	for _, subscription := range subscriptions {
 		if subscription.Type == constants.SubscriptionTypeRecord {
-			recordSubscriptions.WriteString(subscription.GetFormattedSubscription())
+			recordSubscriptions.WriteString(subscription.GetFormattedSubscription(subscription.UserName, subscription.ChannelName))
 		} else {
-			bulkSubscriptions.WriteString(subscription.GetFormattedSubscription())
+			bulkSubscriptions.WriteString(subscription.GetFormattedSubscription(subscription.UserName, subscription.ChannelName))
 		}
 	}
 
 	if bulkSubscriptions.Len() > 0 {
-		sb.WriteString("#### Bulk subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Events |\n| :----|:--------| :--------|")
+		sb.WriteString("#### Bulk subscriptions\n")
+		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|")
 		sb.WriteString(bulkSubscriptions.String())
 	}
 
 	if recordSubscriptions.Len() > 0 {
-		sb.WriteString("\n#### Record subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events |\n| :----|:--------| :--------| :-----| :--------|")
+		sb.WriteString("\n#### Record subscriptions\n")
+		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|")
 		sb.WriteString(recordSubscriptions.String())
 	}
 

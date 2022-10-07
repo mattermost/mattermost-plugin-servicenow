@@ -48,7 +48,7 @@ After that, this user will have the permission to add or manage subscriptions fr
 	disconnectErrorMessage                  = "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	disconnectSuccessMessage                = "Disconnected your ServiceNow account."
 	listSubscriptionsErrorMessage           = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
-	listSubscriptionsWaitMessage            = "Your subscriptions for this channel will be listed soon. Please wait."
+	listSubscriptionsWaitMessage            = "Your subscriptions will be listed soon. Please wait."
 	genericWaitMessage                      = "Your request is being processed. Please wait."
 	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
@@ -246,9 +246,31 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 	return ""
 }
 
-func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
+func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	if len(params) < 1 {
+		return "Invalid number of params for this command."
+	}
+
+	if params[0] != constants.FilterCreatedByMe && params[0] != constants.FilterCreatedByAnyone {
+		return fmt.Sprintf("Unknown filter %s", params[0])
+	}
+
+	userID := ""
+	channelID := args.ChannelId
+
+	if params[0] == constants.FilterCreatedByMe {
+		userID = args.UserId
+	}
+
+	if len(params) == 2 {
+		if params[1] != constants.FilterAllChannels {
+			return fmt.Sprintf("Unknown filter %s", params[1])
+		}
+		channelID = ""
+	}
+
 	go func() {
-		subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, args.UserId, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
 			p.API.LogError("Unable to get subscriptions", "Error", err.Error())
 			p.postCommandResponse(args, listSubscriptionsErrorMessage)
@@ -262,6 +284,22 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 
 		wg := sync.WaitGroup{}
 		for _, subscription := range subscriptions {
+			user, err := p.API.GetUser(subscription.UserID)
+			if err != nil {
+				p.API.LogError("User not found with user ID %d", subscription.UserID)
+				subscription.UserName = "N/A"
+			} else {
+				subscription.UserName = user.Username
+			}
+
+			channel, err := p.API.GetChannel(subscription.ChannelID)
+			if err != nil {
+				p.API.LogError("Channel not found with channel ID %d", subscription.ChannelID)
+				subscription.ChannelName = "N/A"
+			} else {
+				subscription.ChannelName = channel.DisplayName
+			}
+
 			if subscription.Type == constants.SubscriptionTypeBulk {
 				continue
 			}
@@ -365,6 +403,13 @@ func getAutocompleteData() *model.AutocompleteData {
 	subscriptions := model.NewAutocompleteData("subscriptions", "[command]", "Available commands: list, add, edit, delete")
 
 	subscribeList := model.NewAutocompleteData("list", "", "List the current channel subscriptions")
+	subscriptionCreatedByMe := model.NewAutocompleteData("me", "", "Created By Me")
+	subscriptionShowForAllChannels := model.NewAutocompleteData("all_channels", "", "Show for all channels or You can leave this argument to show for the current channel only")
+	subscriptionCreatedByMe.AddCommand(subscriptionShowForAllChannels)
+	subscribeList.AddCommand(subscriptionCreatedByMe)
+	subscriptionCreatedByAnyone := model.NewAutocompleteData("anyone", "", "Created By Anyone")
+	subscriptionCreatedByAnyone.AddCommand(subscriptionShowForAllChannels)
+	subscribeList.AddCommand(subscriptionCreatedByAnyone)
 	subscriptions.AddCommand(subscribeList)
 
 	subscriptionsAdd := model.NewAutocompleteData("add", "", "Subscribe to the record changes in ServiceNow")

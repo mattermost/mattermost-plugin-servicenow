@@ -25,7 +25,9 @@ type SubscriptionPayload struct {
 type SubscriptionResponse struct {
 	SysID              string `json:"sys_id"`
 	UserID             string `json:"user_id"`
+	UserName           string `json:"userName"`
 	ChannelID          string `json:"channel_id"`
+	ChannelName        string `json:"channelName"`
 	RecordType         string `json:"record_type"`
 	RecordID           string `json:"record_id"`
 	SubscriptionEvents string `json:"subscription_events"`
@@ -36,7 +38,7 @@ type SubscriptionResponse struct {
 	ShortDescription   string `json:"short_description"`
 }
 
-func (s *SubscriptionResponse) GetFormattedSubscription() string {
+func (s *SubscriptionResponse) GetFormattedSubscription(user, channel string) string {
 	var subscriptionEvents strings.Builder
 	events := strings.Split(s.SubscriptionEvents, ",")
 	for index, event := range events {
@@ -48,9 +50,9 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 	}
 
 	if s.Type == constants.SubscriptionTypeRecord {
-		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String())
+		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String(), user, channel)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String())
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), user, channel)
 }
 
 type SubscriptionResult struct {
