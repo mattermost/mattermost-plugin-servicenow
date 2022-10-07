@@ -16,7 +16,7 @@ const (
 	PathGetConnected           = "/connected"
 	PathGetConfig              = "/config"
 	PathShareRecord            = "/share/{channel_id:[A-Za-z0-9]+}"
-	PathGetCommentsForRecord   = "/comments/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
+	PathCommentsForRecord      = "/comments/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
 
 	// ServiceNow API paths
 	PathActivateSubscriptions  = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
