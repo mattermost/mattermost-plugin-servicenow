@@ -448,7 +448,7 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidSubscriptionRecordTypes[recordType] {
+	if !constants.ValidRecordTypesForSearching[recordType] {
 		p.API.LogError("Invalid record type while searching", "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return

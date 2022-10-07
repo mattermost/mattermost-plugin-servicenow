@@ -221,13 +221,13 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(true),
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.SubscriptionRecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
 					testutils.GetServiceNowPartialRecords(3), http.StatusOK, nil,
 				)
 			},
@@ -246,7 +246,7 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
 		"invalid search term": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(false),
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				return api
@@ -257,14 +257,14 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 			ExpectedErrorMessage: fmt.Sprintf("The search term must be at least %d characters long.", constants.CharacterThresholdForSearchingRecords),
 		},
 		"failed to get records": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(true),
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.SubscriptionRecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
 					nil, http.StatusForbidden, fmt.Errorf("new error"),
 				)
 			},
@@ -272,14 +272,14 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 			ExpectedCount:      -1,
 		},
 		"failed to marshal records": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(true),
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error")
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.SubscriptionRecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
 					nil, http.StatusOK, nil,
 				)
 
@@ -291,13 +291,13 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 			ExpectedCount:      0,
 		},
 		"no records fetched from ServiceNow": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(true),
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.SubscriptionRecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
 					nil, http.StatusOK, nil,
 				)
 			},
@@ -360,12 +360,12 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("GetRecordFromServiceNow", constants.SubscriptionRecordTypeIncident, testutils.GetServiceNowSysID()).Return(
+				client.On("GetRecordFromServiceNow", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
 					testutils.GetServiceNowRecord(), http.StatusOK, nil,
 				)
 			},
@@ -382,13 +382,13 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
 		"failed to get record": {
-			RecordType: constants.SubscriptionRecordTypeIncident,
+			RecordType: constants.RecordTypeIncident,
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("GetRecordFromServiceNow", constants.SubscriptionRecordTypeIncident, testutils.GetServiceNowSysID()).Return(
+				client.On("GetRecordFromServiceNow", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
 					nil, http.StatusForbidden, fmt.Errorf("new error"),
 				)
 			},
@@ -655,7 +655,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 					testutils.GetSubscriptions(4), http.StatusOK, nil,
 				)
 
-				client.On("GetRecordFromServiceNow", constants.SubscriptionRecordTypeProblem, "").Return(
+				client.On("GetRecordFromServiceNow", constants.RecordTypeProblem, "").Return(
 					testutils.GetServiceNowRecord(), http.StatusOK, nil,
 				)
 			},
@@ -718,7 +718,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 				client.On("GetAllSubscriptions", "", "", "", limit, offset).Return(
 					testutils.GetSubscriptions(4), http.StatusOK, nil,
 				)
-				client.On("GetRecordFromServiceNow", constants.SubscriptionRecordTypeProblem, "").Return(
+				client.On("GetRecordFromServiceNow", constants.RecordTypeProblem, "").Return(
 					testutils.GetServiceNowRecord(), http.StatusOK, nil,
 				)
 				monkey.Patch(json.Marshal, func(_ interface{}) ([]byte, error) {

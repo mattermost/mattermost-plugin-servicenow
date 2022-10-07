@@ -128,7 +128,7 @@ func GetSubscription(subscriptionType string) *serializer.SubscriptionResponse {
 		SysID:              GetServiceNowSysID(),
 		UserID:             GetID(),
 		ChannelID:          GetID(),
-		RecordType:         constants.SubscriptionRecordTypeProblem,
+		RecordType:         constants.RecordTypeProblem,
 		SubscriptionEvents: constants.SubscriptionEventPriority + "," + constants.SubscriptionEventState,
 		IsActive:           "true",
 		Type:               subscriptionType,
