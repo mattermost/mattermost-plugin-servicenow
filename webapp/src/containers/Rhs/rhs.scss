@@ -1,9 +1,8 @@
 @import "../../styles/abstract/variables";
+@import "@brightscout/mattermost-ui-library/build/styles/abstract/_mixins";
 
 .rhs-content {
-  padding: 15px 12px 12px;
   height: calc(100% - #{$rhs-header-height});
-  position: relative;
 
   &__cards-container {
     height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
@@ -32,39 +31,11 @@
 }
 
 .rhs-btn-container {
-  position: fixed;
-  left: 1px;
-  right: 0;
-  z-index: 1;
-  bottom: 0;
-  background: var(--center-channel-bg);
-  padding: 12px 12px 12px 11px;
+  @include positioning(fixed, "", 0, 0, 1px, 1);
+  padding-left: 11px;
   box-shadow: 9px 2px 5px 5px var(--center-channel-bg);
 }
 
 .rhs-btn {
   width: 100%;
-}
-
-.delete-confirmation-modal {
-  .modal__error {
-    margin-bottom: 16px;
-    text-align: left;
-  }
-
-  &__text {
-    margin: 0 0 16px;
-  }
-
-  .modal__footer {
-    border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
-    padding: 12px 15px;
-    flex-direction: row-reverse !important;
-    justify-content: flex-start !important;
-
-    .modal__confirm-btn {
-      margin: 0 0 0 16px;
-      width: unset;
-    }
-  }
 }

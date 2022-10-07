@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-type ConnectedState = {
+export type ConnectedState = {
     connected: boolean;
 };
 
