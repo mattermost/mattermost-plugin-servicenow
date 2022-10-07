@@ -113,3 +113,8 @@ type ConfigData = {
     WebhookSecret: string;
     ServiceNowUpdateSetDownload: string;
 }
+
+interface PaginationQueryParams {
+    page: number;
+    per_page: number;
+}

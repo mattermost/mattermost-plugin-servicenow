@@ -36,6 +36,11 @@ const Rhs = (): JSX.Element => {
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
+    const [paginationQueryParams, setPaginationQueryParams] = useState<PaginationQueryParams>({
+        page: Constants.DefaultPage,
+        per_page: Constants.DefaultPageSize,
+    });
+    const [subscriptionList, setSubscriptionList] = useState<SubscriptionData[]>([]);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
@@ -47,24 +52,32 @@ const Rhs = (): JSX.Element => {
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Fetch all the subscriptions from the API
-    useEffect(() => {
-        if (!showAllSubscriptions) {
-            return;
-        }
-        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
-        setFetchSubscriptionParams(subscriptionParams);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
-    }, [showAllSubscriptions]);
+    // Reset the page params and empty the subscription list
+    const resetStates = useCallback(() => {
+        setPaginationQueryParams(() => ({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize}));
+        setSubscriptionList(() => []);
+    }, []);
 
-    // Fetch subscriptions from the API if the active channel changes or showAllSubscription is reset
+    // Increase the page number by 1
+    const handlePagination = () => {
+        setPaginationQueryParams({...paginationQueryParams, page: paginationQueryParams.page + 1,
+        });
+    };
+
+    // Fetch the subscriptions from the API
     useEffect(() => {
-        if (showAllSubscriptions) {
-            return;
+        const subscriptionParams: FetchSubscriptionsParams = {page: paginationQueryParams.page, per_page: paginationQueryParams.per_page};
+        if (!showAllSubscriptions) {
+            subscriptionParams.channel_id = currentChannelId;
         }
-        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize, channel_id: currentChannelId};
+
         setFetchSubscriptionParams(subscriptionParams);
         makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
+    }, [paginationQueryParams]);
+
+    // Reset states on changing channel or using toggle
+    useEffect(() => {
+        resetStates();
     }, [currentChannelId, showAllSubscriptions]);
 
     // Fetch subscriptions from the API when refetch is set
@@ -73,13 +86,7 @@ const Rhs = (): JSX.Element => {
             return;
         }
 
-        const subscriptionParams: FetchSubscriptionsParams = {page: Constants.DefaultPage, per_page: Constants.DefaultPageSize};
-
-        if (!showAllSubscriptions) {
-            subscriptionParams.channel_id = currentChannelId;
-        }
-        setFetchSubscriptionParams(subscriptionParams);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
+        resetStates();
         dispatch(resetRefetch());
     }, [refetchSubscriptions]);
 
@@ -174,24 +181,30 @@ const Rhs = (): JSX.Element => {
                 setSubscriptionsAuthorized(true);
             }
         }
-    }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess]);
+
+        if (!subscriptionsState.isLoading && subscriptionsState.isSuccess) {
+            setSubscriptionList([...subscriptionList, ...subscriptions]);
+        }
+    }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess, getSubscriptionsState().isLoading]);
 
     const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
     const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
         <div className='rhs-content position-relative padding-top-15 padding-bottom-12 padding-h-12'>
-            {subscriptionsLoading && <CircularLoader/>}
+            {subscriptionsLoading && !paginationQueryParams.page && <CircularLoader/>}
             {connected && subscriptionsEnabled && subscriptionsAuthorized && (
                 <>
                     <RhsData
                         showAllSubscriptions={showAllSubscriptions}
                         setShowAllSubscriptions={setShowAllSubscriptions}
-                        subscriptions={subscriptions}
+                        subscriptionList={subscriptionList}
                         loadingSubscriptions={subscriptionsLoading}
                         handleEditSubscription={handleEditSubscription}
                         handleDeleteClick={handleDeleteClick}
                         error={getSubscriptionsState().error?.message}
                         isCurrentUserSysAdmin={isCurrentUserSysAdmin}
+                        paginationQueryParams={paginationQueryParams}
+                        handlePagination={handlePagination}
                     />
                     {toBeDeleted && (
                         <ConfirmationDialog

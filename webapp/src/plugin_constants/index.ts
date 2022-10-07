@@ -18,7 +18,7 @@ const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from t
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
-const DefaultPageSize = 100;
+const DefaultPageSize = 20;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
@@ -31,6 +31,7 @@ const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
+const NoSubscriptionPresent = 'No more subscriptions present.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -198,4 +199,5 @@ export default {
     DeleteSubscriptionMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
+    NoSubscriptionPresent,
 };
