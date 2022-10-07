@@ -139,9 +139,18 @@ func ProcessComments(comments string, page, perPage int) []string {
 	}
 
 	arr := strings.Split(comments, "\n\n")
-	// Here, we don't want the last element of the array because it will always be an empty string
+	// We don't want the last element of the array because it will always be an empty string
 	arr = arr[:len(arr)-1]
 
 	startingIndex := page * perPage
-	return arr[startingIndex : startingIndex+perPage]
+	if startingIndex >= len(arr) {
+		return []string{}
+	}
+
+	endIndex := len(arr)
+	if startingIndex+perPage < endIndex {
+		endIndex = startingIndex + perPage
+	}
+
+	return arr[startingIndex:endIndex]
 }
