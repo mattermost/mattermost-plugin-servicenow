@@ -572,7 +572,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.ValidRecordTypesForSearching[recordType] {
-		p.API.LogError("Invalid record type while trying to get record", "Record type", recordType)
+		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
