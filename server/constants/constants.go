@@ -77,6 +77,8 @@ const (
 
 const (
 	ErrorInvalidRecordType = "Invalid record type"
+	ErrorInvalidTeamID     = "Invalid team ID"
+	ErrorInvalidChannelID  = "Invalid channel ID"
 	ErrorNotAuthorized     = "Not authorized"
 	ErrorGeneric           = "Something went wrong."
 )
