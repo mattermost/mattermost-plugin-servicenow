@@ -106,7 +106,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 			if errors.Is(err, ErrNotFound) {
 				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDNotConnected, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorNotConnected})
 			} else {
-				p.API.LogError("Unable to get user", "Error", err.Error())
+				p.API.LogError("Unable to get the user", "Error", err.Error())
 				p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s Error: %s", constants.ErrorGeneric, err.Error())})
 			}
 			return
@@ -554,7 +554,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
 	user, userErr := p.API.GetUser(userID)
 	if userErr != nil {
-		p.API.LogError("Unable to get user", "UserID", userID, "Error", userErr.Error())
+		p.API.LogError("Unable to get the user", "UserID", userID, "Error", userErr.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGeneric})
 		return
 	}
