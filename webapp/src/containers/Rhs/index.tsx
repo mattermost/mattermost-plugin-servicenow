@@ -52,7 +52,7 @@ const Rhs = (): JSX.Element => {
         return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Reset the page params and empty the subscription list
+    // Reset the pagination params and empty the subscription list
     const resetStates = useCallback(() => {
         setPaginationQueryParams(() => ({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize}));
         setSubscriptionList(() => []);
@@ -75,7 +75,7 @@ const Rhs = (): JSX.Element => {
         makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
     }, [paginationQueryParams]);
 
-    // Reset states on changing channel or using toggle
+    // Reset states on changing channel or using toggle switch
     useEffect(() => {
         resetStates();
     }, [currentChannelId, showAllSubscriptions]);
