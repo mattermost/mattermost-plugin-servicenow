@@ -3,12 +3,9 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 
-import ToggleSwitch from 'components/toggleSwitch';
-import EmptyState from 'components/emptyState';
-import SubscriptionCard from 'components/card/subscription';
+import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
 
 import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
-import {BellIcon} from 'containers/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -122,9 +119,9 @@ const RhsData = ({
                             />
                         ))}
                     </div>
-                    <div className='rhs-btn-container'>
+                    <div className='rhs-btn-container padding-12 channel-bg'>
                         <button
-                            className='btn btn-primary rhs-btn'
+                            className='btn btn-primary rhs-btn plugin-btn'
                             onClick={() => dispatch(showAddModal())}
                         >
                             {'Add Subscription'}

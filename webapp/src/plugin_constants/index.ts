@@ -16,7 +16,7 @@ const RightSidebarHeader = 'Subscriptions';
 const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
-const DefaultCharThresholdToShowSuggestions = 4;
+const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
 const DefaultPageSize = 100;
 const ApiErrorIdNotConnected = 'not_connected';
@@ -25,6 +25,12 @@ const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 const GeneralErrorMessage = 'Something went wrong';
 const GeneralErrorSubtitleForUser = 'Please contact your system administrator.';
 const GeneralErrorSubtitleForAdmin = 'Please check the server logs.';
+const SubscriptionAddedMsg = 'Subscription added successfully!';
+const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
+const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
+const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
+const CharThresholdToSuggestChannel = 0;
+const RequiredMsg = 'Required';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -150,11 +156,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
 };
 
 export const PanelDefaultHeights = {
-    channelPanel: 151,
+    channelPanel: 210,
     subscriptionTypePanel: 195,
-    recordTypePanel: 195,
-    searchRecordPanel: 203,
-    searchRecordPanelExpanded: 372,
+    recordTypePanel: 210,
+    searchRecordPanel: 210,
+    searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
     panelHeader: 65,
@@ -186,4 +192,10 @@ export default {
     GeneralErrorMessage,
     GeneralErrorSubtitleForUser,
     GeneralErrorSubtitleForAdmin,
+    SubscriptionAddedMsg,
+    SubscriptionUpdatedMsg,
+    DeleteSubscriptionHeading,
+    DeleteSubscriptionMsg,
+    CharThresholdToSuggestChannel,
+    RequiredMsg,
 };
