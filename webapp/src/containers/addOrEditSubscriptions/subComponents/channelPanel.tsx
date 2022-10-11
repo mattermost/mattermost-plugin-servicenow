@@ -22,6 +22,7 @@ type ChannelPanelProps = {
     setApiResponseValid: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
     setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
+    editing?: boolean;
 }
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
@@ -35,28 +36,30 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setApiError,
     setApiResponseValid,
     setChannelOptions,
+    editing = false,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
     const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
     const [validationFailed, setValidationFailed] = useState(false);
     const {makeApiRequest, getApiState} = usePluginApi();
     const {entities} = useSelector((state: GlobalState) => state);
+    const [autoSuggestDefaultValue, setAutoSuggestDefaultValue] = useState<Record<string, string>>();
 
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
         return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
     };
 
+    const mapChannelsToSuggestions = useCallback((channels: ChannelData[]): Array<Record<string, string>> => channels.map((ch) => ({
+        channelName: ch.display_name,
+        channelType: ch.type,
+        channelID: ch.id,
+    })), []);
+
     // Set the suggestions when the input value of the auto-suggest changes;
     useEffect(() => {
         const channelsToSuggest = getChannelState().data?.filter((ch) => ch.display_name.toLowerCase().includes(channelAutoSuggestValue.toLowerCase())) || [];
-        setChannelSuggestions([
-            ...channelsToSuggest.map((ch) => ({
-                channelName: ch.display_name,
-                channelType: ch.type,
-                channelID: ch.id,
-            })),
-        ]);
+        setChannelSuggestions(mapChannelsToSuggestions(channelsToSuggest));
     }, [channelAutoSuggestValue, getChannelState().isSuccess]);
 
     useEffect(() => {
@@ -102,6 +105,13 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         }
     }, [channel]);
 
+    // Provide the default value when subscription is being edited
+    useEffect(() => {
+        if (editing && getChannelState().isSuccess) {
+            setAutoSuggestDefaultValue(mapChannelsToSuggestions(getChannelState()?.data?.filter((ch) => ch.id === channel) as unknown as ChannelData[])?.[0]);
+        }
+    }, [editing, getChannelState().isSuccess]);
+
     // Handle action when the continue button is clicked
     const handleContinue = () => {
         if (!channel) {
@@ -123,7 +133,10 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     ), []);
 
     // Set the channelID when any of the suggestion is selected
-    const handleChannelSelection = (channelSuggestion: Record<string, string> | null) => setChannel(channelSuggestion?.channelID || null);
+    const handleChannelSelection = (channelSuggestion: Record<string, string> | null) => {
+        setChannelAutoSuggestValue(channelSuggestion?.channelName || '');
+        setChannel(channelSuggestion?.channelID || null);
+    };
 
     return (
         <div
@@ -145,6 +158,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                     disabled={getChannelState().isLoading}
                     loadingSuggestions={getChannelState().isLoading}
                     charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
+                    defaultValue={autoSuggestDefaultValue}
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>

@@ -351,6 +351,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     channelOptions={channelOptions}
                     setChannelOptions={setChannelOptions}
                     actionBtnDisabled={showModalLoader}
+                    editing={Boolean(subscriptionData)}
                 />
                 <SubscriptionTypePanel
                     className={`
