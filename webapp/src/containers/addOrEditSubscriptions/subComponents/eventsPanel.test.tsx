@@ -23,7 +23,8 @@ const eventsPanelProps = {
     className: 'mockClassName',
     onBack: mockOnBack,
     onContinue: mockOnContinue,
-    actionBtnDisabled: true,
+    continueBtnDisabled: true,
+    backBtnDisabled: true,
     recordType: RecordType.INCIDENT,
     subscriptionEvents: mockSubscriptionEvents,
     setSubscriptionEvents: mockSetSubscriptionEvents,
@@ -110,8 +111,8 @@ describe('Events Panel', () => {
                 onConfirm={eventsPanelProps.onContinue}
                 confirmBtnText='Continue'
                 cancelBtnText='Back'
-                confirmDisabled={eventsPanelProps.actionBtnDisabled}
-                cancelDisabled={eventsPanelProps.actionBtnDisabled}
+                confirmDisabled={eventsPanelProps.continueBtnDisabled}
+                cancelDisabled={eventsPanelProps.backBtnDisabled}
             />,
         )).toBeTruthy();
     });
