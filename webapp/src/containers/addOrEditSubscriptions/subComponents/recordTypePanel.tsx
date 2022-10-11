@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordTypeLabelMap, RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;
@@ -16,38 +16,8 @@ type RecordTypePanelProps = {
     setResetRecordPanelStates: (reset: boolean) => void;
     showFooter?: boolean;
     placeholder?: string;
+    recordTypeOptions: DropdownOptionType[];
 }
-
-const recordTypeOptions: DropdownOptionType[] = [
-    {
-        label: RecordTypeLabelMap[RecordType.INCIDENT],
-        value: RecordType.INCIDENT,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.PROBLEM],
-        value: RecordType.PROBLEM,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
-        value: RecordType.CHANGE_REQUEST,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.KNOWLEDGE],
-        value: RecordType.KNOWLEDGE,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.TASK],
-        value: RecordType.TASK,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_TASK],
-        value: RecordType.CHANGE_TASK,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.FOLLOW_ON_TASK],
-        value: RecordType.FOLLOW_ON_TASK,
-    },
-];
 
 const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     className,
@@ -60,6 +30,7 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     setResetRecordPanelStates,
     showFooter = false,
     placeholder,
+    recordTypeOptions,
 }: RecordTypePanelProps, recordTypePanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 

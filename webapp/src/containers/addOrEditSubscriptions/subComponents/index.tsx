@@ -6,7 +6,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType, RecordTypeLabelMap} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -25,6 +25,21 @@ type AddOrEditSubscriptionProps = {
     close: () => void;
     subscriptionData?: EditSubscriptionData;
 };
+
+const recordTypeOptions: DropdownOptionType[] = [
+    {
+        label: RecordTypeLabelMap[RecordType.INCIDENT],
+        value: RecordType.INCIDENT,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.PROBLEM],
+        value: RecordType.PROBLEM,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
+        value: RecordType.CHANGE_REQUEST,
+    },
+];
 
 const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscriptionProps) => {
     // Channel panel values
@@ -381,6 +396,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setRecordType={setRecordType}
                     setResetRecordPanelStates={setResetRecordPanelStates}
                     showFooter={true}
+                    recordTypeOptions={recordTypeOptions}
                 />
                 <SearchRecordsPanel
                     className={`
