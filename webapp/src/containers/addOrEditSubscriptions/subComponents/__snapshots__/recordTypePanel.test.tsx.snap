@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Record Type Panel Should render correctly 1`] = `
+<div
+  className="modal__body wizard__secondary-panel mockClassName"
+>
+  <div
+    className="padding-h-12 padding-v-20 wizard__body-container"
+  >
+    <Dropdown
+      error={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "Incident",
+            "value": "incident",
+          },
+          Object {
+            "label": "Problem",
+            "value": "problem",
+          },
+          Object {
+            "label": "Change Request",
+            "value": "change_request",
+          },
+        ]
+      }
+      placeholder="Select Record Type"
+      required={true}
+      value="incident"
+    />
+    <ModalSubtitleAndError
+      error="mockError"
+    />
+  </div>
+  <ModalFooter
+    cancelBtnText="Back"
+    cancelDisabled={true}
+    confirmBtnText="Continue"
+    confirmDisabled={true}
+    onConfirm={[Function]}
+    onHide={[MockFunction]}
+  />
+</div>
+`;
