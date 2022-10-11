@@ -414,7 +414,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionType={subscriptionType as SubscriptionType}
                     record={recordValue}
                     recordType={recordType as RecordType}
-                    actionBtnDisabled={showModalLoader}
+                    continueBtnDisabled={showModalLoader || !subscriptionEvents.length}
+                    backBtnDisabled={showModalLoader}
                 />
                 <ResultPanel
                     className={`${(successPanelOpen || (apiError && apiResponseValid)) && 'wizard__secondary-panel--slide-in'}`}
