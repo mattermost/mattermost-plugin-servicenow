@@ -83,10 +83,13 @@ const (
 	ErrorEmptyEncryptionSecret            = "encryption secret should not be empty"
 	ErrorEmptyWebhookSecret               = "webhook secret should not be empty"
 	ErrorInvalidRecordType                = "Invalid record type"
+	ErrorInvalidTeamID                    = "Invalid team ID"
+	ErrorInvalidChannelID                 = "Invalid channel ID"
 	ErrorNotAuthorized                    = "Not authorized"
 	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
 	ErrorMissingUserCodeState             = "missing user, code or state"
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
+	ErrorGeneric                          = "Something went wrong."
 )
 
 var (
@@ -133,6 +136,19 @@ var (
 		RecordTypeProblem:       "Problem",
 		RecordTypeIncident:      "Incident",
 		RecordTypeChangeRequest: "Change Request",
+	}
+
+	RecordTypesSupportingComments = map[string]bool{
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+		RecordTypeTask:          true,
+		RecordTypeChangeTask:    true,
+		RecordTypeFollowOnTask:  true,
+	}
+
+	RecordTypesSupportingStateUpdation = map[string]bool{
+		RecordTypeIncident: true,
 	}
 )
 
