@@ -173,7 +173,7 @@ func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset 
 	}
 
 	records := &serializer.ServiceNowPartialRecordsResult{}
-	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", tableName, 1)
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", tableName, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, records, queryParams)
 	if err != nil {
 		return nil, statusCode, err
@@ -188,7 +188,7 @@ func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.S
 	}
 
 	record := &serializer.ServiceNowRecordResult{}
-	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", tableName, 1)
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", tableName, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, sysID), nil, record, queryParams)
 	if err != nil {
 		return nil, statusCode, err
@@ -204,7 +204,7 @@ func (c *client) GetAllComments(recordType, recordID string) (string, int, error
 	}
 
 	comments := &serializer.ServiceNowCommentsResult{}
-	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", recordType, 1)
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, recordID), nil, comments, queryParams)
 	if err != nil {
 		return "", statusCode, err

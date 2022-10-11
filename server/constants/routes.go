@@ -19,7 +19,7 @@ const (
 	PathGetCommentsForRecord   = "/comments/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
 
 	// ServiceNow API paths
-	PathActivateSubscriptions  = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
-	PathSubscriptionCRUD       = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
-	PathGetRecordsInServiceNow = "api/now/table/{tableName}"
+	PathActivateSubscriptions    = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
+	PathSubscriptionCRUD         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
+	PathGetRecordsFromServiceNow = "api/now/table/{tableName}"
 )
