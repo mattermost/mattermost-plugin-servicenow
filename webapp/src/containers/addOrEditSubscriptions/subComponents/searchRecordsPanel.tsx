@@ -20,6 +20,7 @@ type SearchRecordsPanelProps = {
     setRecordValue: (value: string) => void;
     suggestionChosen: boolean;
     setSuggestionChosen: (suggestion: boolean) => void;
+    setRecordData?: (value: RecordData | null) => void;
     recordType: RecordType | null;
     setApiError: (error: string | null) => void;
     setApiResponseValid: (valid: boolean) => void;
@@ -28,6 +29,8 @@ type SearchRecordsPanelProps = {
     setRecordId: (recordId: string | null) => void;
     resetStates: boolean;
     setResetStates: (reset: boolean) => void;
+    showFooter?: boolean;
+    disabled?: boolean;
 }
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({
@@ -40,6 +43,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     setRecordValue,
     suggestionChosen,
     setSuggestionChosen,
+    setRecordData,
     recordType,
     setApiError,
     setApiResponseValid,
@@ -47,6 +51,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     recordId,
     resetStates,
     setResetStates,
+    showFooter = false,
+    disabled = false,
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
@@ -122,8 +128,12 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     // Set the default "inputValue" when the subscription is being edited
     useEffect(() => {
+        const recordDataState = getRecordDataState();
+        if (setRecordData) {
+            setRecordData(recordDataState.data);
+        }
+
         if (recordId && !recordValue) {
-            const recordDataState = getRecordDataState();
             if (recordDataState.data) {
                 setRecordValue(`${recordDataState.data.number}: ${recordDataState.data.short_description}`);
                 setDisabledInput(false);
@@ -232,10 +242,10 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     return (
         <div
-            className={`modal__body search-panel wizard__secondary-panel ${className}`}
+            className={className}
             ref={searchRecordPanelRef}
         >
-            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+            <div className={`padding-h-12 ${showFooter ? 'padding-v-20 wizard__body-container' : 'padding-top-10'}`}>
                 <AutoSuggest
                     inputValue={recordValue}
                     onInputValueChange={handleInputChange}
@@ -245,14 +255,15 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                         suggestions,
                         renderValue: getInputValue,
                     }}
+                    required={true}
                     error={validationMsg || validationFailed}
                     className='search-panel__auto-suggest margin-bottom-30'
                     loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
                     charThresholdToShowSuggestions={Constants.DefaultCharThresholdToShowSuggestions}
-                    disabled={disabledInput}
+                    disabled={disabledInput || disabled}
                 />
                 {suggestionChosen && (
-                    <ul className='search-panel__description margin-top-25 padding-0 font-14'>
+                    <ul className='search-panel__description margin-top-25 padding-left-15 font-14'>
                         {
                             Constants.RecordDataLabelConfig.map((header) => (
                                 <li
@@ -268,14 +279,16 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 )}
                 <ModalSubtitleAndError error={error}/>
             </div>
-            <ModalFooter
-                onHide={onBack}
-                onConfirm={handleContinue}
-                cancelBtnText='Back'
-                confirmBtnText='Continue'
-                confirmDisabled={actionBtnDisabled || getRecordDataState().isLoading}
-                cancelDisabled={actionBtnDisabled || getRecordDataState().isLoading}
-            />
+            {showFooter && (
+                <ModalFooter
+                    onHide={onBack}
+                    onConfirm={handleContinue}
+                    cancelBtnText='Back'
+                    confirmBtnText='Continue'
+                    confirmDisabled={actionBtnDisabled || getRecordDataState().isLoading}
+                    cancelDisabled={actionBtnDisabled || getRecordDataState().isLoading}
+                />
+            )}
         </div>
     );
 });

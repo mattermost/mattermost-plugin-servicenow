@@ -12,6 +12,7 @@ import usePluginApi from 'hooks/usePluginApi';
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 
 import Utils from 'utils';
+import {showModal as showRecordModal} from 'reducers/shareRecordModal';
 
 type RhsDataProps = {
     showAllSubscriptions: boolean;
@@ -28,6 +29,10 @@ const BulkSubscriptionHeaders: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incidents',
     [RecordType.PROBLEM]: 'Problems',
     [RecordType.CHANGE_REQUEST]: 'Change Requests',
+    [RecordType.KNOWLEDGE]: 'Knowledge',
+    [RecordType.TASK]: 'Task',
+    [RecordType.CHANGE_TASK]: 'Change Task',
+    [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
 
 const RhsData = ({
@@ -91,6 +96,13 @@ const RhsData = ({
 
     return (
         <>
+            <button
+                className='btn btn-primary margin-bottom-10'
+                onClick={() => dispatch(showRecordModal())}
+            >
+                <i className='icon icon-magnify icon-16 margin-right-5'/>
+                {'Search & Share records'}
+            </button>
             <ToggleSwitch
                 active={showAllSubscriptions}
                 onChange={setShowAllSubscriptions}

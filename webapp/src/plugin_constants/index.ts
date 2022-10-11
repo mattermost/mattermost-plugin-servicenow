@@ -50,6 +50,10 @@ export enum RecordType {
     INCIDENT = 'incident',
     PROBLEM = 'problem',
     CHANGE_REQUEST = 'change_request',
+    KNOWLEDGE = 'kb_knowledge',
+    TASK = 'task',
+    CHANGE_TASK = 'change_task',
+    FOLLOW_ON_TASK = 'cert_follow_on_task',
 }
 
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
@@ -79,6 +83,10 @@ export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
+    [RecordType.KNOWLEDGE]: 'Knowledge',
+    [RecordType.TASK]: 'Task',
+    [RecordType.CHANGE_TASK]: 'Change Task',
+    [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
@@ -152,6 +160,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         path: '/config',
         method: 'GET',
         apiServiceName: 'getConfig',
+    },
+    shareRecord: {
+        path: '/share',
+        method: 'POST',
+        apiServiceName: 'shareRecord',
     },
 };
 

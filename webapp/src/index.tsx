@@ -13,6 +13,7 @@ import reducer from 'reducers';
 import Rhs from 'containers/Rhs';
 import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
+import ShareRecords from 'containers/shareRecords';
 
 import Constants from 'plugin_constants';
 
@@ -32,6 +33,7 @@ export default class Plugin {
         registry.registerReducer(reducer);
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
+        registry.registerRootComponent(ShareRecords);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);

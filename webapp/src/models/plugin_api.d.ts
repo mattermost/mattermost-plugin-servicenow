@@ -113,3 +113,14 @@ type ConfigData = {
     WebhookSecret: string;
     ServiceNowUpdateSetDownload: string;
 }
+
+type ShareRecordPayload = {
+    record_type: RecordType;
+    record_id: string;
+    short_description: string;
+    state: string;
+    priority: string;
+    assigned_to: string | {display_value: string, link: string};
+    assignment_group: string | {display_value: string, link: string};
+    channel_id: string;
+}
