@@ -24,17 +24,21 @@ const (
 	UpdateSetVersion            = "v1.0"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
-	SubscriptionTypeRecord              = "record"
-	SubscriptionTypeBulk                = "object"
-	SubscriptionRecordTypeProblem       = "problem"
-	SubscriptionRecordTypeIncident      = "incident"
-	SubscriptionRecordTypeChangeRequest = "change_request"
-	SubscriptionEventPriority           = "priority"
-	SubscriptionEventState              = "state"
-	SubscriptionEventCommented          = "commented"
-	SubscriptionEventAssignedTo         = "assigned_to"
-	SubscriptionEventAssignmentGroup    = "assignment_group"
-	SubscriptionEventCreated            = "created"
+	SubscriptionTypeRecord           = "record"
+	SubscriptionTypeBulk             = "object"
+	RecordTypeProblem                = "problem"
+	RecordTypeIncident               = "incident"
+	RecordTypeChangeRequest          = "change_request"
+	RecordTypeKnowledge              = "kb_knowledge"
+	RecordTypeTask                   = "task"
+	RecordTypeChangeTask             = "change_task"
+	RecordTypeFollowOnTask           = "cert_follow_on_task"
+	SubscriptionEventPriority        = "priority"
+	SubscriptionEventState           = "state"
+	SubscriptionEventCommented       = "commented"
+	SubscriptionEventAssignedTo      = "assigned_to"
+	SubscriptionEventAssignmentGroup = "assignment_group"
+	SubscriptionEventCreated         = "created"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -79,10 +83,13 @@ const (
 	ErrorEmptyEncryptionSecret            = "encryption secret should not be empty"
 	ErrorEmptyWebhookSecret               = "webhook secret should not be empty"
 	ErrorInvalidRecordType                = "Invalid record type"
+	ErrorInvalidTeamID                    = "Invalid team ID"
+	ErrorInvalidChannelID                 = "Invalid channel ID"
 	ErrorNotAuthorized                    = "Not authorized"
 	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
 	ErrorMissingUserCodeState             = "missing user, code or state"
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
+	ErrorGeneric                          = "Something went wrong."
 )
 
 var (
@@ -92,9 +99,19 @@ var (
 	}
 
 	ValidSubscriptionRecordTypes = map[string]bool{
-		SubscriptionRecordTypeIncident:      true,
-		SubscriptionRecordTypeProblem:       true,
-		SubscriptionRecordTypeChangeRequest: true,
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+	}
+
+	ValidRecordTypesForSearching = map[string]bool{
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+		RecordTypeKnowledge:     true,
+		RecordTypeTask:          true,
+		RecordTypeChangeTask:    true,
+		RecordTypeFollowOnTask:  true,
 	}
 
 	ValidSubscriptionEvents = map[string]bool{
@@ -116,9 +133,22 @@ var (
 	}
 
 	FormattedRecordTypes = map[string]string{
-		SubscriptionRecordTypeProblem:       "Problem",
-		SubscriptionRecordTypeIncident:      "Incident",
-		SubscriptionRecordTypeChangeRequest: "Change Request",
+		RecordTypeProblem:       "Problem",
+		RecordTypeIncident:      "Incident",
+		RecordTypeChangeRequest: "Change Request",
+	}
+
+	RecordTypesSupportingComments = map[string]bool{
+		RecordTypeIncident:      true,
+		RecordTypeProblem:       true,
+		RecordTypeChangeRequest: true,
+		RecordTypeTask:          true,
+		RecordTypeChangeTask:    true,
+		RecordTypeFollowOnTask:  true,
+	}
+
+	RecordTypesSupportingStateUpdation = map[string]bool{
+		RecordTypeIncident: true,
 	}
 )
 
