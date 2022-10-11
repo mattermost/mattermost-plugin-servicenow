@@ -19,9 +19,9 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 	var bulkSubscriptions strings.Builder
 	for _, subscription := range subscriptions {
 		if subscription.Type == constants.SubscriptionTypeRecord {
-			recordSubscriptions.WriteString(subscription.GetFormattedSubscription(subscription.UserName, subscription.ChannelName))
+			recordSubscriptions.WriteString(subscription.GetFormattedSubscription())
 		} else {
-			bulkSubscriptions.WriteString(subscription.GetFormattedSubscription(subscription.UserName, subscription.ChannelName))
+			bulkSubscriptions.WriteString(subscription.GetFormattedSubscription())
 		}
 	}
 

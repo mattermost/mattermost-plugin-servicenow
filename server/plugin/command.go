@@ -247,19 +247,16 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
-	if len(params) < 1 {
-		return "Invalid number of params for this command."
-	}
-
-	if params[0] != constants.FilterCreatedByMe && params[0] != constants.FilterCreatedByAnyone {
-		return fmt.Sprintf("Unknown filter %s", params[0])
-	}
-
-	userID := ""
+	userID := args.UserId
 	channelID := args.ChannelId
+	if len(params) >= 1 {
+		if params[0] != constants.FilterCreatedByMe && params[0] != constants.FilterCreatedByAnyone {
+			return fmt.Sprintf("Unknown filter %s", params[0])
+		}
 
-	if params[0] == constants.FilterCreatedByMe {
-		userID = args.UserId
+		if params[0] == constants.FilterCreatedByAnyone {
+			userID = ""
+		}
 	}
 
 	if len(params) == 2 {
@@ -284,22 +281,27 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 
 		wg := sync.WaitGroup{}
 		for _, subscription := range subscriptions {
-			user, err := p.API.GetUser(subscription.UserID)
-			if err != nil {
-				p.API.LogError("User not found with userID %d", subscription.UserID)
-				subscription.UserName = "N/A"
-			} else {
-				subscription.UserName = user.Username
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				user, err := p.API.GetUser(subscription.UserID)
+				if err != nil {
+					p.API.LogError("Error in getting user", "UserID", subscription.UserID)
+					subscription.UserName = "N/A"
+				} else {
+					subscription.UserName = user.Username
+				}
 
-			channel, err := p.API.GetChannel(subscription.ChannelID)
-			if err != nil {
-				p.API.LogError("Channel not found with channelID %d", subscription.ChannelID)
-				subscription.ChannelName = "N/A"
-			} else {
-				subscription.ChannelName = channel.DisplayName
-			}
+				channel, err := p.API.GetChannel(subscription.ChannelID)
+				if err != nil {
+					p.API.LogError("Error in getting channel", "ChannelID", subscription.ChannelID)
+					subscription.ChannelName = "N/A"
+				} else {
+					subscription.ChannelName = channel.DisplayName
+				}
+			}()
 
+			wg.Wait()
 			if subscription.Type == constants.SubscriptionTypeBulk {
 				continue
 			}
