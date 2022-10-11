@@ -109,6 +109,25 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
+const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
+    {
+        key: 'short_description',
+        label: 'Short Description',
+    }, {
+        key: 'workflow_state',
+        label: 'Workflow',
+    }, {
+        key: 'author',
+        label: 'Author',
+    }, {
+        key: 'kb_category',
+        label: 'Category',
+    }, {
+        key: 'kb_knowledge_base',
+        label: 'Knowledge Base',
+    },
+];
+
 // Map subscription events to texts to be shown in the UI(on cards)
 export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
     [SubscriptionEvents.CREATED]: 'New record created',
@@ -187,6 +206,7 @@ export default {
     HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
+    KnowledgeRecordDataLabelConfig,
     MMUSERID,
     SubscriptionsConfigErrorTitle,
     SubscriptionsConfigErrorSubtitleForAdmin,

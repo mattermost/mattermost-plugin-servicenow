@@ -60,6 +60,10 @@ type RecordData = {
     short_description: string;
     state: string;
     sys_id: string;
+    author: string | {display_value: string, link: string};
+    kb_category: string | {display_value: string, link: string};
+    kb_knowledge_base: string | {display_value: string, link: string};
+    workflow_state: string;
 }
 
 type CreateSubscriptionPayload = {
@@ -118,9 +122,13 @@ type ShareRecordPayload = {
     record_type: RecordType;
     record_id: string;
     short_description: string;
-    state: string;
-    priority: string;
-    assigned_to: string | {display_value: string, link: string};
-    assignment_group: string | {display_value: string, link: string};
+    state?: string;
+    priority?: string;
+    assigned_to?: string | {display_value: string, link: string};
+    assignment_group?: string | {display_value: string, link: string};
+    author?: string | {display_value: string, link: string};
+    kb_category?: string | {display_value: string, link: string};
+    kb_knowledge_base?: string | {display_value: string, link: string};
+    workflow_state?: string;
     channel_id: string;
 }

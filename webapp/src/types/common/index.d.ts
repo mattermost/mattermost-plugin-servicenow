@@ -36,7 +36,7 @@ type EditSubscriptionData = {
     id: string;
 }
 
-type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group';
+type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
 
 type RecordDataLabelConfigType = {
     key: RecordDataKeys;

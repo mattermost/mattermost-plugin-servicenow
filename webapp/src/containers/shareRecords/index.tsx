@@ -93,6 +93,10 @@ const ShareRecords = () => {
             priority: recordData?.priority || '',
             short_description: recordData?.short_description || '',
             state: recordData?.state || '',
+            author: recordData?.author || '',
+            kb_category: recordData?.kb_category || '',
+            kb_knowledge_base: recordData?.kb_knowledge_base || '',
+            workflow_state: recordData?.workflow_state || '',
         };
 
         setShareRecordPayload(payload);

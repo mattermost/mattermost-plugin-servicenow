@@ -264,8 +264,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 />
                 {suggestionChosen && (
                     <ul className='search-panel__description margin-top-25 padding-left-15 font-14'>
-                        {
-                            Constants.RecordDataLabelConfig.map((header) => (
+                        {recordType === RecordType.KNOWLEDGE ? (
+                            Constants.KnowledgeRecordDataLabelConfig?.map((header) => (
                                 <li
                                     key={header.key}
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
@@ -274,7 +274,17 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
                                 </li>
                             ))
-                        }
+                        ) : (
+                            Constants.RecordDataLabelConfig?.map((header) => (
+                                <li
+                                    key={header.key}
+                                    className='d-flex align-items-center search-panel__description-item margin-bottom-10'
+                                >
+                                    <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                </li>
+                            ))
+                        )}
                     </ul>
                 )}
                 <ModalSubtitleAndError error={error}/>
