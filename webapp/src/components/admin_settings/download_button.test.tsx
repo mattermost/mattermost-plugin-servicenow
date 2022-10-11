@@ -1,7 +1,7 @@
 import React from 'react';
 import {shallow, ShallowWrapper} from 'enzyme';
 
-import DownloadButtons from './download_button';
+import DownloadButton from './download_button';
 
 const downloadButtonProps = {
     id: 'mockId',
@@ -21,7 +21,7 @@ describe('Download Button', () => {
     let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
     beforeEach(() => {
-        component = shallow(<DownloadButtons {...downloadButtonProps}/>);
+        component = shallow(<DownloadButton {...downloadButtonProps}/>);
     });
 
     it('Should render correctly', () => {
