@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Events Panel Should render correctly 1`] = `
+<div
+  className="modal__body wizard__secondary-panel events-panel mockClassName"
+>
+  <div
+    className="padding-h-12 padding-v-20 wizard__body-container"
+  >
+    <div
+      className="events-panel__prev-data border-radius-8 padding-v-10 padding-h-25 margin-bottom-25"
+    >
+      <h4
+        className="events-panel__prev-data-header font-14 wt-400 margin-0"
+      >
+        Channel
+      </h4>
+      <p
+        className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+      >
+        mockChannelLabel
+      </p>
+      <h4
+        className="events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header"
+      >
+        Recordfalse
+      </h4>
+      <p
+        className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+      >
+        mockRecord
+      </p>
+    </div>
+    <label
+      className="events-panel__label font-16 margin-bottom-12 wt-400"
+    >
+      Available events:
+    </label>
+    <Checkbox
+      checked={false}
+      className="margin-bottom-20"
+      label="State changed"
+      onChange={[Function]}
+    />
+    <Checkbox
+      checked={false}
+      className="margin-bottom-20"
+      label="Priority changed"
+      onChange={[Function]}
+    />
+    <Checkbox
+      checked={false}
+      className="margin-bottom-20"
+      label="New comment"
+      onChange={[Function]}
+    />
+    <Checkbox
+      checked={false}
+      className="margin-bottom-20"
+      label="Assigned to changed"
+      onChange={[Function]}
+    />
+    <Checkbox
+      checked={false}
+      className="events-panel__checkbox"
+      label="Assignment group changed"
+      onChange={[Function]}
+    />
+    <ModalSubtitleAndError
+      error="mockError"
+    />
+  </div>
+  <ModalFooter
+    cancelBtnText="Back"
+    cancelDisabled={true}
+    confirmBtnText="Continue"
+    confirmDisabled={true}
+    onConfirm={[MockFunction]}
+    onHide={[MockFunction]}
+  />
+</div>
+`;

@@ -9,7 +9,8 @@ type EventsPanelProps = {
     error?: string;
     onContinue?: () => void;
     onBack?: () => void;
-    actionBtnDisabled?: boolean;
+    continueBtnDisabled?: boolean;
+    backBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
     subscriptionEvents: SubscriptionEvents[];
     setSubscriptionEvents: React.Dispatch<React.SetStateAction<SubscriptionEvents[]>>;
@@ -24,7 +25,8 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     error,
     onBack,
     onContinue,
-    actionBtnDisabled,
+    continueBtnDisabled,
+    backBtnDisabled,
     subscriptionEvents,
     setSubscriptionEvents,
     channel,
@@ -104,8 +106,8 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                 onConfirm={onContinue}
                 cancelBtnText='Back'
                 confirmBtnText='Continue'
-                confirmDisabled={actionBtnDisabled}
-                cancelDisabled={actionBtnDisabled}
+                confirmDisabled={continueBtnDisabled}
+                cancelDisabled={backBtnDisabled}
             />
         </div>
     );
