@@ -286,7 +286,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		for _, subscription := range subscriptions {
 			user, err := p.API.GetUser(subscription.UserID)
 			if err != nil {
-				p.API.LogError("User not found with user ID %d", subscription.UserID)
+				p.API.LogError("User not found with userID %d", subscription.UserID)
 				subscription.UserName = "N/A"
 			} else {
 				subscription.UserName = user.Username
@@ -294,7 +294,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 
 			channel, err := p.API.GetChannel(subscription.ChannelID)
 			if err != nil {
-				p.API.LogError("Channel not found with channel ID %d", subscription.ChannelID)
+				p.API.LogError("Channel not found with channelID %d", subscription.ChannelID)
 				subscription.ChannelName = "N/A"
 			} else {
 				subscription.ChannelName = channel.DisplayName
