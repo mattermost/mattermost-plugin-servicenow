@@ -46,6 +46,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
@@ -633,6 +634,40 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w)
+}
+
+func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.ValidRecordTypesForSearching[recordType] {
+		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	client := p.GetClientFromRequest(r)
+	states, statusCode, err := client.GetStatesFromServiceNow(recordType)
+	if err != nil {
+		p.API.LogError("Error in getting the states", "Record Type", recordType, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting the states. Error: %s", err.Error())})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	result, err := json.Marshal(states)
+	if err != nil {
+		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(result) == "null" {
+		_, _ = w.Write([]byte("[]"))
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func returnStatusOK(w http.ResponseWriter) {
