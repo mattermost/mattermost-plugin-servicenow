@@ -166,7 +166,7 @@ func (c *client) CheckForDuplicateSubscription(subscription *serializer.Subscrip
 }
 
 func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
-	query := fmt.Sprintf("%s LIKE%s ^OR %s STARTSWITH%s", constants.FieldShortDescription, constants.FieldNumber, searchTerm, searchTerm)
+	query := fmt.Sprintf("%s LIKE%s ^OR %s STARTSWITH%s", constants.FieldShortDescription, searchTerm, constants.FieldNumber, searchTerm)
 	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
 		constants.SysQueryParamLimit:  {limit},
