@@ -215,7 +215,7 @@ func (c *client) GetAllComments(recordType, recordID string) (string, int, error
 }
 
 func (c *client) AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error) {
-	url := strings.Replace(constants.PathGetRecordsInServiceNow, "{tableName}", recordType, 1)
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", url, recordID), payload, nil, nil)
 	return statusCode, err
 }
