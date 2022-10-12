@@ -18,7 +18,7 @@ import ShareRecords from 'containers/shareRecords';
 import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted} from 'websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal} from 'websocket';
 
 import App from './app';
 
@@ -44,6 +44,7 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_edit_subscription`, handleOpenEditSubscriptionModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_search_and_share_record`, handleOpenShareRecordModal(store));
     }
 }
 
