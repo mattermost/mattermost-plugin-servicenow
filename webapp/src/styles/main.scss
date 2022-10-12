@@ -1,4 +1,5 @@
-@import 'abstract/variables';
+@import "@brightscout/mattermost-ui-library/build/styles/main.scss";
 
-@import 'base/utils';
-@import 'base/common';
+@import "abstract/variables";
+
+@import "base/common";

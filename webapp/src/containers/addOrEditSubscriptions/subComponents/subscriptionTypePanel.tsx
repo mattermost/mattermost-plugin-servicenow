@@ -1,10 +1,8 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import Dropdown from 'components/dropdown';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
 
 type SubscriptionTypePanelProps = {
     className?: string;
@@ -60,18 +58,20 @@ const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelPr
 
     return (
         <div
-            className={`modal__body modal-body secondary-panel ${className}`}
+            className={`modal__body wizard__secondary-panel ${className}`}
             ref={subscriptionTypePanelRef}
         >
-            <Dropdown
-                placeholder='Select Subscription Type'
-                value={subscriptionType}
-                onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
-                options={subscriptionTypeOptions}
-                required={true}
-                error={validationFailed && 'Required'}
-            />
-            <ModalSubTitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 subscription-type-panel'>
+                <Dropdown
+                    placeholder='Select Subscription Type'
+                    value={subscriptionType}
+                    onChange={(newValue) => setSubscriptionType(newValue as SubscriptionType)}
+                    options={subscriptionTypeOptions}
+                    required={true}
+                    error={validationFailed && Constants.RequiredMsg}
+                />
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}
