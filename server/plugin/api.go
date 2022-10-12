@@ -582,6 +582,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	comments, statusCode, err := client.GetAllComments(recordType, recordID)
 	if err != nil {
+		// TODO: Move all the inline messages to constants package
 		p.API.LogError("Error in getting all comments", "Record ID", recordID, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting all comments. Error: %s", err.Error())})
 		return
