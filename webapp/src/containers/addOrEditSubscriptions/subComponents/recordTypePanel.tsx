@@ -1,10 +1,8 @@
 import React, {forwardRef, useState, useEffect} from 'react';
 
-import ModalSubTitleAndError from 'components/modal/subComponents/modalSubtitleAndError';
-import ModalFooter from 'components/modal/subComponents/modalFooter';
-import Dropdown from 'components/dropdown';
+import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import {RecordTypeLabelMap, RecordType} from 'plugin_constants';
+import Constants, {RecordTypeLabelMap, RecordType} from 'plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;
@@ -72,18 +70,20 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
 
     return (
         <div
-            className={`modal__body modal-body secondary-panel ${className}`}
+            className={`modal__body wizard__secondary-panel ${className}`}
             ref={recordTypePanelRef}
         >
-            <Dropdown
-                placeholder='Select Record Type'
-                value={recordType}
-                onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
-                options={recordTypeOptions}
-                required={true}
-                error={validationFailed && 'Required'}
-            />
-            <ModalSubTitleAndError error={error}/>
+            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+                <Dropdown
+                    placeholder='Select Record Type'
+                    value={recordType}
+                    onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
+                    options={recordTypeOptions}
+                    required={true}
+                    error={validationFailed && Constants.RequiredMsg}
+                />
+                <ModalSubtitleAndError error={error}/>
+            </div>
             <ModalFooter
                 onHide={onBack}
                 onConfirm={handleContinue}

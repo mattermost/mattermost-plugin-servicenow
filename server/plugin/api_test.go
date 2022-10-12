@@ -135,12 +135,12 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 		"invalid team id": {
 			TeamID: "testTeamID",
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogError", "Invalid team id").Return()
+				api.On("LogError", constants.ErrorInvalidTeamID).Return()
 				return api
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedCount:        -1,
-			ExpectedErrorMessage: "Invalid team id",
+			ExpectedErrorMessage: constants.ErrorInvalidTeamID,
 		},
 		"failed to get channels": {
 			TeamID: testutils.GetID(),

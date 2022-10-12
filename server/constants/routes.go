@@ -20,8 +20,8 @@ const (
 	PathGetStatesForRecordType = "/states/{record_type}"
 
 	// ServiceNow API paths
-	PathActivateSubscriptions   = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
-	PathSubscriptionCRUD        = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
-	PathGetRecordsInServiceNow  = "api/now/table/{tableName}"
-	PathGetStatesFromServiceNow = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
+	PathActivateSubscriptions    = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
+	PathSubscriptionCRUD         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
+	PathGetRecordsFromServiceNow = "api/now/table/{tableName}"
+	PathGetStatesFromServiceNow  = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
 )

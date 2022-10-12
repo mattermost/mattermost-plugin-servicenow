@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-type SubscriptionModalState = {
+export type SubscriptionModalState = {
     open: boolean;
 }
 
