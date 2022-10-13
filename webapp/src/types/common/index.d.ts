@@ -59,3 +59,8 @@ type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
     labelValuePairs?: Array<{label: string, value: string}>,
 }
+
+type CommentModalData = {
+    recordType: RecordType;
+    recordId: string;
+}

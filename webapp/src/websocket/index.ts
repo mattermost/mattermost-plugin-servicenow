@@ -8,6 +8,7 @@ import {setConnected} from 'reducers/connectedState';
 import {refetch} from 'reducers/refetchSubscriptions';
 import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
+import {showModal as showCommentModal} from 'reducers/commentModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
@@ -57,5 +58,17 @@ export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Recor
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
         }
+    };
+}
+
+export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (msg: WebsocketEventParams) => {
+        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        const {data} = msg;
+        const commentModalData: CommentModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showCommentModal(commentModalData) as Action);
     };
 }

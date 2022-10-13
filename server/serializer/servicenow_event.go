@@ -37,7 +37,7 @@ func ServiceNowEventFromJSON(data io.Reader) (*ServiceNowEvent, error) {
 	return se, nil
 }
 
-func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL string) *model.Post {
+func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginURL string) *model.Post {
 	post := &model.Post{
 		ChannelId: se.ChannelID,
 		UserId:    botID,
@@ -48,6 +48,28 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL string) *
 	}
 	if se.AssignmentGroup == "" {
 		se.AssignmentGroup = "N/A"
+	}
+
+	var actions []*model.PostAction
+	if constants.RecordTypesSupportingComments[se.RecordType] {
+		actions = append(actions, &model.PostAction{
+			Type: "button",
+			Name: "Add and view comments",
+			Integration: &model.PostActionIntegration{
+				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
+				Context: map[string]interface{}{
+					constants.ContextNameRecordType: se.RecordType,
+					constants.ContextNameRecordID:   se.RecordID,
+				},
+			},
+		})
+	}
+
+	if constants.RecordTypesSupportingStateUpdation[se.RecordType] {
+		actions = append(actions, &model.PostAction{
+			Type: "button",
+			Name: "Update State",
+		})
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
@@ -85,6 +107,7 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL string) *
 				Short: true,
 			},
 		},
+		Actions: actions,
 	}
 
 	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})

@@ -61,7 +61,7 @@ func ServiceNowRecordFromJSON(data io.Reader) (*ServiceNowRecord, error) {
 	return sr, nil
 }
 
-func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, sharedByUsername string) *model.Post {
+func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, pluginURL, sharedByUsername string) *model.Post {
 	post := &model.Post{
 		ChannelId: channelID,
 		UserId:    botID,
@@ -120,6 +120,13 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, s
 		actions = append(actions, &model.PostAction{
 			Type: "button",
 			Name: "Add and view comments",
+			Integration: &model.PostActionIntegration{
+				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
+				Context: map[string]interface{}{
+					constants.ContextNameRecordType: sr.RecordType,
+					constants.ContextNameRecordID:   sr.SysID,
+				},
+			},
 		})
 	}
 

@@ -72,6 +72,7 @@ const (
 	WSEventOpenAddSubscriptionModal  = "add_subscription"
 	WSEventOpenEditSubscriptionModal = "edit_subscription"
 	WSEventSubscriptionDeleted       = "subscription_deleted"
+	WSEventOpenCommentModal          = "comment_modal"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -80,6 +81,10 @@ const (
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
+
+	// Slack attachment context constants
+	ContextNameRecordType = "record_type"
+	ContextNameRecordID   = "record_id"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential

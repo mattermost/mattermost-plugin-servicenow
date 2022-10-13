@@ -1,30 +1,24 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 type CommentModalState = {
     open: boolean;
-    recordType: string;
-    recordId: string;
+    data?: CommentModalData;
 }
 
 const initialState: CommentModalState = {
     open: false,
-    recordType: '',
-    recordId: '',
 };
 
 export const openCommentModalSlice = createSlice({
     name: 'openCommentModalSlice',
     initialState,
     reducers: {
-        showModal: (state) => {
+        showModal: (state, action: PayloadAction<CommentModalData>) => {
             state.open = true;
-            state.recordType = 'incident';
-            state.recordId = '9d385017c611228701d22104cc95c371';
+            state.data = action.payload;
         },
         hideModal: (state) => {
             state.open = false;
-            state.recordType = '';
-            state.recordId = '';
         },
     },
 });
