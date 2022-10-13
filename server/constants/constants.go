@@ -96,6 +96,7 @@ const (
 	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
 	ErrorMissingUserCodeState             = "missing user, code or state"
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
+	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
 )
 

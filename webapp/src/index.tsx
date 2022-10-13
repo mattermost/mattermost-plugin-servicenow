@@ -11,6 +11,7 @@ import {ServiceNowIcon} from '@brightscout/mattermost-ui-library';
 import reducer from 'reducers';
 
 import Rhs from 'containers/Rhs';
+import AddOrViewComments from 'containers/addOrViewComments';
 import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 
@@ -32,6 +33,7 @@ export default class Plugin {
         registry.registerReducer(reducer);
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
+        registry.registerRootComponent(AddOrViewComments);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);

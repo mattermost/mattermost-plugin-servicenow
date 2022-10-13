@@ -18,7 +18,7 @@ const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from t
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
-const DefaultPageSize = 20;
+const DefaultPageSize = 5;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
@@ -32,6 +32,8 @@ const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
+const CommentsHeading = 'Comments';
+const NoCommentsPresent = 'No more comments present.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -154,6 +156,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getConfig',
     },
+    getComments: {
+        path: '/comments',
+        method: 'GET',
+        apiServiceName: 'getComments',
+    },
+    addComments: {
+        path: '/comments',
+        method: 'POST',
+        apiServiceName: 'addComments',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -200,4 +212,6 @@ export default {
     CharThresholdToSuggestChannel,
     RequiredMsg,
     NoSubscriptionPresent,
+    CommentsHeading,
+    NoCommentsPresent,
 };

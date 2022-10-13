@@ -2,7 +2,9 @@ package serializer
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
+	"strings"
 )
 
 type ServiceNowComment struct {
@@ -24,4 +26,13 @@ func ServiceNowCommentPayloadFromJSON(data io.Reader) (*ServiceNowCommentPayload
 	}
 
 	return scp, nil
+}
+
+func (s *ServiceNowCommentPayload) Validate() error {
+	s.Comments = strings.TrimSpace(s.Comments)
+	if s.Comments == "" {
+		return errors.New("comment value cannot be empty")
+	}
+
+	return nil
 }

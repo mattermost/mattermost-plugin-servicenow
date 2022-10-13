@@ -624,6 +624,12 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = payload.Validate(); err != nil {
+		p.API.LogError("Error in validating the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		return
+	}
+
 	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.AddComment(recordType, recordID, payload)
