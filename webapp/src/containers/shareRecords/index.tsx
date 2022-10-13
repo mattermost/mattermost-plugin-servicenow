@@ -189,7 +189,7 @@ const ShareRecords = () => {
                         channelOptions={channelOptions}
                         setChannelOptions={setChannelOptions}
                         actionBtnDisabled={showModalLoader}
-                        placeholder={'Search Channel to share'}
+                        placeholder={'Search channel to share'}
                         validationError={error}
                     />
                 )}
