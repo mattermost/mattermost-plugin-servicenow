@@ -282,7 +282,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		wg := sync.WaitGroup{}
 		for _, subscription := range subscriptions {
 			wg.Add(1)
-			go func() {
+			go func(subscription *serializer.SubscriptionResponse) {
 				defer wg.Done()
 				user, err := p.API.GetUser(subscription.UserID)
 				if err != nil {
@@ -299,9 +299,8 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 				} else {
 					subscription.ChannelName = channel.DisplayName
 				}
-			}()
+			}(subscription)
 
-			wg.Wait()
 			if subscription.Type == constants.SubscriptionTypeBulk {
 				continue
 			}
