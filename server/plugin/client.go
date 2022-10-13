@@ -23,6 +23,8 @@ type Client interface {
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
 	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
 	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
+	GetAllComments(recordType, recordID string) (string, int, error)
+	AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error)
 }
 
 type client struct {
@@ -102,7 +104,7 @@ func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit,
 		query = fmt.Sprintf("%s^type=%s", query, subscriptionType)
 	}
 
-	query = fmt.Sprintf("%s^ORDERBYDESCsys_updated_on", query)
+	query = fmt.Sprintf("%s^ORDERBYDESC%s", query, constants.FieldSysUpdatedOn)
 	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
 		constants.SysQueryParamLimit:  {limit},
@@ -163,16 +165,16 @@ func (c *client) CheckForDuplicateSubscription(subscription *serializer.Subscrip
 }
 
 func (c *client) SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
-	query := fmt.Sprintf("short_description LIKE%s ^OR number STARTSWITH%s", searchTerm, searchTerm)
+	query := fmt.Sprintf("%s LIKE%s ^OR %s STARTSWITH%s", constants.FieldShortDescription, searchTerm, constants.FieldNumber, searchTerm)
 	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
 		constants.SysQueryParamLimit:  {limit},
 		constants.SysQueryParamOffset: {offset},
-		constants.SysQueryParamFields: {"sys_id,number,short_description"},
+		constants.SysQueryParamFields: {fmt.Sprintf("%s,%s,%s", constants.FieldSysID, constants.FieldNumber, constants.FieldShortDescription)},
 	}
 
 	records := &serializer.ServiceNowPartialRecordsResult{}
-	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", tableName, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, records, queryParams)
 	if err != nil {
 		return nil, statusCode, err
@@ -187,11 +189,33 @@ func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.S
 	}
 
 	record := &serializer.ServiceNowRecordResult{}
-	url := strings.Replace(constants.PathSearchRecordsInServiceNow, "{tableName}", tableName, 1)
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", tableName, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, sysID), nil, record, queryParams)
 	if err != nil {
 		return nil, statusCode, err
 	}
 
 	return record.Result, statusCode, nil
+}
+
+func (c *client) GetAllComments(recordType, recordID string) (string, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamDisplayValue: {"true"},
+		constants.SysQueryParamFields:       {constants.FieldCommentsAndWorkNotes},
+	}
+
+	comments := &serializer.ServiceNowCommentsResult{}
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, recordID), nil, comments, queryParams)
+	if err != nil {
+		return "", statusCode, err
+	}
+
+	return comments.Result.CommentsAndWorkNotes, statusCode, nil
+}
+
+func (c *client) AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error) {
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
+	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", url, recordID), payload, nil, nil)
+	return statusCode, err
 }
