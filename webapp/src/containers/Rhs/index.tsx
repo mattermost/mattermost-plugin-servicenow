@@ -41,6 +41,7 @@ const Rhs = (): JSX.Element => {
         per_page: Constants.DefaultPageSize,
     });
     const [subscriptionList, setSubscriptionList] = useState<SubscriptionData[]>([]);
+    const [render, setRender] = useState(true);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
@@ -71,12 +72,18 @@ const Rhs = (): JSX.Element => {
             subscriptionParams.channel_id = currentChannelId;
         }
 
+        setRender(false);
         setFetchSubscriptionParams(subscriptionParams);
         makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
     }, [paginationQueryParams]);
 
     // Reset states on changing channel or using toggle switch
     useEffect(() => {
+        // This is used to prevent calling of fetch subscription API twice
+        if (render) {
+            return;
+        }
+
         resetStates();
     }, [currentChannelId, showAllSubscriptions]);
 
