@@ -64,6 +64,13 @@ const (
 	PathParamRecordType                   = "record_type"
 	PathParamRecordID                     = "record_id"
 
+	// ServiceNow table fields
+	FieldSysID                = "sys_id"
+	FieldSysUpdatedOn         = "sys_updated_on"
+	FieldNumber               = "number"
+	FieldShortDescription     = "short_description"
+	FieldCommentsAndWorkNotes = "comments_and_work_notes"
+
 	// Websocket events
 	WSEventConnect                   = "connect"
 	WSEventDisconnect                = "disconnect"
