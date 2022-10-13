@@ -649,6 +649,11 @@ func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) 
 	client := p.GetClientFromRequest(r)
 	states, statusCode, err := client.GetStatesFromServiceNow(recordType)
 	if err != nil {
+		if strings.EqualFold(err.Error(), constants.APIErrorIDLatestUpdateSetNotUploaded) {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDLatestUpdateSetNotUploaded, StatusCode: statusCode, Message: constants.APIErrorLatestUpdateSetNotUploaded})
+			return
+		}
+
 		p.API.LogError("Error in getting the states", "Record Type", recordType, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting the states. Error: %s", err.Error())})
 		return

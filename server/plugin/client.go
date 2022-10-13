@@ -227,6 +227,10 @@ func (c *client) GetStatesFromServiceNow(recordType string) ([]*serializer.Servi
 	url := strings.Replace(constants.PathGetStatesFromServiceNow, "{record_type}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, states, nil)
 	if err != nil {
+		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), "Requested URI does not represent any resource") {
+			return nil, statusCode, errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded)
+		}
+
 		return nil, statusCode, err
 	}
 
