@@ -55,7 +55,7 @@ const Rhs = (): JSX.Element => {
     // Reset the pagination params and empty the subscription list
     const resetStates = useCallback(() => {
         setPaginationQueryParams(() => ({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize}));
-        setSubscriptionList(() => []);
+        setSubscriptionList([]);
     }, []);
 
     // Increase the page number by 1
