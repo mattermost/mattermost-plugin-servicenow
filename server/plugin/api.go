@@ -575,7 +575,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.RecordTypesSupportingComments[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
@@ -614,7 +614,7 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.RecordTypesSupportingComments[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
@@ -642,7 +642,7 @@ func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) 
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.RecordTypesSupportingStateUpdation[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
@@ -680,7 +680,7 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
 	if !constants.RecordTypesSupportingStateUpdation[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
