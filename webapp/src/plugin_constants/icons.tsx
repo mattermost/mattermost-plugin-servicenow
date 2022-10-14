@@ -1,6 +1,6 @@
 import React from 'react';
 
-type SvgIconNames = 'servicenow' | 'bell' | 'unlink' | 'globe' | 'lock' | 'edit' | 'delete' | 'check';
+type SvgIconNames = 'servicenow' | 'bell' | 'unlink' | 'globe' | 'lock' | 'edit' | 'delete' | 'check' | 'filter';
 
 const SVGIcons: Record<SvgIconNames, JSX.Element> = {
     servicenow: (
@@ -57,6 +57,12 @@ const SVGIcons: Record<SvgIconNames, JSX.Element> = {
         <path
             xmlns='http://www.w3.org/2000/svg'
             d='M19 0C8.55 0 0 8.55 0 19C0 29.45 8.55 38 19 38C29.45 38 38 29.45 38 19C38 8.55 29.45 0 19 0ZM19 34.2C10.621 34.2 3.8 27.379 3.8 19C3.8 10.621 10.621 3.8 19 3.8C27.379 3.8 34.2 10.621 34.2 19C34.2 27.379 27.379 34.2 19 34.2ZM27.721 10.602L15.2 23.123L10.279 18.221L7.6 20.9L15.2 28.5L30.4 13.3L27.721 10.602Z'
+        />
+    ),
+    filter: (
+        <path
+            d='M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z'
+            fill='#8A8C94'
         />
     ),
 };

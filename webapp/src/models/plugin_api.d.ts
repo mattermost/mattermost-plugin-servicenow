@@ -77,6 +77,7 @@ type FetchSubscriptionsParams = {
     page?: number;
     per_page?: number;
     channel_id?: string;
+    user_id?: string;
 }
 
 type SubscriptionData = {
@@ -117,4 +118,8 @@ type ConfigData = {
 interface PaginationQueryParams {
     page: number;
     per_page: number;
+}
+
+type SubscriptionFilters = {
+    createdBy: string,
 }

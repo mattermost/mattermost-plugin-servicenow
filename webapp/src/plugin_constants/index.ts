@@ -12,13 +12,13 @@ export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
 const MMUSERID = 'MMUSERID';
-const RightSidebarHeader = 'Subscriptions';
-const RhsToggleLabel = 'Show all subscriptions';
+const RightSidebarHeader = 'ServiceNow';
+const RhsToggleLabel = 'Show For All Channels';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
-const DefaultPageSize = 20;
+const DefaultPageSize = 5;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
@@ -99,6 +99,28 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     }, {
         key: 'assignment_group',
         label: 'Assignment Group',
+    },
+];
+
+export const SubscriptionFilters = {
+    createdBy: {
+        me: 'me',
+        anyone: 'anyone',
+    },
+};
+
+export const DefaultSubscriptionFilters = {
+    createdBy: SubscriptionFilters.createdBy.anyone,
+};
+
+export const SubscriptionFilterCreatedByOptions = [
+    {
+        value: SubscriptionFilters.createdBy.me,
+        label: 'Me',
+    },
+    {
+        value: SubscriptionFilters.createdBy.anyone,
+        label: 'Anyone',
     },
 ];
 
@@ -200,4 +222,7 @@ export default {
     CharThresholdToSuggestChannel,
     RequiredMsg,
     NoSubscriptionPresent,
+    SubscriptionFilters,
+    DefaultSubscriptionFilters,
+    SubscriptionFilterCreatedByOptions,
 };

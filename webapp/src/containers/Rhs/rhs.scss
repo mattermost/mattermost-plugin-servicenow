@@ -1,6 +1,12 @@
 @import "../../styles/abstract/variables";
 @import "@brightscout/mattermost-ui-library/build/styles/abstract/_mixins";
 
+.rhs-title {
+  font-weight: bold;
+  font-size: 17px;
+  margin: 0;
+}
+
 .rhs-content {
   height: calc(100% - #{$rhs-header-height});
 
@@ -39,4 +45,52 @@
 
 .rhs-btn {
   width: 100%;
+}
+
+.rhs-header-divider {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
+}
+
+.rhs-filter-popover {
+  top: 68px;
+  width: calc(100% - 40px);
+  padding: 20px;
+  position: absolute;
+  height: fit-content;
+  border-radius: 4px;
+  border-color: rgba(var(--center-channel-color-rgb), 0.16);
+  background: var(--center-channel-bg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-class {
+  .toggle-switch-container {
+    border: none;
+    margin-bottom: 0px !important;
+  }
+}
+
+.filter-button {
+  position: relative;
+
+  &::after {
+      display: block;
+      content: "";
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      top: 6px;
+      left: 18px;
+      position: absolute;
+      border: 2px solid var(--center-channel-bg);
+      background-color: #1C58D9;
+  }
+}
+
+.subscription-card {
+  .channel-icon {
+    position: static;
+  }
 }

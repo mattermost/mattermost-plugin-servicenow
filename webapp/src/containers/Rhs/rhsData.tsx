@@ -4,7 +4,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
+import {EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
 
 import Spinner from 'components/spinner';
 
@@ -15,6 +15,8 @@ import usePluginApi from 'hooks/usePluginApi';
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 
 import Utils from 'utils';
+
+import Header from './rhsHeader';
 
 type RhsDataProps = {
     showAllSubscriptions: boolean;
@@ -27,6 +29,9 @@ type RhsDataProps = {
     isCurrentUserSysAdmin: boolean;
     paginationQueryParams: PaginationQueryParams;
     handlePagination: () => void;
+    filter: SubscriptionFilters;
+    setFilter: (filter: SubscriptionFilters) => void;
+    setResetFilter: (resetFilter: boolean) => void;
 }
 
 const BulkSubscriptionHeaders: Record<RecordType, string> = {
@@ -46,6 +51,9 @@ const RhsData = ({
     isCurrentUserSysAdmin,
     paginationQueryParams,
     handlePagination,
+    filter,
+    setFilter,
+    setResetFilter,
 }: RhsDataProps) => {
     const dispatch = useDispatch();
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -102,11 +110,6 @@ const RhsData = ({
 
     return (
         <>
-            <ToggleSwitch
-                active={showAllSubscriptions}
-                onChange={setShowAllSubscriptions}
-                label={Constants.RhsToggleLabel}
-            />
             {error && (
                 <EmptyState
                     title={Constants.GeneralErrorMessage}
@@ -115,6 +118,13 @@ const RhsData = ({
                     className='error-state'
                 />
             )}
+            <Header
+                showAllSubscriptions={showAllSubscriptions}
+                setShowAllSubscriptions={setShowAllSubscriptions}
+                filter={filter}
+                setFilter={setFilter}
+                setResetFilter={setResetFilter}
+            />
             <div
                 id='scrollableArea'
                 className='rhs-content__cards-container'
@@ -141,6 +151,7 @@ const RhsData = ({
                                     onEdit={() => handleEditSubscription(subscription)}
                                     onDelete={() => handleDeleteClick(subscription)}
                                     cardBody={getSubscriptionCardBody(subscription)}
+                                    className='subscription-card'
                                     channel={showAllSubscriptions ? getChannelState().data.find((ch) => ch.id === subscription.channel_id) : null}
                                 />
                             ))}
@@ -162,7 +173,7 @@ const RhsData = ({
                             text: 'Add new Subscription',
                             action: () => dispatch(showAddModal()),
                         }}
-                        icon={<BellIcon/>}
+                        icon={<BellIcon className='empty-state-icon'/>}
                     />
                 )}
             </div>
