@@ -18,6 +18,8 @@ export const openCommentModalSlice = createSlice({
     reducers: {
         showModal: (state) => {
             state.open = true;
+
+            // TODO: remove these values after integrating it with post button.
             state.recordType = 'incident';
             state.recordId = '9d385017c611228701d22104cc95c371';
         },

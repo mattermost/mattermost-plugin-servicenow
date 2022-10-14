@@ -132,25 +132,3 @@ func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionRes
 
 	return subscripitons[:n]
 }
-
-func ProcessComments(comments string, page, perPage int) []string {
-	if comments == "" {
-		return []string{}
-	}
-
-	arr := strings.Split(comments, "\n\n")
-	// We don't want the last element of the array because it will always be an empty string
-	arr = arr[:len(arr)-1]
-
-	startingIndex := page * perPage
-	if startingIndex >= len(arr) {
-		return []string{}
-	}
-
-	endIndex := len(arr)
-	if startingIndex+perPage < endIndex {
-		endIndex = startingIndex + perPage
-	}
-
-	return arr[startingIndex:endIndex]
-}

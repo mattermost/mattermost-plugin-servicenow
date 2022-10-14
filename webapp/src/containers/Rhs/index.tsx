@@ -11,7 +11,7 @@ import usePluginApi from 'hooks/usePluginApi';
 
 import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
 
-import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
+import {refetch, resetRefetch} from 'reducers/refetchState';
 
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 import {setConnected} from 'reducers/connectedState';
@@ -31,7 +31,7 @@ const Rhs = (): JSX.Element => {
     const [subscriptionsAuthorized, setSubscriptionsAuthorized] = useState(false);
     const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
-    const refetchSubscriptions = pluginState.refetchSubscriptionsReducer.refetchSubscriptions;
+    const refetchSubscriptions = pluginState.refetchReducer.refetch;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);

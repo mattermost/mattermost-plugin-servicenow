@@ -70,12 +70,11 @@ const pluginApi = createApi({
                 method: Constants.pluginApiServiceConfigs.getConfig.method,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.getComments.apiServiceName]: builder.query<string[], CommentsPayload>({
-            query: ({record_type, record_id, params}) => ({
+        [Constants.pluginApiServiceConfigs.getComments.apiServiceName]: builder.query<string, CommentsPayload>({
+            query: ({record_type, record_id}) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.getComments.path}/${record_type}/${record_id}`,
                 method: Constants.pluginApiServiceConfigs.getComments.method,
-                params,
             }),
         }),
         [Constants.pluginApiServiceConfigs.addComments.apiServiceName]: builder.query<void, CommentsPayload>({

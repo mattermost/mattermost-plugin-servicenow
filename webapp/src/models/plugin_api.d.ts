@@ -108,7 +108,6 @@ type EditSubscriptionPayload = {
 type CommentsPayload = {
     record_type: string;
     record_id: string;
-    params?: PaginationQueryParams;
     comments?: string;
 }
 

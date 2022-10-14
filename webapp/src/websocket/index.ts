@@ -5,8 +5,9 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {SubscriptionEventsMap} from 'plugin_constants';
 
 import {setConnected} from 'reducers/connectedState';
-import {refetch} from 'reducers/refetchSubscriptions';
+import {refetch} from 'reducers/refetchState';
 import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
+import {showModal as showCommentModal} from 'reducers/commentModal';
 import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
@@ -28,8 +29,9 @@ export function handleDisconnect(store: Store<GlobalState, Action<Record<string,
 }
 
 export function handleOpenAddSubscriptionModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    // TODO: Change to add modal after integrating it with post button.
     return (_: WebsocketEventParams) => {
-        store.dispatch(showAddSubcriptionModal() as Action);
+        store.dispatch(showCommentModal() as Action);
     };
 }
 

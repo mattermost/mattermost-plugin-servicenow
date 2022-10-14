@@ -10,7 +10,7 @@ import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, Re
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import {refetch} from 'reducers/refetchSubscriptions';
+import {refetch} from 'reducers/refetchState';
 
 import ChannelPanel from './channelPanel';
 import SubscriptionTypePanel from './subscriptionTypePanel';
