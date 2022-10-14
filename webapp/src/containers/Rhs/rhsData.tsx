@@ -173,7 +173,7 @@ const RhsData = ({
                             text: 'Add new Subscription',
                             action: () => dispatch(showAddModal()),
                         }}
-                        icon={<BellIcon className='empty-state-icon'/>}
+                        icon={<BellIcon/>}
                     />
                 )}
             </div>
