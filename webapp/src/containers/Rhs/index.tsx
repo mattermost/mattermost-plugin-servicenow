@@ -87,7 +87,7 @@ const Rhs = (): JSX.Element => {
         setRender(false);
         setFetchSubscriptionParams(subscriptionParams);
         makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
-    }, [paginationQueryParams, filter]);
+    }, [paginationQueryParams]);
 
     // Reset states on changing channel or using toggle switch
     useEffect(() => {
