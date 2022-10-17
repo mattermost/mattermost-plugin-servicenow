@@ -3,9 +3,10 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
+import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon, SvgWrapper} from '@brightscout/mattermost-ui-library';
 
 import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
+import SVGIcons from 'plugin_constants/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -96,13 +97,23 @@ const RhsData = ({
 
     return (
         <>
-            <button
-                className='btn btn-primary margin-bottom-10'
-                onClick={() => dispatch(showRecordModal())}
-            >
-                <i className='icon icon-magnify icon-16 margin-right-5'/>
-                {'Search & Share records'}
-            </button>
+            <div>
+                <span className='rhs-content__subscriptions'>{Constants.RhsSubscritpions}</span>
+                <button
+                    className='btn btn-primary share-record-btn'
+                    onClick={() => dispatch(showRecordModal())}
+                >
+                    <SvgWrapper
+                        width={16}
+                        height={16}
+                        viewBox='0 0 14 12'
+                        className='share-record-icon'
+                    >
+                        {SVGIcons.share}
+                    </SvgWrapper>
+                    {Constants.ShareRecordButton}
+                </button>
+            </div>
             <ToggleSwitch
                 active={showAllSubscriptions}
                 onChange={setShowAllSubscriptions}

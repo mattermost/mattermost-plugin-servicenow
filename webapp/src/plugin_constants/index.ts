@@ -12,7 +12,9 @@ export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
 const MMUSERID = 'MMUSERID';
-const RightSidebarHeader = 'Subscriptions';
+const RightSidebarHeader = 'ServiceNow';
+const RhsSubscritpions = 'Subscriptions';
+const ShareRecordButton = 'Share';
 const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
@@ -200,6 +202,8 @@ export const PanelDefaultHeights = {
 
 export default {
     RightSidebarHeader,
+    RhsSubscritpions,
+    ShareRecordButton,
     DOWNLOAD_UPDATE_SET_LINK,
     pluginApiServiceConfigs,
     MMCSRF,
