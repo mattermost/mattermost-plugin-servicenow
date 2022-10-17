@@ -76,16 +76,16 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 
 	// Slash commands
-	CommandHelp          = "help"
-	CommandConnect       = "connect"
-	CommandDisconnect    = "disconnect"
-	CommandSubscriptions = "subscriptions"
-	CommandUnsubscribe   = "unsubscribe"
-	CommandSearch        = "search"
-	SubCommandList       = "list"
-	SubCommandAdd        = "add"
-	SubCommandEdit       = "edit"
-	SubCommandDelete     = "delete"
+	CommandHelp           = "help"
+	CommandConnect        = "connect"
+	CommandDisconnect     = "disconnect"
+	CommandSubscriptions  = "subscriptions"
+	CommandUnsubscribe    = "unsubscribe"
+	CommandSearchAndShare = "share"
+	SubCommandList        = "list"
+	SubCommandAdd         = "add"
+	SubCommandEdit        = "edit"
+	SubCommandDelete      = "delete"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
