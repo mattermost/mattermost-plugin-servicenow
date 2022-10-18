@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io"
 	"strings"
+
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 )
 
 type ServiceNowComment struct {
@@ -31,7 +33,7 @@ func ServiceNowCommentPayloadFromJSON(data io.Reader) (*ServiceNowCommentPayload
 func (s *ServiceNowCommentPayload) Validate() error {
 	s.Comments = strings.TrimSpace(s.Comments)
 	if s.Comments == "" {
-		return errors.New("comment value cannot be empty")
+		return errors.New(constants.ErrorEmptyComment)
 	}
 
 	return nil
