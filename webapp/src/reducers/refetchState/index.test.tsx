@@ -6,13 +6,13 @@ const previousState: RefetchState = {
 
 test('should change the state of refetch to "true"', () => {
     expect(reducer(previousState, refetch())).toEqual(
-        {refetchSubscriptions: true},
+        {refetch: true},
     );
 });
 
 test('should change the state of refetch to "false"', () => {
     previousState.refetch = true;
     expect(reducer(previousState, resetRefetch())).toEqual(
-        {refetchSubscriptions: false},
+        {refetch: false},
     );
 });
