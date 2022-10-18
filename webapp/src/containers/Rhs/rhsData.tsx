@@ -75,7 +75,7 @@ const RhsData = ({
     }), []);
 
     const hasMoreSubscriptions = useMemo<boolean>(() => (
-        subscriptionList.length !== 0 && (subscriptionList.length - (paginationQueryParams.page * Constants.DefaultPageSize) === Constants.DefaultPageSize)
+        (subscriptionList.length - (paginationQueryParams.page * Constants.DefaultPageSize) >= Constants.DefaultPageSize)
     ), [subscriptionList]);
 
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {

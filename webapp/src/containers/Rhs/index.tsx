@@ -55,7 +55,7 @@ const Rhs = (): JSX.Element => {
 
     // Reset the pagination params and empty the subscription list
     const resetStates = useCallback(() => {
-        setPaginationQueryParams(() => ({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize}));
+        setPaginationQueryParams({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize});
         setSubscriptionList([]);
     }, []);
 
@@ -176,6 +176,7 @@ const Rhs = (): JSX.Element => {
         }
 
         if (subscriptionsState.isSuccess) {
+            setSubscriptionList([...subscriptionList, ...subscriptions]);
             if (!connected) {
                 dispatch(setConnected(true));
             }
@@ -187,10 +188,6 @@ const Rhs = (): JSX.Element => {
             if (!subscriptionsAuthorized) {
                 setSubscriptionsAuthorized(true);
             }
-        }
-
-        if (!subscriptionsState.isLoading && subscriptionsState.isSuccess) {
-            setSubscriptionList([...subscriptionList, ...subscriptions]);
         }
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess, getSubscriptionsState().isLoading]);
 
