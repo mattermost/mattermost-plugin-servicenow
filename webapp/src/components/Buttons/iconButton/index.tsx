@@ -22,7 +22,6 @@ const IconButton = ({tooltipText, iconClassName, children, extraClass = '', onCl
             className={`plugin-btn button-wrapper btn-icon ${extraClass}`}
             onClick={onClick}
             aria-label={tooltipText}
-            role='button'
             tabIndex={0}
             onKeyDown={(event: React.KeyboardEvent<HTMLSpanElement> | React.KeyboardEvent<SVGSVGElement>) => onPressingEnterKey(event, () => onClick?.())}
         >

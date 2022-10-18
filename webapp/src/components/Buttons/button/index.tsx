@@ -4,7 +4,7 @@ type PrimaryButtonProps = {
     text: string
     iconName?: string
     extraClass?: string
-    onClick?: () => void
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
     isSecondaryButton?: boolean
     isDisabled?: boolean
 }
