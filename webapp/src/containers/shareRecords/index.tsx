@@ -7,43 +7,12 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {RecordType, RecordTypeLabelMap} from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 import {hideModal as hideRecordModal} from 'reducers/shareRecordModal';
 import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
 import SearchRecordsPanel from 'containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
 import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channelPanel';
-
-const recordTypeOptions: DropdownOptionType[] = [
-    {
-        label: RecordTypeLabelMap[RecordType.INCIDENT],
-        value: RecordType.INCIDENT,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.PROBLEM],
-        value: RecordType.PROBLEM,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
-        value: RecordType.CHANGE_REQUEST,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.KNOWLEDGE],
-        value: RecordType.KNOWLEDGE,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.TASK],
-        value: RecordType.TASK,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_TASK],
-        value: RecordType.CHANGE_TASK,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.FOLLOW_ON_TASK],
-        value: RecordType.FOLLOW_ON_TASK,
-    },
-];
 
 const ShareRecords = () => {
     // Record states
@@ -161,7 +130,7 @@ const ShareRecords = () => {
                     setRecordType={setRecordType}
                     setResetRecordPanelStates={setResetRecordPanelStates}
                     placeholder={'Record Type'}
-                    recordTypeOptions={recordTypeOptions}
+                    recordTypeOptions={Constants.shareRecordTypeOptions}
                 />
                 <SearchRecordsPanel
                     recordValue={recordValue}

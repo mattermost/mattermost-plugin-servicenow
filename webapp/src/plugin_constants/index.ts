@@ -91,6 +91,40 @@ export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
 
+const recordTypeOptions: DropdownOptionType[] = [
+    {
+        label: RecordTypeLabelMap[RecordType.INCIDENT],
+        value: RecordType.INCIDENT,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.PROBLEM],
+        value: RecordType.PROBLEM,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
+        value: RecordType.CHANGE_REQUEST,
+    },
+];
+
+const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
+    {
+        label: RecordTypeLabelMap[RecordType.KNOWLEDGE],
+        value: RecordType.KNOWLEDGE,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.TASK],
+        value: RecordType.TASK,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_TASK],
+        value: RecordType.CHANGE_TASK,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.FOLLOW_ON_TASK],
+        value: RecordType.FOLLOW_ON_TASK,
+    },
+]);
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
@@ -235,4 +269,6 @@ export default {
     DeleteSubscriptionMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
+    recordTypeOptions,
+    shareRecordTypeOptions,
 };
