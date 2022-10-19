@@ -1,22 +1,26 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
-import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
+import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
+import {GlobalState} from 'mattermost-redux/types/store';
+
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {ShareRecordType} from 'plugin_constants';
+import Constants from 'plugin_constants';
 
-import {hideModal as hideRecordModal} from 'reducers/shareRecordModal';
+import {showModal as showRecordModal, hideModal as hideRecordModal} from 'reducers/shareRecordModal';
 import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
 import SearchRecordsPanel from 'containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
 import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channelPanel';
 
+import './styles.scss';
+
 const ShareRecords = () => {
     // Record states
-    const [recordType, setRecordType] = useState<ShareRecordType | RecordType | null>(null);
+    const [recordType, setRecordType] = useState<RecordType | null>(null);
     const [recordValue, setRecordValue] = useState('');
     const [recordId, setRecordId] = useState<string | null>(null);
     const [suggestionChosen, setSuggestionChosen] = useState(false);
@@ -26,11 +30,14 @@ const ShareRecords = () => {
     const [showChannelValidationError, setShowChannelValidationError] = useState<boolean>(false);
     const [shareRecordPayload, setShareRecordPayload] = useState<ShareRecordPayload | null>(null);
     const [recordData, setRecordData] = useState<RecordData | null>(null);
+    const [showResultPanel, setShowResultPanel] = useState(false);
+    const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
 
     // API error
     const [apiError, setApiError] = useState<string | null>(null);
 
     // Loaders
+    const [showRecordLoader, setShowRecordLoader] = useState(false);
     const [showModalLoader, setShowModalLoader] = useState(false);
 
     // usePluginApi hook
@@ -48,14 +55,22 @@ const ShareRecords = () => {
         setChannelOptions([]);
         setShowChannelValidationError(false);
         setApiError(null);
+        setShowRecordLoader(false);
         setShowModalLoader(false);
         setShareRecordPayload(null);
         setRecordData(null);
+        setShowResultPanel(false);
     }, []);
 
     const hideModal = useCallback(() => {
         resetFieldStates();
         dispatch(hideRecordModal());
+    }, []);
+
+    // Opens share record modal
+    const handleOpenShareRecordModal = useCallback(() => {
+        resetFieldStates();
+        dispatch(showRecordModal());
     }, []);
 
     const getShareRecordState = () => {
@@ -70,7 +85,7 @@ const ShareRecords = () => {
         }
 
         if (shareRecordState.isSuccess) {
-            hideModal();
+            setShowResultPanel(true);
         }
 
         setShowModalLoader(shareRecordState.isLoading);
@@ -84,7 +99,7 @@ const ShareRecords = () => {
 
         const payload: ShareRecordPayload = {
             channel_id: channel,
-            record_type: recordType as ShareRecordType,
+            record_type: recordType as RecordType,
             record_id: recordId || '',
             assigned_to: recordData?.assigned_to || '',
             assignment_group: recordData?.assignment_group || '',
@@ -101,15 +116,19 @@ const ShareRecords = () => {
         makeApiRequest(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, payload);
     };
 
+    // Remove validation error
     useEffect(() => {
         if (channel || !suggestionChosen) {
             setShowChannelValidationError(false);
         }
-
-        if (!suggestionChosen) {
-            setChannel(null);
-        }
     }, [channel, suggestionChosen]);
+
+    // Set the channel when button is clicked
+    useEffect(() => {
+        if (currentChannelId) {
+            setChannel(currentChannelId);
+        }
+    }, [currentChannelId, pluginState.openShareRecordModalReducer.open]);
 
     return (
         <Modal
@@ -123,50 +142,69 @@ const ShareRecords = () => {
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <RecordTypePanel
-                    recordType={recordType}
-                    setRecordType={setRecordType}
-                    setResetRecordPanelStates={setResetRecordPanelStates}
-                    placeholder='Record Type'
-                    recordTypeOptions={Constants.shareRecordTypeOptions}
-                />
-                <SearchRecordsPanel
-                    recordValue={recordValue}
-                    setRecordValue={setRecordValue}
-                    suggestionChosen={suggestionChosen}
-                    setSuggestionChosen={setSuggestionChosen}
-                    recordType={recordType}
-                    setApiError={setApiError}
-                    setShowModalLoader={setShowModalLoader}
-                    recordId={recordId}
-                    setRecordId={setRecordId}
-                    resetStates={resetRecordPanelStates}
-                    setResetStates={setResetRecordPanelStates}
-                    setRecordData={setRecordData}
-                    disabled={!recordType}
-                />
-                {suggestionChosen && (
-                    <ChannelPanel
-                        channel={channel}
-                        setChannel={setChannel}
-                        setShowModalLoader={setShowModalLoader}
-                        setApiError={setApiError}
-                        channelOptions={channelOptions}
-                        setChannelOptions={setChannelOptions}
-                        actionBtnDisabled={showModalLoader}
-                        placeholder='Search channel to share'
-                        validationError={showChannelValidationError}
+                {showResultPanel ? (
+                    <ResultPanel
+                        header='Record shared successfully!'
+                        className={`${showResultPanel && 'wizard__secondary-panel--slide-in result-panel'}`}
+                        primaryBtn={{
+                            text: 'Share another record',
+                            onClick: handleOpenShareRecordModal,
+                        }}
+                        secondaryBtn={{
+                            text: 'Close',
+                            onClick: hideModal,
+                        }}
+                        iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
+                ) : (
+                    <>
+                        <RecordTypePanel
+                            recordType={recordType}
+                            setRecordType={setRecordType}
+                            setResetRecordPanelStates={setResetRecordPanelStates}
+                            placeholder='Record Type'
+                            recordTypeOptions={Constants.shareRecordTypeOptions}
+                        />
+                        <SearchRecordsPanel
+                            recordValue={recordValue}
+                            setRecordValue={setRecordValue}
+                            suggestionChosen={suggestionChosen}
+                            setSuggestionChosen={setSuggestionChosen}
+                            recordType={recordType}
+                            setApiError={setApiError}
+                            setShowModalLoader={setShowRecordLoader}
+                            recordId={recordId}
+                            setRecordId={setRecordId}
+                            resetStates={resetRecordPanelStates}
+                            setResetStates={setResetRecordPanelStates}
+                            setRecordData={setRecordData}
+                            disabled={!recordType}
+                        />
+                        {suggestionChosen && (
+                            <ChannelPanel
+                                channel={channel}
+                                setChannel={setChannel}
+                                setShowModalLoader={setShowModalLoader}
+                                setApiError={setApiError}
+                                channelOptions={channelOptions}
+                                setChannelOptions={setChannelOptions}
+                                actionBtnDisabled={showModalLoader}
+                                placeholder='Search channel to share'
+                                validationError={showChannelValidationError}
+                                editing={true}
+                            />
+                        )}
+                        <ModalSubtitleAndError error={apiError ?? ''}/>
+                        <ModalFooter
+                            onConfirm={suggestionChosen ? shareRecord : null}
+                            confirmBtnText='Share'
+                            confirmDisabled={showModalLoader || showRecordLoader}
+                            onHide={hideModal}
+                            cancelBtnText='Cancel'
+                            cancelDisabled={showModalLoader || showRecordLoader}
+                        />
+                    </>
                 )}
-                <ModalSubtitleAndError error={apiError ?? ''}/>
-                <ModalFooter
-                    onConfirm={suggestionChosen ? shareRecord : null}
-                    confirmBtnText='Share'
-                    confirmDisabled={showModalLoader}
-                    onHide={hideModal}
-                    cancelBtnText='Cancel'
-                    cancelDisabled={showModalLoader}
-                />
             </>
         </Modal>
     );

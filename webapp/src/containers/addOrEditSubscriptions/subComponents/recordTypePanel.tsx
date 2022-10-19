@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType, ShareRecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;
@@ -11,8 +11,8 @@ type RecordTypePanelProps = {
     onBack?: () => void;
     actionBtnDisabled?: boolean;
     requiredFieldValidationErr?: boolean;
-    recordType: RecordType | ShareRecordType | null;
-    setRecordType: (value: RecordType | ShareRecordType) => void;
+    recordType: RecordType | null;
+    setRecordType: (value: RecordType) => void;
     setResetRecordPanelStates: (reset: boolean) => void;
     showFooter?: boolean;
     placeholder?: string;

@@ -52,12 +52,6 @@ export enum RecordType {
     INCIDENT = 'incident',
     PROBLEM = 'problem',
     CHANGE_REQUEST = 'change_request',
-}
-
-export enum ShareRecordType {
-    INCIDENT = 'incident',
-    PROBLEM = 'problem',
-    CHANGE_REQUEST = 'change_request',
     KNOWLEDGE = 'kb_knowledge',
     TASK = 'task',
     CHANGE_TASK = 'change_task',
@@ -91,16 +85,11 @@ export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
-};
-
-export const ShareRecordTypeLabelMap: Record<ShareRecordType, string> = {
-    [ShareRecordType.INCIDENT]: 'Incident',
-    [ShareRecordType.PROBLEM]: 'Problem',
-    [ShareRecordType.CHANGE_REQUEST]: 'Change Request',
-    [ShareRecordType.KNOWLEDGE]: 'Knowledge',
-    [ShareRecordType.TASK]: 'Task',
-    [ShareRecordType.CHANGE_TASK]: 'Change Task',
-    [ShareRecordType.FOLLOW_ON_TASK]: 'Follow On Task',
+    [RecordType.CHANGE_REQUEST]: 'Change Request',
+    [RecordType.KNOWLEDGE]: 'Knowledge',
+    [RecordType.TASK]: 'Task',
+    [RecordType.CHANGE_TASK]: 'Change Task',
+    [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
 
 const recordTypeOptions: DropdownOptionType[] = [
@@ -120,20 +109,20 @@ const recordTypeOptions: DropdownOptionType[] = [
 
 const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
     {
-        label: ShareRecordTypeLabelMap[ShareRecordType.KNOWLEDGE],
-        value: ShareRecordType.KNOWLEDGE,
+        label: RecordTypeLabelMap[RecordType.KNOWLEDGE],
+        value: RecordType.KNOWLEDGE,
     },
     {
-        label: ShareRecordTypeLabelMap[ShareRecordType.TASK],
-        value: ShareRecordType.TASK,
+        label: RecordTypeLabelMap[RecordType.TASK],
+        value: RecordType.TASK,
     },
     {
-        label: ShareRecordTypeLabelMap[ShareRecordType.CHANGE_TASK],
-        value: ShareRecordType.CHANGE_TASK,
+        label: RecordTypeLabelMap[RecordType.CHANGE_TASK],
+        value: RecordType.CHANGE_TASK,
     },
     {
-        label: ShareRecordTypeLabelMap[ShareRecordType.FOLLOW_ON_TASK],
-        value: ShareRecordType.FOLLOW_ON_TASK,
+        label: RecordTypeLabelMap[RecordType.FOLLOW_ON_TASK],
+        value: RecordType.FOLLOW_ON_TASK,
     },
 ]);
 

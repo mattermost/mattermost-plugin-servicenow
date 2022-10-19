@@ -26,7 +26,8 @@ type RhsDataProps = {
     isCurrentUserSysAdmin: boolean;
 }
 
-const BulkSubscriptionHeaders: Record<RecordType, string> = {
+// TODO: Add proper type here
+const BulkSubscriptionHeaders: Record<string, string> = {
     [RecordType.INCIDENT]: 'Incidents',
     [RecordType.PROBLEM]: 'Problems',
     [RecordType.CHANGE_REQUEST]: 'Change Requests',
