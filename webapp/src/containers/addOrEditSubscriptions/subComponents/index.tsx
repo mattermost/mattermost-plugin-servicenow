@@ -6,7 +6,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType, ShareRecordType} from 'plugin_constants';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -41,7 +41,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [resetRecordPanelStates, setResetRecordPanelStates] = useState(false);
 
     // Record type panel
-    const [recordType, setRecordType] = useState<null | RecordType>(null);
+    const [recordType, setRecordType] = useState<ShareRecordType | RecordType | null>(null);
 
     // Opened panel states
     const [subscriptionTypePanelOpen, setSubscriptionTypePanelOpen] = useState(false);
