@@ -23,7 +23,7 @@ const ShareRecords = () => {
     const [resetRecordPanelStates, setResetRecordPanelStates] = useState(false);
     const [channel, setChannel] = useState<string | null>(null);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
-    const [error, setError] = useState<boolean>(false);
+    const [showChannelValidationError, setShowChannelValidationError] = useState<boolean>(false);
     const [shareRecordPayload, setShareRecordPayload] = useState<ShareRecordPayload | null>(null);
     const [recordData, setRecordData] = useState<RecordData | null>(null);
 
@@ -46,7 +46,7 @@ const ShareRecords = () => {
         setResetRecordPanelStates(false);
         setChannel(null);
         setChannelOptions([]);
-        setError(false);
+        setShowChannelValidationError(false);
         setApiError(null);
         setShowModalLoader(false);
         setShareRecordPayload(null);
@@ -78,7 +78,7 @@ const ShareRecords = () => {
 
     const shareRecord = () => {
         if (!channel) {
-            setError(true);
+            setShowChannelValidationError(true);
             return;
         }
 
@@ -103,7 +103,7 @@ const ShareRecords = () => {
 
     useEffect(() => {
         if (channel || !suggestionChosen) {
-            setError(false);
+            setShowChannelValidationError(false);
         }
 
         if (!suggestionChosen) {
@@ -155,7 +155,7 @@ const ShareRecords = () => {
                         setChannelOptions={setChannelOptions}
                         actionBtnDisabled={showModalLoader}
                         placeholder='Search channel to share'
-                        validationError={error}
+                        validationError={showChannelValidationError}
                     />
                 )}
                 <ModalSubtitleAndError error={apiError ?? ''}/>
