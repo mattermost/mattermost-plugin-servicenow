@@ -30,10 +30,6 @@ const BulkSubscriptionHeaders: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incidents',
     [RecordType.PROBLEM]: 'Problems',
     [RecordType.CHANGE_REQUEST]: 'Change Requests',
-    [RecordType.KNOWLEDGE]: 'Knowledge',
-    [RecordType.TASK]: 'Task',
-    [RecordType.CHANGE_TASK]: 'Change Task',
-    [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
 
 const RhsData = ({

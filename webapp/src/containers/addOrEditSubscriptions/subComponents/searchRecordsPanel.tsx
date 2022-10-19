@@ -3,7 +3,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'plugin_constants';
+import Constants, {RecordType, ShareRecordType} from 'plugin_constants';
 
 import Utils from 'utils';
 
@@ -21,9 +21,9 @@ type SearchRecordsPanelProps = {
     suggestionChosen: boolean;
     setSuggestionChosen: (suggestion: boolean) => void;
     setRecordData?: (value: RecordData | null) => void;
-    recordType: RecordType | null;
+    recordType: RecordType | ShareRecordType | null;
     setApiError: (error: string | null) => void;
-    setApiResponseValid: (valid: boolean) => void;
+    setApiResponseValid?: (valid: boolean) => void;
     setShowModalLoader: (show: boolean) => void;
     recordId: string | null;
     setRecordId: (recordId: string | null) => void;
@@ -144,7 +144,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Handle API state updates in the suggestions
     useEffect(() => {
         const searchSuggestionsState = getRecordsSuggestions();
-        if (searchSuggestionsState.isLoading) {
+        if (searchSuggestionsState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
         if (searchSuggestionsState.isError) {
@@ -158,7 +158,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Handle API state updates while fetching record data
     useEffect(() => {
         const recordDataState = getRecordDataState();
-        if (recordDataState.isLoading) {
+        if (recordDataState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
         if (recordDataState.isError) {
@@ -264,8 +264,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 />
                 {suggestionChosen && (
                     <ul className='search-panel__description margin-top-25 padding-left-15 font-14'>
-                        {recordType === RecordType.KNOWLEDGE ? (
-                            Constants.KnowledgeRecordDataLabelConfig?.map((header) => (
+                        {recordType === ShareRecordType.KNOWLEDGE ? (
+                            Constants.KnowledgeRecordDataLabelConfig.map((header) => (
                                 <li
                                     key={header.key}
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
@@ -275,7 +275,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                 </li>
                             ))
                         ) : (
-                            Constants.RecordDataLabelConfig?.map((header) => (
+                            Constants.RecordDataLabelConfig.map((header) => (
                                 <li
                                     key={header.key}
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'

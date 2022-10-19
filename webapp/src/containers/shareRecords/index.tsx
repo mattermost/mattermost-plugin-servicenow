@@ -7,7 +7,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants, {RecordType} from 'plugin_constants';
+import Constants, {ShareRecordType} from 'plugin_constants';
 
 import {hideModal as hideRecordModal} from 'reducers/shareRecordModal';
 import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
@@ -16,7 +16,7 @@ import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channe
 
 const ShareRecords = () => {
     // Record states
-    const [recordType, setRecordType] = useState<null | RecordType>(null);
+    const [recordType, setRecordType] = useState<ShareRecordType | RecordType | null>(null);
     const [recordValue, setRecordValue] = useState('');
     const [recordId, setRecordId] = useState<string | null>(null);
     const [suggestionChosen, setSuggestionChosen] = useState(false);
@@ -24,12 +24,11 @@ const ShareRecords = () => {
     const [channel, setChannel] = useState<string | null>(null);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
     const [error, setError] = useState<boolean>(false);
-    const [shareRecordPayload, setShareRecordPayload] = useState<ShareRecordPayload | null >(null);
+    const [shareRecordPayload, setShareRecordPayload] = useState<ShareRecordPayload | null>(null);
     const [recordData, setRecordData] = useState<RecordData | null>(null);
 
     // API error
     const [apiError, setApiError] = useState<string | null>(null);
-    const [apiResponseValid, setApiResponseValid] = useState(false);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
@@ -49,7 +48,6 @@ const ShareRecords = () => {
         setChannelOptions([]);
         setError(false);
         setApiError(null);
-        setApiResponseValid(false);
         setShowModalLoader(false);
         setShareRecordPayload(null);
         setRecordData(null);
@@ -86,7 +84,7 @@ const ShareRecords = () => {
 
         const payload: ShareRecordPayload = {
             channel_id: channel,
-            record_type: recordType as RecordType,
+            record_type: recordType as ShareRecordType,
             record_id: recordId || '',
             assigned_to: recordData?.assigned_to || '',
             assignment_group: recordData?.assignment_group || '',
@@ -139,7 +137,6 @@ const ShareRecords = () => {
                     setSuggestionChosen={setSuggestionChosen}
                     recordType={recordType}
                     setApiError={setApiError}
-                    setApiResponseValid={setApiResponseValid}
                     setShowModalLoader={setShowModalLoader}
                     recordId={recordId}
                     setRecordId={setRecordId}
@@ -154,7 +151,6 @@ const ShareRecords = () => {
                         setChannel={setChannel}
                         setShowModalLoader={setShowModalLoader}
                         setApiError={setApiError}
-                        setApiResponseValid={setApiResponseValid}
                         channelOptions={channelOptions}
                         setChannelOptions={setChannelOptions}
                         actionBtnDisabled={showModalLoader}

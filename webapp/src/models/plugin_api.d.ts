@@ -36,13 +36,13 @@ type FetchChannelsParams = {
 }
 
 type SearchRecordsParams = {
-    recordType: RecordType;
+    recordType: RecordType | ShareRecordType;
     search: string;
     perPage?: number;
 }
 
 type GetRecordParams = {
-    recordType: RecordType;
+    recordType: RecordType | ShareRecordType;
     recordId: string;
 }
 
@@ -119,7 +119,7 @@ type ConfigData = {
 }
 
 type ShareRecordPayload = {
-    record_type: RecordType;
+    record_type: ShareRecordType;
     record_id: string;
     short_description: string;
     state?: string;
