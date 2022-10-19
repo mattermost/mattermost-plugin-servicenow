@@ -40,7 +40,7 @@ const Rhs = (): JSX.Element => {
         page: Constants.DefaultPage,
         per_page: Constants.DefaultPageSize,
     });
-    const [subscriptionList, setSubscriptionList] = useState<SubscriptionData[]>([]);
+    const [totalSubscriptions, setTotalSubscriptions] = useState<SubscriptionData[]>([]);
     const [render, setRender] = useState(true);
 
     const getSubscriptionsState = () => {
@@ -56,7 +56,7 @@ const Rhs = (): JSX.Element => {
     // Reset the pagination params and empty the subscription list
     const resetStates = useCallback(() => {
         setPaginationQueryParams({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize});
-        setSubscriptionList([]);
+        setTotalSubscriptions([]);
     }, []);
 
     // Increase the page number by 1
@@ -176,7 +176,7 @@ const Rhs = (): JSX.Element => {
         }
 
         if (subscriptionsState.isSuccess) {
-            setSubscriptionList([...subscriptionList, ...subscriptions]);
+            setTotalSubscriptions([...totalSubscriptions, ...subscriptions]);
             if (!connected) {
                 dispatch(setConnected(true));
             }
@@ -201,7 +201,7 @@ const Rhs = (): JSX.Element => {
                     <RhsData
                         showAllSubscriptions={showAllSubscriptions}
                         setShowAllSubscriptions={setShowAllSubscriptions}
-                        subscriptionList={subscriptionList}
+                        totalSubscriptions={totalSubscriptions}
                         loadingSubscriptions={subscriptionsLoading}
                         handleEditSubscription={handleEditSubscription}
                         handleDeleteClick={handleDeleteClick}

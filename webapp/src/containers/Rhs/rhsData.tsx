@@ -19,7 +19,7 @@ import Utils from 'utils';
 type RhsDataProps = {
     showAllSubscriptions: boolean;
     setShowAllSubscriptions: (show: boolean) => void;
-    subscriptionList: SubscriptionData[];
+    totalSubscriptions: SubscriptionData[];
     loadingSubscriptions: boolean;
     handleEditSubscription: (subscriptionData: SubscriptionData) => void;
     handleDeleteClick: (subscriptionData: SubscriptionData) => void;
@@ -38,7 +38,7 @@ const BulkSubscriptionHeaders: Record<RecordType, string> = {
 const RhsData = ({
     showAllSubscriptions,
     setShowAllSubscriptions,
-    subscriptionList,
+    totalSubscriptions,
     loadingSubscriptions,
     handleEditSubscription,
     handleDeleteClick,
@@ -75,8 +75,8 @@ const RhsData = ({
     }), []);
 
     const hasMoreSubscriptions = useMemo<boolean>(() => (
-        (subscriptionList.length - (paginationQueryParams.page * Constants.DefaultPageSize) >= Constants.DefaultPageSize)
-    ), [subscriptionList]);
+        (totalSubscriptions.length - (paginationQueryParams.page * Constants.DefaultPageSize) === Constants.DefaultPageSize)
+    ), [totalSubscriptions]);
 
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
         const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
@@ -119,9 +119,9 @@ const RhsData = ({
                 id='scrollableArea'
                 className='rhs-content__cards-container'
             >
-                {subscriptionList.length > 0 && (
+                {totalSubscriptions.length > 0 && (
                     <InfiniteScroll
-                        dataLength={subscriptionList.length}
+                        dataLength={totalSubscriptions.length}
                         next={handlePagination}
                         hasMore={hasMoreSubscriptions}
                         loader={<Spinner/>}
@@ -133,7 +133,7 @@ const RhsData = ({
                         scrollableTarget='scrollableArea'
                     >
                         <>
-                            {subscriptionList.map((subscription) => (
+                            {totalSubscriptions.map((subscription) => (
                                 <SubscriptionCard
                                     key={subscription.sys_id}
                                     header={getSubscriptionCardHeader(subscription)}
@@ -155,7 +155,7 @@ const RhsData = ({
                         </>
                     </InfiniteScroll>
                 )}
-                {!subscriptionList.length && !loadingSubscriptions && !error && (
+                {!totalSubscriptions.length && !loadingSubscriptions && !error && (
                     <EmptyState
                         title='No Subscriptions Found'
                         buttonConfig={{
