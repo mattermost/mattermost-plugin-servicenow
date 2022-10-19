@@ -115,11 +115,11 @@ const ShareRecords = () => {
         <Modal
             show={pluginState.openShareRecordModalReducer.open}
             onHide={hideModal}
-            className={'rhs-modal'}
+            className='rhs-modal'
         >
             <>
                 <ModalHeader
-                    title={'Share a record'}
+                    title='Share a record'
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
@@ -127,7 +127,7 @@ const ShareRecords = () => {
                     recordType={recordType}
                     setRecordType={setRecordType}
                     setResetRecordPanelStates={setResetRecordPanelStates}
-                    placeholder={'Record Type'}
+                    placeholder='Record Type'
                     recordTypeOptions={Constants.shareRecordTypeOptions}
                 />
                 <SearchRecordsPanel
@@ -154,17 +154,17 @@ const ShareRecords = () => {
                         channelOptions={channelOptions}
                         setChannelOptions={setChannelOptions}
                         actionBtnDisabled={showModalLoader}
-                        placeholder={'Search channel to share'}
+                        placeholder='Search channel to share'
                         validationError={error}
                     />
                 )}
                 <ModalSubtitleAndError error={apiError ?? ''}/>
                 <ModalFooter
                     onConfirm={suggestionChosen ? shareRecord : null}
-                    confirmBtnText={'Share'}
+                    confirmBtnText='Share'
                     confirmDisabled={showModalLoader}
                     onHide={hideModal}
-                    cancelBtnText={'Cancel'}
+                    cancelBtnText='Cancel'
                     cancelDisabled={showModalLoader}
                 />
             </>
