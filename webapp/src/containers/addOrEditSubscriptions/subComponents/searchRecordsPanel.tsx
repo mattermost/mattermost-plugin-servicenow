@@ -47,7 +47,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     recordType,
     setApiError,
     setApiResponseValid,
-    setShowModalLoader,
     setRecordId,
     recordId,
     resetStates,
@@ -145,7 +144,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Handle API state updates in the suggestions
     useEffect(() => {
         const searchSuggestionsState = getRecordsSuggestions();
-        setShowModalLoader(searchSuggestionsState.isLoading);
         if (searchSuggestionsState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
@@ -160,7 +158,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Handle API state updates while fetching record data
     useEffect(() => {
         const recordDataState = getRecordDataState();
-        setShowModalLoader(recordDataState.isLoading);
         if (recordDataState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }

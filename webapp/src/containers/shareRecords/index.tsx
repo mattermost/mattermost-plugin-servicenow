@@ -37,7 +37,6 @@ const ShareRecords = () => {
     const [apiError, setApiError] = useState<string | null>(null);
 
     // Loaders
-    const [showRecordLoader, setShowRecordLoader] = useState(false);
     const [showModalLoader, setShowModalLoader] = useState(false);
 
     // usePluginApi hook
@@ -55,7 +54,6 @@ const ShareRecords = () => {
         setChannelOptions([]);
         setShowChannelValidationError(false);
         setApiError(null);
-        setShowRecordLoader(false);
         setShowModalLoader(false);
         setShareRecordPayload(null);
         setRecordData(null);
@@ -172,7 +170,7 @@ const ShareRecords = () => {
                             setSuggestionChosen={setSuggestionChosen}
                             recordType={recordType}
                             setApiError={setApiError}
-                            setShowModalLoader={setShowRecordLoader}
+                            setShowModalLoader={setShowModalLoader}
                             recordId={recordId}
                             setRecordId={setRecordId}
                             resetStates={resetRecordPanelStates}
@@ -198,10 +196,10 @@ const ShareRecords = () => {
                         <ModalFooter
                             onConfirm={suggestionChosen ? shareRecord : null}
                             confirmBtnText='Share'
-                            confirmDisabled={showModalLoader || showRecordLoader}
+                            confirmDisabled={showModalLoader || !recordData}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
-                            cancelDisabled={showModalLoader || showRecordLoader}
+                            cancelDisabled={showModalLoader || !recordData}
                         />
                     </>
                 )}
