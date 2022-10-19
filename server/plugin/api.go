@@ -44,6 +44,8 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
@@ -562,6 +564,73 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, user.Username)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError("Unable to create post", "Error", postErr.Error())
+	}
+
+	returnStatusOK(w)
+}
+
+func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.ValidRecordTypesForSearching[recordType] {
+		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	recordID := pathParams[constants.PathParamRecordID]
+	client := p.GetClientFromRequest(r)
+	comments, statusCode, err := client.GetAllComments(recordType, recordID)
+	if err != nil {
+		// TODO: Move all the inline messages to constants package
+		p.API.LogError("Error in getting all comments", "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting all comments. Error: %s", err.Error())})
+		return
+	}
+
+	page, perPage := GetPageAndPerPage(r)
+	commentsArray := ProcessComments(comments, page, perPage)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	result, err := json.Marshal(commentsArray)
+	if err != nil {
+		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(result) == "null" {
+		_, _ = w.Write([]byte("[]"))
+	} else if _, err = w.Write(result); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.ValidRecordTypesForSearching[recordType] {
+		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	payload, err := serializer.ServiceNowCommentPayloadFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		return
+	}
+
+	recordID := pathParams[constants.PathParamRecordID]
+	client := p.GetClientFromRequest(r)
+	statusCode, err := client.AddComment(recordType, recordID, payload)
+	if err != nil {
+		p.API.LogError("Error in creating the comment", "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in creating the comment. Error: %s", err.Error())})
+		return
 	}
 
 	returnStatusOK(w)

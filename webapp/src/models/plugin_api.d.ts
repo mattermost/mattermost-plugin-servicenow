@@ -137,3 +137,8 @@ type LinkData = {
     display_value: string;
     link: string;
 }
+
+interface PaginationQueryParams {
+    page: number;
+    per_page: number;
+}

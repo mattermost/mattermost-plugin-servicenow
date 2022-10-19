@@ -25,7 +25,9 @@ type SubscriptionPayload struct {
 type SubscriptionResponse struct {
 	SysID              string `json:"sys_id"`
 	UserID             string `json:"user_id"`
+	UserName           string `json:"-"`
 	ChannelID          string `json:"channel_id"`
+	ChannelName        string `json:"-"`
 	RecordType         string `json:"record_type"`
 	RecordID           string `json:"record_id"`
 	SubscriptionEvents string `json:"subscription_events"`
@@ -48,9 +50,9 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 	}
 
 	if s.Type == constants.SubscriptionTypeRecord {
-		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String())
+		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String(), s.UserName, s.ChannelName)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String())
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), s.UserName, s.ChannelName)
 }
 
 type SubscriptionResult struct {
