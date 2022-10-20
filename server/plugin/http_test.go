@@ -1,7 +1,10 @@
 package plugin
 
 import (
+	"bytes"
+	"errors"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -38,6 +41,90 @@ func TestCallJSON(t *testing.T) {
 			assert.Equal(t, testCase.expectedStatusCode, statusCode)
 			require.EqualValues(t, res, testCase.callMethodResponse)
 			require.Nil(t, err)
+		})
+	}
+}
+
+func TestCall(t *testing.T) {
+	defer monkey.UnpatchAll()
+	p := Plugin{}
+	c := new(client)
+	mockClient := &client{
+		plugin: &p,
+	}
+
+	for _, testCase := range []struct {
+		description          string
+		setupClient          func(c *client)
+		expectedStatusCode   int
+		expectedErrorMessage string
+	}{
+		{
+			description: "Call: Do method returns an error",
+			setupClient: func(c *client) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
+					return &http.Response{}, errors.New("mockError invalid character '<'")
+				})
+			},
+			expectedErrorMessage: ErrorContentTypeNotJSON.Error(),
+			expectedStatusCode:   http.StatusInternalServerError,
+		},
+		{
+			description: "Call: Do method returns an error 2",
+			setupClient: func(c *client) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
+					return &http.Response{}, errors.New("mockError")
+				})
+			},
+			expectedErrorMessage: "mockError",
+			expectedStatusCode:   http.StatusInternalServerError,
+		},
+		{
+			description: "Call: response body is nil",
+			setupClient: func(c *client) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: http.StatusNoContent,
+					}, nil
+				})
+			},
+			expectedStatusCode: http.StatusNoContent,
+		},
+		{
+			description: "Call: response body with status StatusNoContent",
+			setupClient: func(c *client) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: http.StatusNoContent,
+						Body:       ioutil.NopCloser(bytes.NewBufferString("mockBody")),
+					}, nil
+				})
+			},
+			expectedStatusCode: http.StatusNoContent,
+		},
+		{
+			description: "Call: response body with status StatusOK",
+			setupClient: func(c *client) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: http.StatusOK,
+						Body:       ioutil.NopCloser(bytes.NewBufferString("mockBody")),
+					}, nil
+				})
+			},
+			expectedStatusCode: http.StatusOK,
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			testCase.setupClient(c)
+			_, statusCode, err := mockClient.Call("mockMethod", "mockPath", "mockContentType", nil, nil, url.Values{})
+			if testCase.expectedErrorMessage != "" {
+				assert.EqualError(t, err, testCase.expectedErrorMessage)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.Equal(t, testCase.expectedStatusCode, statusCode)
 		})
 	}
 }

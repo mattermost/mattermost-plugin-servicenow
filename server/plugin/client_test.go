@@ -18,56 +18,46 @@ func TestActivateSubscriptions(t *testing.T) {
 	c := new(client)
 	c.plugin = &Plugin{}
 	for _, testCase := range []struct {
-		description   string
-		setupClient   func(c *client)
-		statusCode    int
-		expectedError string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "ActivateSubscriptions: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "ActivateSubscriptions: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "ActivateSubscriptions: user not authorized with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusForbidden, errors.New("mockError: User Not Authorized")
-				})
-			},
-			statusCode:    http.StatusForbidden,
-			expectedError: constants.APIErrorIDSubscriptionsNotAuthorized,
+			description:        "ActivateSubscriptions: user not authorized with error",
+			statusCode:         http.StatusForbidden,
+			expectedStatusCode: http.StatusForbidden,
+			errorMessage:       errors.New("User Not Authorized"),
+			expectedErr:        constants.APIErrorIDSubscriptionsNotAuthorized,
 		},
 		{
-			description: "ActivateSubscriptions: invalid table",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError: Invalid table")
-				})
-			},
-			statusCode:    http.StatusInternalServerError,
-			expectedError: constants.APIErrorIDSubscriptionsNotConfigured,
+			description:        "ActivateSubscriptions: invalid table",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError: Invalid table"),
+			expectedErr:        constants.APIErrorIDSubscriptionsNotConfigured,
 		},
 		{
-			description: "ActivateSubscriptions: failed to get subscription auth details",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:    http.StatusInternalServerError,
-			expectedError: "failed to get subscription auth details: mockError",
+			description:        "ActivateSubscriptions: failed to get subscription auth details",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to get subscription auth details: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			statusCode, err := c.ActivateSubscriptions()
-			if testCase.expectedError != "" {
-				assert.EqualError(t, err, testCase.expectedError)
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -81,33 +71,29 @@ func TestCreateSubscriptionClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "CreateSubscription: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "CreateSubscription: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "CreateSubscription: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "failed to create subscription in ServiceNow: mockError",
+			description:        "CreateSubscription: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to create subscription in ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			statusCode, err := c.CreateSubscription(&serializer.SubscriptionPayload{})
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -125,33 +111,29 @@ func TestGetAllSubscriptionsClient(t *testing.T) {
 	c := new(client)
 	c.plugin = &Plugin{}
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "GetAllSubscriptions: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "GetAllSubscriptions: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "GetAllSubscriptions: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "failed to get subscriptions from ServiceNow: mockError",
+			description:        "GetAllSubscriptions: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to get subscriptions from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			_, statusCode, err := c.GetAllSubscriptions("mockChannelID", "mockUserID", "mockSubscriptionType", "mockLimit", "mockOffset")
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -168,33 +150,29 @@ func TestGetSubscription(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "GetSubscription: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "GetSubscription: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "GetSubscription: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "failed to get subscription from ServiceNow: mockError",
+			description:        "GetSubscription: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to get subscription from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			_, statusCode, err := c.GetSubscription("mockSubscriptionID")
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -211,33 +189,29 @@ func TestDeleteSubscriptionClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "DeleteSubscription: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "DeleteSubscription: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "DeleteSubscription: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "failed to delete subscription from ServiceNow: mockError",
+			description:        "DeleteSubscription: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to delete subscription from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			statusCode, err := c.DeleteSubscription("mockSubscriptionID")
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -254,33 +228,29 @@ func TestEditSubscriptionClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "EditSubscription: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "EditSubscription: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "EditSubscription: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "failed to update subscription from ServiceNow: mockError",
+			description:        "EditSubscription: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to update subscription from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			statusCode, err := c.EditSubscription("mockSubscriptionID", &serializer.SubscriptionPayload{})
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -297,33 +267,29 @@ func TestCheckForDuplicateSubscription(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "CheckForDuplicateSubscription: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "CheckForDuplicateSubscription: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "CheckForDuplicateSubscription: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "failed to get subscriptions from ServiceNow: mockError",
+			description:        "CheckForDuplicateSubscription: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "failed to get subscriptions from ServiceNow: mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			mockChannelID := "mockChannelID"
 			mockType := "mockType"
 			mockRecordType := "mockRecordType"
@@ -351,33 +317,29 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "SearchRecordsInServiceNow: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "SearchRecordsInServiceNow: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "SearchRecordsInServiceNow: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "mockError",
+			description:        "SearchRecordsInServiceNow: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			_, statusCode, err := c.SearchRecordsInServiceNow("mockTable", "mockSearchItem", "mockLimit", "mockOffset")
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -394,33 +356,29 @@ func TestGetRecordFromServiceNowClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "GetRecordFromServiceNow: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "GetRecordFromServiceNow: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "GetRecordFromServiceNow: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "mockError",
+			description:        "GetRecordFromServiceNow: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			_, statusCode, err := c.GetRecordFromServiceNow("mockTable", "mockSysID")
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -437,33 +395,29 @@ func TestGetAllCommentsClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "GetAllComments: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "GetAllComments: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "GetAllComments: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "mockError",
+			description:        "GetAllComments: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			_, statusCode, err := c.GetAllComments("mockRecordType", "mockRecordID")
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
@@ -480,33 +434,29 @@ func TestAddCommentClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "AddComment: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "AddComment: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "AddComment: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "mockError",
+			description:        "AddComment: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			statusCode, err := c.AddComment("mockRecordType", "mockRecordID", &serializer.ServiceNowCommentPayload{
 				Comments: "mockComment",
 			})
@@ -526,33 +476,29 @@ func TestGetStatesFromServiceNowClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "GetStatesFromServiceNow: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "GetStatesFromServiceNow: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "GetStatesFromServiceNow: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "mockError",
+			description:        "GetStatesFromServiceNow: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			_, statusCode, err := c.GetStatesFromServiceNow("mockRecordType")
 
 			if testCase.expectedErr != "" {
@@ -561,7 +507,7 @@ func TestGetStatesFromServiceNowClient(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			assert.EqualValues(t, testCase.statusCode, statusCode)
+			assert.EqualValues(t, testCase.expectedStatusCode, statusCode)
 		})
 	}
 }
@@ -570,33 +516,29 @@ func TestUpdateStateOfRecordInServiceNowClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)
 	for _, testCase := range []struct {
-		description string
-		statusCode  int
-		setupClient func(c *client)
-		expectedErr string
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
 	}{
 		{
-			description: "UpdateStateOfRecordInServiceNow: valid",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusOK, nil
-				})
-			},
-			statusCode: http.StatusOK,
+			description:        "UpdateStateOfRecordInServiceNow: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
 		},
 		{
-			description: "UpdateStateOfRecordInServiceNow: with error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-					return nil, http.StatusInternalServerError, errors.New("mockError")
-				})
-			},
-			statusCode:  http.StatusInternalServerError,
-			expectedErr: "mockError",
+			description:        "UpdateStateOfRecordInServiceNow: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("mockError"),
+			expectedErr:        "mockError",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			testCase.setupClient(c)
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
 			statusCode, err := c.UpdateStateOfRecordInServiceNow("mockRecordType", "mockRecordID", &serializer.ServiceNowUpdateStatePayload{
 				State: "mockState",
 			})
