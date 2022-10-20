@@ -12,13 +12,15 @@ export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
 const MMUSERID = 'MMUSERID';
-const RightSidebarHeader = 'Subscriptions';
+const RightSidebarHeader = 'ServiceNow';
+const RhsSubscritpions = 'Subscriptions';
+const ShareRecordButton = 'Share';
 const RhsToggleLabel = 'Show all subscriptions';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
-const DefaultPageSize = 100;
+const DefaultPageSize = 20;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
@@ -31,6 +33,7 @@ const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
+const NoSubscriptionPresent = 'No more subscriptions present.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -50,6 +53,10 @@ export enum RecordType {
     INCIDENT = 'incident',
     PROBLEM = 'problem',
     CHANGE_REQUEST = 'change_request',
+    KNOWLEDGE = 'kb_knowledge',
+    TASK = 'task',
+    CHANGE_TASK = 'change_task',
+    FOLLOW_ON_TASK = 'cert_follow_on_task',
 }
 
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
@@ -79,7 +86,46 @@ export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
+    [RecordType.CHANGE_REQUEST]: 'Change Request',
+    [RecordType.KNOWLEDGE]: 'Knowledge',
+    [RecordType.TASK]: 'Task',
+    [RecordType.CHANGE_TASK]: 'Change Task',
+    [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
+
+const recordTypeOptions: DropdownOptionType[] = [
+    {
+        label: RecordTypeLabelMap[RecordType.INCIDENT],
+        value: RecordType.INCIDENT,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.PROBLEM],
+        value: RecordType.PROBLEM,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
+        value: RecordType.CHANGE_REQUEST,
+    },
+];
+
+const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
+    {
+        label: RecordTypeLabelMap[RecordType.KNOWLEDGE],
+        value: RecordType.KNOWLEDGE,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.TASK],
+        value: RecordType.TASK,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_TASK],
+        value: RecordType.CHANGE_TASK,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.FOLLOW_ON_TASK],
+        value: RecordType.FOLLOW_ON_TASK,
+    },
+]);
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
@@ -98,6 +144,25 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     }, {
         key: 'assignment_group',
         label: 'Assignment Group',
+    },
+];
+
+const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
+    {
+        key: 'short_description',
+        label: 'Short Description',
+    }, {
+        key: 'workflow_state',
+        label: 'Workflow',
+    }, {
+        key: 'author',
+        label: 'Author',
+    }, {
+        key: 'kb_category',
+        label: 'Category',
+    }, {
+        key: 'kb_knowledge_base',
+        label: 'Knowledge Base',
     },
 ];
 
@@ -153,6 +218,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getConfig',
     },
+    shareRecord: {
+        path: '/share',
+        method: 'POST',
+        apiServiceName: 'shareRecord',
+    },
     getStates: {
         path: '/states',
         method: 'GET',
@@ -178,12 +248,15 @@ export const PanelDefaultHeights = {
 
 export default {
     RightSidebarHeader,
+    RhsSubscritpions,
+    ShareRecordButton,
     DOWNLOAD_UPDATE_SET_LINK,
     pluginApiServiceConfigs,
     MMCSRF,
     HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
+    KnowledgeRecordDataLabelConfig,
     MMUSERID,
     SubscriptionsConfigErrorTitle,
     SubscriptionsConfigErrorSubtitleForAdmin,
@@ -208,4 +281,7 @@ export default {
     DeleteSubscriptionMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
+    recordTypeOptions,
+    shareRecordTypeOptions,
+    NoSubscriptionPresent,
 };

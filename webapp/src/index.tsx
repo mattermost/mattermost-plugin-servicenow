@@ -13,12 +13,13 @@ import reducer from 'reducers';
 import Rhs from 'containers/Rhs';
 import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
+import ShareRecords from 'containers/shareRecords';
 import UpdateState from 'containers/updateState';
 
 import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenUpdateStateModal} from 'websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenUpdateStateModal} from 'websocket';
 
 import App from './app';
 
@@ -33,6 +34,7 @@ export default class Plugin {
         registry.registerReducer(reducer);
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
+        registry.registerRootComponent(ShareRecords);
         registry.registerRootComponent(UpdateState);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
@@ -44,6 +46,7 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_edit_subscription`, handleOpenEditSubscriptionModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_search_and_share_record`, handleOpenShareRecordModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_update_state`, handleOpenUpdateStateModal(store));
     }
 }
