@@ -86,6 +86,8 @@ const (
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
+	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
+	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
 
 	// Slash commands
 	CommandHelp           = "help"
