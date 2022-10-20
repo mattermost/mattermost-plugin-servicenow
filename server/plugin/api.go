@@ -46,6 +46,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
@@ -511,8 +512,8 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidRecordTypesForSearching[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+	if !constants.RecordTypesSupportingComments[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
@@ -535,8 +536,8 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidRecordTypesForSearching[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+	if !constants.RecordTypesSupportingComments[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
@@ -563,10 +564,14 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidRecordTypesForSearching[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+	if !constants.RecordTypesSupportingStateUpdation[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
+	}
+
+	if recordType == constants.RecordTypeFollowOnTask {
+		recordType = constants.RecordTypeTask
 	}
 
 	client := p.GetClientFromRequest(r)
@@ -578,6 +583,40 @@ func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) 
 	}
 
 	p.writeJSONArray(w, statusCode, states)
+}
+
+func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.RecordTypesSupportingStateUpdation[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	payload, err := serializer.ServiceNowStatePayloadFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		return
+	}
+
+	if err = payload.Validate(); err != nil {
+		p.API.LogError("Error in validating the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		return
+	}
+
+	recordID := pathParams[constants.PathParamRecordID]
+	client := p.GetClientFromRequest(r)
+	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
+	if err != nil {
+		p.API.LogError("Error in updating the state", "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in updating the state. Error: %s", err.Error())})
+		return
+	}
+
+	returnStatusOK(w)
 }
 
 func returnStatusOK(w http.ResponseWriter) {

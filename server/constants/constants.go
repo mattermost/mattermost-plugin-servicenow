@@ -173,7 +173,10 @@ var (
 	}
 
 	RecordTypesSupportingStateUpdation = map[string]bool{
-		RecordTypeIncident: true,
+		RecordTypeIncident:     true,
+		RecordTypeTask:         true,
+		RecordTypeChangeTask:   true,
+		RecordTypeFollowOnTask: true,
 	}
 )
 
