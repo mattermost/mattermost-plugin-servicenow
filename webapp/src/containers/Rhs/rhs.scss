@@ -4,6 +4,12 @@
 .rhs-content {
   height: calc(100% - #{$rhs-header-height});
 
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   &__subscriptions {
     font-weight: bold;
   }
@@ -46,16 +52,16 @@
 }
 
 .share-record-btn {
-  float: right;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0px 30px;
   width: 88px;
   height: 40px;
   border-radius: 4px;
-  margin-bottom: 10px;
 }
 
 .share-record-icon {
-  float: right;
-  margin-right: 30px;
-  margin-top: 2px;
+  margin-right: 3px;
+  margin-top: 4px;
 }
