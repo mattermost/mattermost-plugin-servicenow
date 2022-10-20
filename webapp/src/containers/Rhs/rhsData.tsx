@@ -105,20 +105,22 @@ const RhsData = ({
 
     return (
         <>
-            <div>
+            <div className='rhs-content__header'>
                 <span className='rhs-content__subscriptions'>{Constants.RhsSubscritpions}</span>
                 <button
                     className='btn btn-primary share-record-btn'
                     onClick={() => dispatch(showRecordModal())}
                 >
-                    <SvgWrapper
-                        width={16}
-                        height={16}
-                        viewBox='0 0 14 12'
-                        className='share-record-icon'
-                    >
-                        {SVGIcons.share}
-                    </SvgWrapper>
+                    <span>
+                        <SvgWrapper
+                            width={16}
+                            height={16}
+                            viewBox='0 0 14 12'
+                            className='share-record-icon'
+                        >
+                            {SVGIcons.share}
+                        </SvgWrapper>
+                    </span>
                     {Constants.ShareRecordButton}
                 </button>
             </div>
