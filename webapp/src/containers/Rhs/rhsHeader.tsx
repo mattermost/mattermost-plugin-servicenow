@@ -1,4 +1,5 @@
 import React, {useCallback, useRef, useState} from 'react';
+import {useDispatch} from 'react-redux';
 
 import {Dropdown, SvgWrapper, ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
@@ -8,6 +9,8 @@ import Constants from 'plugin_constants';
 import SVGIcons from 'plugin_constants/icons';
 import IconButton from 'components/Buttons/iconButton';
 import Button from 'components/Buttons/button';
+
+import {showModal as showRecordModal} from 'reducers/shareRecordModal';
 
 type HeaderProps = {
     showAllSubscriptions: boolean;
@@ -24,6 +27,7 @@ const Header = ({
     setFilter,
     setResetFilter}: HeaderProps) => {
     const [showFilter, setShowFilter] = useState(false);
+    const dispatch = useDispatch();
 
     const isFilterApplied = useCallback(() => showAllSubscriptions || filter.createdBy !== Constants.DefaultSubscriptionFilters.createdBy, [filter, showAllSubscriptions]);
 
@@ -51,6 +55,22 @@ const Header = ({
                             {SVGIcons.filter}
                         </SvgWrapper>
                     </IconButton>
+                    <button
+                        className='btn btn-primary share-record-btn'
+                        onClick={() => dispatch(showRecordModal())}
+                    >
+                        <span>
+                            <SvgWrapper
+                                width={16}
+                                height={16}
+                                viewBox='0 0 14 12'
+                                className='share-record-icon'
+                            >
+                                {SVGIcons.share}
+                            </SvgWrapper>
+                        </span>
+                        {Constants.ShareRecordButton}
+                    </button>
                 </div>
             </div>
             {

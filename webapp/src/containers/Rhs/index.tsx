@@ -41,7 +41,7 @@ const Rhs = (): JSX.Element => {
         page: Constants.DefaultPage,
         per_page: Constants.DefaultPageSize,
     });
-    const [subscriptionList, setSubscriptionList] = useState<SubscriptionData[]>([]);
+    const [totalSubscriptions, setTotalSubscriptions] = useState<SubscriptionData[]>([]);
     const [render, setRender] = useState(true);
     const [filter, setFilter] = useState<SubscriptionFilters>(Constants.DefaultSubscriptionFilters);
     const [resetFilter, setResetFilter] = useState(false);
@@ -58,8 +58,8 @@ const Rhs = (): JSX.Element => {
 
     // Reset the pagination params and empty the subscription list
     const resetStates = useCallback(() => {
-        setPaginationQueryParams(() => ({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize}));
-        setSubscriptionList([]);
+        setPaginationQueryParams({page: Constants.DefaultPage, per_page: Constants.DefaultPageSize});
+        setTotalSubscriptions([]);
     }, []);
 
     // Increase the page number by 1
@@ -189,6 +189,7 @@ const Rhs = (): JSX.Element => {
         }
 
         if (subscriptionsState.isSuccess) {
+            setTotalSubscriptions([...totalSubscriptions, ...subscriptions]);
             if (!connected) {
                 dispatch(setConnected(true));
             }
@@ -200,10 +201,6 @@ const Rhs = (): JSX.Element => {
             if (!subscriptionsAuthorized) {
                 setSubscriptionsAuthorized(true);
             }
-        }
-
-        if (!subscriptionsState.isLoading && subscriptionsState.isSuccess) {
-            setSubscriptionList([...subscriptionList, ...subscriptions]);
         }
     }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess, getSubscriptionsState().isLoading]);
 
@@ -217,7 +214,7 @@ const Rhs = (): JSX.Element => {
                     <RhsData
                         showAllSubscriptions={showAllSubscriptions}
                         setShowAllSubscriptions={setShowAllSubscriptions}
-                        subscriptionList={subscriptionList}
+                        totalSubscriptions={totalSubscriptions}
                         loadingSubscriptions={subscriptionsLoading}
                         handleEditSubscription={handleEditSubscription}
                         handleDeleteClick={handleDeleteClick}
