@@ -46,17 +46,16 @@
 }
 
 .share-record-btn {
-  align-items: center;
+  float: right;
   padding: 0px 30px;
   width: 88px;
   height: 40px;
   border-radius: 4px;
   margin-bottom: 10px;
-  margin-left: 195px;
 }
 
 .share-record-icon {
-  position: absolute;
-  top: 27px;
-  left: 307px;
+  float: right;
+  margin-right: 30px;
+  margin-top: 2px;
 }
