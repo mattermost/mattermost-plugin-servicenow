@@ -4,7 +4,7 @@ import {shallow, ShallowWrapper} from 'enzyme';
 
 import {ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
 
-import {RecordType, RecordTypeLabelMap} from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 import RecordTypePanel from './recordTypePanel';
 
@@ -12,20 +12,6 @@ const mockOnContinue = jest.fn();
 const mockOnBack = jest.fn();
 const mockSetRecordType = jest.fn();
 const mockSetResetRecordPanelStates = jest.fn();
-const recordTypeOptions: DropdownOptionType[] = [
-    {
-        label: RecordTypeLabelMap[RecordType.INCIDENT],
-        value: RecordType.INCIDENT,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.PROBLEM],
-        value: RecordType.PROBLEM,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
-        value: RecordType.CHANGE_REQUEST,
-    },
-];
 
 const recordTypePanelProps = {
     className: 'mockClassName',
@@ -36,7 +22,7 @@ const recordTypePanelProps = {
     recordType: RecordType.INCIDENT,
     setRecordType: mockSetRecordType,
     setResetRecordPanelStates: mockSetResetRecordPanelStates,
-    recordTypeOptions,
+    recordTypeOptions: Constants.recordTypeOptions,
 };
 
 describe('Record Type Panel', () => {

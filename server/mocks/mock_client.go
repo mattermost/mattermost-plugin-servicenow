@@ -38,6 +38,27 @@ func (_m *Client) ActivateSubscriptions() (int, error) {
 	return r0, r1
 }
 
+// AddComment provides a mock function with given fields: recordType, recordID, payload
+func (_m *Client) AddComment(recordType string, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error) {
+	ret := _m.Called(recordType, recordID, payload)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(string, string, *serializer.ServiceNowCommentPayload) int); ok {
+		r0 = rf(recordType, recordID, payload)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, *serializer.ServiceNowCommentPayload) error); ok {
+		r1 = rf(recordType, recordID, payload)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CheckForDuplicateSubscription provides a mock function with given fields: _a0
 func (_m *Client) CheckForDuplicateSubscription(_a0 *serializer.SubscriptionPayload) (bool, int, error) {
 	ret := _m.Called(_a0)
@@ -127,6 +148,34 @@ func (_m *Client) EditSubscription(subscriptionID string, subscription *serializ
 	}
 
 	return r0, r1
+}
+
+// GetAllComments provides a mock function with given fields: recordType, recordID
+func (_m *Client) GetAllComments(recordType string, recordID string) (string, int, error) {
+	ret := _m.Called(recordType, recordID)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(recordType, recordID)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string, string) int); ok {
+		r1 = rf(recordType, recordID)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string, string) error); ok {
+		r2 = rf(recordType, recordID)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // GetAllSubscriptions provides a mock function with given fields: channelID, userID, subscriptionType, limit, offset

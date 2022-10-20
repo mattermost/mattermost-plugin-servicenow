@@ -10,6 +10,7 @@
 
   &__cards-container {
     height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
+    padding-right: 10px;
     overflow-y: auto;
   }
 

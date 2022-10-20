@@ -1,10 +1,10 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-export type SubscriptionModalState = {
+export type ShareRecordModalState = {
     open: boolean;
 }
 
-const initialState: SubscriptionModalState = {
+const initialState: ShareRecordModalState = {
     open: false,
 };
 

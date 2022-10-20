@@ -20,7 +20,7 @@ const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from t
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
-const DefaultPageSize = 100;
+const DefaultPageSize = 20;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
@@ -33,6 +33,7 @@ const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
+const NoSubscriptionPresent = 'No more subscriptions present.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -85,11 +86,46 @@ export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
+    [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.KNOWLEDGE]: 'Knowledge',
     [RecordType.TASK]: 'Task',
     [RecordType.CHANGE_TASK]: 'Change Task',
     [RecordType.FOLLOW_ON_TASK]: 'Follow On Task',
 };
+
+const recordTypeOptions: DropdownOptionType[] = [
+    {
+        label: RecordTypeLabelMap[RecordType.INCIDENT],
+        value: RecordType.INCIDENT,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.PROBLEM],
+        value: RecordType.PROBLEM,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
+        value: RecordType.CHANGE_REQUEST,
+    },
+];
+
+const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
+    {
+        label: RecordTypeLabelMap[RecordType.KNOWLEDGE],
+        value: RecordType.KNOWLEDGE,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.TASK],
+        value: RecordType.TASK,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.CHANGE_TASK],
+        value: RecordType.CHANGE_TASK,
+    },
+    {
+        label: RecordTypeLabelMap[RecordType.FOLLOW_ON_TASK],
+        value: RecordType.FOLLOW_ON_TASK,
+    },
+]);
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
@@ -235,4 +271,7 @@ export default {
     DeleteSubscriptionMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
+    recordTypeOptions,
+    shareRecordTypeOptions,
+    NoSubscriptionPresent,
 };

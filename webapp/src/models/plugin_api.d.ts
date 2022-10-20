@@ -36,13 +36,13 @@ type FetchChannelsParams = {
 }
 
 type SearchRecordsParams = {
-    recordType: RecordType;
+    recordType: RecordType | ShareRecordType;
     search: string;
     perPage?: number;
 }
 
 type GetRecordParams = {
-    recordType: RecordType;
+    recordType: RecordType | ShareRecordType;
     recordId: string;
 }
 
@@ -53,16 +53,16 @@ type Suggestion = {
 }
 
 type RecordData = {
-    assigned_to: string | {display_value: string, link: string};
-    assignment_group: string | {display_value: string, link: string};
+    assigned_to: string | LinkData;
+    assignment_group: string | LinkData;
     number: string;
     priority: string;
     short_description: string;
     state: string;
     sys_id: string;
-    author: string | {display_value: string, link: string};
-    kb_category: string | {display_value: string, link: string};
-    kb_knowledge_base: string | {display_value: string, link: string};
+    author: string | LinkData;
+    kb_category: string | LinkData;
+    kb_knowledge_base: string | LinkData;
     workflow_state: string;
 }
 
@@ -119,16 +119,26 @@ type ConfigData = {
 }
 
 type ShareRecordPayload = {
-    record_type: RecordType;
+    record_type: ShareRecordType;
     record_id: string;
     short_description: string;
     state?: string;
     priority?: string;
-    assigned_to?: string | {display_value: string, link: string};
-    assignment_group?: string | {display_value: string, link: string};
-    author?: string | {display_value: string, link: string};
-    kb_category?: string | {display_value: string, link: string};
-    kb_knowledge_base?: string | {display_value: string, link: string};
+    assigned_to?: string | LinkData;
+    assignment_group?: string | LinkData;
+    author?: string | LinkData;
+    kb_category?: string | LinkData;
+    kb_knowledge_base?: string | LinkData;
     workflow_state?: string;
     channel_id: string;
+}
+
+type LinkData = {
+    display_value: string;
+    link: string;
+}
+
+interface PaginationQueryParams {
+    page: number;
+    per_page: number;
 }

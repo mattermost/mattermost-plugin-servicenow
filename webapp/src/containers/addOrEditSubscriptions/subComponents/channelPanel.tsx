@@ -20,7 +20,7 @@ type ChannelPanelProps = {
     setChannel: (value: string | null) => void;
     setShowModalLoader: (show: boolean) => void;
     setApiError: (error: string | null) => void;
-    setApiResponseValid: (valid: boolean) => void;
+    setApiResponseValid?: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
     setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
     editing?: boolean;
@@ -77,7 +77,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     useEffect(() => {
         const channelListState = getChannelState();
 
-        if (channelListState.isLoading) {
+        if (channelListState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
 
