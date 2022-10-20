@@ -223,7 +223,6 @@ func (c *client) AddComment(recordType, recordID string, payload *serializer.Ser
 
 func (c *client) GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error) {
 	states := &serializer.ServiceNowStatesResult{}
-
 	url := strings.Replace(constants.PathGetStatesFromServiceNow, "{record_type}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, states, nil)
 	if err != nil {
