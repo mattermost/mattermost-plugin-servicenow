@@ -564,7 +564,7 @@ func TestGetCommentsForRecord(t *testing.T) {
 		"failed to marshal comments": {
 			RecordType: constants.RecordTypeIncident,
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error")
+				api.On("LogError", mock.AnythingOfType("string"), "Error", "marshal error")
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
@@ -757,7 +757,7 @@ func TestGetStatesForRecordType(t *testing.T) {
 		"failed to marshal states": {
 			RecordType: constants.RecordTypeIncident,
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error")
+				api.On("LogError", mock.AnythingOfType("string"), "Error", "marshal error")
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
