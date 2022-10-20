@@ -13,6 +13,67 @@ import (
 	"golang.org/x/oauth2"
 )
 
+func (p *Plugin) handleAPIError(w http.ResponseWriter, apiErr *serializer.APIErrorResponse) {
+	w.Header().Set("Content-Type", "application/json")
+	errorBytes, err := json.Marshal(apiErr)
+	if err != nil {
+		p.API.LogError("Failed to marshal API error", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(apiErr.StatusCode)
+
+	if _, err = w.Write(errorBytes); err != nil {
+		p.API.LogError("Failed to write JSON response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *Plugin) writeJSON(w http.ResponseWriter, statusCode int, v interface{}) {
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	b, err := json.Marshal(v)
+	if err != nil {
+		p.API.LogError("Failed to marshal JSON response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if _, err = w.Write(b); err != nil {
+		p.API.LogError("Failed to write JSON response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *Plugin) writeJSONArray(w http.ResponseWriter, statusCode int, v interface{}) {
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	b, err := json.Marshal(v)
+	if err != nil {
+		p.API.LogError("Failed to marshal JSON response", "Error", err.Error())
+		_, _ = w.Write([]byte("[]"))
+		return
+	}
+
+	if string(b) == "null" {
+		_, _ = w.Write([]byte("[]"))
+	} else if _, err = w.Write(b); err != nil {
+		p.API.LogError("Error while writing response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
 	var sb strings.Builder
 	var recordSubscriptions strings.Builder
@@ -26,14 +87,14 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 	}
 
 	if bulkSubscriptions.Len() > 0 {
-		sb.WriteString("#### Bulk subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Events |\n| :----|:--------| :--------|")
+		sb.WriteString("#### Bulk subscriptions\n")
+		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|")
 		sb.WriteString(bulkSubscriptions.String())
 	}
 
 	if recordSubscriptions.Len() > 0 {
-		sb.WriteString("\n#### Record subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events |\n| :----|:--------| :--------| :-----| :--------|")
+		sb.WriteString("\n#### Record subscriptions\n")
+		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|")
 		sb.WriteString(recordSubscriptions.String())
 	}
 

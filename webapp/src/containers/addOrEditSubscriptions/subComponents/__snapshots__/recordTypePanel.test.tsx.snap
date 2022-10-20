@@ -2,7 +2,7 @@
 
 exports[`Record Type Panel Should render correctly 1`] = `
 <div
-  className="modal__body wizard__secondary-panel mockClassName"
+  className="mockClassName"
 >
   <div
     className="padding-h-12 padding-v-20 wizard__body-container"
