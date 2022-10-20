@@ -427,6 +427,561 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 	}
 }
 
+func TestShareRecordInChannel(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathShareRecord)
+	requestMethod := http.MethodPost
+	for name, test := range map[string]struct {
+		RequestBody          string
+		ChannelID            string
+		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			RequestBody: `{
+				"sys_id": "mockSysID",
+				"record_type": "incident"
+				}`,
+			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("GetUser", mock.AnythingOfType("string")).Return(
+					testutils.GetUser(), nil,
+				)
+
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
+					nil, nil,
+				)
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"invalid channel ID": {
+			ChannelID: "invalidID",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", constants.ErrorInvalidChannelID).Return()
+				return api
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedErrorMessage: constants.ErrorInvalidChannelID,
+			ExpectedStatusCode:   http.StatusBadRequest,
+		},
+		"invalid request body": {
+			RequestBody: "",
+			ChannelID:   "bnqnzipmnir4zkkj95ggba5pde",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"invalid record type": {
+			RequestBody: `{
+		 		"sys_id": "mockSysID",
+		 		"record_type": "testRecordType"
+		 		}`,
+			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
+				return api
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
+		},
+		"failed to get the user": {
+			RequestBody: `{
+				"sys_id": "mockSysID",
+				"record_type": "incident"
+				}`,
+			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("GetUser", mock.AnythingOfType("string")).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
+
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusInternalServerError,
+		},
+		"failed to create the post": {
+			RequestBody: `{
+				"sys_id": "mockSysID",
+				"record_type": "incident"
+				}`,
+			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("GetUser", mock.AnythingOfType("string")).Return(
+					testutils.GetUser(), nil,
+				)
+
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
+
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusOK,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			api := test.SetupAPI(&plugintest.API{})
+			defer api.AssertExpectations(t)
+			defer monkey.UnpatchAll()
+
+			p := setupTestPlugin(api, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{channel_id:[A-Za-z0-9]+}", test.ChannelID, 1), bytes.NewBufferString(test.RequestBody))
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
+func TestGetCommentsForRecord(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCommentsForRecord)
+	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
+	requestMethod := http.MethodGet
+	for name, test := range map[string]struct {
+		RecordType           string
+		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			RecordType: constants.RecordTypeIncident,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
+					testutils.GetServiceNowComments(), http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"invalid record type": {
+			RecordType: "testRecordType",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
+				return api
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
+		},
+		"failed to get comments": {
+			RecordType: constants.RecordTypeIncident,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...)
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
+					"", http.StatusInternalServerError, fmt.Errorf("new error"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "new error",
+		},
+		"failed to marshal comments": {
+			RecordType: constants.RecordTypeIncident,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error")
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
+					testutils.GetServiceNowComments(), http.StatusOK, nil,
+				)
+
+				monkey.Patch(json.Marshal, func(_ interface{}) ([]byte, error) {
+					return nil, fmt.Errorf("marshal error")
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			api := test.SetupAPI(&plugintest.API{})
+			defer api.AssertExpectations(t)
+			defer monkey.UnpatchAll()
+
+			p := setupTestPlugin(api, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
+func TestAddCommentsOnRecord(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCommentsForRecord)
+	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
+	requestMethod := http.MethodPost
+	for name, test := range map[string]struct {
+		RecordType           string
+		RequestBody          string
+		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"comments": "mockComment"
+			}`,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("AddComment", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowCommentPayload")).Return(
+					http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"invalid record type": {
+			RecordType: "testRecordType",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
+				return api
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
+		},
+		"invalid request body": {
+			RecordType:  constants.RecordTypeIncident,
+			RequestBody: "",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"failed to add comment": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"comments": "mockComment"
+			}`,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("AddComment", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowCommentPayload")).Return(
+					http.StatusInternalServerError, fmt.Errorf("add comment error"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "add comment error",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			api := test.SetupAPI(&plugintest.API{})
+			defer api.AssertExpectations(t)
+			defer monkey.UnpatchAll()
+
+			p := setupTestPlugin(api, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
+func TestGetStatesForRecordType(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetStatesForRecordType)
+	requestMethod := http.MethodGet
+	for name, test := range map[string]struct {
+		RecordType           string
+		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedCount        int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			RecordType: constants.RecordTypeFollowOnTask,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetStatesFromServiceNow", constants.RecordTypeTask).Return(
+					testutils.GetServiceNowStates(3), http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      3,
+		},
+		"invalid record type": {
+			RecordType: "testRecordType",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
+				return api
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedCount:        -1,
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
+		},
+		"failed to get states": {
+			RecordType: constants.RecordTypeIncident,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...)
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetStatesFromServiceNow", constants.RecordTypeIncident).Return(
+					nil, http.StatusInternalServerError, fmt.Errorf("get states error"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "Error in getting the states. Error: get states error",
+			ExpectedCount:        -1,
+		},
+		"failed to marshal states": {
+			RecordType: constants.RecordTypeIncident,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error")
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetStatesFromServiceNow", constants.RecordTypeIncident).Return(
+					testutils.GetServiceNowStates(3), http.StatusOK, nil,
+				)
+
+				monkey.Patch(json.Marshal, func(_ interface{}) ([]byte, error) {
+					return nil, fmt.Errorf("marshal error")
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      0,
+		},
+		"no states fetched from ServiceNow": {
+			RecordType: constants.RecordTypeIncident,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetStatesFromServiceNow", constants.RecordTypeIncident).Return(
+					nil, http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      0,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			api := test.SetupAPI(&plugintest.API{})
+			defer api.AssertExpectations(t)
+			defer monkey.UnpatchAll()
+
+			p := setupTestPlugin(api, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+
+			if test.ExpectedCount != -1 {
+				var states []*serializer.ServiceNowState
+				err := json.NewDecoder(result.Body).Decode(&states)
+				require.Nil(t, err)
+
+				assert.Equal(test.ExpectedCount, len(states))
+			}
+
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+
+				assert.Equal(test.ExpectedErrorMessage, resp.Message)
+			}
+		})
+	}
+}
+
+func TestUpdateStateOfRecord(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathUpdateStateOfRecord)
+	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
+	requestMethod := http.MethodPatch
+	for name, test := range map[string]struct {
+		RecordType           string
+		RequestBody          string
+		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"state": "mockState"
+			}`,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
+					http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"invalid record type": {
+			RecordType: "testRecordType",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
+				return api
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
+		},
+		"invalid request body": {
+			RecordType:  constants.RecordTypeIncident,
+			RequestBody: "",
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"valid body with empty state": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"state": ""
+			}`,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				return api
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"failed to update state": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"state": "mockState"
+			}`,
+			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+				return api
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
+					http.StatusInternalServerError, fmt.Errorf("update state error"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "update state error",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			api := test.SetupAPI(&plugintest.API{})
+			defer api.AssertExpectations(t)
+			defer monkey.UnpatchAll()
+
+			p := setupTestPlugin(api, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
 func TestHandleNotification(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathProcessNotification)
 	requestMethod := http.MethodPost
