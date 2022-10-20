@@ -33,7 +33,7 @@ func TestActivateSubscriptions(t *testing.T) {
 			description:        "ActivateSubscriptions: user not authorized with error",
 			statusCode:         http.StatusForbidden,
 			expectedStatusCode: http.StatusForbidden,
-			errorMessage:       errors.New("User Not Authorized"),
+			errorMessage:       errors.New("user Not Authorized"),
 			expectedErr:        constants.APIErrorIDSubscriptionsNotAuthorized,
 		},
 		{
