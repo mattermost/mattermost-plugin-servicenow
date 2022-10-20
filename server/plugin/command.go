@@ -21,6 +21,7 @@ const (
 * |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
 * |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
+* |/servicenow search| - Search a record in ServiceNow and share it in a channel
 * |/servicenow help| - Know about the features of this plugin
 `
 
@@ -48,7 +49,7 @@ After that, this user will have the permission to add or manage subscriptions fr
 	disconnectErrorMessage                  = "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	disconnectSuccessMessage                = "Disconnected your ServiceNow account."
 	listSubscriptionsErrorMessage           = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
-	listSubscriptionsWaitMessage            = "Your subscriptions for this channel will be listed soon. Please wait."
+	listSubscriptionsWaitMessage            = "Your subscriptions will be listed soon. Please wait."
 	genericWaitMessage                      = "Your request is being processed. Please wait."
 	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
 	deleteSubscriptionSuccessMessage        = "Subscription successfully deleted."
@@ -74,7 +75,7 @@ func (p *Plugin) getCommand() (*model.Command, error) {
 	return &model.Command{
 		Trigger:              constants.CommandTrigger,
 		AutoComplete:         true,
-		AutoCompleteDesc:     "Available commands: connect, disconnect, subscriptions, help",
+		AutoCompleteDesc:     fmt.Sprintf("Available commands: %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandHelp),
 		AutoCompleteHint:     "[command]",
 		AutocompleteData:     getAutocompleteData(),
 		AutocompleteIconData: iconData,
@@ -107,7 +108,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	if action == "connect" {
+	if action == constants.CommandConnect {
 		message := ""
 		if _, userErr := p.GetUser(args.UserId); userErr == nil {
 			message = "You are already connected to ServiceNow."
@@ -119,7 +120,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	if action == "" || action == "help" {
+	if action == "" || action == constants.CommandHelp {
 		p.handleHelp(args, isSysAdmin)
 		return &model.CommandResponse{}, nil
 	}
@@ -131,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != "disconnect" {
+		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}
@@ -223,13 +224,13 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	parameters = parameters[1:]
 
 	switch command {
-	case "list":
+	case constants.SubCommandList:
 		return p.handleListSubscriptions(c, args, parameters, client)
-	case "add":
+	case constants.SubCommandAdd:
 		return p.handleSubscribe(c, args, parameters, client)
-	case "edit":
+	case constants.SubCommandEdit:
 		return p.handleEditSubscription(c, args, parameters, client)
-	case "delete":
+	case constants.SubCommandDelete:
 		return p.handleDeleteSubscription(c, args, parameters, client)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
@@ -246,9 +247,38 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 	return ""
 }
 
-func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, _ []string, client Client) string {
+func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenSearchAndShareRecordsModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
+func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client) string {
+	userID := args.UserId
+	channelID := args.ChannelId
+	if len(params) >= 1 {
+		if params[0] != constants.FilterCreatedByMe && params[0] != constants.FilterCreatedByAnyone {
+			return fmt.Sprintf("Unknown filter %s", params[0])
+		}
+
+		if params[0] == constants.FilterCreatedByAnyone {
+			userID = ""
+		}
+	}
+
+	if len(params) == 2 {
+		if params[1] != constants.FilterAllChannels {
+			return fmt.Sprintf("Unknown filter %s", params[1])
+		}
+		channelID = ""
+	}
+
 	go func() {
-		subscriptions, _, err := client.GetAllSubscriptions(args.ChannelId, args.UserId, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
+		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
 			p.API.LogError("Unable to get subscriptions", "Error", err.Error())
 			p.postCommandResponse(args, listSubscriptionsErrorMessage)
@@ -262,6 +292,26 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 
 		wg := sync.WaitGroup{}
 		for _, subscription := range subscriptions {
+			wg.Add(1)
+			go func(subscription *serializer.SubscriptionResponse) {
+				defer wg.Done()
+				user, err := p.API.GetUser(subscription.UserID)
+				if err != nil {
+					p.API.LogError("Error in getting user", "UserID", subscription.UserID)
+					subscription.UserName = "N/A"
+				} else {
+					subscription.UserName = user.Username
+				}
+
+				channel, err := p.API.GetChannel(subscription.ChannelID)
+				if err != nil {
+					p.API.LogError("Error in getting channel", "ChannelID", subscription.ChannelID)
+					subscription.ChannelName = "N/A"
+				} else {
+					subscription.ChannelName = channel.DisplayName
+				}
+			}(subscription)
+
 			if subscription.Type == constants.SubscriptionTypeBulk {
 				continue
 			}
@@ -354,33 +404,43 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 }
 
 func getAutocompleteData() *model.AutocompleteData {
-	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", "Available commands: connect, disconnect, help")
+	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandHelp))
 
-	connect := model.NewAutocompleteData("connect", "", "Connect your Mattermost account to your ServiceNow account")
+	connect := model.NewAutocompleteData(constants.CommandConnect, "", "Connect your Mattermost account to your ServiceNow account")
 	serviceNow.AddCommand(connect)
 
-	disconnect := model.NewAutocompleteData("disconnect", "", "Disconnect your Mattermost account from your ServiceNow account")
+	disconnect := model.NewAutocompleteData(constants.CommandDisconnect, "", "Disconnect your Mattermost account from your ServiceNow account")
 	serviceNow.AddCommand(disconnect)
 
-	subscriptions := model.NewAutocompleteData("subscriptions", "[command]", "Available commands: list, add, edit, delete")
+	subscriptions := model.NewAutocompleteData(constants.CommandSubscriptions, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s", constants.SubCommandList, constants.SubCommandAdd, constants.SubCommandEdit, constants.SubCommandDelete))
 
 	subscribeList := model.NewAutocompleteData("list", "", "List the current channel subscriptions")
+	subscriptionCreatedByMe := model.NewAutocompleteData("me", "", "Created By Me")
+	subscriptionShowForAllChannels := model.NewAutocompleteData("all_channels", "", "Show for all channels or You can leave this argument to show for the current channel only")
+	subscriptionCreatedByMe.AddCommand(subscriptionShowForAllChannels)
+	subscribeList.AddCommand(subscriptionCreatedByMe)
+	subscriptionCreatedByAnyone := model.NewAutocompleteData("anyone", "", "Created By Anyone")
+	subscriptionCreatedByAnyone.AddCommand(subscriptionShowForAllChannels)
+	subscribeList.AddCommand(subscriptionCreatedByAnyone)
 	subscriptions.AddCommand(subscribeList)
 
-	subscriptionsAdd := model.NewAutocompleteData("add", "", "Subscribe to the record changes in ServiceNow")
+	subscriptionsAdd := model.NewAutocompleteData(constants.SubCommandAdd, "", "Subscribe to the record changes in ServiceNow")
 	subscriptions.AddCommand(subscriptionsAdd)
 
-	subscriptionsEdit := model.NewAutocompleteData("edit", "[subscription_id]", "Edit the subscriptions created to the record changes in ServiceNow")
+	subscriptionsEdit := model.NewAutocompleteData(constants.SubCommandEdit, "[subscription_id]", "Edit the subscriptions created to the record changes in ServiceNow")
 	subscriptionsEdit.AddTextArgument("ID of the subscription", "[subscription_id]", "")
 	subscriptions.AddCommand(subscriptionsEdit)
 
-	subscriptionsDelete := model.NewAutocompleteData("delete", "[subscription_id]", "Unsubscribe to the record changes in ServiceNow")
+	subscriptionsDelete := model.NewAutocompleteData(constants.SubCommandDelete, "[subscription_id]", "Unsubscribe to the record changes in ServiceNow")
 	subscriptionsDelete.AddTextArgument("ID of the subscription", "[subscription_id]", "")
 	subscriptions.AddCommand(subscriptionsDelete)
 
 	serviceNow.AddCommand(subscriptions)
 
-	help := model.NewAutocompleteData("help", "", "Display slash command help text")
+	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
+	serviceNow.AddCommand(searchRecords)
+
+	help := model.NewAutocompleteData(constants.CommandHelp, "", "Display slash command help text")
 	serviceNow.AddCommand(help)
 
 	return serviceNow
