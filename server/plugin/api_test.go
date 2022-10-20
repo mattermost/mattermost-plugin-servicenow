@@ -66,7 +66,6 @@ func setupPluginForSubscriptionsConfiguredMiddleware(p *Plugin, t *testing.T) *m
 
 func TestGetConnected(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetConnected)
-	requestMethod := http.MethodGet
 	for name, test := range map[string]struct {
 		SetupStore         func(*mock_plugin.Store) *mock_plugin.Store
 		ExpectedStatusCode int
@@ -95,7 +94,7 @@ func TestGetConnected(t *testing.T) {
 
 			p := setupTestPlugin(&plugintest.API{}, store)
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, requestURL, nil)
+			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -115,7 +114,6 @@ func TestGetConnected(t *testing.T) {
 
 func TestGetUserChannelsForTeam(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetUserChannelsForTeam)
-	requestMethod := http.MethodGet
 	for name, test := range map[string]struct {
 		TeamID               string
 		SetupAPI             func(*plugintest.API) *plugintest.API
@@ -178,7 +176,7 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 
 			p := setupTestPlugin(api, nil)
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{team_id:[A-Za-z0-9]+}", test.TeamID, 1), nil)
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{team_id:[A-Za-z0-9]+}", test.TeamID, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -209,7 +207,6 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 
 func TestAPISearchRecordsInServiceNow(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSearchRecords)
-	requestMethod := http.MethodGet
 	limit, offset := testutils.GetLimitAndOffset()
 	for name, test := range map[string]struct {
 		RecordType           string
@@ -318,7 +315,7 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 			queryParams := url.Values{
 				constants.QueryParamSearchTerm: {test.SearchTerm},
 			}
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
 			r.URL.RawQuery = queryParams.Encode()
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
@@ -351,7 +348,6 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 func TestGetRecordFromServiceNow(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetSingleRecord)
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
-	requestMethod := http.MethodGet
 	for name, test := range map[string]struct {
 		RecordType           string
 		SetupAPI             func(*plugintest.API) *plugintest.API
@@ -407,7 +403,7 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -429,12 +425,10 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 
 func TestShareRecordInChannel(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathShareRecord)
-	requestMethod := http.MethodPost
 	for name, test := range map[string]struct {
 		RequestBody          string
 		ChannelID            string
 		SetupAPI             func(*plugintest.API) *plugintest.API
-		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
@@ -454,7 +448,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 				return api
 			},
-			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusOK,
 		},
 		"invalid channel ID": {
@@ -463,7 +456,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				api.On("LogError", constants.ErrorInvalidChannelID).Return()
 				return api
 			},
-			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedErrorMessage: constants.ErrorInvalidChannelID,
 			ExpectedStatusCode:   http.StatusBadRequest,
 		},
@@ -474,7 +466,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				return api
 			},
-			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 		"invalid record type": {
@@ -487,7 +478,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
 				return api
 			},
-			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
@@ -505,7 +495,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 				return api
 			},
-			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 		"failed to create the post": {
@@ -526,7 +515,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				return api
 			},
-			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusOK,
 		},
 	} {
@@ -537,11 +525,10 @@ func TestShareRecordInChannel(t *testing.T) {
 			defer monkey.UnpatchAll()
 
 			p := setupTestPlugin(api, nil)
-			client := setupPluginForCheckOAuthMiddleware(p, t)
-			test.SetupClient(client)
+			_ = setupPluginForCheckOAuthMiddleware(p, t)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{channel_id:[A-Za-z0-9]+}", test.ChannelID, 1), bytes.NewBufferString(test.RequestBody))
+			r := httptest.NewRequest(http.MethodPost, strings.Replace(requestURL, "{channel_id:[A-Za-z0-9]+}", test.ChannelID, 1), bytes.NewBufferString(test.RequestBody))
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -564,7 +551,6 @@ func TestShareRecordInChannel(t *testing.T) {
 func TestGetCommentsForRecord(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCommentsForRecord)
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
-	requestMethod := http.MethodGet
 	for name, test := range map[string]struct {
 		RecordType           string
 		SetupAPI             func(*plugintest.API) *plugintest.API
@@ -637,7 +623,7 @@ func TestGetCommentsForRecord(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -660,7 +646,6 @@ func TestGetCommentsForRecord(t *testing.T) {
 func TestAddCommentsOnRecord(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCommentsForRecord)
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
-	requestMethod := http.MethodPost
 	for name, test := range map[string]struct {
 		RecordType           string
 		RequestBody          string
@@ -733,7 +718,7 @@ func TestAddCommentsOnRecord(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
+			r := httptest.NewRequest(http.MethodPost, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -755,7 +740,6 @@ func TestAddCommentsOnRecord(t *testing.T) {
 
 func TestGetStatesForRecordType(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetStatesForRecordType)
-	requestMethod := http.MethodGet
 	for name, test := range map[string]struct {
 		RecordType           string
 		SetupAPI             func(*plugintest.API) *plugintest.API
@@ -845,7 +829,7 @@ func TestGetStatesForRecordType(t *testing.T) {
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -877,7 +861,6 @@ func TestGetStatesForRecordType(t *testing.T) {
 func TestUpdateStateOfRecord(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathUpdateStateOfRecord)
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
-	requestMethod := http.MethodPatch
 	for name, test := range map[string]struct {
 		RecordType           string
 		RequestBody          string
@@ -962,7 +945,7 @@ func TestUpdateStateOfRecord(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
+			r := httptest.NewRequest(http.MethodPatch, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -984,7 +967,6 @@ func TestUpdateStateOfRecord(t *testing.T) {
 
 func TestHandleNotification(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathProcessNotification)
-	requestMethod := http.MethodPost
 	for name, test := range map[string]struct {
 		RequestBody        string
 		SetupAPI           func(*plugintest.API) *plugintest.API
@@ -1027,7 +1009,7 @@ func TestHandleNotification(t *testing.T) {
 			queryParams := url.Values{
 				"secret": {testutils.GetSecret()},
 			}
-			r := httptest.NewRequest(requestMethod, requestURL, bytes.NewBufferString(test.RequestBody))
+			r := httptest.NewRequest(http.MethodPost, requestURL, bytes.NewBufferString(test.RequestBody))
 			r.URL.RawQuery = queryParams.Encode()
 			p.ServeHTTP(nil, w, r)
 
@@ -1042,7 +1024,6 @@ func TestHandleNotification(t *testing.T) {
 
 func TestCreateSubscription(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateSubscription)
-	requestMethod := http.MethodPost
 	for name, test := range map[string]struct {
 		RequestBody          string
 		SetupAPI             func(*plugintest.API) *plugintest.API
@@ -1167,7 +1148,7 @@ func TestCreateSubscription(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, requestURL, bytes.NewBufferString(test.RequestBody))
+			r := httptest.NewRequest(http.MethodPost, requestURL, bytes.NewBufferString(test.RequestBody))
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -1189,7 +1170,6 @@ func TestCreateSubscription(t *testing.T) {
 
 func TestGetAllSubscriptions(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetAllSubscriptions)
-	requestMethod := http.MethodGet
 	limit, offset := testutils.GetLimitAndOffset()
 	for name, test := range map[string]struct {
 		ChannelID            string
@@ -1312,7 +1292,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 				constants.QueryParamUserID:           {test.UserID},
 				constants.QueryParamSubscriptionType: {test.SubscriptionType},
 			}
-			r := httptest.NewRequest(requestMethod, requestURL, nil)
+			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
 			r.URL.RawQuery = queryParams.Encode()
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
@@ -1344,7 +1324,6 @@ func TestGetAllSubscriptions(t *testing.T) {
 
 func TestDeleteSubscription(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathDeleteSubscription)
-	requestMethod := http.MethodDelete
 	for name, test := range map[string]struct {
 		SetupAPI             func(*plugintest.API) *plugintest.API
 		SetupClient          func(client *mock_plugin.Client)
@@ -1387,7 +1366,7 @@ func TestDeleteSubscription(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), nil)
+			r := httptest.NewRequest(http.MethodDelete, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -1409,7 +1388,6 @@ func TestDeleteSubscription(t *testing.T) {
 
 func TestEditSubscription(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathEditSubscription)
-	requestMethod := http.MethodPatch
 	for name, test := range map[string]struct {
 		RequestBody          string
 		SetupAPI             func(*plugintest.API) *plugintest.API
@@ -1488,7 +1466,7 @@ func TestEditSubscription(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), bytes.NewBufferString(test.RequestBody))
+			r := httptest.NewRequest(http.MethodPatch, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), bytes.NewBufferString(test.RequestBody))
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -1510,12 +1488,11 @@ func TestEditSubscription(t *testing.T) {
 
 func TestCheckAuth(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathOAuth2Connect)
-	requestMethod := http.MethodGet
 	t.Run("user id not present", func(t *testing.T) {
 		assert := assert.New(t)
 		p := setupTestPlugin(&plugintest.API{}, nil)
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest(requestMethod, requestURL, nil)
+		r := httptest.NewRequest(http.MethodGet, requestURL, nil)
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -1534,7 +1511,6 @@ func TestCheckAuth(t *testing.T) {
 func TestCheckOAuth(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetSingleRecord)
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
-	requestMethod := http.MethodGet
 	for name, test := range map[string]struct {
 		SetupAPI             func(*plugintest.API) *plugintest.API
 		SetupPlugin          func(p *Plugin)
@@ -1593,7 +1569,7 @@ func TestCheckOAuth(t *testing.T) {
 			test.SetupPlugin(p)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, requestURL, nil)
+			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
@@ -1615,7 +1591,6 @@ func TestCheckOAuth(t *testing.T) {
 
 func TestCheckSubscriptionsConfigured(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateSubscription)
-	requestMethod := http.MethodPost
 	for name, test := range map[string]struct {
 		SetupAPI             func(*plugintest.API) *plugintest.API
 		SetupClient          func(client *mock_plugin.Client)
@@ -1665,7 +1640,7 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 			test.SetupClient(client)
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(requestMethod, requestURL, nil)
+			r := httptest.NewRequest(http.MethodPost, requestURL, nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
