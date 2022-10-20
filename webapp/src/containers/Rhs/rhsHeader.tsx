@@ -44,7 +44,7 @@ const Header = ({
                     <p className='rhs-title'>{'Subscriptions'}</p>
                     <IconButton
                         tooltipText='Filter'
-                        extraClass={`margin-left-auto flex-basis-initial ${isFilterApplied() && 'filter-button'}`}
+                        extraClass={`margin-left-auto flex-basis-initial margin-right-8 ${isFilterApplied() && 'filter-button'}`}
                         onClick={() => setShowFilter(!showFilter)}
                     >
                         <SvgWrapper
