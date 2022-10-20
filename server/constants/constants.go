@@ -40,6 +40,11 @@ const (
 	SubscriptionEventAssignmentGroup = "assignment_group"
 	SubscriptionEventCreated         = "created"
 
+	// Filters
+	FilterCreatedByMe     = "me"
+	FilterCreatedByAnyone = "anyone"
+	FilterAllChannels     = "all_channels"
+
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
@@ -67,11 +72,12 @@ const (
 	FieldCommentsAndWorkNotes = "comments_and_work_notes"
 
 	// Websocket events
-	WSEventConnect                   = "connect"
-	WSEventDisconnect                = "disconnect"
-	WSEventOpenAddSubscriptionModal  = "add_subscription"
-	WSEventOpenEditSubscriptionModal = "edit_subscription"
-	WSEventSubscriptionDeleted       = "subscription_deleted"
+	WSEventConnect                        = "connect"
+	WSEventDisconnect                     = "disconnect"
+	WSEventOpenAddSubscriptionModal       = "add_subscription"
+	WSEventOpenEditSubscriptionModal      = "edit_subscription"
+	WSEventSubscriptionDeleted            = "subscription_deleted"
+	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -82,6 +88,18 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
 	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
+
+	// Slash commands
+	CommandHelp           = "help"
+	CommandConnect        = "connect"
+	CommandDisconnect     = "disconnect"
+	CommandSubscriptions  = "subscriptions"
+	CommandUnsubscribe    = "unsubscribe"
+	CommandSearchAndShare = "share"
+	SubCommandList        = "list"
+	SubCommandAdd         = "add"
+	SubCommandEdit        = "edit"
+	SubCommandDelete      = "delete"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -157,7 +175,10 @@ var (
 	}
 
 	RecordTypesSupportingStateUpdation = map[string]bool{
-		RecordTypeIncident: true,
+		RecordTypeIncident:     true,
+		RecordTypeTask:         true,
+		RecordTypeChangeTask:   true,
+		RecordTypeFollowOnTask: true,
 	}
 )
 

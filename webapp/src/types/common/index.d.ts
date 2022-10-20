@@ -4,7 +4,7 @@
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig';
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig' | 'shareRecord';
 
 type PluginApiService = {
     path: string,
@@ -36,14 +36,14 @@ type EditSubscriptionData = {
     id: string;
 }
 
-type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group';
+type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
 
 type RecordDataLabelConfigType = {
     key: RecordDataKeys;
     label: string;
 }
 
-type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | string;
+type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | ShareRecordPayload | string;
 
 type APIError = {
     id: string,

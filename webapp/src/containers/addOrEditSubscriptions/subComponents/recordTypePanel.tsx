@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordTypeLabelMap, RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;
@@ -14,22 +14,10 @@ type RecordTypePanelProps = {
     recordType: RecordType | null;
     setRecordType: (value: RecordType) => void;
     setResetRecordPanelStates: (reset: boolean) => void;
+    showFooter?: boolean;
+    placeholder?: string;
+    recordTypeOptions: DropdownOptionType[];
 }
-
-const recordTypeOptions: DropdownOptionType[] = [
-    {
-        label: RecordTypeLabelMap[RecordType.INCIDENT],
-        value: RecordType.INCIDENT,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.PROBLEM],
-        value: RecordType.PROBLEM,
-    },
-    {
-        label: RecordTypeLabelMap[RecordType.CHANGE_REQUEST],
-        value: RecordType.CHANGE_REQUEST,
-    },
-];
 
 const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     className,
@@ -40,6 +28,9 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     recordType,
     setRecordType,
     setResetRecordPanelStates,
+    showFooter = false,
+    placeholder,
+    recordTypeOptions,
 }: RecordTypePanelProps, recordTypePanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
@@ -70,12 +61,12 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
 
     return (
         <div
-            className={`modal__body wizard__secondary-panel ${className}`}
+            className={className}
             ref={recordTypePanelRef}
         >
-            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+            <div className={`padding-h-12 ${showFooter ? 'padding-v-20 wizard__body-container' : 'padding-top-20'}`}>
                 <Dropdown
-                    placeholder='Select Record Type'
+                    placeholder={placeholder || 'Select Record Type'}
                     value={recordType}
                     onChange={(newValue) => handleRecordTypeChange(newValue as RecordType)}
                     options={recordTypeOptions}
@@ -84,14 +75,16 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>
-            <ModalFooter
-                onHide={onBack}
-                onConfirm={handleContinue}
-                cancelBtnText='Back'
-                confirmBtnText='Continue'
-                confirmDisabled={actionBtnDisabled}
-                cancelDisabled={actionBtnDisabled}
-            />
+            {showFooter && (
+                <ModalFooter
+                    onHide={onBack}
+                    onConfirm={handleContinue}
+                    cancelBtnText='Back'
+                    confirmBtnText='Continue'
+                    confirmDisabled={actionBtnDisabled}
+                    cancelDisabled={actionBtnDisabled}
+                />
+            )}
         </div>
     );
 });

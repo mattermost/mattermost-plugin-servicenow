@@ -328,6 +328,27 @@ func (_m *Client) SearchRecordsInServiceNow(tableName string, searchTerm string,
 	return r0, r1, r2
 }
 
+// UpdateStateOfRecordInServiceNow provides a mock function with given fields: recordType, recordID, payload
+func (_m *Client) UpdateStateOfRecordInServiceNow(recordType string, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error) {
+	ret := _m.Called(recordType, recordID, payload)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(string, string, *serializer.ServiceNowUpdateStatePayload) int); ok {
+		r0 = rf(recordType, recordID, payload)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, *serializer.ServiceNowUpdateStatePayload) error); ok {
+		r1 = rf(recordType, recordID, payload)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewClient creates a new instance of Client. It also registers a cleanup function to assert the mocks expectations.
 func NewClient(t testing.TB) *Client {
 	mock := &Client{}
