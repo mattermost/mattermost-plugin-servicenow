@@ -11,7 +11,7 @@ import usePluginApi from 'hooks/usePluginApi';
 
 import Constants from 'plugin_constants';
 
-import {showModal as showRecordModal, hideModal as hideRecordModal} from 'reducers/shareRecordModal';
+import {hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
 import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
 import SearchRecordsPanel from 'containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
 import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channelPanel';
@@ -62,13 +62,12 @@ const ShareRecords = () => {
 
     const hideModal = useCallback(() => {
         resetFieldStates();
-        dispatch(hideRecordModal());
+        dispatch(hideShareRecordModal());
     }, []);
 
     // Opens share record modal
     const handleOpenShareRecordModal = useCallback(() => {
         resetFieldStates();
-        dispatch(showRecordModal());
     }, []);
 
     const getShareRecordState = () => {
@@ -196,10 +195,10 @@ const ShareRecords = () => {
                         <ModalFooter
                             onConfirm={suggestionChosen ? shareRecord : null}
                             confirmBtnText='Share'
-                            confirmDisabled={showModalLoader || !recordData}
+                            confirmDisabled={showModalLoader || (!recordData && suggestionChosen)}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
-                            cancelDisabled={showModalLoader || !recordData}
+                            cancelDisabled={showModalLoader || (!recordData && suggestionChosen)}
                         />
                     </>
                 )}
