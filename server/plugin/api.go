@@ -3,7 +3,6 @@ package plugin
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -53,67 +52,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
 	return r
-}
-
-func (p *Plugin) handleAPIError(w http.ResponseWriter, apiErr *serializer.APIErrorResponse) {
-	w.Header().Set("Content-Type", "application/json")
-	errorBytes, err := json.Marshal(apiErr)
-	if err != nil {
-		p.API.LogError("Failed to marshal API error", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(apiErr.StatusCode)
-
-	if _, err = w.Write(errorBytes); err != nil {
-		p.API.LogError("Failed to write JSON response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (p *Plugin) writeJSON(w http.ResponseWriter, statusCode int, v interface{}) {
-	if statusCode == 0 {
-		statusCode = http.StatusOK
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	b, err := json.Marshal(v)
-	if err != nil {
-		p.API.LogError("Failed to marshal JSON response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if _, err = w.Write(b); err != nil {
-		p.API.LogError("Failed to write JSON response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (p *Plugin) writeJSONArray(w http.ResponseWriter, statusCode int, v interface{}) {
-	if statusCode == 0 {
-		statusCode = http.StatusOK
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	b, err := json.Marshal(v)
-	if err != nil {
-		p.API.LogError("Failed to marshal JSON response", "Error", err.Error())
-		_, _ = w.Write([]byte("[]"))
-		return
-	}
-
-	if string(b) == "null" {
-		_, _ = w.Write([]byte("[]"))
-	} else if _, err = w.Write(b); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
 }
 
 func (p *Plugin) checkAuth(handler http.HandlerFunc) http.HandlerFunc {
