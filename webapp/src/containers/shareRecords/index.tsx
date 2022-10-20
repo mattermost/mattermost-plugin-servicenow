@@ -193,12 +193,12 @@ const ShareRecords = () => {
                         )}
                         <ModalSubtitleAndError error={apiError ?? ''}/>
                         <ModalFooter
-                            onConfirm={suggestionChosen ? shareRecord : null}
+                            onConfirm={recordData ? shareRecord : null}
                             confirmBtnText='Share'
-                            confirmDisabled={showModalLoader || (!recordData && suggestionChosen)}
+                            confirmDisabled={showModalLoader}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
-                            cancelDisabled={showModalLoader || (!recordData && suggestionChosen)}
+                            cancelDisabled={showModalLoader}
                         />
                     </>
                 )}
