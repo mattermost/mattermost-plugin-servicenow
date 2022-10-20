@@ -268,39 +268,6 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 			ExpectedStatusCode: http.StatusForbidden,
 			ExpectedCount:      -1,
 		},
-		"failed to marshal records": {
-			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(true),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error")
-				return api
-			},
-			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
-					nil, http.StatusOK, nil,
-				)
-
-				monkey.Patch(json.Marshal, func(_ interface{}) ([]byte, error) {
-					return nil, fmt.Errorf("marshal error")
-				})
-			},
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedCount:      0,
-		},
-		"no records fetched from ServiceNow": {
-			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(true),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
-			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
-					nil, http.StatusOK, nil,
-				)
-			},
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedCount:      0,
-		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
@@ -1243,37 +1210,6 @@ func TestGetAllSubscriptions(t *testing.T) {
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedCount:        -1,
 			ExpectedErrorMessage: "get subscriptions error",
-		},
-		"failed to marshal subscriptions": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("LogDebug", mock.AnythingOfType("string"), "Error", "marshal error").Return()
-				return api
-			},
-			SetupClient: func(client *mock_plugin.Client) {
-				client.On("GetAllSubscriptions", "", "", "", limit, offset).Return(
-					testutils.GetSubscriptions(4), http.StatusOK, nil,
-				)
-				client.On("GetRecordFromServiceNow", constants.RecordTypeProblem, "").Return(
-					testutils.GetServiceNowRecord(), http.StatusOK, nil,
-				)
-				monkey.Patch(json.Marshal, func(_ interface{}) ([]byte, error) {
-					return nil, fmt.Errorf("marshal error")
-				})
-			},
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedCount:      0,
-		},
-		"no subscriptions fetched from ServiceNow": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
-			SetupClient: func(client *mock_plugin.Client) {
-				client.On("GetAllSubscriptions", "", "", "", limit, offset).Return(
-					nil, http.StatusOK, nil,
-				)
-			},
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedCount:      0,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

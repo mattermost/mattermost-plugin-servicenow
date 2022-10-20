@@ -1,30 +1,38 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
+import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon, SvgWrapper} from '@brightscout/mattermost-ui-library';
+
+import Spinner from 'components/spinner';
 
 import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
+import SVGIcons from 'plugin_constants/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 
 import Utils from 'utils';
+import {showModal as showRecordModal} from 'reducers/shareRecordModal';
 
 type RhsDataProps = {
     showAllSubscriptions: boolean;
     setShowAllSubscriptions: (show: boolean) => void;
-    subscriptions: SubscriptionData[];
+    totalSubscriptions: SubscriptionData[];
     loadingSubscriptions: boolean;
     handleEditSubscription: (subscriptionData: SubscriptionData) => void;
     handleDeleteClick: (subscriptionData: SubscriptionData) => void;
     error?: string;
     isCurrentUserSysAdmin: boolean;
+    paginationQueryParams: PaginationQueryParams;
+    handlePagination: () => void;
 }
 
-const BulkSubscriptionHeaders: Record<RecordType, string> = {
+// TODO: Add proper type here
+const BulkSubscriptionHeaders: Record<string, string> = {
     [RecordType.INCIDENT]: 'Incidents',
     [RecordType.PROBLEM]: 'Problems',
     [RecordType.CHANGE_REQUEST]: 'Change Requests',
@@ -33,12 +41,14 @@ const BulkSubscriptionHeaders: Record<RecordType, string> = {
 const RhsData = ({
     showAllSubscriptions,
     setShowAllSubscriptions,
-    subscriptions,
+    totalSubscriptions,
     loadingSubscriptions,
     handleEditSubscription,
     handleDeleteClick,
     error,
     isCurrentUserSysAdmin,
+    paginationQueryParams,
+    handlePagination,
 }: RhsDataProps) => {
     const dispatch = useDispatch();
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -67,6 +77,10 @@ const RhsData = ({
         list: subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]),
     }), []);
 
+    const hasMoreSubscriptions = useMemo<boolean>(() => (
+        (totalSubscriptions.length - (paginationQueryParams.page * Constants.DefaultPageSize) === Constants.DefaultPageSize)
+    ), [totalSubscriptions]);
+
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
         const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
         const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type];
@@ -91,6 +105,25 @@ const RhsData = ({
 
     return (
         <>
+            <div className='rhs-content__header'>
+                <span className='rhs-content__subscriptions'>{Constants.RhsSubscritpions}</span>
+                <button
+                    className='btn btn-primary share-record-btn'
+                    onClick={() => dispatch(showRecordModal())}
+                >
+                    <span>
+                        <SvgWrapper
+                            width={16}
+                            height={16}
+                            viewBox='0 0 14 12'
+                            className='share-record-icon'
+                        >
+                            {SVGIcons.share}
+                        </SvgWrapper>
+                    </span>
+                    {Constants.ShareRecordButton}
+                </button>
+            </div>
             <ToggleSwitch
                 active={showAllSubscriptions}
                 onChange={setShowAllSubscriptions}
@@ -104,41 +137,57 @@ const RhsData = ({
                     className='error-state'
                 />
             )}
-            {subscriptions?.length > 0 && !loadingSubscriptions && (
-                <>
-                    <div className='rhs-content__cards-container'>
-                        {subscriptions.map((subscription) => (
-                            <SubscriptionCard
-                                key={subscription.sys_id}
-                                header={getSubscriptionCardHeader(subscription)}
-                                label={SubscriptionTypeLabelMap[subscription.type]}
-                                onEdit={() => handleEditSubscription(subscription)}
-                                onDelete={() => handleDeleteClick(subscription)}
-                                cardBody={getSubscriptionCardBody(subscription)}
-                                channel={showAllSubscriptions ? getChannelState().data.find((ch) => ch.id === subscription.channel_id) : null}
-                            />
-                        ))}
-                    </div>
-                    <div className='rhs-btn-container padding-12 channel-bg'>
-                        <button
-                            className='btn btn-primary rhs-btn plugin-btn'
-                            onClick={() => dispatch(showAddModal())}
-                        >
-                            {'Add Subscription'}
-                        </button>
-                    </div>
-                </>
-            )}
-            {!subscriptions?.length && !loadingSubscriptions && !error && (
-                <EmptyState
-                    title='No Subscriptions Found'
-                    buttonConfig={{
-                        text: 'Add new Subscription',
-                        action: () => dispatch(showAddModal()),
-                    }}
-                    icon={<BellIcon/>}
-                />
-            )}
+            <div
+                id='scrollableArea'
+                className='rhs-content__cards-container'
+            >
+                {totalSubscriptions.length > 0 && (
+                    <InfiniteScroll
+                        dataLength={totalSubscriptions.length}
+                        next={handlePagination}
+                        hasMore={hasMoreSubscriptions}
+                        loader={<Spinner/>}
+                        endMessage={
+                            <p className='text-center'>
+                                <b>{Constants.NoSubscriptionPresent}</b>
+                            </p>
+                        }
+                        scrollableTarget='scrollableArea'
+                    >
+                        <>
+                            {totalSubscriptions.map((subscription) => (
+                                <SubscriptionCard
+                                    key={subscription.sys_id}
+                                    header={getSubscriptionCardHeader(subscription)}
+                                    label={SubscriptionTypeLabelMap[subscription.type]}
+                                    onEdit={() => handleEditSubscription(subscription)}
+                                    onDelete={() => handleDeleteClick(subscription)}
+                                    cardBody={getSubscriptionCardBody(subscription)}
+                                    channel={showAllSubscriptions ? getChannelState().data.find((ch) => ch.id === subscription.channel_id) : null}
+                                />
+                            ))}
+                            <div className='rhs-btn-container padding-12 channel-bg'>
+                                <button
+                                    className='btn btn-primary rhs-btn plugin-btn'
+                                    onClick={() => dispatch(showAddModal())}
+                                >
+                                    {'Add Subscription'}
+                                </button>
+                            </div>
+                        </>
+                    </InfiniteScroll>
+                )}
+                {!totalSubscriptions.length && !loadingSubscriptions && !error && (
+                    <EmptyState
+                        title='No Subscriptions Found'
+                        buttonConfig={{
+                            text: 'Add new Subscription',
+                            action: () => dispatch(showAddModal()),
+                        }}
+                        icon={<BellIcon/>}
+                    />
+                )}
+            </div>
         </>
     );
 };

@@ -2,9 +2,9 @@ import React from 'react';
 
 import {shallow, ShallowWrapper} from 'enzyme';
 
-import {ModalSubtitleAndError, ModalFooter} from '@brightscout/mattermost-ui-library';
+import {ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
 
-import {RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'plugin_constants';
 
 import RecordTypePanel from './recordTypePanel';
 
@@ -22,6 +22,7 @@ const recordTypePanelProps = {
     recordType: RecordType.INCIDENT,
     setRecordType: mockSetRecordType,
     setResetRecordPanelStates: mockSetResetRecordPanelStates,
+    recordTypeOptions: Constants.recordTypeOptions,
 };
 
 describe('Record Type Panel', () => {
@@ -32,6 +33,7 @@ describe('Record Type Panel', () => {
             <RecordTypePanel
                 {...recordTypePanelProps}
                 error={'mockError'}
+                showFooter={true}
             />);
     });
 
@@ -47,6 +49,17 @@ describe('Record Type Panel', () => {
         expect(component.find('Dropdown')).toHaveLength(1);
         expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
         expect(component.find('ModalFooter')).toHaveLength(1);
+    });
+
+    it('Should render the record type panel body correctly when show footer is "false"', () => {
+        component = shallow(
+            <RecordTypePanel
+                {...recordTypePanelProps}
+                error={'mockError'}
+            />);
+        expect(component.find('Dropdown')).toHaveLength(1);
+        expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
+        expect(component.find('ModalFooter')).toHaveLength(0);
     });
 
     it('Should render the error correctly', () => {
