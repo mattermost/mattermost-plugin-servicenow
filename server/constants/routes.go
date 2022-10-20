@@ -19,6 +19,7 @@ const (
 	PathCommentsForRecord      = "/comments/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
 	PathGetStatesForRecordType = "/states/{record_type}"
 	PathUpdateStateOfRecord    = "/states/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
+	PathOpenStateModal         = "/state-modal"
 
 	// ServiceNow API paths
 	PathActivateSubscriptions    = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"

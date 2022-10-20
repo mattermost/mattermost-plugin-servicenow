@@ -62,7 +62,13 @@ export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Recor
 }
 
 export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
-    return (_: WebsocketEventParams) => {
-        store.dispatch(showUpdateStateModal() as Action);
+    return (msg: WebsocketEventParams) => {
+        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        const {data} = msg;
+        const updateStateModalData: CommentAndStateModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
     };
 }

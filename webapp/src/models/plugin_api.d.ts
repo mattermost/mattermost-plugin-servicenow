@@ -46,6 +46,16 @@ type GetRecordParams = {
     recordId: string;
 }
 
+type GetStatesParams = {
+    recordType: RecordType;
+}
+
+type UpdateStatePayload = {
+    recordType: RecordType;
+    recordId: string;
+    state: string;
+}
+
 type Suggestion = {
     number: string;
     short_description: string;
@@ -112,4 +122,9 @@ type ConfigData = {
     EncryptionSecret: string;
     WebhookSecret: string;
     ServiceNowUpdateSetDownload: string;
+}
+
+type StateData = {
+    label: string;
+    value: string;
 }

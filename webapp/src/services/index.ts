@@ -70,6 +70,21 @@ const pluginApi = createApi({
                 method: Constants.pluginApiServiceConfigs.getConfig.method,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.getStates.apiServiceName]: builder.query<StateData[], GetStatesParams>({
+            query: (params) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getStates.path}/${params.recordType}`,
+                method: Constants.pluginApiServiceConfigs.getStates.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.updateState.apiServiceName]: builder.query<void, UpdateStateParams>({
+            query: ({recordType, recordId, ...body}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.updateState.path}/${recordType}/${recordId}`,
+                method: Constants.pluginApiServiceConfigs.updateState.method,
+                body,
+            }),
+        }),
     }),
 });
 

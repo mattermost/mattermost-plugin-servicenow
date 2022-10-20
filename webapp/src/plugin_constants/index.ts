@@ -153,6 +153,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getConfig',
     },
+    getStates: {
+        path: '/states',
+        method: 'GET',
+        apiServiceName: 'getStates',
+    },
+    updateState: {
+        path: '/states',
+        method: 'PATCH',
+        apiServiceName: 'updateState',
+    },
 };
 
 export const PanelDefaultHeights = {

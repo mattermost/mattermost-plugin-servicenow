@@ -81,6 +81,12 @@ const (
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
+	APIErrorIDInsufficientPermissions    = "insufficient_permissions"
+	APIErrorInsufficientPermissions      = "Insufficient Permissions"
+
+	// Slack attachment context constants
+	ContextNameRecordType = "record_type"
+	ContextNameRecordID   = "record_id"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
