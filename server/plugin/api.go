@@ -582,7 +582,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 
 	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
-	comments, statusCode, err := client.GetAllComments(recordType, recordID)
+	response, statusCode, err := client.GetAllComments(recordType, recordID)
 	if err != nil {
 		// TODO: Move all the inline messages to constants package
 		p.API.LogError("Error in getting all comments", "Record ID", recordID, "Error", err.Error())
@@ -591,7 +591,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page, perPage := GetPageAndPerPage(r)
-	commentsArray := ProcessComments(comments, page, perPage)
+	commentsArray := ProcessComments(response.CommentsAndWorkNotes, page, perPage)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

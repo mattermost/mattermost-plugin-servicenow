@@ -602,7 +602,7 @@ func TestGetCommentsForRecord(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
-					"", http.StatusInternalServerError, fmt.Errorf("new error"),
+					nil, http.StatusInternalServerError, fmt.Errorf("new error"),
 				)
 			},
 			ExpectedStatusCode:   http.StatusInternalServerError,

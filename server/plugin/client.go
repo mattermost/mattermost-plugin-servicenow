@@ -23,7 +23,7 @@ type Client interface {
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
 	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
 	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
-	GetAllComments(recordType, recordID string) (string, int, error)
+	GetAllComments(recordType, recordID string) (*serializer.ServiceNowComment, int, error)
 	AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error)
 	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
@@ -200,7 +200,7 @@ func (c *client) GetRecordFromServiceNow(tableName, sysID string) (*serializer.S
 	return record.Result, statusCode, nil
 }
 
-func (c *client) GetAllComments(recordType, recordID string) (string, int, error) {
+func (c *client) GetAllComments(recordType, recordID string) (*serializer.ServiceNowComment, int, error) {
 	queryParams := url.Values{
 		constants.SysQueryParamDisplayValue: {"true"},
 		constants.SysQueryParamFields:       {constants.FieldCommentsAndWorkNotes},
@@ -210,10 +210,10 @@ func (c *client) GetAllComments(recordType, recordID string) (string, int, error
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, fmt.Sprintf("%s/%s", url, recordID), nil, comments, queryParams)
 	if err != nil {
-		return "", statusCode, err
+		return nil, statusCode, err
 	}
 
-	return comments.Result.CommentsAndWorkNotes, statusCode, nil
+	return comments.Result, statusCode, nil
 }
 
 func (c *client) AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error) {
