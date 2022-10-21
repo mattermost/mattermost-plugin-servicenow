@@ -9,7 +9,6 @@ import (
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +19,7 @@ func Test_LoadUser(t *testing.T) {
 		expectedError error
 	}{
 		{
-			description: "User is loaded successfully from the KV store using mattermostID",
+			description: "User is loaded from the KV store using mattermostUserID",
 			setupTest: func() {
 				monkey.Patch(kvstore.LoadJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return nil
@@ -28,7 +27,7 @@ func Test_LoadUser(t *testing.T) {
 			},
 		},
 		{
-			description: "User is not loaded successfully from the KV store",
+			description: "User is not loaded from the KV store",
 			setupTest: func() {
 				monkey.Patch(kvstore.LoadJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return fmt.Errorf("error in loading user")
@@ -39,10 +38,10 @@ func Test_LoadUser(t *testing.T) {
 	} {
 		t.Run(test.description, func(t *testing.T) {
 			defer monkey.UnpatchAll()
-			s := pluginStore{}
+			ps := pluginStore{}
 
 			test.setupTest()
-			user, err := s.LoadUser("mock-userID")
+			user, err := ps.LoadUser("mock-userID")
 			assert.EqualValues(t, test.expectedError, err)
 			if test.expectedError == nil {
 				assert.Equal(t, &serializer.User{}, user)
@@ -58,7 +57,7 @@ func TestStoreUser(t *testing.T) {
 		expectedError error
 	}{
 		{
-			description: "User is stored successfully in the KV store",
+			description: "User is stored in the KV store",
 			setupTest: func() {
 				monkey.Patch(kvstore.StoreJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return nil
@@ -66,7 +65,7 @@ func TestStoreUser(t *testing.T) {
 			},
 		},
 		{
-			description: "User is not stored successfully",
+			description: "User is not stored",
 			setupTest: func() {
 				monkey.Patch(kvstore.StoreJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
 					return fmt.Errorf("error in storing user")
@@ -77,10 +76,10 @@ func TestStoreUser(t *testing.T) {
 	} {
 		t.Run(test.description, func(t *testing.T) {
 			defer monkey.UnpatchAll()
-			s := pluginStore{}
+			ps := pluginStore{}
 			test.setupTest()
 
-			err := s.StoreUser(&serializer.User{})
+			err := ps.StoreUser(&serializer.User{})
 			assert.EqualValues(t, test.expectedError, err)
 		})
 	}
@@ -88,54 +87,54 @@ func TestStoreUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	defer monkey.UnpatchAll()
-	s := new(pluginStore)
+	ps := new(pluginStore)
 	p := Plugin{}
-	s.userKV = kvstore.NewHashedKeyStore(kvstore.NewPluginStore(p.API), UserKeyPrefix)
+	ps.userKV = kvstore.NewHashedKeyStore(kvstore.NewPluginStore(p.API), UserKeyPrefix)
 	for _, test := range []struct {
 		description   string
 		setupTest     func()
-		expectedError string
+		expectedError error
 	}{
 		{
-			description: "User is not loaded successfully from the KV store using mattermostID",
+			description: "User is not loaded from the KV store using mattermostUserID",
 			setupTest: func() {
-				monkey.PatchInstanceMethod(reflect.TypeOf(s), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
-					return nil, errors.New("mockError")
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
+					return nil, fmt.Errorf("mockError")
 				})
 			},
-			expectedError: "mockError",
+			expectedError: fmt.Errorf("mockError"),
 		},
 		{
-			description: "User is deleted successfully from the KV store",
+			description: "User is deleted from the KV store",
 			setupTest: func() {
-				monkey.PatchInstanceMethod(reflect.TypeOf(s), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
 					return testutils.GetSerializerUser(), nil
 				})
-				monkey.PatchInstanceMethod(reflect.TypeOf(s.userKV), "Delete", func(*kvstore.HashedKeyStore, string) error {
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps.userKV), "Delete", func(*kvstore.HashedKeyStore, string) error {
 					return nil
 				})
 			},
 		},
 		{
-			description: "User is not deleted successfully",
+			description: "User is not deleted",
 			setupTest: func() {
-				monkey.PatchInstanceMethod(reflect.TypeOf(s), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
 					return testutils.GetSerializerUser(), nil
 				})
-				monkey.PatchInstanceMethod(reflect.TypeOf(s.userKV), "Delete", func(*kvstore.HashedKeyStore, string) error {
-					return errors.New("mockError")
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps.userKV), "Delete", func(*kvstore.HashedKeyStore, string) error {
+					return fmt.Errorf("mockError")
 				})
 			},
-			expectedError: "mockError",
+			expectedError: fmt.Errorf("mockError"),
 		},
 	} {
 		t.Run(test.description, func(t *testing.T) {
 			assert := assert.New(t)
 			test.setupTest()
 
-			err := s.DeleteUser(testutils.GetID())
-			if test.expectedError != "" {
-				assert.EqualValues(err.Error(), test.expectedError)
+			err := ps.DeleteUser(testutils.GetID())
+			if test.expectedError != nil {
+				assert.EqualValues(err, test.expectedError)
 				return
 			}
 
@@ -145,9 +144,9 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestVerifyOAuth2State(t *testing.T) {
-	s := new(pluginStore)
+	ps := new(pluginStore)
 	p := Plugin{}
-	s.oauth2KV = kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(p.API, OAuth2KeyExpiration), OAuth2KeyPrefix)
+	ps.oauth2KV = kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(p.API, OAuth2KeyExpiration), OAuth2KeyPrefix)
 	for _, test := range []struct {
 		description   string
 		errorMessage  error
@@ -155,7 +154,7 @@ func TestVerifyOAuth2State(t *testing.T) {
 		expectedError string
 	}{
 		{
-			description: "User is verified successfully",
+			description: "User is verified",
 			data:        []byte("mockState"),
 		},
 		{
@@ -164,7 +163,7 @@ func TestVerifyOAuth2State(t *testing.T) {
 			expectedError: "invalid oauth state, please try again",
 		},
 		{
-			description:   "User is not loaded successfully",
+			description:   "User is not loaded",
 			expectedError: "authentication attempt expired, please try again",
 			errorMessage:  ErrNotFound,
 		},
@@ -172,11 +171,11 @@ func TestVerifyOAuth2State(t *testing.T) {
 		t.Run(test.description, func(t *testing.T) {
 			assert := assert.New(t)
 			defer monkey.UnpatchAll()
-			monkey.PatchInstanceMethod(reflect.TypeOf(s.oauth2KV), "Load", func(*kvstore.HashedKeyStore, string) ([]byte, error) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(ps.oauth2KV), "Load", func(*kvstore.HashedKeyStore, string) ([]byte, error) {
 				return test.data, test.errorMessage
 			})
 
-			err := s.VerifyOAuth2State("mockState")
+			err := ps.VerifyOAuth2State("mockState")
 			if test.expectedError != "" {
 				assert.EqualValues(err.Error(), test.expectedError)
 				return

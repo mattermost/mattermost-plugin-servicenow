@@ -16,6 +16,11 @@ import (
 
 func TestParseSubscriptionsToCommandResponse(t *testing.T) {
 	defer monkey.UnpatchAll()
+	mockSysID := "mockSysID"
+	mockNumber := "mockNumber"
+	mockChannelID := "mockChannelID"
+	mockUser := "mockUser"
+	mockDescription := "mockDescription"
 	for _, testCase := range []struct {
 		description    string
 		subscripitons  []*serializer.SubscriptionResponse
@@ -25,25 +30,25 @@ func TestParseSubscriptionsToCommandResponse(t *testing.T) {
 			description: "ParseSubscriptionsToCommandResponse",
 			subscripitons: []*serializer.SubscriptionResponse{
 				{
-					SysID:              "mockID",
+					SysID:              mockSysID,
 					Type:               constants.SubscriptionTypeRecord,
-					Number:             "mockNumber",
-					ChannelID:          "mockChannelID",
-					UserName:           "mockUser",
-					ShortDescription:   "mockDescription",
+					Number:             mockNumber,
+					ChannelID:          mockChannelID,
+					UserName:           mockUser,
+					ShortDescription:   mockDescription,
 					RecordType:         constants.RecordTypeIncident,
 					SubscriptionEvents: constants.SubscriptionEventState,
 				},
 				{
-					SysID:              "mockID",
+					SysID:              mockSysID,
 					Type:               constants.SubscriptionTypeBulk,
-					ChannelID:          "mockChannelID",
-					UserName:           "mockUser",
+					ChannelID:          mockChannelID,
+					UserName:           mockUser,
 					RecordType:         constants.RecordTypeIncident,
 					SubscriptionEvents: constants.SubscriptionEventState,
 				},
 			},
-			expectedResult: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|mockID|Incident|State changed|mockUser||\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|mockID|Incident|mockNumber|mockDescription|State changed|mockUser||",
+			expectedResult: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|mockSysID|Incident|State changed|mockUser||\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|mockSysID|Incident|mockNumber|mockDescription|State changed|mockUser||",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
