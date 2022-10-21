@@ -99,7 +99,7 @@ const UpdateState = () => {
         <Modal
             show={pluginState.openUpdateStateModalReducer.open}
             onHide={hideModal}
-            className={'rhs-modal update-state-modal'}
+            className={'rhs-modal update-state-modal wizard'}
         >
             <>
                 <ModalHeader
