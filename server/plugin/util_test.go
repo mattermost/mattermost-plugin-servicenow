@@ -17,39 +17,39 @@ import (
 func TestParseSubscriptionsToCommandResponse(t *testing.T) {
 	defer monkey.UnpatchAll()
 	for _, testCase := range []struct {
-		description string
-		subscripitons []*serializer.SubscriptionResponse
+		description    string
+		subscripitons  []*serializer.SubscriptionResponse
 		expectedResult string
 	}{
 		{
 			description: "ParseSubscriptionsToCommandResponse",
 			subscripitons: []*serializer.SubscriptionResponse{
 				{
-					SysID: "mockID",
-					Type: constants.SubscriptionTypeRecord,
-					Number: "mockNumber",
-					ChannelID: "mockChannelID",
-					UserName: "mockUser",
-					ShortDescription: "mockDescription",
-					RecordType: constants.RecordTypeIncident,
+					SysID:              "mockID",
+					Type:               constants.SubscriptionTypeRecord,
+					Number:             "mockNumber",
+					ChannelID:          "mockChannelID",
+					UserName:           "mockUser",
+					ShortDescription:   "mockDescription",
+					RecordType:         constants.RecordTypeIncident,
 					SubscriptionEvents: constants.SubscriptionEventState,
 				},
 				{
-					SysID: "mockID",
-					Type: constants.SubscriptionTypeBulk,
-					ChannelID: "mockChannelID",
-					UserName: "mockUser",
-					RecordType: constants.RecordTypeIncident,
+					SysID:              "mockID",
+					Type:               constants.SubscriptionTypeBulk,
+					ChannelID:          "mockChannelID",
+					UserName:           "mockUser",
+					RecordType:         constants.RecordTypeIncident,
 					SubscriptionEvents: constants.SubscriptionEventState,
 				},
 			},
 			expectedResult: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|mockID|Incident|State changed|mockUser||\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|mockID|Incident|mockNumber|mockDescription|State changed|mockUser||",
 		},
-		} {
+	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-		
-			resp := ParseSubscriptionsToCommandResponse(testCase.subscripitons)			
+
+			resp := ParseSubscriptionsToCommandResponse(testCase.subscripitons)
 			assert.EqualValues(testCase.expectedResult, resp)
 		})
 	}
@@ -59,9 +59,9 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 	defer monkey.UnpatchAll()
 	for _, testCase := range []struct {
 		description string
-		setupAPI func(api *plugintest.API) *plugintest.API
+		setupAPI    func(api *plugintest.API) *plugintest.API
 		expectedErr bool
-		isAdmin bool
+		isAdmin     bool
 	}{
 		{
 			description: "IsAuthorizedSysAdmin: with admin",
@@ -88,12 +88,12 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 			},
 			expectedErr: true,
 		},
-		} {
+	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
 			api := testCase.setupAPI(&plugintest.API{})
 			defer api.AssertExpectations(t)
-		
+
 			p := setupTestPlugin(api, nil)
 			isAdmin, err := p.isAuthorizedSysAdmin(testutils.GetID())
 
@@ -127,7 +127,7 @@ func TestConvertSubscriptionToMap(t *testing.T) {
 			},
 		},
 		{
-			description: "ConvertSubscriptionToMap: marshalling gives error",
+			description: "ConvertSubscriptionToMap: marshaling gives error",
 			setupPlugin: func() {
 				monkey.Patch(json.Marshal, func(interface{}) ([]byte, error) {
 					return nil, errors.New("mockError")
@@ -147,15 +147,15 @@ func TestConvertSubscriptionToMap(t *testing.T) {
 			},
 			expectedErr: "mockError",
 		},
-		} {
+	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
 			testCase.setupPlugin()
-		
+
 			resp, err := ConvertSubscriptionToMap(&serializer.SubscriptionResponse{
 				Type: constants.SubscriptionTypeBulk,
 			})
-			
+
 			if testCase.expectedErr != "" {
 				assert.EqualValues(testCase.expectedErr, err.Error())
 				assert.Nil(resp)
@@ -170,7 +170,7 @@ func TestConvertSubscriptionToMap(t *testing.T) {
 func TestFilterSubscriptionsOnRecordData(t *testing.T) {
 	defer monkey.UnpatchAll()
 	for _, testCase := range []struct {
-		description string
+		description   string
 		subscripitons []*serializer.SubscriptionResponse
 		expectedCount int
 	}{
@@ -184,18 +184,18 @@ func TestFilterSubscriptionsOnRecordData(t *testing.T) {
 					Type: constants.SubscriptionTypeBulk,
 				},
 				{
-					Type: constants.SubscriptionTypeRecord,
+					Type:             constants.SubscriptionTypeRecord,
 					ShortDescription: "mockDescription",
-					Number: "mockNumber",
+					Number:           "mockNumber",
 				},
 			},
 			expectedCount: 2,
 		},
-		} {
+	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-		
-			resp := FilterSubscriptionsOnRecordData(testCase.subscripitons)			
+
+			resp := FilterSubscriptionsOnRecordData(testCase.subscripitons)
 			assert.EqualValues(testCase.expectedCount, len(resp))
 		})
 	}
