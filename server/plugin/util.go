@@ -180,9 +180,9 @@ func ConvertSubscriptionToMap(subscription *serializer.SubscriptionResponse) (ma
 	return m, nil
 }
 
-// filterSubscriptionsOnRecordData filters the given subscriptions based on if they contain record data or not.
+// FilterSubscriptionsOnRecordData filters the given subscriptions based on if they contain record data or not.
 // It keeps only those subscriptions which contain record data (number and short description) and discards the rest of them
-func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionResponse) []*serializer.SubscriptionResponse {
+func FilterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionResponse) []*serializer.SubscriptionResponse {
 	n := 0
 	for _, subscription := range subscripitons {
 		if subscription.Type == constants.SubscriptionTypeBulk || (subscription.Number != "" && subscription.ShortDescription != "") {

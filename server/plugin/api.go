@@ -311,7 +311,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
-	recordSubscriptions = filterSubscriptionsOnRecordData(recordSubscriptions)
+	recordSubscriptions = FilterSubscriptionsOnRecordData(recordSubscriptions)
 	bulkSubscriptions = append(bulkSubscriptions, recordSubscriptions...)
 
 	p.writeJSONArray(w, statusCode, bulkSubscriptions)
