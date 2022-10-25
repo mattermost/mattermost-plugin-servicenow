@@ -26,14 +26,14 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 	}
 
 	if bulkSubscriptions.Len() > 0 {
-		sb.WriteString("#### Bulk subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Events |\n| :----|:--------| :--------|")
+		sb.WriteString("#### Bulk subscriptions\n")
+		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|")
 		sb.WriteString(bulkSubscriptions.String())
 	}
 
 	if recordSubscriptions.Len() > 0 {
-		sb.WriteString("\n#### Record subscriptions for this channel\n")
-		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events |\n| :----|:--------| :--------| :-----| :--------|")
+		sb.WriteString("\n#### Record subscriptions\n")
+		sb.WriteString("| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|")
 		sb.WriteString(recordSubscriptions.String())
 	}
 
@@ -131,26 +131,4 @@ func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionRes
 	}
 
 	return subscripitons[:n]
-}
-
-func ProcessComments(comments string, page, perPage int) []string {
-	if comments == "" {
-		return []string{}
-	}
-
-	arr := strings.Split(comments, "\n\n")
-	// We don't want the last element of the array because it will always be an empty string
-	arr = arr[:len(arr)-1]
-
-	startingIndex := page * perPage
-	if startingIndex >= len(arr) {
-		return []string{}
-	}
-
-	endIndex := len(arr)
-	if startingIndex+perPage < endIndex {
-		endIndex = startingIndex + perPage
-	}
-
-	return arr[startingIndex:endIndex]
 }

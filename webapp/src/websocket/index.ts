@@ -5,7 +5,7 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {SubscriptionEventsMap} from 'plugin_constants';
 
 import {setConnected} from 'reducers/connectedState';
-import {refetch} from 'reducers/refetchSubscriptions';
+import {refetch} from 'reducers/refetchState';
 import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
 import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
 import {showModal as showCommentModal} from 'reducers/commentModal';

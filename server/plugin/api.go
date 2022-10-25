@@ -589,24 +589,9 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, perPage := GetPageAndPerPage(r)
-	commentsArray := ProcessComments(comments, page, perPage)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	result, err := json.Marshal(commentsArray)
-	if err != nil {
-		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
-		_, _ = w.Write([]byte("[]"))
-		return
-	}
-
-	if string(result) == "null" {
-		_, _ = w.Write([]byte("[]"))
-	} else if _, err = w.Write(result); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	p.writeJSON(w, comments)
 }
 
 func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {

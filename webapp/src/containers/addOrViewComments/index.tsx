@@ -1,9 +1,7 @@
-/* eslint-disable no-lone-blocks */
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, TextField} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
@@ -12,56 +10,47 @@ import usePluginApi from 'hooks/usePluginApi';
 import Constants from 'plugin_constants';
 
 import {hideModal as hideCommentModal} from 'reducers/commentModal';
-
-import Spinner from 'components/spinner';
-
-import TextField from './input';
+import {refetch, resetRefetch} from 'reducers/refetchState';
 
 import './styles.scss';
 
 const AddOrViewComments = () => {
-    const [commentsData, setCommentsData] = useState<string[]>([]);
+    const [commentsData, setCommentsData] = useState<string>('');
     const [comments, setComments] = useState('');
     const [getcommentsPayload, setGetCommentsPayload] = useState<CommentsPayload | null>(null);
     const [addcommentsPayload, setAddCommentsPayload] = useState<CommentsPayload | null>(null);
     const [showModalLoader, setShowModalLoader] = useState(false);
     const [apiError, setApiError] = useState('');
     const [error, setError] = useState('');
-    const [paginationQueryParams, setPaginationQueryParams] = useState<PaginationQueryParams>({
-        page: Constants.DefaultPage,
-        per_page: Constants.DefaultPageSize,
-    });
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
 
+    const refetchComments = pluginState.refetchReducer.refetch;
+
     const dispatch = useDispatch();
 
     const resetFieldStates = useCallback(() => {
-        setCommentsData([]);
+        setCommentsData('');
         setComments('');
         setGetCommentsPayload(null);
         setAddCommentsPayload(null);
         setShowModalLoader(false);
         setApiError('');
         setError('');
-        setPaginationQueryParams({
-            page: Constants.DefaultPage,
-            per_page: Constants.DefaultPageSize,
-        });
     }, []);
 
     const hideModal = useCallback(() => {
-        resetFieldStates();
         dispatch(hideCommentModal());
+        resetFieldStates();
     }, []);
 
     const getCommentsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, getcommentsPayload as CommentsPayload);
-        return {isLoading, isSuccess, isError, data: data as string[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, data: data as string, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
     };
 
-    const getAddCommentState = () => {
+    const addCommentState = () => {
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.addComments.apiServiceName, addcommentsPayload as CommentsPayload);
         return {isLoading, isSuccess, isError, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
     };
@@ -87,16 +76,6 @@ const AddOrViewComments = () => {
         setComments(e.target.value);
     };
 
-    // Increase the page number by 1
-    const handlePagination = () => {
-        setPaginationQueryParams({...paginationQueryParams, page: paginationQueryParams.page + 1,
-        });
-    };
-
-    const hasMoreComments = useMemo<boolean>(() => (
-        commentsData.length !== 0 && (commentsData.length - (paginationQueryParams.page * Constants.DefaultPageSize) === Constants.DefaultPageSize)
-    ), [commentsData]);
-
     useEffect(() => {
         if (!pluginState.openCommentModalReducer.recordType || !pluginState.openCommentModalReducer.recordId) {
             return;
@@ -105,19 +84,16 @@ const AddOrViewComments = () => {
         const payload: CommentsPayload = {
             record_type: pluginState.openCommentModalReducer.recordType,
             record_id: pluginState.openCommentModalReducer.recordId,
-            params: {
-                page: paginationQueryParams.page,
-                per_page: paginationQueryParams.per_page,
-            },
         };
+
         setGetCommentsPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
-    }, [pluginState.openCommentModalReducer.recordType, pluginState.openCommentModalReducer.recordId, paginationQueryParams]);
+    }, [pluginState.openCommentModalReducer.recordType, pluginState.openCommentModalReducer.recordId]);
 
     useEffect(() => {
         const commentState = getCommentsState();
         if (commentState.isSuccess) {
-            setCommentsData([...commentsData, ...commentState.data]);
+            setCommentsData(commentState.data);
         }
 
         if (commentState.error) {
@@ -128,19 +104,34 @@ const AddOrViewComments = () => {
     }, [getCommentsState().isLoading, getCommentsState().isError, getCommentsState().isSuccess]);
 
     useEffect(() => {
-        const addCommentState = getAddCommentState();
-        if (addCommentState.isSuccess) {
-            hideModal();
+        const commentState = addCommentState();
+        if (commentState.isSuccess) {
+            setComments('');
+            dispatch(refetch());
         }
 
-        if (addCommentState.error) {
-            setApiError(addCommentState.error);
+        if (commentState.error) {
+            setApiError(commentState.error);
         }
 
-        setShowModalLoader(addCommentState.isLoading);
-    }, [getAddCommentState().isLoading, getAddCommentState().isError, getAddCommentState().isSuccess]);
+        setShowModalLoader(commentState.isLoading);
+    }, [addCommentState().isLoading, addCommentState().isError, addCommentState().isSuccess]);
 
-    // console.log('has more', hasMoreComments, paginationQueryParams);
+    // Fetch comments from the API when refetch is set
+    useEffect(() => {
+        if (!refetchComments) {
+            return;
+        }
+
+        const payload: CommentsPayload = {
+            record_type: pluginState.openCommentModalReducer.recordType,
+            record_id: pluginState.openCommentModalReducer.recordId,
+        };
+
+        setGetCommentsPayload(payload);
+        makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
+        dispatch(resetRefetch());
+    }, [refetchComments]);
 
     return (
         <Modal
@@ -149,47 +140,33 @@ const AddOrViewComments = () => {
         >
             <>
                 <ModalHeader
-                    title={'Comment'}
+                    title={'Add comments'}
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <TextField
-                    placeholder='Write new comment here'
-                    value={comments}
-                    onChange={onChangeHandle}
-                    className='comment-text-field'
-                    error={error}
-                />
+                {showModalLoader && !comments && <CircularLoader/>}
                 <div
-                    id='scrollableArea'
-                    className='comment-body comment-body__scroller'
+                    className={`comment-body
+                                ${((!commentsData.length || apiError) && !showModalLoader) && 'comment-body__height'}`}
                 >
-                    <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>
-                    {showModalLoader && !paginationQueryParams.page && !comments && <CircularLoader/>}
-                    {commentsData.length > 0 && (
-                        <InfiniteScroll
-                            dataLength={commentsData.length}
-                            next={handlePagination}
-                            hasMore={hasMoreComments}
-                            loader={
-                                <Spinner
-                                    extraClass='comment-body__spinner'
-                                />}
-                            endMessage={
-                                <p style={{textAlign: 'center'}}>
-                                    <b>{Constants.NoCommentsPresent}</b>
-                                </p>
-                            }
-                            scrollableTarget='scrollableArea'
-                        >
-                            {commentsData.map((data) => (
-                                <div
-                                    key={data}
-                                    className='comment-body__description-text'
-                                >{data}</div>
-                            ))}
-
-                        </InfiniteScroll>
+                    <TextField
+                        placeholder='Write new comment here'
+                        value={comments}
+                        onChange={onChangeHandle}
+                        className='comment-body__text-field'
+                        disabled={showModalLoader}
+                        error={error}
+                    />
+                    {!apiError && <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>}
+                    {commentsData ? (
+                        <>
+                            <div className='comment-body__description-text'>{commentsData}</div>
+                            {!showModalLoader && <p className='comment-body__footer'>{Constants.NoCommentsPresent}</p>}
+                        </>
+                    ) : (
+                        <>
+                            {!showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>}
+                        </>
                     )}
                 </div>
                 <ModalSubtitleAndError error={apiError}/>
@@ -207,16 +184,3 @@ const AddOrViewComments = () => {
 };
 
 export default AddOrViewComments;
-
-{/* <ul className='comment-body__description'>
-                                {
-                                    // commentsData.map((data) => (
-                                        <li
-                                            key={data}
-                                            className='comment-body__description-text'
-                                        >
-                                            <span>{data}</span>
-                                        </li>
-                                    ))
-                                }
-                            </ul> */}

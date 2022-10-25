@@ -126,7 +126,7 @@ const RhsData = ({
                         hasMore={hasMoreSubscriptions}
                         loader={<Spinner/>}
                         endMessage={
-                            <p style={{textAlign: 'center'}}>
+                            <p className='text-center'>
                                 <b>{Constants.NoSubscriptionPresent}</b>
                             </p>
                         }
