@@ -13,21 +13,25 @@ import usePluginApi from 'hooks/usePluginApi';
 type ChannelPanelProps = {
     className?: string;
     error?: string;
+    validationError?: boolean;
     onContinue?: () => void;
     actionBtnDisabled?: boolean;
     channel: string | null;
     setChannel: (value: string | null) => void;
     setShowModalLoader: (show: boolean) => void;
     setApiError: (error: string | null) => void;
-    setApiResponseValid: (valid: boolean) => void;
+    setApiResponseValid?: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
     setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
     editing?: boolean;
+    showFooter? :boolean;
+    placeholder?: string;
 }
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     className,
     error,
+    validationError = false,
     onContinue,
     actionBtnDisabled,
     channel,
@@ -37,6 +41,8 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     setApiResponseValid,
     setChannelOptions,
     editing = false,
+    showFooter = false,
+    placeholder,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
     const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
@@ -71,7 +77,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     useEffect(() => {
         const channelListState = getChannelState();
 
-        if (channelListState.isLoading) {
+        if (channelListState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
 
@@ -140,12 +146,12 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     return (
         <div
-            className={`modal__body channel-panel wizard__primary-panel ${className}`}
+            className={className}
             ref={channelPanelRef}
         >
-            <div className='padding-h-12 padding-v-20 wizard__body-container'>
+            <div className={`padding-h-12 ${showFooter ? 'padding-v-20 wizard__body-container' : 'padding-top-10'}`}>
                 <AutoSuggest
-                    placeholder='Select Channel'
+                    placeholder={placeholder || 'Select Channel'}
                     inputValue={channelAutoSuggestValue}
                     onInputValueChange={setChannelAutoSuggestValue}
                     onChangeSelectedSuggestion={handleChannelSelection}
@@ -154,7 +160,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                         renderValue: (suggestion) => getChannelAutoSuggestOptionJSX(suggestion.channelName, suggestion.channelType),
                     }}
                     required={true}
-                    error={validationFailed && Constants.RequiredMsg}
+                    error={(validationFailed || validationError) && Constants.RequiredMsg}
                     disabled={getChannelState().isLoading}
                     loadingSuggestions={getChannelState().isLoading}
                     charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
@@ -162,11 +168,12 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                 />
                 <ModalSubtitleAndError error={error}/>
             </div>
-            <ModalFooter
-                onConfirm={handleContinue}
-                confirmBtnText='Continue'
-                confirmDisabled={actionBtnDisabled}
-            />
+            {showFooter && (
+                <ModalFooter
+                    onConfirm={handleContinue}
+                    confirmBtnText='Continue'
+                    confirmDisabled={actionBtnDisabled}
+                />)}
         </div>
     );
 });

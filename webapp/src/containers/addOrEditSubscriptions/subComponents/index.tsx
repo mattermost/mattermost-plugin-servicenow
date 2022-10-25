@@ -41,7 +41,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [resetRecordPanelStates, setResetRecordPanelStates] = useState(false);
 
     // Record type panel
-    const [recordType, setRecordType] = useState<null | RecordType>(null);
+    const [recordType, setRecordType] = useState<RecordType | null>(null);
 
     // Opened panel states
     const [subscriptionTypePanelOpen, setSubscriptionTypePanelOpen] = useState(false);
@@ -338,6 +338,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 <ModalLoader loading={showModalLoader}/>
                 <ChannelPanel
                     className={`
+                        modal__body channel-panel wizard__primary-panel 
                         ${subscriptionTypePanelOpen && 'wizard__primary-panel--fade-out'}
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__primary-panel--fade-out'}
                     `}
@@ -352,6 +353,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setChannelOptions={setChannelOptions}
                     actionBtnDisabled={showModalLoader}
                     editing={Boolean(subscriptionData)}
+                    showFooter={true}
                 />
                 <SubscriptionTypePanel
                     className={`
@@ -367,6 +369,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 />
                 <RecordTypePanel
                     className={`
+                        modal__body wizard__secondary-panel 
                         ${recordTypePanelOpen && 'wizard__secondary-panel--slide-in'}
                         ${(searchRecordsPanelOpen || eventsPanelOpen) && 'wizard__secondary-panel--fade-out'}
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
@@ -377,9 +380,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     recordType={recordType}
                     setRecordType={setRecordType}
                     setResetRecordPanelStates={setResetRecordPanelStates}
+                    showFooter={true}
+                    recordTypeOptions={Constants.recordTypeOptions}
                 />
                 <SearchRecordsPanel
                     className={`
+                        modal__body search-panel wizard__secondary-panel 
                         ${searchRecordsPanelOpen && 'wizard__secondary-panel--slide-in'}
                         ${eventsPanelOpen && 'wizard__secondary-panel--fade-out'}
                         ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
@@ -399,6 +405,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setRecordId={setRecordId}
                     resetStates={resetRecordPanelStates}
                     setResetStates={setResetRecordPanelStates}
+                    showFooter={true}
                 />
                 <EventsPanel
                     className={`

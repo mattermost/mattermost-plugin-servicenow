@@ -21,7 +21,7 @@ const (
 	SysQueryParamDisplayValue                 = "sysparm_display_value"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v1.0"
+	UpdateSetVersion            = "v2.0"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
@@ -72,12 +72,13 @@ const (
 	FieldCommentsAndWorkNotes = "comments_and_work_notes"
 
 	// Websocket events
-	WSEventConnect                   = "connect"
-	WSEventDisconnect                = "disconnect"
-	WSEventOpenAddSubscriptionModal  = "add_subscription"
-	WSEventOpenEditSubscriptionModal = "edit_subscription"
-	WSEventSubscriptionDeleted       = "subscription_deleted"
-	WSEventOpenCommentModal          = "comment_modal"
+	WSEventConnect                        = "connect"
+	WSEventDisconnect                     = "disconnect"
+	WSEventOpenAddSubscriptionModal       = "add_subscription"
+	WSEventOpenEditSubscriptionModal      = "edit_subscription"
+	WSEventSubscriptionDeleted            = "subscription_deleted"
+	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
+	WSEventOpenCommentModal               = "comment_modal"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -86,10 +87,24 @@ const (
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
+	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
+	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
 	ContextNameRecordID   = "record_id"
+
+	// Slash commands
+	CommandHelp           = "help"
+	CommandConnect        = "connect"
+	CommandDisconnect     = "disconnect"
+	CommandSubscriptions  = "subscriptions"
+	CommandUnsubscribe    = "unsubscribe"
+	CommandSearchAndShare = "share"
+	SubCommandList        = "list"
+	SubCommandAdd         = "add"
+	SubCommandEdit        = "edit"
+	SubCommandDelete      = "delete"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -166,7 +181,10 @@ var (
 	}
 
 	RecordTypesSupportingStateUpdation = map[string]bool{
-		RecordTypeIncident: true,
+		RecordTypeIncident:     true,
+		RecordTypeTask:         true,
+		RecordTypeChangeTask:   true,
+		RecordTypeFollowOnTask: true,
 	}
 )
 

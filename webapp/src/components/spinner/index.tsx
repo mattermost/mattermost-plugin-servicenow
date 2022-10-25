@@ -2,7 +2,9 @@ import React from 'react';
 
 import './styles.scss';
 
-interface SpinnerProps { extraClass?: string }
+interface SpinnerProps {
+    extraClass?: string;
+}
 
 const Spinner = ({extraClass = ''}: SpinnerProps): JSX.Element => (
     <div className={`text-align-center spinner-wrapper ${extraClass}`}>

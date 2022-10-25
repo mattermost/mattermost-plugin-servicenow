@@ -24,8 +24,7 @@ type ServiceNowEvent struct {
 	Priority         string `json:"priority"`
 	AssignedTo       string `json:"assigned_to"`
 	AssignmentGroup  string `json:"assignment_group"`
-	// TODO: Remove the nolint comment by changing spelling of occurred in the update set XML
-	EventOccured string `json:"event_occured"` // nolint
+	EventOccurred    string `json:"event_occurred"`
 }
 
 func ServiceNowEventFromJSON(data io.Reader) (*ServiceNowEvent, error) {
@@ -78,7 +77,7 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 		Fields: []*model.SlackAttachmentField{
 			{
 				Title: "Event",
-				Value: constants.FormattedEventNames[se.EventOccured],
+				Value: constants.FormattedEventNames[se.EventOccurred],
 				Short: true,
 			},
 			{
