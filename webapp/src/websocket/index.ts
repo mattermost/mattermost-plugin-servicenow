@@ -9,6 +9,7 @@ import {refetch} from 'reducers/refetchState';
 import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
 import {showModal as showCommentModal} from 'reducers/commentModal';
 import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
+import {showModal as showShareRecordModal} from 'reducers/shareRecordModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
@@ -59,5 +60,11 @@ export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Recor
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
         }
+    };
+}
+
+export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(showShareRecordModal() as Action);
     };
 }

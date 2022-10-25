@@ -85,6 +85,14 @@ const pluginApi = createApi({
                 body,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.shareRecord.apiServiceName]: builder.query<void, ShareRecordPayload>({
+            query: (body) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.shareRecord.path}/${body.channel_id}`,
+                method: Constants.pluginApiServiceConfigs.shareRecord.method,
+                body,
+            }),
+        }),
     }),
 });
 

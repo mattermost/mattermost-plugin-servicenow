@@ -3,7 +3,6 @@ package plugin
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -46,46 +45,14 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
 	return r
-}
-
-func (p *Plugin) handleAPIError(w http.ResponseWriter, apiErr *serializer.APIErrorResponse) {
-	w.Header().Set("Content-Type", "application/json")
-	errorBytes, err := json.Marshal(apiErr)
-	if err != nil {
-		p.API.LogError("Failed to marshal API error", "error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(apiErr.StatusCode)
-
-	if _, err = w.Write(errorBytes); err != nil {
-		p.API.LogError("Failed to write JSON response", "error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (p *Plugin) writeJSON(w http.ResponseWriter, v interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	b, err := json.Marshal(v)
-	if err != nil {
-		p.API.LogError("Failed to marshal JSON response", "error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if _, err = w.Write(b); err != nil {
-		p.API.LogError("Failed to write JSON response", "error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }
 
 func (p *Plugin) checkAuth(handler http.HandlerFunc) http.HandlerFunc {
@@ -151,7 +118,7 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 }
 
 func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
-	p.writeJSON(w, p.getConfiguration())
+	p.writeJSON(w, 0, p.getConfiguration())
 }
 
 func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +131,7 @@ func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
 		resp.Connected = true
 	}
 
-	p.writeJSON(w, resp)
+	p.writeJSON(w, 0, resp)
 }
 
 // checkAuthBySecret verifies if provided request is performed by an authorized source.
@@ -346,21 +313,8 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg.Wait()
 	recordSubscriptions = filterSubscriptionsOnRecordData(recordSubscriptions)
 	bulkSubscriptions = append(bulkSubscriptions, recordSubscriptions...)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	result, err := json.Marshal(bulkSubscriptions)
-	if err != nil {
-		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
-		_, _ = w.Write([]byte("[]"))
-		return
-	}
 
-	if string(result) == "null" {
-		_, _ = w.Write([]byte("[]"))
-	} else if _, err = w.Write(result); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	p.writeJSONArray(w, statusCode, bulkSubscriptions)
 }
 
 func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
@@ -445,7 +399,7 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	p.writeJSON(w, requiredChannels)
+	p.writeJSON(w, 0, requiredChannels)
 }
 
 func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Request) {
@@ -472,21 +426,7 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	result, err := json.Marshal(records)
-	if err != nil {
-		p.API.LogDebug("Error while marshaling the response", "Error", err.Error())
-		_, _ = w.Write([]byte("[]"))
-		return
-	}
-
-	if string(result) == "null" {
-		_, _ = w.Write([]byte("[]"))
-	} else if _, err = w.Write(result); err != nil {
-		p.API.LogError("Error while writing response", "Error", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	p.writeJSONArray(w, statusCode, records)
 }
 
 func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request) {
@@ -507,7 +447,7 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	p.writeJSON(w, record)
+	p.writeJSON(w, 0, record)
 }
 
 func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
@@ -572,8 +512,8 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidRecordTypesForSearching[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+	if !constants.RecordTypesSupportingComments[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
@@ -588,21 +528,76 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	p.writeJSON(w, comments)
+	p.writeJSON(w, statusCode, comments)
 }
 
 func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	recordType := pathParams[constants.PathParamRecordType]
-	if !constants.ValidRecordTypesForSearching[recordType] {
-		p.API.LogError("Invalid record type while trying to get the record", "Record type", recordType)
+	if !constants.RecordTypesSupportingComments[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
 
 	payload, err := serializer.ServiceNowCommentPayloadFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		return
+	}
+
+	recordID := pathParams[constants.PathParamRecordID]
+	client := p.GetClientFromRequest(r)
+	statusCode, err := client.AddComment(recordType, recordID, payload)
+	if err != nil {
+		p.API.LogError("Error in creating the comment", "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in creating the comment. Error: %s", err.Error())})
+		return
+	}
+
+	returnStatusOK(w)
+}
+
+func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.RecordTypesSupportingStateUpdation[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	if recordType == constants.RecordTypeFollowOnTask {
+		recordType = constants.RecordTypeTask
+	}
+
+	client := p.GetClientFromRequest(r)
+	states, statusCode, err := client.GetStatesFromServiceNow(recordType)
+	if err != nil {
+		if strings.EqualFold(err.Error(), constants.APIErrorIDLatestUpdateSetNotUploaded) {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDLatestUpdateSetNotUploaded, StatusCode: statusCode, Message: constants.APIErrorLatestUpdateSetNotUploaded})
+			return
+		}
+
+		p.API.LogError("Error in getting the states", "Record Type", recordType, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting the states. Error: %s", err.Error())})
+		return
+	}
+
+	p.writeJSONArray(w, statusCode, states)
+}
+
+func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	recordType := pathParams[constants.PathParamRecordType]
+	if !constants.RecordTypesSupportingStateUpdation[recordType] {
+		p.API.LogError(constants.ErrorInvalidRecordType, "Record type", recordType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
+		return
+	}
+
+	payload, err := serializer.ServiceNowStatePayloadFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
@@ -617,10 +612,10 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 
 	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
-	statusCode, err := client.AddComment(recordType, recordID, payload)
+	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
 	if err != nil {
-		p.API.LogError("Error in creating the comment", "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in creating the comment. Error: %s", err.Error())})
+		p.API.LogError("Error in updating the state", "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in updating the state. Error: %s", err.Error())})
 		return
 	}
 
@@ -652,9 +647,9 @@ func (p *Plugin) withRecovery(next http.Handler) http.Handler {
 		defer func() {
 			if x := recover(); x != nil {
 				p.API.LogError("Recovered from a panic",
-					"url", r.URL.String(),
-					"error", x,
-					"stack", string(debug.Stack()))
+					"URL", r.URL.String(),
+					"Error", x,
+					"Stack", string(debug.Stack()))
 			}
 		}()
 

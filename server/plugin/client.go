@@ -25,6 +25,8 @@ type Client interface {
 	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
 	GetAllComments(recordType, recordID string) (string, int, error)
 	AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error)
+	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
+	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
 }
 
 type client struct {
@@ -215,6 +217,27 @@ func (c *client) GetAllComments(recordType, recordID string) (string, int, error
 }
 
 func (c *client) AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error) {
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
+	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", url, recordID), payload, nil, nil)
+	return statusCode, err
+}
+
+func (c *client) GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error) {
+	states := &serializer.ServiceNowStatesResult{}
+	url := strings.Replace(constants.PathGetStatesFromServiceNow, "{record_type}", recordType, 1)
+	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, states, nil)
+	if err != nil {
+		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), "Requested URI does not represent any resource") {
+			return nil, statusCode, errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded)
+		}
+
+		return nil, statusCode, err
+	}
+
+	return states.Result, statusCode, nil
+}
+
+func (c *client) UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error) {
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", url, recordID), payload, nil, nil)
 	return statusCode, err
