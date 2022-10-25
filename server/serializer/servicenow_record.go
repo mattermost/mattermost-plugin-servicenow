@@ -118,7 +118,7 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	var actions []*model.PostAction
 	if constants.RecordTypesSupportingComments[sr.RecordType] {
 		actions = append(actions, &model.PostAction{
-			Type: "button",
+			Type: model.POST_ACTION_TYPE_BUTTON,
 			Name: "Add and view comments",
 			Integration: &model.PostActionIntegration{
 				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
@@ -132,7 +132,7 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 
 	if constants.RecordTypesSupportingStateUpdation[sr.RecordType] {
 		actions = append(actions, &model.PostAction{
-			Type: "button",
+			Type: model.POST_ACTION_TYPE_BUTTON,
 			Name: "Update State",
 		})
 	}
