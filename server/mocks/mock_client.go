@@ -238,6 +238,36 @@ func (_m *Client) GetRecordFromServiceNow(tableName string, sysID string) (*seri
 	return r0, r1, r2
 }
 
+// GetStatesFromServiceNow provides a mock function with given fields: recordType
+func (_m *Client) GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error) {
+	ret := _m.Called(recordType)
+
+	var r0 []*serializer.ServiceNowState
+	if rf, ok := ret.Get(0).(func(string) []*serializer.ServiceNowState); ok {
+		r0 = rf(recordType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*serializer.ServiceNowState)
+		}
+	}
+
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string) int); ok {
+		r1 = rf(recordType)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string) error); ok {
+		r2 = rf(recordType)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // GetSubscription provides a mock function with given fields: subscriptionID
 func (_m *Client) GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error) {
 	ret := _m.Called(subscriptionID)
@@ -296,6 +326,27 @@ func (_m *Client) SearchRecordsInServiceNow(tableName string, searchTerm string,
 	}
 
 	return r0, r1, r2
+}
+
+// UpdateStateOfRecordInServiceNow provides a mock function with given fields: recordType, recordID, payload
+func (_m *Client) UpdateStateOfRecordInServiceNow(recordType string, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error) {
+	ret := _m.Called(recordType, recordID, payload)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(string, string, *serializer.ServiceNowUpdateStatePayload) int); ok {
+		r0 = rf(recordType, recordID, payload)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, *serializer.ServiceNowUpdateStatePayload) error); ok {
+		r1 = rf(recordType, recordID, payload)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // NewClient creates a new instance of Client. It also registers a cleanup function to assert the mocks expectations.

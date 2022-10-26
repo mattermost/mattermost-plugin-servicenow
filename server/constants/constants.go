@@ -21,7 +21,7 @@ const (
 	SysQueryParamDisplayValue                 = "sysparm_display_value"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v1.0"
+	UpdateSetVersion            = "v2.0"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
@@ -86,6 +86,8 @@ const (
 	APIErrorSubscriptionsNotConfigured   = "Subscripitons are not configured for this server."
 	APIErrorIDSubscriptionsNotAuthorized = "subscriptions_not_authorized"
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
+	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
+	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
 
 	// Slash commands
 	CommandHelp           = "help"
@@ -173,7 +175,10 @@ var (
 	}
 
 	RecordTypesSupportingStateUpdation = map[string]bool{
-		RecordTypeIncident: true,
+		RecordTypeIncident:     true,
+		RecordTypeTask:         true,
+		RecordTypeChangeTask:   true,
+		RecordTypeFollowOnTask: true,
 	}
 )
 
