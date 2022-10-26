@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, TextField} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, TextArea} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
@@ -77,17 +77,15 @@ const AddOrViewComments = () => {
     };
 
     useEffect(() => {
-        if (!pluginState.openCommentModalReducer.recordType || !pluginState.openCommentModalReducer.recordId) {
-            return;
+        if (pluginState.openCommentModalReducer.recordType && pluginState.openCommentModalReducer.recordId) {
+            const payload: CommentsPayload = {
+                record_type: pluginState.openCommentModalReducer.recordType,
+                record_id: pluginState.openCommentModalReducer.recordId,
+            };
+
+            setGetCommentsPayload(payload);
+            makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
         }
-
-        const payload: CommentsPayload = {
-            record_type: pluginState.openCommentModalReducer.recordType,
-            record_id: pluginState.openCommentModalReducer.recordId,
-        };
-
-        setGetCommentsPayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
     }, [pluginState.openCommentModalReducer.recordType, pluginState.openCommentModalReducer.recordId]);
 
     useEffect(() => {
@@ -119,18 +117,16 @@ const AddOrViewComments = () => {
 
     // Fetch comments from the API when refetch is set
     useEffect(() => {
-        if (!refetchComments) {
-            return;
+        if (refetchComments) {
+            const payload: CommentsPayload = {
+                record_type: pluginState.openCommentModalReducer.recordType,
+                record_id: pluginState.openCommentModalReducer.recordId,
+            };
+
+            setGetCommentsPayload(payload);
+            makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
+            dispatch(resetRefetch());
         }
-
-        const payload: CommentsPayload = {
-            record_type: pluginState.openCommentModalReducer.recordType,
-            record_id: pluginState.openCommentModalReducer.recordId,
-        };
-
-        setGetCommentsPayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
-        dispatch(resetRefetch());
     }, [refetchComments]);
 
     return (
@@ -140,20 +136,21 @@ const AddOrViewComments = () => {
         >
             <>
                 <ModalHeader
-                    title={'Add comments'}
+                    title='Add comments'
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
+                <ModalLoader loading={addCommentState().isLoading}/>
                 {showModalLoader && !comments && <CircularLoader/>}
                 <div
                     className={`comment-body
                                 ${((!commentsData.length || apiError) && !showModalLoader) && 'comment-body__height'}`}
                 >
-                    <TextField
+                    <TextArea
                         placeholder='Write new comment here'
                         value={comments}
                         onChange={onChangeHandle}
-                        className='comment-body__text-field'
+                        className='comment-body__text-area'
                         disabled={showModalLoader}
                         error={error}
                     />
@@ -172,10 +169,10 @@ const AddOrViewComments = () => {
                 <ModalSubtitleAndError error={apiError}/>
                 <ModalFooter
                     onConfirm={addComment}
-                    confirmBtnText={'Submit'}
+                    confirmBtnText='Submit'
                     confirmDisabled={showModalLoader}
                     onHide={hideModal}
-                    cancelBtnText={'Cancel'}
+                    cancelBtnText='Cancel'
                     cancelDisabled={showModalLoader}
                 />
             </>
