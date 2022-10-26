@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"crypto/subtle"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -45,6 +46,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathOpenCommentModal, p.checkAuth(p.handleOpenCommentModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
@@ -458,7 +460,7 @@ func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := event.CreateNotificationPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	post := event.CreateNotificationPost(p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL())
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError("Unable to create post", "Error", postErr.Error())
 	}
@@ -501,7 +503,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, user.Username)
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), user.Username)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError("Unable to create post", "Error", postErr.Error())
 	}
@@ -622,11 +624,37 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	returnStatusOK(w)
 }
 
+func (p *Plugin) handleOpenCommentModal(w http.ResponseWriter, r *http.Request) {
+	response := &model.PostActionIntegrationResponse{}
+	decoder := json.NewDecoder(r.Body)
+	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
+	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
+		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
+		p.returnPostActionIntegrationResponse(w, response)
+		return
+	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenCommentModal,
+		postActionIntegrationRequest.Context,
+		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
+	)
+
+	p.returnPostActionIntegrationResponse(w, response)
+}
+
 func returnStatusOK(w http.ResponseWriter) {
 	m := make(map[string]string)
 	w.Header().Set("Content-Type", "application/json")
 	m[model.STATUS] = model.STATUS_OK
 	_, _ = w.Write([]byte(model.MapToJson(m)))
+}
+
+func (p *Plugin) returnPostActionIntegrationResponse(w http.ResponseWriter, res *model.PostActionIntegrationResponse) {
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(res.ToJson()); err != nil {
+		p.API.LogWarn("failed to write PostActionIntegrationResponse", "Error", err.Error())
+	}
 }
 
 // handleStaticFiles handles the static files under the assets directory.
