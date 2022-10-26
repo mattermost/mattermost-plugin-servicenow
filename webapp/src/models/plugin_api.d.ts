@@ -127,7 +127,7 @@ type ConfigData = {
 
 type ShareRecordPayload = {
     record_type: ShareRecordType;
-    record_id: string;
+    sys_id: string;
     short_description: string;
     state?: string;
     priority?: string;
