@@ -46,6 +46,12 @@ const AddOrViewComments = () => {
         resetFieldStates();
     }, []);
 
+    const getCommentsPayload = (): CommentsPayload => ({
+        record_type: pluginState.openCommentModalReducer.data?.recordType,
+        record_id: pluginState.openCommentModalReducer.data?.recordId,
+        comments,
+    });
+
     const getCommentsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, getcommentsPayload as CommentsPayload);
         return {isLoading, isSuccess, isError, data: data as string, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || '', errorId: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.id || ''};
@@ -62,12 +68,7 @@ const AddOrViewComments = () => {
             return;
         }
 
-        const payload: CommentsPayload = {
-            record_type: pluginState.openCommentModalReducer.data?.recordType,
-            record_id: pluginState.openCommentModalReducer.data?.recordId,
-            comments,
-        };
-
+        const payload = getCommentsPayload();
         setAddCommentsPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
     };
@@ -82,10 +83,7 @@ const AddOrViewComments = () => {
             return;
         }
 
-        const payload: CommentsPayload = {
-            record_type: pluginState.openCommentModalReducer.data?.recordType,
-            record_id: pluginState.openCommentModalReducer.data?.recordId,
-        };
+        const payload = getCommentsPayload();
 
         setGetCommentsPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
@@ -136,11 +134,7 @@ const AddOrViewComments = () => {
             return;
         }
 
-        const payload: CommentsPayload = {
-            record_type: pluginState.openCommentModalReducer.data?.recordType,
-            record_id: pluginState.openCommentModalReducer.data?.recordId,
-        };
-
+        const payload = getCommentsPayload();
         setGetCommentsPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
         dispatch(resetRefetch());
@@ -189,9 +183,7 @@ const AddOrViewComments = () => {
                                     {!showModalLoader && <p className='comment-body__footer'>{Constants.NoCommentsPresent}</p>}
                                 </>
                             ) : (
-                                <>
-                                    {!showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>}
-                                </>
+                                !showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>
                             )}
                         </div>
                         <ModalSubtitleAndError error={apiError}/>
