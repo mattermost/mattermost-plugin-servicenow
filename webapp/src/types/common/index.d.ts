@@ -61,6 +61,6 @@ type SubscriptionCardBody = {
 }
 
 type CommentModalData = {
-    recordType: RecordType | string;
+    recordType: RecordType;
     recordId: string;
 }

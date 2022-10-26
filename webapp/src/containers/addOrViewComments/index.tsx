@@ -79,15 +79,10 @@ const AddOrViewComments = () => {
     };
 
     useEffect(() => {
-        if (!pluginState.openCommentModalReducer.data?.recordType || !pluginState.openCommentModalReducer.data?.recordId) {
-            return;
-        }
-
         const payload = getCommentsPayload();
-
         setGetCommentsPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
-    }, [pluginState.openCommentModalReducer.data?.recordType, pluginState.openCommentModalReducer.data?.recordId]);
+    }, [pluginState.openCommentModalReducer.open]);
 
     useEffect(() => {
         const commentState = getCommentsState();
