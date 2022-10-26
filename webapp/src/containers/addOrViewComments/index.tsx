@@ -54,7 +54,7 @@ const AddOrViewComments = () => {
 
     const getCommentsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, getcommentsPayload as CommentsPayload);
-        return {isLoading, isSuccess, isError, data: data as string, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || '', errorId: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.id || ''};
+        return {isLoading, isSuccess, isError, data: data as string, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)};
     };
 
     const addCommentState = () => {
@@ -91,28 +91,25 @@ const AddOrViewComments = () => {
 
     useEffect(() => {
         const commentState = getCommentsState();
-        if (commentState.isLoading) {
-            setShowErrorPanel(false);
-        }
-
-        setShowModalLoader(commentState.isLoading);
-    }, [getCommentsState().isLoading]);
-
-    useEffect(() => {
-        const commentState = getCommentsState();
         if (commentState.isSuccess) {
             setShowErrorPanel(false);
             setCommentsData(commentState.data);
         }
 
         if (commentState.isError) {
-            if (commentState.errorId === Constants.ApiErrorIdNotConnected) {
+            if (commentState.error?.id === Constants.ApiErrorIdNotConnected) {
                 setShowErrorPanel(true);
             }
 
-            setApiError(commentState.error);
+            setApiError(commentState.error?.message ?? '');
         }
-    }, [getCommentsState().isError, getCommentsState().isSuccess]);
+
+        if (commentState.isLoading) {
+            setShowErrorPanel(false);
+        }
+
+        setShowModalLoader(commentState.isLoading);
+    }, [getCommentsState().isError, getCommentsState().isSuccess, getCommentsState().isLoading]);
 
     useEffect(() => {
         const commentState = addCommentState();
