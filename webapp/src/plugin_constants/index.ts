@@ -150,6 +150,26 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
+export enum SubscriptionFilters {
+    ME = 'me',
+    ANYONE = 'anyone',
+}
+
+export const DefaultSubscriptionFilters = {
+    createdBy: SubscriptionFilters.ANYONE,
+};
+
+export const SubscriptionFilterCreatedByOptions = [
+    {
+        value: SubscriptionFilters.ME,
+        label: 'Me',
+    },
+    {
+        value: SubscriptionFilters.ANYONE,
+        label: 'Anyone',
+    },
+];
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
         key: 'short_description',
@@ -290,4 +310,7 @@ export default {
     CommentsHeading,
     NoCommentsPresent,
     CommentsNotFound,
+    SubscriptionFilters,
+    DefaultSubscriptionFilters,
+    SubscriptionFilterCreatedByOptions,
 };

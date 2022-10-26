@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, ResultPanel, TextField} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
@@ -10,35 +10,30 @@ import usePluginApi from 'hooks/usePluginApi';
 import Constants from 'plugin_constants';
 
 import {hideModal as hideCommentModal} from 'reducers/commentModal';
-import {refetch, resetRefetch} from 'reducers/refetchState';
 
 import './styles.scss';
 
 const AddOrViewComments = () => {
     const [commentsData, setCommentsData] = useState<string>('');
     const [comments, setComments] = useState('');
-    const [getcommentsPayload, setGetCommentsPayload] = useState<CommentsPayload | null>(null);
-    const [addcommentsPayload, setAddCommentsPayload] = useState<CommentsPayload | null>(null);
     const [showModalLoader, setShowModalLoader] = useState(false);
     const [apiError, setApiError] = useState('');
-    const [error, setError] = useState('');
     const [showErrorPanel, setShowErrorPanel] = useState(false);
+    const [validationError, setValidationError] = useState('');
+    const [refetch, setRefetch] = useState(false);
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
-
-    const refetchComments = pluginState.refetchReducer.refetch;
 
     const dispatch = useDispatch();
 
     const resetFieldStates = useCallback(() => {
         setCommentsData('');
         setComments('');
-        setGetCommentsPayload(null);
-        setAddCommentsPayload(null);
         setShowModalLoader(false);
         setApiError('');
-        setError('');
+        setValidationError('');
+        setRefetch(false);
     }, []);
 
     const hideModal = useCallback(() => {
@@ -53,84 +48,83 @@ const AddOrViewComments = () => {
     });
 
     const getCommentsState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, getcommentsPayload as CommentsPayload);
+        const payload = getCommentsPayload();
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
         return {isLoading, isSuccess, isError, data: data as string, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)};
     };
 
     const addCommentState = () => {
-        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.addComments.apiServiceName, addcommentsPayload as CommentsPayload);
+        const payload = getCommentsPayload();
+        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
         return {isLoading, isSuccess, isError, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
     };
 
     const addComment = () => {
         if (!comments) {
-            setError(Constants.RequiredMsg);
+            setValidationError(Constants.RequiredMsg);
             return;
         }
 
         const payload = getCommentsPayload();
-        setAddCommentsPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
     };
 
     const onChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setError('');
+        setValidationError('');
         setComments(e.target.value);
     };
 
     useEffect(() => {
-        const payload = getCommentsPayload();
-        setGetCommentsPayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
+        if (pluginState.openCommentModalReducer.open) {
+            const payload = getCommentsPayload();
+            makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
+        }
     }, [pluginState.openCommentModalReducer.open]);
 
     useEffect(() => {
-        const commentState = getCommentsState();
-        if (commentState.isSuccess) {
+        const {isLoading, isSuccess, error, data, isError} = getCommentsState();
+        if (isSuccess) {
             setShowErrorPanel(false);
-            setCommentsData(commentState.data);
+            setCommentsData(data);
         }
 
-        if (commentState.isError) {
-            if (commentState.error?.id === Constants.ApiErrorIdNotConnected) {
+        if (isError) {
+            if (error?.id === Constants.ApiErrorIdNotConnected) {
                 setShowErrorPanel(true);
             }
 
-            setApiError(commentState.error?.message ?? '');
+            setApiError(error?.message ?? '');
         }
 
-        if (commentState.isLoading) {
+        if (isLoading) {
             setShowErrorPanel(false);
         }
 
-        setShowModalLoader(commentState.isLoading);
-    }, [getCommentsState().isError, getCommentsState().isSuccess, getCommentsState().isLoading]);
+        setShowModalLoader(isLoading);
+    }, [getCommentsState().isLoading, getCommentsState().isError, getCommentsState().isSuccess]);
 
     useEffect(() => {
-        const commentState = addCommentState();
-        if (commentState.isSuccess) {
+        const {isLoading, isSuccess, error} = addCommentState();
+        if (isSuccess) {
             setComments('');
-            dispatch(refetch());
+            setRefetch(true);
         }
 
-        if (commentState.error) {
-            setApiError(commentState.error);
+        if (error) {
+            setApiError(error);
         }
 
-        setShowModalLoader(commentState.isLoading);
+        setShowModalLoader(isLoading);
     }, [addCommentState().isLoading, addCommentState().isError, addCommentState().isSuccess]);
 
     // Fetch comments from the API when refetch is set
     useEffect(() => {
-        if (!refetchComments) {
-            return;
+        if (refetch) {
+            const payload = getCommentsPayload();
+            makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
+            setRefetch(false);
         }
-
-        const payload = getCommentsPayload();
-        setGetCommentsPayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
-        dispatch(resetRefetch());
-    }, [refetchComments]);
+    }, [refetch]);
 
     return (
         <Modal
@@ -139,10 +133,11 @@ const AddOrViewComments = () => {
         >
             <>
                 <ModalHeader
-                    title={'Add comments'}
+                    title='Add comments'
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
+                <ModalLoader loading={addCommentState().isLoading}/>
                 {showModalLoader && !comments && <CircularLoader/>}
                 {showErrorPanel ? (
 
@@ -160,33 +155,35 @@ const AddOrViewComments = () => {
                     <>
                         <div
                             className={`comment-body
-                                ${((!commentsData.length || apiError) && !showModalLoader) && 'comment-body__height'}`}
+                                    ${((!commentsData.length || apiError) && !showModalLoader) && 'comment-body__height'}`}
                         >
-                            <TextField
+                            <TextArea
                                 placeholder='Write new comment here'
                                 value={comments}
                                 onChange={onChangeHandle}
-                                className='comment-body__text-field'
+                                className='comment-body__text-area'
                                 disabled={showModalLoader}
-                                error={error}
+                                error={validationError}
                             />
                             {!apiError && <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>}
                             {commentsData ? (
                                 <>
                                     <div className='comment-body__description-text'>{commentsData}</div>
-                                    {!showModalLoader && <p className='comment-body__footer'>{Constants.NoCommentsPresent}</p>}
+                                    <p className='comment-body__footer'>{Constants.NoCommentsPresent}</p>
                                 </>
                             ) : (
-                                !showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>
+                                <>
+                                    {!showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>}
+                                </>
                             )}
                         </div>
                         <ModalSubtitleAndError error={apiError}/>
                         <ModalFooter
                             onConfirm={addComment}
-                            confirmBtnText={'Submit'}
+                            confirmBtnText='Submit'
                             confirmDisabled={showModalLoader}
                             onHide={hideModal}
-                            cancelBtnText={'Cancel'}
+                            cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}
                         />
                     </>

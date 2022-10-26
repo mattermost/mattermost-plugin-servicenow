@@ -15,7 +15,7 @@ export function handleConnect(store: Store<GlobalState, Action<Record<string, un
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(true) as Action);
 
-        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
@@ -54,7 +54,7 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
 
 export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
-        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
@@ -70,7 +70,7 @@ export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Reco
 
 export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (msg: WebsocketEventParams) => {
-        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {data} = msg;
         const commentModalData: CommentModalData = {
             recordType: data.record_type as RecordType,
