@@ -1,14 +1,13 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {Dropdown, SvgWrapper, ToggleSwitch} from '@brightscout/mattermost-ui-library';
+import {Dropdown, Button, SvgWrapper, ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
 import useOutsideClick from 'hooks/useClickOutside';
 
 import Constants from 'plugin_constants';
 import SVGIcons from 'plugin_constants/icons';
 import IconButton from 'components/Buttons/iconButton';
-import Button from 'components/Buttons/button';
 
 import {showModal as showRecordModal} from 'reducers/shareRecordModal';
 
@@ -25,7 +24,8 @@ const Header = ({
     setShowAllSubscriptions,
     filter,
     setFilter,
-    setResetFilter}: HeaderProps) => {
+    setResetFilter,
+}: HeaderProps) => {
     const [showFilter, setShowFilter] = useState(false);
     const dispatch = useDispatch();
 
@@ -82,9 +82,7 @@ const Header = ({
                         <div className='d-flex align-item-center margin-bottom-15 toggle-class'>
                             <ToggleSwitch
                                 active={showAllSubscriptions}
-                                onChange={(active) => {
-                                    setShowAllSubscriptions(active);
-                                }}
+                                onChange={(active) => setShowAllSubscriptions(active)}
                                 label={Constants.RhsToggleLabel}
                                 labelPositioning='right'
                             />

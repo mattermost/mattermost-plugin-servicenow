@@ -147,24 +147,22 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
-export const SubscriptionFilters = {
-    createdBy: {
-        me: 'me',
-        anyone: 'anyone',
-    },
-};
+export enum SubscriptionFilters {
+    ME = 'me',
+    ANYONE = 'anyone',
+}
 
 export const DefaultSubscriptionFilters = {
-    createdBy: SubscriptionFilters.createdBy.anyone,
+    createdBy: SubscriptionFilters.ANYONE,
 };
 
 export const SubscriptionFilterCreatedByOptions = [
     {
-        value: SubscriptionFilters.createdBy.me,
+        value: SubscriptionFilters.ME,
         label: 'Me',
     },
     {
-        value: SubscriptionFilters.createdBy.anyone,
+        value: SubscriptionFilters.ANYONE,
         label: 'Anyone',
     },
 ];

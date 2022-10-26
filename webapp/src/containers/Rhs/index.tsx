@@ -80,7 +80,7 @@ const Rhs = (): JSX.Element => {
             subscriptionParams.channel_id = currentChannelId;
         }
 
-        if (filter.createdBy === Constants.SubscriptionFilters.createdBy.me) {
+        if (filter.createdBy === Constants.SubscriptionFilters.ME) {
             subscriptionParams.user_id = currentUserId;
         }
 
