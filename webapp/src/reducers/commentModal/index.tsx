@@ -19,6 +19,10 @@ export const openCommentModalSlice = createSlice({
         },
         hideModal: (state) => {
             state.open = false;
+            state.data = {
+                recordId: '',
+                recordType: '',
+            };
         },
     },
 });
