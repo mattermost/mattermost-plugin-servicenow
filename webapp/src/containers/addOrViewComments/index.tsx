@@ -172,9 +172,7 @@ const AddOrViewComments = () => {
                                     <p className='comment-body__footer'>{Constants.NoCommentsPresent}</p>
                                 </>
                             ) : (
-                                <>
-                                    {!showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>}
-                                </>
+                                !showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>
                             )}
                         </div>
                         <ModalSubtitleAndError error={apiError}/>
