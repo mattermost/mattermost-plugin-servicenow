@@ -110,6 +110,12 @@ type EditSubscriptionPayload = {
     sys_id: string;
 }
 
+type CommentsPayload = {
+    record_type: string;
+    record_id: string;
+    comments?: string;
+}
+
 type ConfigData = {
     ServiceNowBaseURL: string;
     ServiceNowOAuthClientID: string;

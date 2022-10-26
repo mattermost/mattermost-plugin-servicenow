@@ -528,9 +528,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, perPage := GetPageAndPerPage(r)
-	commentsArray := ProcessComments(comments, page, perPage)
-	p.writeJSONArray(w, statusCode, commentsArray)
+	p.writeJSON(w, statusCode, comments)
 }
 
 func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
