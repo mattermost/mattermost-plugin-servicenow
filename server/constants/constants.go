@@ -78,6 +78,7 @@ const (
 	WSEventOpenEditSubscriptionModal      = "edit_subscription"
 	WSEventSubscriptionDeleted            = "subscription_deleted"
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
+	WSEventOpenCommentModal               = "comment_modal"
 	WSEventOpenUpdateStateModal           = "update_state"
 
 	// API Errors
@@ -123,6 +124,7 @@ const (
 	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
 	ErrorMissingUserCodeState             = "missing user, code or state"
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
+	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
 )
 

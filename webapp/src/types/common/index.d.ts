@@ -4,7 +4,7 @@
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig' | 'shareRecord' | 'getStates' | 'updateState';
+type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig' | 'shareRecord' | 'getComments' | 'addComments' | 'getStates' | 'updateState';
 
 type PluginApiService = {
     path: string,
@@ -43,7 +43,7 @@ type RecordDataLabelConfigType = {
     label: string;
 }
 
-type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | ShareRecordPayload | GetStatesParams | UpdateStateParams | string;
+type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | ShareRecordPayload | CommentsPayload | GetStatesParams | UpdateStateParams | string;
 
 type APIError = {
     id: string,

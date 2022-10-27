@@ -91,6 +91,7 @@ type FetchSubscriptionsParams = {
     page?: number;
     per_page?: number;
     channel_id?: string;
+    user_id?: string;
 }
 
 type SubscriptionData = {
@@ -119,6 +120,12 @@ type EditSubscriptionPayload = {
     sys_id: string;
 }
 
+type CommentsPayload = {
+    record_type: string;
+    record_id: string;
+    comments?: string;
+}
+
 type ConfigData = {
     ServiceNowBaseURL: string;
     ServiceNowOAuthClientID: string;
@@ -130,7 +137,7 @@ type ConfigData = {
 
 type ShareRecordPayload = {
     record_type: ShareRecordType;
-    record_id: string;
+    sys_id: string;
     short_description: string;
     state?: string;
     priority?: string;
@@ -151,6 +158,10 @@ type LinkData = {
 interface PaginationQueryParams {
     page: number;
     per_page: number;
+}
+
+type SubscriptionFilters = {
+    createdBy: string,
 }
 
 type StateData = {

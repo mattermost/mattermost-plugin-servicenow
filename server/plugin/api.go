@@ -46,6 +46,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathOpenCommentModal, p.checkAuth(p.handleOpenCommentModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
@@ -460,7 +461,7 @@ func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := event.CreateNotificationPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	post := event.CreateNotificationPost(p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL())
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError("Unable to create post", "Error", postErr.Error())
 	}
@@ -530,9 +531,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, perPage := GetPageAndPerPage(r)
-	commentsArray := ProcessComments(comments, page, perPage)
-	p.writeJSONArray(w, statusCode, commentsArray)
+	p.writeJSON(w, statusCode, comments)
 }
 
 func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
@@ -629,6 +628,25 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w)
+}
+
+func (p *Plugin) handleOpenCommentModal(w http.ResponseWriter, r *http.Request) {
+	response := &model.PostActionIntegrationResponse{}
+	decoder := json.NewDecoder(r.Body)
+	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
+	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
+		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
+		p.returnPostActionIntegrationResponse(w, response)
+		return
+	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenCommentModal,
+		postActionIntegrationRequest.Context,
+		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
+	)
+
+	p.returnPostActionIntegrationResponse(w, response)
 }
 
 func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
