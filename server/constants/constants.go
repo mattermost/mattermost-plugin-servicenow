@@ -89,6 +89,8 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
 	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
+	APIErrorIDRefreshTokenExpired        = "refresh_token_expired"
+	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired, so you need to reconnect your account."
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
