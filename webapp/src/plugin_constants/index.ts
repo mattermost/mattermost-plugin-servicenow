@@ -34,6 +34,9 @@ const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
+const CommentsHeading = 'Comments';
+const NoCommentsPresent = 'No more comments present.';
+const CommentsNotFound = 'No comments found.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -147,6 +150,26 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
+export enum SubscriptionFilters {
+    ME = 'me',
+    ANYONE = 'anyone',
+}
+
+export const DefaultSubscriptionFilters = {
+    createdBy: SubscriptionFilters.ANYONE,
+};
+
+export const SubscriptionFilterCreatedByOptions = [
+    {
+        value: SubscriptionFilters.ME,
+        label: 'Me',
+    },
+    {
+        value: SubscriptionFilters.ANYONE,
+        label: 'Anyone',
+    },
+];
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
         key: 'short_description',
@@ -218,6 +241,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getConfig',
     },
+    getComments: {
+        path: '/comments',
+        method: 'GET',
+        apiServiceName: 'getComments',
+    },
+    addComments: {
+        path: '/comments',
+        method: 'POST',
+        apiServiceName: 'addComments',
+    },
     shareRecord: {
         path: '/share',
         method: 'POST',
@@ -274,4 +307,10 @@ export default {
     recordTypeOptions,
     shareRecordTypeOptions,
     NoSubscriptionPresent,
+    CommentsHeading,
+    NoCommentsPresent,
+    CommentsNotFound,
+    SubscriptionFilters,
+    DefaultSubscriptionFilters,
+    SubscriptionFilterCreatedByOptions,
 };

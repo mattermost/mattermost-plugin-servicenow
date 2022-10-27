@@ -97,7 +97,7 @@ const ShareRecords = () => {
         const payload: ShareRecordPayload = {
             channel_id: channel,
             record_type: recordType as RecordType,
-            record_id: recordId || '',
+            sys_id: recordId || '',
             assigned_to: recordData?.assigned_to || '',
             assignment_group: recordData?.assignment_group || '',
             priority: recordData?.priority || '',

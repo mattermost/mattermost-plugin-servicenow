@@ -78,6 +78,7 @@ const (
 	WSEventOpenEditSubscriptionModal      = "edit_subscription"
 	WSEventSubscriptionDeleted            = "subscription_deleted"
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
+	WSEventOpenCommentModal               = "comment_modal"
 	WSEventOpenUpdateStateModal           = "update_state"
 
 	// API Errors
@@ -89,6 +90,10 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
 	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
+
+	// Slack attachment context constants
+	ContextNameRecordType = "record_type"
+	ContextNameRecordID   = "record_id"
 
 	// Slash commands
 	CommandHelp           = "help"
@@ -117,6 +122,7 @@ const (
 	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
 	ErrorMissingUserCodeState             = "missing user, code or state"
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
+	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
 )
 
