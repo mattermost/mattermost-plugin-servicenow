@@ -1,15 +1,16 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea, Button} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import usePluginApi from 'hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants, {CONNECT_ACCOUNT_LINK} from 'plugin_constants';
 
 import {hideModal as hideCommentModal} from 'reducers/commentModal';
+import Utils from 'utils';
 
 import './styles.scss';
 
@@ -140,10 +141,23 @@ const AddOrViewComments = () => {
                 <ModalLoader loading={addCommentState().isLoading}/>
                 {showModalLoader && !comments && <CircularLoader/>}
                 {showErrorPanel ? (
-
-                    // TODO: Add a button to connect to ServiceNow account
                     <ResultPanel
-                        header={apiError}
+                        header={
+                            <>
+                                {apiError}
+                                <a
+                                    target='_blank'
+                                    rel='noreferrer'
+                                    href={Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
+                                >
+                                    <Button
+                                        text='Connect your account'
+                                        extraClass='margin-top-25'
+                                        onClick={hideModal}
+                                    />
+                                </a>
+                            </>
+                        }
                         className='wizard__secondary-panel--slide-in result-panel'
                         secondaryBtn={{
                             text: 'Close',
