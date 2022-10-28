@@ -89,7 +89,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	isSysAdmin, err := p.isAuthorizedSysAdmin(args.UserId)
+	isSysAdmin, err := p.IsAuthorizedSysAdmin(args.UserId)
 	if err != nil {
 		text := "Error checking user's permissions"
 		p.API.LogWarn(text, "Error", err.Error())
