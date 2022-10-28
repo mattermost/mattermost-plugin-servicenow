@@ -652,11 +652,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			// wg.Add(1)
 			resp := p.handleListSubscriptions(&plugin.Context{}, args, testCase.params, c, true)
 			time.Sleep(100 * time.Millisecond)
-			// defer wg.Done()
-			// wg.Wait()
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}
