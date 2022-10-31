@@ -161,7 +161,7 @@ const Rhs = (): JSX.Element => {
         const subscriptionsState = getSubscriptionsState();
 
         if (subscriptionsState.isError) {
-            if (subscriptionsState.error?.id === Constants.ApiErrorIdNotConnected) {
+            if (subscriptionsState.error?.id === Constants.ApiErrorIdNotConnected || subscriptionsState.error?.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 if (connected) {
                     dispatch(setConnected(false));
                 }

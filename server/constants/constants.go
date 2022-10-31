@@ -90,7 +90,7 @@ const (
 	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
 	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
 	APIErrorIDRefreshTokenExpired        = "refresh_token_expired"
-	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired, so you need to reconnect your account."
+	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
