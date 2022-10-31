@@ -696,7 +696,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 			expectedError: "Invalid number of params for this command.",
 		},
 		{
-			description:      "HandleDeleteSubscription: Invalid subsrciption ID",
+			description:      "HandleDeleteSubscription: Invalid subscription ID",
 			params:           []string{"invalidID"},
 			setupAPI:         func(a *plugintest.API) {},
 			setupClient:      func(client *mock_plugin.Client) {},
@@ -705,7 +705,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 			expectedError:    genericWaitMessage,
 		},
 		{
-			description: "HandleDeleteSubscription: Unable to delete subsrciption",
+			description: "HandleDeleteSubscription: Unable to delete subscription",
 			params:      []string{"efe53526975a1110f357bfb3f153afa1"},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
@@ -776,14 +776,14 @@ func TestHandleEditSubscription(t *testing.T) {
 			expectedError: "Invalid number of params for this command.",
 		},
 		{
-			description:   "HandleEditSubscription: Invalid subsrciption ID",
+			description:   "HandleEditSubscription: Invalid subscription ID",
 			params:        []string{"invalidID"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
 			expectedError: invalidSubscriptionIDMessage,
 		},
 		{
-			description: "HandleEditSubscription: Unable to get subsrciption",
+			description: "HandleEditSubscription: Unable to get subscription",
 			params:      []string{"efe53526975a1110f357bfb3f153afa1"},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
