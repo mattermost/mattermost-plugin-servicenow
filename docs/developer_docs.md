@@ -23,7 +23,7 @@ This plugin integrates ServiceNow with Mattermost by allowing users to subscribe
 This plugin contains the following features:
 - Connecting/disconnecting to ServiceNow account using OAuth.
 - Creating/editing subscriptions to get notifications for ServiceNow record changes using wizards.
-- Ability to open the create/edit subscription modal through UI or by using slash commands.
+- Ability to open the create/edit subscription modal through UI or slash commands.
 - Ability to create a record or bulk subscription.
 - A record subscription is for subscribing to changes in a specific record and a Bulk subscription allows subscribing to all records of a particular type.
 - Supported record types for subscriptions - incident, problem, change_request.
@@ -35,16 +35,16 @@ This plugin contains the following features:
   * New comment added
   * New record created (only for bulk subscriptions)
 - Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
-- Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command.
-- Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command.
+- Ability to see the existing subscriptions in the Right-Hand Sidebar or slash command.
+- Ability to delete the subscriptions from the Right-Hand Sidebar or slash command.
 - Ability to filter subscriptions using the slash command to get a post containing filtered subscriptions.
-- Ability to filter subscriptions in the Right Hand Sidebar using the filter icon.
+- Ability to filter subscriptions in the Right-Hand Sidebar using the filter icon.
 - Search and share a ServiceNow record in a specified channel.
-- Ability to open search and share record modal through UI or by using a slash command.
+- Ability to open search and share record modal through UI or slash command.
 - Add and view comments of a ServiceNow record.
 - Update the state of a ServiceNow record.
-- Ability to open add and view comments/update state modal through buttons present in a notification post or a shared record post.
-- Supported record types for sharing a record or updating a record state - incident, problem, change_request, kb_knowledge, task, change_task, cert_follow_on_task.
+- Ability to open, add and view comments modal or update state modal through buttons present in a notification post or a shared record post.
+- Supported record types for sharing a record or updating a record state - incident, problem, change_request, kb_knowledge, task, change_task and cert_follow_on_task.
 
 ## Basic Knowledge
 
