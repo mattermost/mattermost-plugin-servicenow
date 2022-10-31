@@ -140,8 +140,6 @@ const AddOrViewComments = () => {
                 <ModalLoader loading={addCommentState().isLoading}/>
                 {showModalLoader && !comments && <CircularLoader/>}
                 {showErrorPanel ? (
-
-                    // TODO: Add a button to connect to ServiceNow account
                     <ResultPanel
                         header={apiError}
                         className='wizard__secondary-panel--slide-in result-panel'

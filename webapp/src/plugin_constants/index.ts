@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const DOWNLOAD_UPDATE_SET_LINK = '/download';
+export const UPLOAD_SET_FILE = '/servicenow_for_mattermost_notifications_v2.0.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 
 const MMCSRF = 'MMCSRF';
@@ -273,7 +273,7 @@ export default {
     RightSidebarHeader,
     RhsSubscritpions,
     ShareRecordButton,
-    DOWNLOAD_UPDATE_SET_LINK,
+    UPLOAD_SET_FILE,
     pluginApiServiceConfigs,
     MMCSRF,
     HeaderCSRFToken,

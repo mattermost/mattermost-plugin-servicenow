@@ -5,7 +5,6 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -35,7 +34,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 	s.HandleFunc(constants.PathGetConnected, p.checkAuth(p.getConnected)).Methods(http.MethodGet)
 
-	s.HandleFunc(constants.PathDownloadUpdateSet, p.downloadUpdateSet).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createSubscription)))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getAllSubscriptions)))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathDeleteSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
@@ -77,7 +75,7 @@ func (p *Plugin) checkOAuth(handler http.HandlerFunc) http.HandlerFunc {
 			if errors.Is(err, ErrNotFound) {
 				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDNotConnected, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorNotConnected})
 			} else {
-				p.API.LogError("Unable to get the user", "Error", err.Error())
+				p.API.LogError(constants.ErrorGetUser, "Error", err.Error())
 				p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s Error: %s", constants.ErrorGeneric, err.Error())})
 			}
 			return
@@ -140,35 +138,13 @@ func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) checkAuthBySecret(handleFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if status, err := verifyHTTPSecret(p.getConfiguration().WebhookSecret, r.FormValue("secret")); err != nil {
-			p.API.LogError("Invalid secret", "Error", err.Error())
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: status, Message: fmt.Sprintf("Invalid Secret. Error: %s", err.Error())})
+			p.API.LogError(constants.ErrorInvalidSecret, "Error", err.Error())
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: status, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorInvalidSecret, err.Error())})
 			return
 		}
 
 		handleFunc(w, r)
 	}
-}
-
-func (p *Plugin) downloadUpdateSet(w http.ResponseWriter, r *http.Request) {
-	bundlePath, err := p.API.GetBundlePath()
-	if err != nil {
-		p.API.LogError("Error in getting the bundle path", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Error in getting the bundle path. Error: %s", err.Error())})
-		return
-	}
-
-	xmlPath := filepath.Join(bundlePath, "assets", constants.UpdateSetFilename)
-	fileBytes, err := ioutil.ReadFile(xmlPath)
-	if err != nil {
-		p.API.LogError("Error in reading the file", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Error in reading the file. Error: %s", err.Error())})
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", constants.UpdateSetFilename))
-	w.Header().Set("Content-Type", http.DetectContentType(fileBytes))
-	_, _ = w.Write(fileBytes)
 }
 
 func (p *Plugin) httpOAuth2Connect(w http.ResponseWriter, r *http.Request) {
@@ -231,14 +207,14 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 	subscription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
 	if err = subscription.IsValidForCreation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Error in validating the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorValidatingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorValidatingRequestBody, err.Error())})
 		return
 	}
 
@@ -271,21 +247,21 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	channelID := r.URL.Query().Get(constants.QueryParamChannelID)
 	if channelID != "" && !model.IsValidId(channelID) {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamChannelID)
+		p.API.LogError(constants.ErrorInvalidQueryParam, "Query param", constants.QueryParamChannelID)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Query param %s is not valid", constants.QueryParamChannelID)})
 		return
 	}
 
 	userID := r.URL.Query().Get(constants.QueryParamUserID)
 	if userID != "" && !model.IsValidId(userID) {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamUserID)
+		p.API.LogError(constants.ErrorInvalidQueryParam, "Query param", constants.QueryParamUserID)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Query param %s is not valid", constants.QueryParamUserID)})
 		return
 	}
 
 	subscriptionType := r.URL.Query().Get(constants.QueryParamSubscriptionType)
 	if subscriptionType != "" && !constants.ValidSubscriptionTypes[subscriptionType] {
-		p.API.LogError("Invalid query param", "Query param", constants.QueryParamSubscriptionType)
+		p.API.LogError(constants.ErrorInvalidQueryParam, "Query param", constants.QueryParamSubscriptionType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Query param %s is not valid", constants.QueryParamSubscriptionType)})
 		return
 	}
@@ -294,8 +270,8 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	page, perPage := GetPageAndPerPage(r)
 	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, subscriptionType, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
-		p.API.LogError("Error in getting all subscriptions", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting all subscriptions. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorGetSubscriptions, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetSubscriptions, err.Error())})
 		return
 	}
 
@@ -324,10 +300,10 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
-		p.API.LogError("Error in deleting the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
+		p.API.LogError(constants.ErrorDeleteSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("Error in deleting the subscription. Error: %s", err.Error())
+			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorDeleteSubscription, err.Error())
 		}
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: responseMessage})
 		return
@@ -341,23 +317,23 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	subcription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
 	if err = subcription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
-		p.API.LogError("Error in validating the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorValidatingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorValidatingRequestBody, err.Error())})
 		return
 	}
 
 	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.EditSubscription(subscriptionID, subcription); err != nil {
-		p.API.LogError("Error in editing the subscription", "subscriptionID", subscriptionID, "Error", err.Error())
+		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("Error in editing the subscription. Error: %s", err.Error())
+			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, err.Error())
 		}
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: responseMessage})
 		return
@@ -378,8 +354,8 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 
 	channels, channelErr := p.API.GetChannelsForTeamForUser(teamID, userID, false)
 	if channelErr != nil {
-		p.API.LogError("Error in getting channels for team and user", "Error", channelErr.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: channelErr.StatusCode, Message: fmt.Sprintf("Error in getting channels for team and user. Error: %s", channelErr.Error())})
+		p.API.LogError(constants.ErrorGetChannel, "Error", channelErr.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: channelErr.StatusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetChannel, channelErr.Error())})
 		return
 	}
 
@@ -423,8 +399,8 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	client := p.GetClientFromRequest(r)
 	records, statusCode, err := client.SearchRecordsInServiceNow(recordType, searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
-		p.API.LogError("Error in searching for records in ServiceNow", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in searching for records in ServiceNow. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorSearchingRecord, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorSearchingRecord, err.Error())})
 		return
 	}
 
@@ -444,8 +420,8 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 	client := p.GetClientFromRequest(r)
 	record, statusCode, err := client.GetRecordFromServiceNow(recordType, recordID)
 	if err != nil {
-		p.API.LogError("Error in getting record from ServiceNow", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting record from ServiceNow. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorGetRecord, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetRecord, err.Error())})
 		return
 	}
 
@@ -455,14 +431,14 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 func (p *Plugin) handleNotification(w http.ResponseWriter, r *http.Request) {
 	event, err := serializer.ServiceNowEventFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
 	post := event.CreateNotificationPost(p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL())
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
-		p.API.LogError("Unable to create post", "Error", postErr.Error())
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 	returnStatusOK(w)
 }
@@ -478,8 +454,8 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 
 	record, err := serializer.ServiceNowRecordFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
@@ -498,14 +474,14 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
 	user, userErr := p.API.GetUser(userID)
 	if userErr != nil {
-		p.API.LogError("Unable to get the user", "UserID", userID, "Error", userErr.Error())
+		p.API.LogError(constants.ErrorGetUser, "UserID", userID, "Error", userErr.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGeneric})
 		return
 	}
 
 	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), user.Username)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
-		p.API.LogError("Unable to create post", "Error", postErr.Error())
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
 	returnStatusOK(w)
@@ -524,9 +500,8 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	comments, statusCode, err := client.GetAllComments(recordType, recordID)
 	if err != nil {
-		// TODO: Move all the inline messages to constants package
-		p.API.LogError("Error in getting all comments", "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting all comments. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorGetComments, "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s Error: %s", constants.ErrorGetComments, err.Error())})
 		return
 	}
 
@@ -544,8 +519,8 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 
 	payload, err := serializer.ServiceNowCommentPayloadFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
@@ -553,8 +528,8 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.AddComment(recordType, recordID, payload)
 	if err != nil {
-		p.API.LogError("Error in creating the comment", "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in creating the comment. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorCreateComment, "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorCreateComment, err.Error())})
 		return
 	}
 
@@ -582,8 +557,8 @@ func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		p.API.LogError("Error in getting the states", "Record Type", recordType, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in getting the states. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorGetStates, "Record Type", recordType, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetStates, err.Error())})
 		return
 	}
 
@@ -601,14 +576,14 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 
 	payload, err := serializer.ServiceNowStatePayloadFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
 	if err = payload.Validate(); err != nil {
-		p.API.LogError("Error in validating the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorValidatingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorValidatingRequestBody, err.Error())})
 		return
 	}
 
@@ -616,8 +591,8 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
 	if err != nil {
-		p.API.LogError("Error in updating the state", "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("Error in updating the state. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUpdateState, "Record ID", recordID, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUpdateState, err.Error())})
 		return
 	}
 

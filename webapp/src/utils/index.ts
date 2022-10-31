@@ -8,14 +8,16 @@ import {id as pluginId} from '../manifest';
 const getBaseUrls = (): {
     pluginApiBaseUrl: string;
     mattermostApiBaseUrl: string;
+    uploadSetFile: string;
 } => {
     const url = new URL(window.location.href);
     const baseUrl = `${url.protocol}//${url.host}`;
     const pluginUrl = `${baseUrl}/plugins/${pluginId}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
     const mattermostApiBaseUrl = `${baseUrl}/api/v4`;
+    const uploadSetFile = `${baseUrl}/plugins/${pluginId}/public`;
 
-    return {pluginApiBaseUrl, mattermostApiBaseUrl};
+    return {pluginApiBaseUrl, mattermostApiBaseUrl, uploadSetFile};
 };
 
 /**

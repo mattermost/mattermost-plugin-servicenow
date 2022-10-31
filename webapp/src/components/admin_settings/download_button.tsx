@@ -3,7 +3,7 @@ import {FormGroup, Col, Button} from 'react-bootstrap';
 
 import Utils from 'utils';
 
-import {DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
+import {UPLOAD_SET_FILE} from 'plugin_constants';
 
 type HelpText = {
     key: string | null;
@@ -29,9 +29,8 @@ const DownloadButton = ({label, helpText}: Props) => (
             {label}
         </Col>
         <Col sm={8}>
-            {/* TODO: Add proper handling for the download logic as the downloaded filename should be the same that we get in the response headers. */}
             <a
-                href={Utils.getBaseUrls().pluginApiBaseUrl + DOWNLOAD_UPDATE_SET_LINK}
+                href={Utils.getBaseUrls().uploadSetFile + UPLOAD_SET_FILE}
                 download={true}
             >
                 <Button>
