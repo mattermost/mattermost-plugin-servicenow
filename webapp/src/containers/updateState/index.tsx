@@ -99,11 +99,11 @@ const UpdateState = () => {
         <Modal
             show={pluginState.openUpdateStateModalReducer.open}
             onHide={hideModal}
-            className={'rhs-modal update-state-modal wizard'}
+            className='rhs-modal update-state-modal wizard'
         >
             <>
                 <ModalHeader
-                    title={'Update State'}
+                    title='Update State'
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
@@ -119,9 +119,9 @@ const UpdateState = () => {
                     />
                 ) : (
                     <>
-                        <div className={'padding-h-12 padding-v-20 wizard__body-container'}>
+                        <div className='padding-h-12 padding-v-20 wizard__body-container'>
                             <Dropdown
-                                placeholder={'Select State'}
+                                placeholder='Select State'
                                 value={selectedState}
                                 onChange={setSelectedState}
                                 options={stateOptions ?? []}
@@ -130,7 +130,7 @@ const UpdateState = () => {
                         </div>
                         <ModalFooter
                             onConfirm={updateState}
-                            confirmBtnText={'Update'}
+                            confirmBtnText='Update'
                             confirmDisabled={showLoader || !selectedState}
                             onHide={hideModal}
                             cancelDisabled={showLoader}
