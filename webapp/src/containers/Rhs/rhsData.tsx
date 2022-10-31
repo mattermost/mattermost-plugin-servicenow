@@ -111,6 +111,13 @@ const RhsData = ({
 
     return (
         <>
+            <Header
+                showAllSubscriptions={showAllSubscriptions}
+                setShowAllSubscriptions={setShowAllSubscriptions}
+                filter={filter}
+                setFilter={setFilter}
+                setResetFilter={setResetFilter}
+            />
             {error && (
                 <EmptyState
                     title={Constants.GeneralErrorMessage}
@@ -119,13 +126,6 @@ const RhsData = ({
                     className='error-state'
                 />
             )}
-            <Header
-                showAllSubscriptions={showAllSubscriptions}
-                setShowAllSubscriptions={setShowAllSubscriptions}
-                filter={filter}
-                setFilter={setFilter}
-                setResetFilter={setResetFilter}
-            />
             <div
                 id='scrollableArea'
                 className='rhs-content__cards-container'
