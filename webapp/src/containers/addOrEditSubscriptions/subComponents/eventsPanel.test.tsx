@@ -39,8 +39,8 @@ describe('Events Panel', () => {
             <EventsPanel
                 {...eventsPanelProps}
                 subscriptionType={SubscriptionType.RECORD}
-                record={'mockRecord'}
-                error={'mockError'}
+                record='mockRecord'
+                error='mockError'
             />);
     });
 
@@ -63,7 +63,7 @@ describe('Events Panel', () => {
             <EventsPanel
                 {...eventsPanelProps}
                 subscriptionType={SubscriptionType.BULK}
-                record={'mockRecord'}
+                record='mockRecord'
             />);
         expect(component.find('Checkbox')).toHaveLength(6);
         expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
@@ -83,7 +83,7 @@ describe('Events Panel', () => {
             <EventsPanel
                 {...eventsPanelProps}
                 subscriptionType={SubscriptionType.BULK}
-                record={''}
+                record=''
             />);
         expect(component.text().includes('Channel')).toBeTruthy();
         expect(component.text().includes(`${eventsPanelProps.channel.label}`)).toBeTruthy();
@@ -94,7 +94,7 @@ describe('Events Panel', () => {
 
     it('Should render the error correctly', () => {
         expect(component.contains(
-            <ModalSubtitleAndError error={'mockError'}/>,
+            <ModalSubtitleAndError error='mockError'/>,
         )).toBeTruthy();
     });
 

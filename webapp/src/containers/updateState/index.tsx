@@ -1,6 +1,7 @@
 import React, {useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
-import {CustomModal as Modal, Dropdown, ModalFooter, ModalHeader, ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
+
+import {CustomModal as Modal, Dropdown, ModalFooter, ModalHeader} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -53,30 +54,29 @@ const UpdateState = () => {
         <Modal
             show={pluginState.openUpdateStateModalReducer.open}
             onHide={hideModal}
-            className={'rhs-modal'}
+            className='rhs-modal'
         >
             <>
                 <ModalHeader
-                    title={'Update State'}
+                    title='Update State'
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <div className={'padding-h-12 padding-v-20 wizard__body-container'}>
+                <div className='padding-h-12 padding-v-20 wizard__body-container'>
                     <Dropdown
-                        placeholder={'Select State'}
+                        placeholder='Select State'
                         value={selectedState}
                         onChange={setSelectedState}
                         options={stateOptions}
                         required={true}
                     />
-                    <ModalSubtitleAndError error={''}/>
                 </div>
                 <ModalFooter
                     onConfirm={hideModal}
-                    confirmBtnText={'Update'}
+                    confirmBtnText='Update'
                     confirmDisabled={showModalLoader || !selectedState}
                     onHide={hideModal}
-                    cancelBtnText={'Cancel'}
+                    cancelBtnText='Cancel'
                     cancelDisabled={showModalLoader}
                 />
             </>
