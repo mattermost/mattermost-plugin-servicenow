@@ -34,6 +34,13 @@ This plugin contains the following features:
 - Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
 - Ability to see the existing subscriptions in the Right Hand Sidebar or by using a slash command.
 - Ability to delete the subscriptions from the Right Hand Sidebar or by using a slash command.
+- Ability to filter subscriptions using the slash command to get a post containing filtered subscriptions.
+- Ability to filter subscriptions in the Right Hand Sidebar using the filter icon.
+- Search and share a ServiceNow record in a specified channel.
+- Ability to open search and share record modal through UI or by using a slash command.
+- Add and view comments of a ServiceNow record.
+- Update the state of a ServiceNow record.
+- Ability to open add and view comments/update state modal through buttons present in a post.
 
 ## Installation
 
