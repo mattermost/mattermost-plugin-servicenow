@@ -227,8 +227,8 @@ func (p *Plugin) handleClientError(err error, w http.ResponseWriter, r *http.Req
 		message = subscriptionsNotConfiguredErrorForUser
 		if isSysAdmin {
 			message = subscriptionsNotConfiguredErrorForAdmin
-
 		}
+
 		return message
 	}
 
@@ -241,8 +241,8 @@ func (p *Plugin) handleClientError(err error, w http.ResponseWriter, r *http.Req
 		message = subscriptionsNotAuthorizedErrorForUser
 		if isSysAdmin {
 			message = subscriptionsNotAuthorizedErrorForAdmin
-
 		}
+
 		return message
 	}
 
