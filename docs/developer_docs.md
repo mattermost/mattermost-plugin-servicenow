@@ -26,7 +26,7 @@ This plugin contains the following features:
 - Ability to open the create/edit subscription modal through UI or by using slash commands.
 - Ability to create a record or bulk subscription.
 - A record subscription is for subscribing to changes in a specific record and a Bulk subscription allows subscribing to all records of a particular type.
-- Supported record types - incident, problem, change_request.
+- Supported record types for subscriptions - incident, problem, change_request.
 - Supported events:
   * State changed
   * Priority changed
@@ -43,7 +43,8 @@ This plugin contains the following features:
 - Ability to open search and share record modal through UI or by using a slash command.
 - Add and view comments of a ServiceNow record.
 - Update the state of a ServiceNow record.
-- Ability to open add and view comments/update state modal through buttons present in a post.
+- Ability to open add and view comments/update state modal through buttons present in a notification post or a shared record post.
+- Supported record types for sharing a record or updating a record state - incident, problem, change_request, kb_knowledge, task, change_task, cert_follow_on_task.
 
 ## Basic Knowledge
 
