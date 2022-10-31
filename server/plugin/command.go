@@ -47,7 +47,6 @@ After that, this user will have the permission to add or manage subscriptions fr
 	helpCommandHeader                       = "#### Mattermost ServiceNow Plugin - Slash Command Help\n"
 	disconnectErrorMessage                  = "Something went wrong. Not able to disconnect user. Check server logs for errors."
 	disconnectSuccessMessage                = "Disconnected your ServiceNow account."
-	listSubscriptionsErrorMessage           = "Something went wrong. Not able to list subscriptions. Check server logs for errors."
 	listSubscriptionsWaitMessage            = "Your subscriptions will be listed soon. Please wait."
 	genericWaitMessage                      = "Your request is being processed. Please wait."
 	deleteSubscriptionErrorMessage          = "Something went wrong. Not able to delete subscription. Check server logs for errors."
