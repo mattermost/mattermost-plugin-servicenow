@@ -138,7 +138,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 			if _, err := client.ActivateSubscriptions(); err != nil {
 				p.API.LogError("Unable to check or activate subscriptions in ServiceNow.", "Error", err.Error())
-				p.postCommandResponse(args, p.handleClientError(err, nil, nil, args.UserId, isSysAdmin, 0, ""))
+				p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
 				return &model.CommandResponse{}, nil
 			}
 		}
@@ -264,7 +264,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
 			p.API.LogError("Unable to get subscriptions", "Error", err.Error())
-			p.postCommandResponse(args, p.handleClientError(err, nil, nil, userID, isSysAdmin, 0, ""))
+			p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, userID, ""))
 			return
 		}
 
@@ -330,7 +330,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 
 		if _, err = client.DeleteSubscription(subscriptionID); err != nil {
 			p.API.LogError("Unable to delete subscription", "Error", err.Error())
-			p.postCommandResponse(args, p.handleClientError(err, nil, nil, args.UserId, isSysAdmin, 0, ""))
+			p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
 			return
 		}
 
@@ -364,7 +364,7 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	subscription, _, err := client.GetSubscription(subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to get subscription", "Error", err.Error())
-		return p.handleClientError(err, nil, nil, args.UserId, isSysAdmin, 0, "")
+		return p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, "")
 	}
 
 	if subscription.Type == constants.SubscriptionTypeRecord {
