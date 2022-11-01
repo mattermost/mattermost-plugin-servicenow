@@ -2,7 +2,7 @@ import reducer, {showModal, hideModal, ShareRecordModalState} from 'reducers/sha
 
 const previousState: ShareRecordModalState = {
     open: false,
-}
+};
 
 test('should change the state of open to "true"', () => {
     expect(reducer(previousState, showModal())).toEqual(

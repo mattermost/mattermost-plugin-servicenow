@@ -4,12 +4,12 @@ import reducer, {showModal, hideModal, UpdateStateModalState} from 'reducers/upd
 
 const previousState: UpdateStateModalState = {
     open: false,
-}
+};
 
 test('should change the state of open to "true" and data value to payload', () => {
     const payload: CommentAndStateModalData = {
         recordType: RecordType.INCIDENT,
-        recordId: "mockId",
+        recordId: 'mockId',
     };
     expect(reducer(previousState, showModal(payload))).toEqual(
         {open: true, data: payload},
