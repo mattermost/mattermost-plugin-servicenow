@@ -388,10 +388,10 @@ func TestShareRecordInChannel(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: `{
+			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
-				"record_type": "incident"
-				}`,
+				"record_type": "%s"
+				}`, constants.RecordTypeIncident),
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
@@ -433,10 +433,10 @@ func TestShareRecordInChannel(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
 		"failed to get the user": {
-			RequestBody: `{
+			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
-				"record_type": "incident"
-				}`,
+				"record_type": "%s"
+				}`, constants.RecordTypeIncident),
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", mock.AnythingOfType("string")).Return(
@@ -448,10 +448,10 @@ func TestShareRecordInChannel(t *testing.T) {
 			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 		"failed to create the post": {
-			RequestBody: `{
+			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
-				"record_type": "incident"
-				}`,
+				"record_type": "%s"
+				}`, constants.RecordTypeIncident),
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
