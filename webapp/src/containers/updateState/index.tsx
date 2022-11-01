@@ -51,13 +51,11 @@ const UpdateState = () => {
 
     useEffect(() => {
         const {data, open} = pluginState.openUpdateStateModalReducer;
-        if (!(open && data?.recordType && data?.recordId)) {
-            return;
+        if (open && data?.recordType && data?.recordId) {
+            const params: GetStatesParams = {recordType: data.recordType};
+            setGetStatesParams(params);
+            makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
         }
-
-        const params: GetStatesParams = {recordType: data.recordType};
-        setGetStatesParams(params);
-        makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
     }, [pluginState.openUpdateStateModalReducer.open]);
 
     const updateState = () => {
