@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IconButton should match snapshot with all the props 1`] = `
+<Tooltip
+  tooltipContent="mockTooltip"
+>
+  <Button
+    active={false}
+    aria-label="mockTooltip"
+    className="plugin-btn button-wrapper btn-icon mockExtraClass"
+    disabled={false}
+    onClick={[MockFunction]}
+    onKeyDown={[Function]}
+    tabIndex={0}
+    type="button"
+    variant="outline-danger"
+  >
+    <i
+      className="mockIconClassName"
+    />
+    <span>
+      Dummytext
+    </span>
+  </Button>
+</Tooltip>
+`;
+
+exports[`IconButton should match snapshot with only tooltip text provided 1`] = `
+<Tooltip
+  tooltipContent="mockTooltip"
+>
+  <Button
+    active={false}
+    aria-label="mockTooltip"
+    className="plugin-btn button-wrapper btn-icon "
+    disabled={false}
+    onKeyDown={[Function]}
+    tabIndex={0}
+    type="button"
+    variant="outline-danger"
+  />
+</Tooltip>
+`;
