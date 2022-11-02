@@ -66,6 +66,7 @@ const UpdateState = () => {
     };
 
     useEffect(() => {
+        // TODO: Add the use of "useApiRequestCompletionState" by taking reference from Azure DevOps plugin
         const {isError, isSuccess, error} = getStateForUpdateStateAPI();
         if (isError) {
             setApiError(error?.message ?? '');
