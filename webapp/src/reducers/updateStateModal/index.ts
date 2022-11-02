@@ -12,6 +12,8 @@ export const openUpdateStateModalSlice = createSlice({
     name: 'openUpdateStateModalSlice',
     initialState,
     reducers: {
+
+        // TODO: Convert these two reducers into one "toggleModalVisibility(state, action)" reducer
         showModal: (state) => {
             state.open = true;
         },
