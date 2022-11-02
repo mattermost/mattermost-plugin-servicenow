@@ -95,7 +95,7 @@ const AddOrViewComments = () => {
                 setShowErrorPanel(true);
             }
 
-            setApiError(error.message ?? '');
+            setApiError(error.message);
         }
 
         if (isLoading) {
@@ -117,7 +117,7 @@ const AddOrViewComments = () => {
                 dispatch(setConnected(false));
                 setShowErrorPanel(true);
             }
-            setApiError(error.message ?? '');
+            setApiError(error.message);
         }
 
         setShowModalLoader(isLoading);
