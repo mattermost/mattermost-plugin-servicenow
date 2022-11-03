@@ -22,6 +22,7 @@ const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
 const DefaultPageSize = 20;
 const ApiErrorIdNotConnected = 'not_connected';
+const ApiErrorIdRefreshTokenExpired = 'refresh_token_expired';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 const GeneralErrorMessage = 'Something went wrong';
@@ -300,6 +301,7 @@ export default {
     DefaultPage,
     DefaultPageSize,
     ApiErrorIdNotConnected,
+    ApiErrorIdRefreshTokenExpired,
     ApiErrorIdSubscriptionsNotConfigured,
     ApiErrorIdSubscriptionsUnauthorized,
     SubscriptionsUnauthorizedErrorTitle,
