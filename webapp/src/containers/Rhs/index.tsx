@@ -158,25 +158,25 @@ const Rhs = (): JSX.Element => {
     };
 
     useEffect(() => {
-        const subscriptionsState = getSubscriptionsState();
+        const {isError, error, isSuccess} = getSubscriptionsState();
 
-        if (subscriptionsState.isError) {
-            if (subscriptionsState.error?.id === Constants.ApiErrorIdNotConnected) {
+        if (isError) {
+            if (error?.id === Constants.ApiErrorIdNotConnected) {
                 if (connected) {
                     dispatch(setConnected(false));
                 }
                 return;
-            } else if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsNotConfigured) {
+            } else if (error?.id === Constants.ApiErrorIdSubscriptionsNotConfigured) {
                 setSubscriptionsEnabled(false);
                 if (!connected) {
                     dispatch(setConnected(true));
                 }
                 return;
-            } else if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsUnauthorized && subscriptionsAuthorized) {
+            } else if (error?.id === Constants.ApiErrorIdSubscriptionsUnauthorized && subscriptionsAuthorized) {
                 setSubscriptionsAuthorized(false);
             }
 
-            if (!subscriptionsAuthorized && subscriptionsState.error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized) {
+            if (!subscriptionsAuthorized && error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized) {
                 setSubscriptionsAuthorized(true);
             }
 
@@ -188,7 +188,7 @@ const Rhs = (): JSX.Element => {
             }
         }
 
-        if (subscriptionsState.isSuccess) {
+        if (isSuccess) {
             setTotalSubscriptions([...totalSubscriptions, ...subscriptions]);
             if (!connected) {
                 dispatch(setConnected(true));

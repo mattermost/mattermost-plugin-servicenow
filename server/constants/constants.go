@@ -90,6 +90,8 @@ const (
 	APIErrorSubscriptionsNotAuthorized   = "You are not authorized to manage subscriptions in ServiceNow."
 	APIErrorIDLatestUpdateSetNotUploaded = "update_set_not_uploaded"
 	APIErrorLatestUpdateSetNotUploaded   = "The latest update set has not been uploaded to ServiceNow."
+	APIErrorIDInsufficientPermissions    = "insufficient_permissions"
+	APIErrorInsufficientPermissions      = "Insufficient Permissions"
 	APIErrorIDRefreshTokenExpired        = "refresh_token_expired"
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 

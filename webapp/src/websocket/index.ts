@@ -71,9 +71,8 @@ export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Reco
 
 export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (msg: WebsocketEventParams) => {
-        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {data} = msg;
-        const commentModalData: CommentModalData = {
+        const commentModalData: CommentAndStateModalData = {
             recordType: data.record_type as RecordType,
             recordId: data.record_id,
         };
@@ -82,7 +81,12 @@ export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<s
 }
 
 export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
-    return (_: WebsocketEventParams) => {
-        store.dispatch(showUpdateStateModal() as Action);
+    return (msg: WebsocketEventParams) => {
+        const {data} = msg;
+        const updateStateModalData: CommentAndStateModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
     };
 }

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 
 	"path/filepath"
@@ -48,6 +49,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathOpenCommentModal, p.checkAuth(p.handleOpenCommentModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
+	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
@@ -600,6 +602,11 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
 	if err != nil {
+		if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, ID: constants.APIErrorIDInsufficientPermissions, Message: constants.APIErrorInsufficientPermissions})
+			return
+		}
+
 		p.API.LogError("Error in updating the state", "Record ID", recordID, "Error", err.Error())
 		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("Error in updating the state. Error: %s", err.Error()))
 		return
@@ -620,6 +627,25 @@ func (p *Plugin) handleOpenCommentModal(w http.ResponseWriter, r *http.Request) 
 
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCommentModal,
+		postActionIntegrationRequest.Context,
+		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
+	)
+
+	p.returnPostActionIntegrationResponse(w, response)
+}
+
+func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
+	response := &model.PostActionIntegrationResponse{}
+	decoder := json.NewDecoder(r.Body)
+	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
+	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
+		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
+		p.returnPostActionIntegrationResponse(w, response)
+		return
+	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenUpdateStateModal,
 		postActionIntegrationRequest.Context,
 		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
 	)

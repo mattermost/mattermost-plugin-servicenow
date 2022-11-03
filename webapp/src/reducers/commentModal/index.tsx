@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 type CommentModalState = {
     open: boolean;
-    data?: CommentModalData;
+    data?: CommentAndStateModalData;
 }
 
 const initialState: CommentModalState = {
@@ -13,7 +13,7 @@ export const openCommentModalSlice = createSlice({
     name: 'openCommentModalSlice',
     initialState,
     reducers: {
-        showModal: (state, action: PayloadAction<CommentModalData>) => {
+        showModal: (state, action: PayloadAction<CommentAndStateModalData>) => {
             state.open = true;
             state.data = action.payload;
         },

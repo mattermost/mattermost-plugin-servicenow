@@ -256,6 +256,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'shareRecord',
     },
+    getStates: {
+        path: '/states',
+        method: 'GET',
+        apiServiceName: 'getStates',
+    },
+    updateState: {
+        path: '/states',
+        method: 'PATCH',
+        apiServiceName: 'updateState',
+    },
 };
 
 export const PanelDefaultHeights = {

@@ -46,6 +46,16 @@ type GetRecordParams = {
     recordId: string;
 }
 
+type GetStatesParams = {
+    recordType: RecordType;
+}
+
+type UpdateStatePayload = {
+    recordType: RecordType;
+    recordId: string;
+    state: string;
+}
+
 type Suggestion = {
     number: string;
     short_description: string;
@@ -152,4 +162,9 @@ interface PaginationQueryParams {
 
 type SubscriptionFilters = {
     createdBy: string,
+}
+
+type StateData = {
+    label: string;
+    value: string;
 }
