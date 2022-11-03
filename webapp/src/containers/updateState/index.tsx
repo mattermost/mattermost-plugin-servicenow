@@ -114,7 +114,7 @@ const UpdateState = () => {
                             text: 'Close',
                             onClick: hideModal,
                         }}
-                        iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
+                        iconClass={apiError && 'fa-times-circle-o result-panel-icon--error'}
                     />
                 ) : (
                     <>
