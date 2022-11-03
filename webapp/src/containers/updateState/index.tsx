@@ -8,9 +8,8 @@ import usePluginApi from 'hooks/usePluginApi';
 
 import Constants from 'plugin_constants';
 
+import {setConnected} from 'reducers/connectedState';
 import {hideModal as hideUpdateStateModal} from 'reducers/updateStateModal';
-
-import './styles.scss';
 
 const UpdateState = () => {
     const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -68,8 +67,11 @@ const UpdateState = () => {
     useEffect(() => {
         // TODO: Add the use of "useApiRequestCompletionState" by taking reference from Azure DevOps plugin
         const {isError, isSuccess, error} = getStateForUpdateStateAPI();
-        if (isError) {
-            setApiError(error?.message ?? '');
+        if (isError && error) {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
+            setApiError(error.message);
             setShowResultPanel(true);
         }
 
@@ -81,8 +83,11 @@ const UpdateState = () => {
 
     useEffect(() => {
         const {isError, isSuccess, error} = getStateForGetStatesAPI();
-        if (isError) {
-            setApiError(error?.message ?? '');
+        if (isError && error) {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
+            setApiError(error.message);
             setShowResultPanel(true);
         }
 
@@ -98,7 +103,7 @@ const UpdateState = () => {
         <Modal
             show={pluginState.openUpdateStateModalReducer.open}
             onHide={hideModal}
-            className='rhs-modal update-state-modal wizard'
+            className='rhs-modal'
         >
             <>
                 <ModalHeader
@@ -109,6 +114,7 @@ const UpdateState = () => {
                 {showLoader && <CircularLoader/>}
                 {showResultPanel ? (
                     <ResultPanel
+                        className='wizard__secondary-panel--slide-in result-panel'
                         header={apiError || 'State updated successfully'}
                         primaryBtn={{
                             text: 'Close',
