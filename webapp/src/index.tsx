@@ -1,25 +1,25 @@
 import React from 'react';
 import {Store, Action} from 'redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 
 // eslint-disable-next-line import/no-unresolved
-import {PluginRegistry} from 'types/mattermost-webapp';
+import {PluginRegistry} from 'src/types/mattermost-webapp';
 
 import {ServiceNowIcon} from '@brightscout/mattermost-ui-library';
 
-import reducer from 'reducers';
+import reducer from 'src/reducers';
 
-import Rhs from 'containers/Rhs';
-import AddOrViewComments from 'containers/addOrViewComments';
-import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
-import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
-import ShareRecords from 'containers/shareRecords';
+import Rhs from 'src/containers/Rhs';
+import AddOrViewComments from 'src/containers/addOrViewComments';
+import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
+import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
+import ShareRecords from 'src/containers/shareRecords';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
-import DownloadButton from 'components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal} from 'websocket';
+import DownloadButton from 'src/components/admin_settings/download_button';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal} from 'src/websocket';
 
 import App from './app';
 

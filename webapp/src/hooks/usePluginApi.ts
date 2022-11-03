@@ -1,7 +1,7 @@
 import {useCallback} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 
-import services from 'services';
+import services from 'src/services';
 
 function usePluginApi() {
     const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);

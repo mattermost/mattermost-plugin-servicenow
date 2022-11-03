@@ -5,16 +5,16 @@ import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, R
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
-import {hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
-import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
-import SearchRecordsPanel from 'containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
-import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channelPanel';
+import {hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
+import RecordTypePanel from 'src/containers/addOrEditSubscriptions/subComponents/recordTypePanel';
+import SearchRecordsPanel from 'src/containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
+import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
 import './styles.scss';
 

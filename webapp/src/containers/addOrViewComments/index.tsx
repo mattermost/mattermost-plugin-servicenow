@@ -5,11 +5,11 @@ import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoa
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
-import {hideModal as hideCommentModal} from 'reducers/commentModal';
+import {hideModal as hideCommentModal} from 'src/reducers/commentModal';
 
 import './styles.scss';
 

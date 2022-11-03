@@ -1,7 +1,7 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {hideModal as hideAddModal} from 'reducers/addSubscriptionModal';
+import {hideModal as hideAddModal} from 'src/reducers/addSubscriptionModal';
 
 import AddOrEditSubscriptionModal from '../subComponents';
 

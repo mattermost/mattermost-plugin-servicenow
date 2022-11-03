@@ -1,9 +1,9 @@
 import React from 'react';
 import {FormGroup, Col, Button} from 'react-bootstrap';
 
-import Utils from 'utils';
+import Utils from 'src/utils';
 
-import {UPLOAD_SET_FILE} from 'plugin_constants';
+import {UPLOAD_SET_FILE} from 'src/plugin_constants';
 
 type HelpText = {
     key: string | null;

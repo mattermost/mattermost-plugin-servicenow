@@ -3,13 +3,13 @@ import {useDispatch} from 'react-redux';
 
 import {Dropdown, Button, SvgWrapper, ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
-import useOutsideClick from 'hooks/useClickOutside';
+import useOutsideClick from 'src/hooks/useClickOutside';
 
-import Constants from 'plugin_constants';
-import SVGIcons from 'plugin_constants/icons';
-import IconButton from 'components/Buttons/iconButton';
+import Constants from 'src/plugin_constants';
+import SVGIcons from 'src/plugin_constants/icons';
+import IconButton from 'src/components/Buttons/iconButton';
 
-import {showModal as showRecordModal} from 'reducers/shareRecordModal';
+import {showModal as showRecordModal} from 'src/reducers/shareRecordModal';
 
 type HeaderProps = {
     showAllSubscriptions: boolean;

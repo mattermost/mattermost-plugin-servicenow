@@ -4,7 +4,7 @@ import {shallow, ShallowWrapper} from 'enzyme';
 
 import {ModalFooter, ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
 
-import {RecordType, RecordTypeLabelMap, SubscriptionEvents, SubscriptionType} from 'plugin_constants';
+import {RecordType, RecordTypeLabelMap, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
 
 import EventsPanel from './eventsPanel';
 

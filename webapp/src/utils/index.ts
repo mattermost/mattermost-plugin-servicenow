@@ -2,7 +2,7 @@
  * Utils
  */
 
-import {SubscriptionType, RecordType} from 'plugin_constants';
+import {SubscriptionType, RecordType} from 'src/plugin_constants';
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {

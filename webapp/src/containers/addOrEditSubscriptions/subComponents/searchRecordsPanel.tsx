@@ -3,11 +3,11 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'src/plugin_constants';
 
-import Utils from 'utils';
+import Utils from 'src/utils';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
 type SearchRecordsPanelProps = {
     className?: string;

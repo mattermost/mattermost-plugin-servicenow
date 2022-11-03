@@ -1,22 +1,22 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from '@brightscout/mattermost-ui-library';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILE} from 'plugin_constants';
+import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILE} from 'src/plugin_constants';
 
-import {refetch, resetRefetch} from 'reducers/refetchState';
+import {refetch, resetRefetch} from 'src/reducers/refetchState';
 
-import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
-import {setConnected} from 'reducers/connectedState';
+import {showModal as showEditModal} from 'src/reducers/editSubscriptionModal';
+import {setConnected} from 'src/reducers/connectedState';
 
-import Utils from 'utils';
+import Utils from 'src/utils';
 
 import RhsData from './rhsData';
 
