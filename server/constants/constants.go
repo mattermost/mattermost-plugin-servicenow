@@ -79,6 +79,7 @@ const (
 	WSEventSubscriptionDeleted            = "subscription_deleted"
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
 	WSEventOpenCommentModal               = "comment_modal"
+	WSEventOpenUpdateStateModal           = "update_state"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"

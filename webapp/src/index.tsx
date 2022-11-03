@@ -15,11 +15,12 @@ import AddOrViewComments from 'containers/addOrViewComments';
 import AddSubscription from 'containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'containers/addOrEditSubscriptions/editSubscription';
 import ShareRecords from 'containers/shareRecords';
+import UpdateState from 'containers/updateState';
 
 import Constants from 'plugin_constants';
 
 import DownloadButton from 'components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal} from 'websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal} from 'websocket';
 
 import App from './app';
 
@@ -36,6 +37,7 @@ export default class Plugin {
         registry.registerRootComponent(EditSubscription);
         registry.registerRootComponent(AddOrViewComments);
         registry.registerRootComponent(ShareRecords);
+        registry.registerRootComponent(UpdateState);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
@@ -48,6 +50,7 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_search_and_share_record`, handleOpenShareRecordModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_comment_modal`, handleOpenCommentModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_update_state`, handleOpenUpdateStateModal(store));
     }
 }
 

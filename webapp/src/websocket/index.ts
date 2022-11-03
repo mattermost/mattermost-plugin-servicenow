@@ -10,6 +10,7 @@ import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModa
 import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
 import {showModal as showShareRecordModal} from 'reducers/shareRecordModal';
 import {showModal as showCommentModal} from 'reducers/commentModal';
+import {showModal as showUpdateStateModal} from 'reducers/updateStateModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
@@ -77,5 +78,11 @@ export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<s
             recordId: data.record_id,
         };
         store.dispatch(showCommentModal(commentModalData) as Action);
+    };
+}
+
+export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(showUpdateStateModal() as Action);
     };
 }
