@@ -29,7 +29,7 @@ describe('Subscription Type Panel', () => {
         component = shallow(
             <SubscriptionTypePanel
                 {...subscriptionTypePanelProps}
-                error={'mockError'}
+                error='mockError'
             />);
     });
 
@@ -49,7 +49,7 @@ describe('Subscription Type Panel', () => {
 
     it('Should render the error correctly', () => {
         expect(component.contains(
-            <ModalSubtitleAndError error={'mockError'}/>,
+            <ModalSubtitleAndError error='mockError'/>,
         )).toBeTruthy();
     });
 
