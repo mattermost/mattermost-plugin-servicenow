@@ -4,15 +4,19 @@ import services from 'services';
 
 import openAddSubscriptionModalReducer from './addSubscriptionModal';
 import openEditSubscriptionModalReducer from './editSubscriptionModal';
+import refetchReducer from './refetchState';
 import openShareRecordModalReducer from './shareRecordModal';
-import refetchSubscriptionsReducer from './refetchSubscriptions';
+import openCommentModalReducer from './commentModal';
+import openUpdateStateModalReducer from './updateStateModal';
 import connectedReducer from './connectedState';
 
 export default combineReducers({
     openAddSubscriptionModalReducer,
     openEditSubscriptionModalReducer,
+    refetchReducer,
     openShareRecordModalReducer,
-    refetchSubscriptionsReducer,
+    openCommentModalReducer,
+    openUpdateStateModalReducer,
     connectedReducer,
     [services.reducerPath]: services.reducer,
 });

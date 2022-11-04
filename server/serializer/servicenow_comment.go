@@ -2,7 +2,11 @@ package serializer
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
+	"strings"
+
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 )
 
 type ServiceNowComment struct {
@@ -24,4 +28,13 @@ func ServiceNowCommentPayloadFromJSON(data io.Reader) (*ServiceNowCommentPayload
 	}
 
 	return scp, nil
+}
+
+func (s *ServiceNowCommentPayload) Validate() error {
+	s.Comments = strings.TrimSpace(s.Comments)
+	if s.Comments == "" {
+		return errors.New(constants.ErrorEmptyComment)
+	}
+
+	return nil
 }

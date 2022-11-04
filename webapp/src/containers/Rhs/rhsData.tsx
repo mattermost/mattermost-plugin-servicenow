@@ -4,19 +4,19 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {ToggleSwitch, EmptyState, SubscriptionCard, BellIcon, SvgWrapper} from '@brightscout/mattermost-ui-library';
+import {EmptyState, SubscriptionCard, BellIcon, ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
 import Spinner from 'components/spinner';
 
 import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
-import SVGIcons from 'plugin_constants/icons';
 
 import usePluginApi from 'hooks/usePluginApi';
 
 import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
 
 import Utils from 'utils';
-import {showModal as showRecordModal} from 'reducers/shareRecordModal';
+
+import Header from './rhsHeader';
 
 type RhsDataProps = {
     showAllSubscriptions: boolean;
@@ -29,6 +29,9 @@ type RhsDataProps = {
     isCurrentUserSysAdmin: boolean;
     paginationQueryParams: PaginationQueryParams;
     handlePagination: () => void;
+    filter: SubscriptionFilters;
+    setFilter: (filter: SubscriptionFilters) => void;
+    setResetFilter: (resetFilter: boolean) => void;
 }
 
 // TODO: Add proper type here
@@ -49,6 +52,9 @@ const RhsData = ({
     isCurrentUserSysAdmin,
     paginationQueryParams,
     handlePagination,
+    filter,
+    setFilter,
+    setResetFilter,
 }: RhsDataProps) => {
     const dispatch = useDispatch();
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -105,29 +111,12 @@ const RhsData = ({
 
     return (
         <>
-            <div className='rhs-content__header'>
-                <span className='rhs-content__subscriptions'>{Constants.RhsSubscritpions}</span>
-                <button
-                    className='btn btn-primary share-record-btn'
-                    onClick={() => dispatch(showRecordModal())}
-                >
-                    <span>
-                        <SvgWrapper
-                            width={16}
-                            height={16}
-                            viewBox='0 0 14 12'
-                            className='share-record-icon'
-                        >
-                            {SVGIcons.share}
-                        </SvgWrapper>
-                    </span>
-                    {Constants.ShareRecordButton}
-                </button>
-            </div>
-            <ToggleSwitch
-                active={showAllSubscriptions}
-                onChange={setShowAllSubscriptions}
-                label={Constants.RhsToggleLabel}
+            <Header
+                showAllSubscriptions={showAllSubscriptions}
+                setShowAllSubscriptions={setShowAllSubscriptions}
+                filter={filter}
+                setFilter={setFilter}
+                setResetFilter={setResetFilter}
             />
             {error && (
                 <EmptyState
@@ -163,6 +152,7 @@ const RhsData = ({
                                     onEdit={() => handleEditSubscription(subscription)}
                                     onDelete={() => handleDeleteClick(subscription)}
                                     cardBody={getSubscriptionCardBody(subscription)}
+                                    className='subscription-card'
                                     channel={showAllSubscriptions ? getChannelState().data.find((ch) => ch.id === subscription.channel_id) : null}
                                 />
                             ))}

@@ -57,8 +57,8 @@ This plugin contains the following features:
 
 ## Setup
 
-- [ServiceNow Setup](./docs/servicenow_setup.md)
-- [Plugin Setup](./docs/plugin_setup.md)
+- [ServiceNow Setup](./servicenow_setup.md)
+- [Plugin Setup](./plugin_setup.md)
 
 ## Connecting to ServiceNow
 
