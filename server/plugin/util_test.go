@@ -2,6 +2,10 @@ package plugin
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"bou.ke/monkey"
@@ -10,6 +14,7 @@ import (
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -202,6 +207,107 @@ func TestFilterSubscriptionsOnRecordData(t *testing.T) {
 
 			resp := FilterSubscriptionsOnRecordData(testCase.subscripitons)
 			assert.EqualValues(testCase.expectedCount, len(resp))
+		})
+	}
+}
+
+func TestHandleClientError(t *testing.T) {
+	defer monkey.UnpatchAll()
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateSubscription)
+	for _, testCase := range []struct {
+		description        string
+		setupAPI           func(api *plugintest.API) *plugintest.API
+		setupPlugin        func()
+		errorMessage       error
+		expectedResponse   string
+		expectedStatusCode int
+	}{
+		{
+			description: "handleClientError",
+			setupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			setupPlugin:        func() {},
+			errorMessage:       errors.New("mockError"),
+			expectedResponse:   genericErrorMessage,
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			description: "handleClientError: with token not fetched",
+			setupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			setupPlugin: func() {
+				var p *Plugin
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "DisconnectUser", func(*Plugin, string) error {
+					return nil
+				})
+			},
+			errorMessage:       errors.New("oauth2: cannot fetch token: 401 Unauthorized"),
+			expectedResponse:   "",
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			description: "handleClientError: with token not fetched and disconnect error",
+			setupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string")).Return()
+				return api
+			},
+			setupPlugin: func() {
+				var p *Plugin
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "DisconnectUser", func(*Plugin, string) error {
+					return errors.New("disconnect user error")
+				})
+			},
+			errorMessage:       errors.New("oauth2: cannot fetch token: 401 Unauthorized"),
+			expectedResponse:   genericErrorMessage,
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			description: "handleClientError: with subscriptions not configured",
+			setupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			setupPlugin:        func() {},
+			errorMessage:       errors.New(constants.APIErrorIDSubscriptionsNotConfigured),
+			expectedResponse:   "",
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			description: "handleClientError: with update set not uploaded",
+			setupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			setupPlugin:        func() {},
+			errorMessage:       errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded),
+			expectedResponse:   constants.APIErrorIDLatestUpdateSetNotUploaded,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			description: "handleClientError: with subscriptions not authorized",
+			setupAPI: func(api *plugintest.API) *plugintest.API {
+				return api
+			},
+			setupPlugin:        func() {},
+			errorMessage:       errors.New(constants.APIErrorIDSubscriptionsNotAuthorized),
+			expectedResponse:   "",
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			api := testCase.setupAPI(&plugintest.API{})
+			defer api.AssertExpectations(t)
+
+			p := setupTestPlugin(api, nil)
+			testCase.setupPlugin()
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPost, requestURL, nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			response := p.handleClientError(w, r, testCase.errorMessage, true, 0, testutils.GetID(), "")
+
+			assert.EqualValues(testCase.expectedResponse, response)
+			assert.EqualValues(testCase.expectedStatusCode, w.Result().StatusCode)
 		})
 	}
 }
