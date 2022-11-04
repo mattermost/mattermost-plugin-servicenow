@@ -6,10 +6,11 @@ import {SubscriptionEventsMap} from 'plugin_constants';
 
 import {setConnected} from 'reducers/connectedState';
 import {refetch} from 'reducers/refetchState';
-import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
-import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
-import {showModal as showShareRecordModal} from 'reducers/shareRecordModal';
-import {showModal as showCommentModal} from 'reducers/commentModal';
+import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'reducers/addSubscriptionModal';
+import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'reducers/editSubscriptionModal';
+import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
+import {showModal as showCommentModal, hideModal as hideCommentModal} from 'reducers/commentModal';
+import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'reducers/updateStateModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
@@ -26,6 +27,11 @@ export function handleConnect(store: Store<GlobalState, Action<Record<string, un
 export function handleDisconnect(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(false) as Action);
+        store.dispatch(hideAddSubscriptionModal() as Action);
+        store.dispatch(hideEditSubscriptionModal() as Action);
+        store.dispatch(hideShareRecordModal() as Action);
+        store.dispatch(hideCommentModal() as Action);
+        store.dispatch(hideUpdateStateModal() as Action);
     };
 }
 
@@ -70,12 +76,22 @@ export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Reco
 
 export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (msg: WebsocketEventParams) => {
-        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {data} = msg;
-        const commentModalData: CommentModalData = {
+        const commentModalData: CommentAndStateModalData = {
             recordType: data.record_type as RecordType,
             recordId: data.record_id,
         };
         store.dispatch(showCommentModal(commentModalData) as Action);
+    };
+}
+
+export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (msg: WebsocketEventParams) => {
+        const {data} = msg;
+        const updateStateModalData: CommentAndStateModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
     };
 }

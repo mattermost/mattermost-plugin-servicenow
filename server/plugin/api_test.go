@@ -1005,6 +1005,7 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 	}{
 		"subscriptions not configured": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Error", constants.APIErrorIDSubscriptionsNotConfigured)
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
@@ -1015,6 +1016,7 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 		},
 		"subscriptions not authorized": {
 			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				api.On("LogError", mock.AnythingOfType("string"), "Error", constants.APIErrorIDSubscriptionsNotAuthorized)
 				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
