@@ -244,7 +244,6 @@ func TestHandleClientError(t *testing.T) {
 				})
 			},
 			errorMessage:       errors.New("oauth2: cannot fetch token: 401 Unauthorized"),
-			expectedResponse:   "",
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -270,7 +269,6 @@ func TestHandleClientError(t *testing.T) {
 			},
 			setupPlugin:        func() {},
 			errorMessage:       errors.New(constants.APIErrorIDSubscriptionsNotConfigured),
-			expectedResponse:   "",
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -290,7 +288,6 @@ func TestHandleClientError(t *testing.T) {
 			},
 			setupPlugin:        func() {},
 			errorMessage:       errors.New(constants.APIErrorIDSubscriptionsNotAuthorized),
-			expectedResponse:   "",
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 	} {
