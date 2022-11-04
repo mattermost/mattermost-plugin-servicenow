@@ -54,7 +54,7 @@ After that, this user will have the permission to add or manage subscriptions fr
 	genericErrorMessage                     = "Something went wrong."
 	invalidSubscriptionIDMessage            = "Invalid subscription ID."
 	notConnectedMessage                     = "You are not connected to ServiceNow.\n[Click here to link your ServiceNow account.](%s%s)"
-	tokenExpiredReconnectMessage            = "Your connection with ServiceNow has expired, so you need to reconnect your account.\n[Click here to link your ServiceNow account.](%s%s)"
+	tokenExpiredReconnectMessage            = constants.APIErrorRefreshTokenExpired + "\n[Click here to link your ServiceNow account.](%s%s)"
 	subscriptionsNotConfiguredError         = "It seems that subscriptions for ServiceNow have not been configured properly."
 	subscriptionsNotConfiguredErrorForUser  = subscriptionsNotConfiguredError + " Please contact your system administrator to configure the subscriptions by following the instructions given by the plugin."
 	subscriptionsNotConfiguredErrorForAdmin = subscriptionsNotConfiguredError + " To enable subscriptions, you have to download the update set provided by the plugin and upload that in ServiceNow. The update set is available in the plugin configuration settings. The instructions for uploading the update set are available in the plugin's documentation and also can be viewed by running the \"/servicenow help\" command."
@@ -138,7 +138,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 			if _, err := client.ActivateSubscriptions(); err != nil {
 				p.API.LogError("Unable to check or activate subscriptions in ServiceNow.", "Error", err.Error())
-				p.postCommandResponse(args, p.handleClientError(err, nil, nil, args.UserId, isSysAdmin, 0, ""))
+				p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
 				return &model.CommandResponse{}, nil
 			}
 		}
@@ -264,7 +264,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
 			p.API.LogError("Unable to get subscriptions", "Error", err.Error())
-			p.postCommandResponse(args, p.handleClientError(err, nil, nil, userID, isSysAdmin, 0, ""))
+			p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, userID, ""))
 			return
 		}
 
@@ -330,7 +330,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 
 		if _, err = client.DeleteSubscription(subscriptionID); err != nil {
 			p.API.LogError("Unable to delete subscription", "Error", err.Error())
-			p.postCommandResponse(args, p.handleClientError(err, nil, nil, args.UserId, isSysAdmin, 0, ""))
+			p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
 			return
 		}
 
@@ -364,7 +364,7 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	subscription, _, err := client.GetSubscription(subscriptionID)
 	if err != nil {
 		p.API.LogError("Unable to get subscription", "Error", err.Error())
-		return p.handleClientError(err, nil, nil, args.UserId, isSysAdmin, 0, "")
+		return p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, "")
 	}
 
 	if subscription.Type == constants.SubscriptionTypeRecord {

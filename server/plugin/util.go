@@ -195,7 +195,7 @@ func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionRes
 	return subscripitons[:n]
 }
 
-func (p *Plugin) handleClientError(err error, w http.ResponseWriter, r *http.Request, userID string, isSysAdmin bool, statusCode int, response string) string {
+func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err error, isSysAdmin bool, statusCode int, userID, response string) string {
 	message := ""
 	if strings.Contains(err.Error(), "oauth2: cannot fetch token: 401 Unauthorized") {
 		if userID == "" && r != nil {

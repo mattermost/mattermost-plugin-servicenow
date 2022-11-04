@@ -1,16 +1,16 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-type CommentModalState = {
+export type UpdateStateModalState = {
     open: boolean;
     data?: CommentAndStateModalData;
 }
 
-const initialState: CommentModalState = {
+const initialState: UpdateStateModalState = {
     open: false,
 };
 
-export const openCommentModalSlice = createSlice({
-    name: 'openCommentModalSlice',
+export const openUpdateStateModalSlice = createSlice({
+    name: 'openUpdateStateModalSlice',
     initialState,
     reducers: {
         showModal: (state, action: PayloadAction<CommentAndStateModalData>) => {
@@ -23,6 +23,6 @@ export const openCommentModalSlice = createSlice({
     },
 });
 
-export const {showModal, hideModal} = openCommentModalSlice.actions;
+export const {showModal, hideModal} = openUpdateStateModalSlice.actions;
 
-export default openCommentModalSlice.reducer;
+export default openUpdateStateModalSlice.reducer;
