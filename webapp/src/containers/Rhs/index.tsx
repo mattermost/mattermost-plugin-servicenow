@@ -11,7 +11,7 @@ import usePluginApi from 'hooks/usePluginApi';
 
 import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, DOWNLOAD_UPDATE_SET_LINK} from 'plugin_constants';
 
-import {refetch, resetRefetch} from 'reducers/refetchSubscriptions';
+import {refetch, resetRefetch} from 'reducers/refetchState';
 
 import {showModal as showEditModal} from 'reducers/editSubscriptionModal';
 import {setConnected} from 'reducers/connectedState';
@@ -31,8 +31,9 @@ const Rhs = (): JSX.Element => {
     const [subscriptionsAuthorized, setSubscriptionsAuthorized] = useState(false);
     const [showAllSubscriptions, setShowAllSubscriptions] = useState(false);
     const [fetchSubscriptionParams, setFetchSubscriptionParams] = useState<FetchSubscriptionsParams | null>(null);
-    const refetchSubscriptions = pluginState.refetchSubscriptionsReducer.refetchSubscriptions;
+    const refetchSubscriptions = pluginState.refetchReducer.refetch;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
+    const {currentUserId} = useSelector((state: GlobalState) => state.entities.users);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
@@ -42,6 +43,8 @@ const Rhs = (): JSX.Element => {
     });
     const [totalSubscriptions, setTotalSubscriptions] = useState<SubscriptionData[]>([]);
     const [render, setRender] = useState(true);
+    const [filter, setFilter] = useState<SubscriptionFilters>(Constants.DefaultSubscriptionFilters);
+    const [resetFilter, setResetFilter] = useState(false);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
@@ -65,11 +68,20 @@ const Rhs = (): JSX.Element => {
         });
     };
 
+    const handleSetFilter = (newFilter: SubscriptionFilters) => {
+        setFilter(newFilter);
+        resetStates();
+    };
+
     // Fetch the subscriptions from the API
     useEffect(() => {
         const subscriptionParams: FetchSubscriptionsParams = {page: paginationQueryParams.page, per_page: paginationQueryParams.per_page};
         if (!showAllSubscriptions) {
             subscriptionParams.channel_id = currentChannelId;
+        }
+
+        if (filter.createdBy === Constants.SubscriptionFilters.ME) {
+            subscriptionParams.user_id = currentUserId;
         }
 
         setRender(false);
@@ -80,7 +92,8 @@ const Rhs = (): JSX.Element => {
     // Reset states on changing channel or using toggle switch
     useEffect(() => {
         // This is used to prevent calling of fetch subscription API twice
-        if (render) {
+        if (render || resetFilter) {
+            setResetFilter(false);
             return;
         }
 
@@ -145,25 +158,25 @@ const Rhs = (): JSX.Element => {
     };
 
     useEffect(() => {
-        const subscriptionsState = getSubscriptionsState();
+        const {isError, error, isSuccess} = getSubscriptionsState();
 
-        if (subscriptionsState.isError) {
-            if (subscriptionsState.error?.id === Constants.ApiErrorIdNotConnected) {
+        if (isError) {
+            if (error?.id === Constants.ApiErrorIdNotConnected || error?.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 if (connected) {
                     dispatch(setConnected(false));
                 }
                 return;
-            } else if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsNotConfigured) {
+            } else if (error?.id === Constants.ApiErrorIdSubscriptionsNotConfigured) {
                 setSubscriptionsEnabled(false);
                 if (!connected) {
                     dispatch(setConnected(true));
                 }
                 return;
-            } else if (subscriptionsState.error?.id === Constants.ApiErrorIdSubscriptionsUnauthorized && subscriptionsAuthorized) {
+            } else if (error?.id === Constants.ApiErrorIdSubscriptionsUnauthorized && subscriptionsAuthorized) {
                 setSubscriptionsAuthorized(false);
             }
 
-            if (!subscriptionsAuthorized && subscriptionsState.error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized) {
+            if (!subscriptionsAuthorized && error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized) {
                 setSubscriptionsAuthorized(true);
             }
 
@@ -175,7 +188,7 @@ const Rhs = (): JSX.Element => {
             }
         }
 
-        if (subscriptionsState.isSuccess) {
+        if (isSuccess) {
             setTotalSubscriptions([...totalSubscriptions, ...subscriptions]);
             if (!connected) {
                 dispatch(setConnected(true));
@@ -209,6 +222,9 @@ const Rhs = (): JSX.Element => {
                         isCurrentUserSysAdmin={isCurrentUserSysAdmin}
                         paginationQueryParams={paginationQueryParams}
                         handlePagination={handlePagination}
+                        filter={filter}
+                        setFilter={handleSetFilter}
+                        setResetFilter={setResetFilter}
                     />
                     {toBeDeleted && (
                         <ConfirmationDialog

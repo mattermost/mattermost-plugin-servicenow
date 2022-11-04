@@ -844,6 +844,20 @@ func TestUpdateStateOfRecord(t *testing.T) {
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
+		"failed to update state due to insufficient permissions": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"state": "mockState"
+			}`,
+			SetupAPI: func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
+					http.StatusNotFound, fmt.Errorf("ACL restricts the record retrieval"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusUnauthorized,
+			ExpectedErrorMessage: constants.APIErrorInsufficientPermissions,
+		},
 		"failed to update state": {
 			RecordType: constants.RecordTypeIncident,
 			RequestBody: `{
@@ -1465,7 +1479,9 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"subscriptions not configured": {
-			SetupAPI: func(api *plugintest.API) {},
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", mock.AnythingOfType("string"), "Error", constants.APIErrorIDSubscriptionsNotConfigured)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("ActivateSubscriptions").Return(0, fmt.Errorf(constants.APIErrorIDSubscriptionsNotConfigured))
 			},
@@ -1473,7 +1489,9 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 			ExpectedErrorMessage: constants.APIErrorSubscriptionsNotConfigured,
 		},
 		"subscriptions not authorized": {
-			SetupAPI: func(api *plugintest.API) {},
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", mock.AnythingOfType("string"), "Error", constants.APIErrorIDSubscriptionsNotAuthorized)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("ActivateSubscriptions").Return(0, fmt.Errorf(constants.APIErrorIDSubscriptionsNotAuthorized))
 			},

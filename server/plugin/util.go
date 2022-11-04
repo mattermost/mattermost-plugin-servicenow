@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -198,24 +199,74 @@ func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionRes
 	return subscripitons[:n]
 }
 
-func ProcessComments(comments string, page, perPage int) []string {
-	if comments == "" {
-		return []string{}
+func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err error, isSysAdmin bool, statusCode int, userID, response string) string {
+	message := ""
+	if strings.Contains(err.Error(), "oauth2: cannot fetch token: 401 Unauthorized") {
+		if userID == "" && r != nil {
+			userID = r.Header.Get(constants.HeaderMattermostUserID)
+		}
+
+		if disconnectErr := p.DisconnectUser(userID); disconnectErr != nil {
+			p.API.LogError(disconnectErr.Error())
+			if w != nil {
+				p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: genericErrorMessage})
+			}
+			return genericErrorMessage
+		}
+
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDRefreshTokenExpired, StatusCode: http.StatusBadRequest, Message: constants.APIErrorRefreshTokenExpired})
+			return message
+		}
+
+		return fmt.Sprintf(tokenExpiredReconnectMessage, p.GetPluginURL(), constants.PathOAuth2Connect)
 	}
 
-	arr := strings.Split(comments, "\n\n")
-	// We don't want the last element of the array because it will always be an empty string
-	arr = arr[:len(arr)-1]
+	if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusBadRequest, Message: constants.APIErrorSubscriptionsNotConfigured})
+			return message
+		}
 
-	startingIndex := page * perPage
-	if startingIndex >= len(arr) {
-		return []string{}
+		message = subscriptionsNotConfiguredErrorForUser
+		if isSysAdmin {
+			message = subscriptionsNotConfiguredErrorForAdmin
+		}
+
+		return message
 	}
 
-	endIndex := len(arr)
-	if startingIndex+perPage < endIndex {
-		endIndex = startingIndex + perPage
+	if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized) {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotAuthorized, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorSubscriptionsNotAuthorized})
+			return message
+		}
+
+		message = subscriptionsNotAuthorizedErrorForUser
+		if isSysAdmin {
+			message = subscriptionsNotAuthorizedErrorForAdmin
+		}
+
+		return message
 	}
 
-	return arr[startingIndex:endIndex]
+	if strings.EqualFold(err.Error(), constants.APIErrorIDLatestUpdateSetNotUploaded) {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDLatestUpdateSetNotUploaded, StatusCode: http.StatusBadRequest, Message: constants.APIErrorLatestUpdateSetNotUploaded})
+		}
+
+		return constants.APIErrorIDLatestUpdateSetNotUploaded
+	}
+
+	if w != nil {
+		if statusCode == 0 {
+			statusCode = http.StatusInternalServerError
+		}
+		if response == "" {
+			response = err.Error()
+		}
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: response})
+	}
+
+	return genericErrorMessage
 }
