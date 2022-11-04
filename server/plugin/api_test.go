@@ -25,7 +25,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func setupTestPlugin(api *plugintest.API, store *mock_plugin.Store) *Plugin {
+func setupTestPlugin(api *plugintest.API, store *mock_plugin.Store) (*Plugin, *plugintest.API) {
 	p := &Plugin{}
 	p.setConfiguration(&configuration{
 		WebhookSecret: testutils.GetSecret(),
@@ -38,7 +38,7 @@ func setupTestPlugin(api *plugintest.API, store *mock_plugin.Store) *Plugin {
 		p.store = store
 	}
 	p.router = p.InitAPI()
-	return p
+	return p, api
 }
 
 func setupPluginForCheckOAuthMiddleware(p *Plugin, t *testing.T) *mock_plugin.Client {
@@ -92,7 +92,7 @@ func TestGetConnected(t *testing.T) {
 			assert := assert.New(t)
 			store := test.SetupStore(mock_plugin.NewStore(t))
 
-			p := setupTestPlugin(&plugintest.API{}, store)
+			p, _ := setupTestPlugin(&plugintest.API{}, store)
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
@@ -116,25 +116,23 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetUserChannelsForTeam)
 	for name, test := range map[string]struct {
 		TeamID               string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		ExpectedStatusCode   int
 		ExpectedCount        int
 		ExpectedErrorMessage string
 	}{
 		"success": {
 			TeamID: testutils.GetID(),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(testutils.GetChannels(3, model.CHANNEL_PRIVATE), nil)
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedCount:      3,
 		},
 		"invalid team id": {
 			TeamID: "testTeamID",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", constants.ErrorInvalidTeamID).Return()
-				return api
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedCount:        -1,
@@ -142,28 +140,25 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 		},
 		"failed to get channels": {
 			TeamID: testutils.GetID(),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(nil, testutils.GetBadRequestAppError())
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedCount:      -1,
 		},
 		"no channels present": {
 			TeamID: testutils.GetID(),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(nil, nil)
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedCount:      0,
 		},
 		"no public or private channels present": {
 			TeamID: testutils.GetID(),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(testutils.GetChannels(3, model.CHANNEL_DIRECT), nil)
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedCount:      0,
@@ -171,10 +166,11 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			test.SetupAPI(api)
 			defer api.AssertExpectations(t)
 
-			p := setupTestPlugin(api, nil)
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{team_id:[A-Za-z0-9]+}", test.TeamID, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
@@ -211,7 +207,7 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 	for name, test := range map[string]struct {
 		RecordType           string
 		SearchTerm           string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedCount        int
@@ -220,9 +216,7 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		"success": {
 			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(true),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
 					testutils.GetServiceNowPartialRecords(3), http.StatusOK, nil,
@@ -233,9 +227,8 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		},
 		"invalid record type": {
 			RecordType: "testRecordType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -245,8 +238,7 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		"invalid search term": {
 			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(false),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
+			SetupAPI: func(api *plugintest.API) {
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -256,9 +248,8 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		"failed to get records": {
 			RecordType: constants.RecordTypeIncident,
 			SearchTerm: testutils.GetSearchTerm(true),
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
@@ -271,13 +262,14 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
 			w := httptest.NewRecorder()
 			queryParams := url.Values{
 				constants.QueryParamSearchTerm: {test.SearchTerm},
@@ -317,16 +309,14 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
 	for name, test := range map[string]struct {
 		RecordType           string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"success": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetRecordFromServiceNow", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
 					testutils.GetServiceNowRecord(), http.StatusOK, nil,
@@ -336,9 +326,8 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 		},
 		"invalid record type": {
 			RecordType: "testRecordType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -346,9 +335,8 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 		},
 		"failed to get record": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetRecordFromServiceNow", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
@@ -361,13 +349,13 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
@@ -395,43 +383,40 @@ func TestShareRecordInChannel(t *testing.T) {
 	for name, test := range map[string]struct {
 		RequestBody          string
 		ChannelID            string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: `{
+			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
-				"record_type": "incident"
-				}`,
-			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", mock.AnythingOfType("string")).Return(
+				"record_type": "%s"
+				}`, constants.RecordTypeIncident),
+			ChannelID: testutils.GetChannelID(),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("GetUser", testutils.GetID()).Return(
 					testutils.GetUser(), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
 					nil, nil,
 				)
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 		},
 		"invalid channel ID": {
 			ChannelID: "invalidID",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", constants.ErrorInvalidChannelID).Return()
-				return api
 			},
 			ExpectedErrorMessage: constants.ErrorInvalidChannelID,
 			ExpectedStatusCode:   http.StatusBadRequest,
 		},
 		"invalid request body": {
 			RequestBody: "",
-			ChannelID:   "bnqnzipmnir4zkkj95ggba5pde",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			ChannelID:   testutils.GetChannelID(),
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
@@ -440,38 +425,36 @@ func TestShareRecordInChannel(t *testing.T) {
 		 		"sys_id": "mockSysID",
 		 		"record_type": "testRecordType"
 		 		}`,
-			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			ChannelID: testutils.GetChannelID(),
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedErrorMessage: constants.ErrorInvalidRecordType,
 		},
 		"failed to get the user": {
-			RequestBody: `{
+			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
-				"record_type": "incident"
-				}`,
-			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+				"record_type": "%s"
+				}`, constants.RecordTypeIncident),
+			ChannelID: testutils.GetChannelID(),
+			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", mock.AnythingOfType("string")).Return(
 					nil, testutils.GetInternalServerAppError(),
 				)
 
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
-				return api
 			},
 			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 		"failed to create the post": {
-			RequestBody: `{
+			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
-				"record_type": "incident"
-				}`,
-			ChannelID: "bnqnzipmnir4zkkj95ggba5pde",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", mock.AnythingOfType("string")).Return(
+				"record_type": "%s"
+				}`, constants.RecordTypeIncident),
+			ChannelID: testutils.GetChannelID(),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("GetUser", testutils.GetID()).Return(
 					testutils.GetUser(), nil,
 				)
 
@@ -480,19 +463,18 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			_ = setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, strings.Replace(requestURL, "{channel_id:[A-Za-z0-9]+}", test.ChannelID, 1), bytes.NewBufferString(test.RequestBody))
@@ -520,16 +502,14 @@ func TestGetCommentsForRecord(t *testing.T) {
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
 	for name, test := range map[string]struct {
 		RecordType           string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"success": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
 					testutils.GetServiceNowComments(), http.StatusOK, nil,
@@ -539,9 +519,8 @@ func TestGetCommentsForRecord(t *testing.T) {
 		},
 		"invalid record type": {
 			RecordType: "testRecordType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -549,9 +528,8 @@ func TestGetCommentsForRecord(t *testing.T) {
 		},
 		"failed to get comments": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...)
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
@@ -563,9 +541,8 @@ func TestGetCommentsForRecord(t *testing.T) {
 		},
 		"failed to marshal comments": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "marshal error")
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
@@ -576,18 +553,18 @@ func TestGetCommentsForRecord(t *testing.T) {
 					return nil, fmt.Errorf("marshal error")
 				})
 			},
-			ExpectedStatusCode: http.StatusOK,
+			ExpectedStatusCode: http.StatusInternalServerError,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
@@ -616,7 +593,7 @@ func TestAddCommentsOnRecord(t *testing.T) {
 	for name, test := range map[string]struct {
 		RecordType           string
 		RequestBody          string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
@@ -626,9 +603,7 @@ func TestAddCommentsOnRecord(t *testing.T) {
 			RequestBody: `{
 				"comments": "mockComment"
 			}`,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("AddComment", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowCommentPayload")).Return(
 					http.StatusOK, nil,
@@ -638,9 +613,8 @@ func TestAddCommentsOnRecord(t *testing.T) {
 		},
 		"invalid record type": {
 			RecordType: "testRecordType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -649,9 +623,8 @@ func TestAddCommentsOnRecord(t *testing.T) {
 		"invalid request body": {
 			RecordType:  constants.RecordTypeIncident,
 			RequestBody: "",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
@@ -661,9 +634,8 @@ func TestAddCommentsOnRecord(t *testing.T) {
 			RequestBody: `{
 				"comments": "mockComment"
 			}`,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("AddComment", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowCommentPayload")).Return(
@@ -676,13 +648,13 @@ func TestAddCommentsOnRecord(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
@@ -709,7 +681,7 @@ func TestGetStatesForRecordType(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetStatesForRecordType)
 	for name, test := range map[string]struct {
 		RecordType           string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedCount        int
@@ -717,9 +689,7 @@ func TestGetStatesForRecordType(t *testing.T) {
 	}{
 		"success": {
 			RecordType: constants.RecordTypeFollowOnTask,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetStatesFromServiceNow", constants.RecordTypeTask).Return(
 					testutils.GetServiceNowStates(3), http.StatusOK, nil,
@@ -730,9 +700,8 @@ func TestGetStatesForRecordType(t *testing.T) {
 		},
 		"invalid record type": {
 			RecordType: "testRecordType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -741,9 +710,8 @@ func TestGetStatesForRecordType(t *testing.T) {
 		},
 		"failed to get states": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...)
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetStatesFromServiceNow", constants.RecordTypeIncident).Return(
@@ -756,9 +724,8 @@ func TestGetStatesForRecordType(t *testing.T) {
 		},
 		"failed to marshal states": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "marshal error")
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetStatesFromServiceNow", constants.RecordTypeIncident).Return(
@@ -769,14 +736,12 @@ func TestGetStatesForRecordType(t *testing.T) {
 					return nil, fmt.Errorf("marshal error")
 				})
 			},
-			ExpectedStatusCode: http.StatusOK,
+			ExpectedStatusCode: http.StatusInternalServerError,
 			ExpectedCount:      0,
 		},
 		"no states fetched from ServiceNow": {
 			RecordType: constants.RecordTypeIncident,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetStatesFromServiceNow", constants.RecordTypeIncident).Return(
 					nil, http.StatusOK, nil,
@@ -788,13 +753,14 @@ func TestGetStatesForRecordType(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
@@ -831,7 +797,7 @@ func TestUpdateStateOfRecord(t *testing.T) {
 	for name, test := range map[string]struct {
 		RecordType           string
 		RequestBody          string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
@@ -841,9 +807,7 @@ func TestUpdateStateOfRecord(t *testing.T) {
 			RequestBody: `{
 				"state": "mockState"
 			}`,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
 					http.StatusOK, nil,
@@ -853,9 +817,8 @@ func TestUpdateStateOfRecord(t *testing.T) {
 		},
 		"invalid record type": {
 			RecordType: "testRecordType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -864,9 +827,8 @@ func TestUpdateStateOfRecord(t *testing.T) {
 		"invalid request body": {
 			RecordType:  constants.RecordTypeIncident,
 			RequestBody: "",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
@@ -876,21 +838,33 @@ func TestUpdateStateOfRecord(t *testing.T) {
 			RequestBody: `{
 				"state": ""
 			}`,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"failed to update state due to insufficient permissions": {
+			RecordType: constants.RecordTypeIncident,
+			RequestBody: `{
+				"state": "mockState"
+			}`,
+			SetupAPI: func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
+					http.StatusNotFound, fmt.Errorf("ACL restricts the record retrieval"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusUnauthorized,
+			ExpectedErrorMessage: constants.APIErrorInsufficientPermissions,
 		},
 		"failed to update state": {
 			RecordType: constants.RecordTypeIncident,
 			RequestBody: `{
 				"state": "mockState"
 			}`,
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
@@ -903,13 +877,13 @@ func TestUpdateStateOfRecord(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPatch, strings.Replace(requestURL, "{record_type}", test.RecordType, 1), bytes.NewBufferString(test.RequestBody))
@@ -936,41 +910,38 @@ func TestHandleNotification(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathProcessNotification)
 	for name, test := range map[string]struct {
 		RequestBody        string
-		SetupAPI           func(*plugintest.API) *plugintest.API
+		SetupAPI           func(*plugintest.API)
 		ExpectedStatusCode int
 	}{
 		"success": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 		},
 		"invalid request body": {
 			RequestBody: "",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 		"failed to create post": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetBadRequestAppError())
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			ExpectedStatusCode: http.StatusOK,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			queryParams := url.Values{
@@ -993,16 +964,14 @@ func TestCreateSubscription(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateSubscription)
 	for name, test := range map[string]struct {
 		RequestBody          string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"success": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusOK, nil,
@@ -1021,18 +990,16 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		"invalid request body": {
 			RequestBody: "",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 		"invalid subscription": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				var s *serializer.SubscriptionPayload
@@ -1045,9 +1012,8 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		"failed to check duplicate subscription": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
@@ -1064,9 +1030,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		"duplicate subscription exists": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					true, http.StatusOK, nil,
@@ -1082,9 +1046,8 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		"failed to create subscription": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
@@ -1106,13 +1069,13 @@ func TestCreateSubscription(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForSubscriptionsConfiguredMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, requestURL, bytes.NewBufferString(test.RequestBody))
@@ -1142,16 +1105,14 @@ func TestGetAllSubscriptions(t *testing.T) {
 		ChannelID            string
 		UserID               string
 		SubscriptionType     string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 		ExpectedCount        int
 	}{
 		"success": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", "", "", "", limit, offset).Return(
 					testutils.GetSubscriptions(4), http.StatusOK, nil,
@@ -1166,9 +1127,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 		},
 		"invalid channel id": {
 			ChannelID: "testChannelID",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Query param", constants.QueryParamChannelID).Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1177,9 +1137,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 		},
 		"invalid user id": {
 			UserID: "testUserID",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Query param", constants.QueryParamUserID).Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1188,9 +1147,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 		},
 		"invalid subscription type": {
 			SubscriptionType: "testSubscriptionType",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Query param", constants.QueryParamSubscriptionType).Return()
-				return api
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1198,9 +1156,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 			ExpectedErrorMessage: constants.QueryParamSubscriptionType,
 		},
 		"failed to get subscriptions": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "get subscriptions error").Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", "", "", "", limit, offset).Return(
@@ -1214,13 +1171,13 @@ func TestGetAllSubscriptions(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForSubscriptionsConfiguredMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			queryParams := url.Values{
@@ -1261,15 +1218,13 @@ func TestGetAllSubscriptions(t *testing.T) {
 func TestDeleteSubscription(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathDeleteSubscription)
 	for name, test := range map[string]struct {
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
 					http.StatusOK, nil,
@@ -1278,9 +1233,8 @@ func TestDeleteSubscription(t *testing.T) {
 			ExpectedStatusCode: http.StatusOK,
 		},
 		"failed to delete subscription": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "delete subscription error").Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
@@ -1293,13 +1247,13 @@ func TestDeleteSubscription(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForSubscriptionsConfiguredMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodDelete, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), nil)
@@ -1326,16 +1280,14 @@ func TestEditSubscription(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathEditSubscription)
 	for name, test := range map[string]struct {
 		RequestBody          string
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"success": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
@@ -1350,18 +1302,16 @@ func TestEditSubscription(t *testing.T) {
 		},
 		"invalid request body": {
 			RequestBody: "",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				return api
 			},
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 		"invalid subscription": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "new error").Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				var s *serializer.SubscriptionPayload
@@ -1374,9 +1324,8 @@ func TestEditSubscription(t *testing.T) {
 		},
 		"failed to edit subscription": {
 			RequestBody: "{}",
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				var s *serializer.SubscriptionPayload
@@ -1393,13 +1342,13 @@ func TestEditSubscription(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForSubscriptionsConfiguredMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPatch, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), bytes.NewBufferString(test.RequestBody))
@@ -1426,7 +1375,7 @@ func TestCheckAuth(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathOAuth2Connect)
 	t.Run("user id not present", func(t *testing.T) {
 		assert := assert.New(t)
-		p := setupTestPlugin(&plugintest.API{}, nil)
+		p, _ := setupTestPlugin(&plugintest.API{}, nil)
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(http.MethodGet, requestURL, nil)
 		p.ServeHTTP(nil, w, r)
@@ -1448,15 +1397,13 @@ func TestCheckOAuth(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetSingleRecord)
 	requestURL = strings.Replace(requestURL, "{record_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1)
 	for name, test := range map[string]struct {
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupPlugin          func(p *Plugin)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"user not connected": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			SetupAPI: func(api *plugintest.API) {},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "GetUser", func(_ *Plugin, _ string) (*serializer.User, error) {
 					return nil, ErrNotFound
@@ -1466,9 +1413,8 @@ func TestCheckOAuth(t *testing.T) {
 			ExpectedErrorMessage: constants.APIErrorNotConnected,
 		},
 		"failed to get user": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "get user error")
-				return api
 			},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "GetUser", func(_ *Plugin, _ string) (*serializer.User, error) {
@@ -1479,9 +1425,8 @@ func TestCheckOAuth(t *testing.T) {
 			ExpectedErrorMessage: "get user error",
 		},
 		"failed to parse auth token": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "token error")
-				return api
 			},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "GetUser", func(_ *Plugin, _ string) (*serializer.User, error) {
@@ -1497,12 +1442,12 @@ func TestCheckOAuth(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			test.SetupPlugin(p)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
@@ -1528,14 +1473,14 @@ func TestCheckOAuth(t *testing.T) {
 func TestCheckSubscriptionsConfigured(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateSubscription)
 	for name, test := range map[string]struct {
-		SetupAPI             func(*plugintest.API) *plugintest.API
+		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
 		"subscriptions not configured": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", mock.AnythingOfType("string"), "Error", constants.APIErrorIDSubscriptionsNotConfigured)
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("ActivateSubscriptions").Return(0, fmt.Errorf(constants.APIErrorIDSubscriptionsNotConfigured))
@@ -1544,8 +1489,8 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 			ExpectedErrorMessage: constants.APIErrorSubscriptionsNotConfigured,
 		},
 		"subscriptions not authorized": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", mock.AnythingOfType("string"), "Error", constants.APIErrorIDSubscriptionsNotAuthorized)
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("ActivateSubscriptions").Return(0, fmt.Errorf(constants.APIErrorIDSubscriptionsNotAuthorized))
@@ -1554,9 +1499,8 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 			ExpectedErrorMessage: constants.APIErrorSubscriptionsNotAuthorized,
 		},
 		"failed to check or activate subscriptions": {
-			SetupAPI: func(api *plugintest.API) *plugintest.API {
+			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "generic error")
-				return api
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("ActivateSubscriptions").Return(0, fmt.Errorf("generic error"))
@@ -1567,13 +1511,13 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			api := test.SetupAPI(&plugintest.API{})
-			defer api.AssertExpectations(t)
 			defer monkey.UnpatchAll()
 
-			p := setupTestPlugin(api, nil)
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
 			client := setupPluginForCheckOAuthMiddleware(p, t)
 			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, requestURL, nil)

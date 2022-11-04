@@ -488,6 +488,13 @@ func TestGetStatesFromServiceNowClient(t *testing.T) {
 			expectedStatusCode: http.StatusOK,
 		},
 		{
+			description:        "GetStatesFromServiceNow: with latest update set not uploaded",
+			statusCode:         http.StatusBadRequest,
+			expectedStatusCode: http.StatusBadRequest,
+			errorMessage:       errors.New("mockError: Requested URI does not represent any resource"),
+			expectedErr:        constants.APIErrorIDLatestUpdateSetNotUploaded,
+		},
+		{
 			description:        "GetStatesFromServiceNow: with error",
 			statusCode:         http.StatusInternalServerError,
 			expectedStatusCode: http.StatusInternalServerError,

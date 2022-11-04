@@ -22,6 +22,7 @@ const DefaultCharThresholdToShowSuggestions = 3;
 const DefaultPage = 0;
 const DefaultPageSize = 20;
 const ApiErrorIdNotConnected = 'not_connected';
+const ApiErrorIdRefreshTokenExpired = 'refresh_token_expired';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 const GeneralErrorMessage = 'Something went wrong';
@@ -34,6 +35,9 @@ const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
+const CommentsHeading = 'Comments';
+const NoCommentsPresent = 'No more comments present.';
+const CommentsNotFound = 'No comments found.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -147,6 +151,26 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
+export enum SubscriptionFilters {
+    ME = 'me',
+    ANYONE = 'anyone',
+}
+
+export const DefaultSubscriptionFilters = {
+    createdBy: SubscriptionFilters.ANYONE,
+};
+
+export const SubscriptionFilterCreatedByOptions = [
+    {
+        value: SubscriptionFilters.ME,
+        label: 'Me',
+    },
+    {
+        value: SubscriptionFilters.ANYONE,
+        label: 'Anyone',
+    },
+];
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
         key: 'short_description',
@@ -218,10 +242,30 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getConfig',
     },
+    getComments: {
+        path: '/comments',
+        method: 'GET',
+        apiServiceName: 'getComments',
+    },
+    addComments: {
+        path: '/comments',
+        method: 'POST',
+        apiServiceName: 'addComments',
+    },
     shareRecord: {
         path: '/share',
         method: 'POST',
         apiServiceName: 'shareRecord',
+    },
+    getStates: {
+        path: '/states',
+        method: 'GET',
+        apiServiceName: 'getStates',
+    },
+    updateState: {
+        path: '/states',
+        method: 'PATCH',
+        apiServiceName: 'updateState',
     },
 };
 
@@ -257,6 +301,7 @@ export default {
     DefaultPage,
     DefaultPageSize,
     ApiErrorIdNotConnected,
+    ApiErrorIdRefreshTokenExpired,
     ApiErrorIdSubscriptionsNotConfigured,
     ApiErrorIdSubscriptionsUnauthorized,
     SubscriptionsUnauthorizedErrorTitle,
@@ -274,4 +319,10 @@ export default {
     recordTypeOptions,
     shareRecordTypeOptions,
     NoSubscriptionPresent,
+    CommentsHeading,
+    NoCommentsPresent,
+    CommentsNotFound,
+    SubscriptionFilters,
+    DefaultSubscriptionFilters,
+    SubscriptionFilterCreatedByOptions,
 };

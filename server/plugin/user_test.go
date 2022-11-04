@@ -203,15 +203,15 @@ func TestCompleteOAuth2(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			api := &plugintest.API{}
-			store := mock_plugin.NewStore(t)
-			test.setupStore(store)
-			test.setupAPI(api)
 			defer monkey.UnpatchAll()
+
+			store := mock_plugin.NewStore(t)
+			p, api := setupTestPlugin(&plugintest.API{}, store)
+			test.setupPlugin(p)
+			test.setupAPI(api)
+			test.setupStore(store)
 			defer api.AssertExpectations(t)
 
-			p := setupTestPlugin(api, store)
-			test.setupPlugin(p)
 			err := p.CompleteOAuth2(test.authenticatedUserID, test.code, test.state)
 			if test.expectedErrorMessage != "" {
 				require.NotNil(t, err)

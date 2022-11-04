@@ -11,12 +11,12 @@ import usePluginApi from 'hooks/usePluginApi';
 
 import Constants from 'plugin_constants';
 
-import {hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
 import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
 import SearchRecordsPanel from 'containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
 import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channelPanel';
 
-import './styles.scss';
+import {setConnected} from 'reducers/connectedState';
+import {hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
 
 const ShareRecords = () => {
     // Record states
@@ -34,7 +34,7 @@ const ShareRecords = () => {
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
 
     // API error
-    const [apiError, setApiError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<APIError | null>(null);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
@@ -72,12 +72,12 @@ const ShareRecords = () => {
 
     const getShareRecordState = () => {
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, shareRecordPayload as ShareRecordPayload);
-        return {isLoading, isSuccess, isError, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     useEffect(() => {
         const shareRecordState = getShareRecordState();
-        if (shareRecordState.isError) {
+        if (shareRecordState.isError && shareRecordState.error) {
             setApiError(shareRecordState.error);
         }
 
@@ -97,7 +97,7 @@ const ShareRecords = () => {
         const payload: ShareRecordPayload = {
             channel_id: channel,
             record_type: recordType as RecordType,
-            record_id: recordId || '',
+            sys_id: recordId || '',
             assigned_to: recordData?.assigned_to || '',
             assignment_group: recordData?.assignment_group || '',
             priority: recordData?.priority || '',
@@ -127,6 +127,14 @@ const ShareRecords = () => {
         }
     }, [currentChannelId, pluginState.openShareRecordModalReducer.open]);
 
+    const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
+        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
+            dispatch(setConnected(false));
+            return action ? hideModal : 'Close';
+        }
+        return action ? handleOpenShareRecordModal : 'Share another record';
+    }, [apiError]);
+
     return (
         <Modal
             show={pluginState.openShareRecordModalReducer.open}
@@ -139,17 +147,17 @@ const ShareRecords = () => {
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                {showResultPanel ? (
+                {showResultPanel || apiError ? (
                     <ResultPanel
-                        header='Record shared successfully!'
-                        className={`${showResultPanel && 'wizard__secondary-panel--slide-in result-panel'}`}
+                        header={apiError?.message || 'Record shared successfully!'}
+                        className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
-                            text: 'Share another record',
-                            onClick: handleOpenShareRecordModal,
+                            text: getResultPanelPrimaryBtnActionOrText(false) as string,
+                            onClick: getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null,
                         }}
                         secondaryBtn={{
                             text: 'Close',
-                            onClick: hideModal,
+                            onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
                         }}
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
@@ -191,7 +199,6 @@ const ShareRecords = () => {
                                 editing={true}
                             />
                         )}
-                        <ModalSubtitleAndError error={apiError ?? ''}/>
                         <ModalFooter
                             onConfirm={recordData ? shareRecord : null}
                             confirmBtnText='Share'

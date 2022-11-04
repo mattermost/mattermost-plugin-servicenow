@@ -5,16 +5,18 @@ import {GlobalState} from 'mattermost-redux/types/store';
 import {SubscriptionEventsMap} from 'plugin_constants';
 
 import {setConnected} from 'reducers/connectedState';
-import {refetch} from 'reducers/refetchSubscriptions';
-import {showModal as showAddSubcriptionModal} from 'reducers/addSubscriptionModal';
-import {showModal as showEditSubcriptionModal} from 'reducers/editSubscriptionModal';
-import {showModal as showShareRecordModal} from 'reducers/shareRecordModal';
+import {refetch} from 'reducers/refetchState';
+import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'reducers/addSubscriptionModal';
+import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'reducers/editSubscriptionModal';
+import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
+import {showModal as showCommentModal, hideModal as hideCommentModal} from 'reducers/commentModal';
+import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'reducers/updateStateModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(true) as Action);
 
-        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
@@ -25,6 +27,11 @@ export function handleConnect(store: Store<GlobalState, Action<Record<string, un
 export function handleDisconnect(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(false) as Action);
+        store.dispatch(hideAddSubscriptionModal() as Action);
+        store.dispatch(hideEditSubscriptionModal() as Action);
+        store.dispatch(hideShareRecordModal() as Action);
+        store.dispatch(hideCommentModal() as Action);
+        store.dispatch(hideUpdateStateModal() as Action);
     };
 }
 
@@ -53,7 +60,7 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
 
 export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
-        // Fix the type of state below by importing the GlobalState from mattermost-webapp
+        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
         const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
@@ -64,5 +71,27 @@ export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Recor
 export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
         store.dispatch(showShareRecordModal() as Action);
+    };
+}
+
+export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (msg: WebsocketEventParams) => {
+        const {data} = msg;
+        const commentModalData: CommentAndStateModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showCommentModal(commentModalData) as Action);
+    };
+}
+
+export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (msg: WebsocketEventParams) => {
+        const {data} = msg;
+        const updateStateModalData: CommentAndStateModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
     };
 }

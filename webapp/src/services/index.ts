@@ -70,11 +70,41 @@ const pluginApi = createApi({
                 method: Constants.pluginApiServiceConfigs.getConfig.method,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.getComments.apiServiceName]: builder.query<string, CommentsPayload>({
+            query: ({record_type, record_id}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getComments.path}/${record_type}/${record_id}`,
+                method: Constants.pluginApiServiceConfigs.getComments.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.addComments.apiServiceName]: builder.query<void, CommentsPayload>({
+            query: ({record_type, record_id, ...body}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.addComments.path}/${record_type}/${record_id}`,
+                method: Constants.pluginApiServiceConfigs.addComments.method,
+                body,
+            }),
+        }),
         [Constants.pluginApiServiceConfigs.shareRecord.apiServiceName]: builder.query<void, ShareRecordPayload>({
             query: (body) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.shareRecord.path}/${body.channel_id}`,
                 method: Constants.pluginApiServiceConfigs.shareRecord.method,
+                body,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getStates.apiServiceName]: builder.query<StateData[], GetStatesParams>({
+            query: (params) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getStates.path}/${params.recordType}`,
+                method: Constants.pluginApiServiceConfigs.getStates.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.updateState.apiServiceName]: builder.query<void, UpdateStatePayload>({
+            query: ({recordType, recordId, ...body}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.updateState.path}/${recordType}/${recordId}`,
+                method: Constants.pluginApiServiceConfigs.updateState.method,
                 body,
             }),
         }),
