@@ -37,6 +37,8 @@ func (p *Plugin) mockHandleSearchAndShare(*plugin.Context, *model.CommandArgs, [
 	return "mockHandleSearchAndShare"
 }
 
+const mockUserID = "mockUserID"
+
 func setMockConfigurations(p *Plugin) {
 	p.setConfiguration(&configuration{
 		ServiceNowBaseURL:           "mockServiceNowBaseURL",
@@ -57,7 +59,6 @@ func TestExecuteCommand(t *testing.T) {
 		constants.CommandUnsubscribe:    p.mockHandleDeleteSubscription,
 		constants.CommandSearchAndShare: p.mockHandleSearchAndShare,
 	}
-	userID := "mockUserID"
 	for _, testCase := range []struct {
 		description      string
 		setupAPI         func(*plugintest.API)
@@ -65,10 +66,9 @@ func TestExecuteCommand(t *testing.T) {
 		args             *model.CommandArgs
 		isResponse       bool
 		expectedResponse string
-		expectedError    *model.AppError
 	}{
 		{
-			description: "ExecuteCommand: Different command",
+			description: "ExecuteCommand: Invalid command",
 			setupAPI:    func(a *plugintest.API) {},
 			setupPlugin: func() {},
 			args: &model.CommandArgs{
@@ -87,7 +87,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
 			expectedResponse: "Error checking user's permissions",
@@ -103,10 +103,10 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
-			expectedResponse: fmt.Sprintf("Before using this plugin, you'll need to configure it in the System Console`: %s", constants.ErrorEmptyServiceNowURL),
+			expectedResponse: fmt.Sprintf("%s: %s", constants.InvalidConfigAdminMessage, constants.ErrorEmptyServiceNowURL),
 		},
 		{
 			description: "ExecuteCommand: User not connected",
@@ -122,10 +122,10 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
-			expectedResponse: fmt.Sprintf("[Click here to link your ServiceNow account.](%s%s)", p.GetPluginURL(), constants.PathOAuth2Connect),
+			expectedResponse: fmt.Sprintf("[%s](%s%s)", constants.UserConnectMessage, p.GetPluginURL(), constants.PathOAuth2Connect),
 		},
 		{
 			description: "ExecuteCommand: User already connected",
@@ -141,10 +141,10 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
-			expectedResponse: "You are already connected to ServiceNow.",
+			expectedResponse: constants.UserAlreadyConnectedMessage,
 		},
 		{
 			description: "ExecuteCommand: Help command",
@@ -160,10 +160,10 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow help",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
-			expectedResponse: "#### Mattermost ServiceNow Plugin - Slash Command Help\n##### Slash Commands\n* `/servicenow connect` - Connect your Mattermost account to your ServiceNow account\n* `/servicenow disconnect` - Disconnect your Mattermost account from your ServiceNow account\n* `/servicenow subscriptions` - Manage your subscriptions to the record changes in ServiceNow\n* `/servicenow search` - Search a record in ServiceNow and share it in a channel\n* `/servicenow help` - Know about the features of this plugin\n\n\n##### Configure/Enable subscriptions\n* Download the update set XML file from **System Console > Plugins > ServiceNow Plugin > Download ServiceNow Update Set**.\n* Go to ServiceNow and search for Update sets. Then go to \"Retrieved Update Sets\" under \"System Update Sets\".\n* Click on \"Import Update Set from XML\" link.\n* Choose the downloaded XML file from the plugin's config and upload that file.\n* You will be back on the \"Retrieved Update Sets\" page and you'll be able to see an update set named \"ServiceNow for Mattermost Notifications\".\n* Click on that update set and then click on \"Preview Update Set\".\n* After the preview is complete, you have to commit the update set by clicking on the button \"Commit Update Set\".\n* You'll see a warning dialog. You can ignore that and click on \"Proceed with Commit\".\n\n##### Setting up user permissions in ServiceNow\nWithin ServiceNow user roles, add the \"x_830655_mm_std.user\" role to any user who should have the ability to add or manage subscriptions in Mattermost channels.\n- Go to ServiceNow and search for Users.\n- On the Users page, open any user's profile. \n- Click on \"Roles\" tab in the table present below and click on \"Edit\"\n- Then, search for the \"x_830655_mm_std.user\" role and add that role to the user's Roles list and click on \"Save\".\n\nAfter that, this user will have the permission to add or manage subscriptions from Mattermost.\n",
+			expectedResponse: p.getHelpMessage(helpCommandHeader, true),
 		},
 		{
 			description: "ExecuteCommand: Unknown action",
@@ -179,7 +179,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow invalid",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
 			expectedResponse: "Unknown action `invalid`",
@@ -195,7 +195,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow disconnect",
-				UserId:  userID,
+				UserId:  mockUserID,
 			},
 			isResponse:       true,
 			expectedResponse: "mockHandleDisconnect",
@@ -218,7 +218,7 @@ func TestExecuteCommand(t *testing.T) {
 			resp, err := p.ExecuteCommand(&plugin.Context{}, testCase.args)
 
 			assert.EqualValues(&model.CommandResponse{}, resp)
-			assert.EqualValues(testCase.expectedError, err)
+			assert.EqualValues((*model.AppError)(nil), err)
 		})
 	}
 }
@@ -228,7 +228,7 @@ func TestCheckConnected(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -348,7 +348,7 @@ func TestHandleDisconnect(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -392,7 +392,7 @@ func TestHandleDisconnect(t *testing.T) {
 func TestHandleSubscriptions(t *testing.T) {
 	p := Plugin{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -421,7 +421,7 @@ func TestHandleSubscribe(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description   string
@@ -452,7 +452,7 @@ func TestHandleSearchAndShare(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description   string
@@ -482,15 +482,15 @@ func TestHandleSearchAndShare(t *testing.T) {
 func TestHandleListSubscriptions(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId:    "mockUserID",
-		ChannelId: "mockChannelID",
-	}
 	mockSysID := "mockSysID"
 	mockNumber := "mockNumber"
 	mockChannelID := "mockChannelID"
 	mockUser := "mockUser"
 	mockDescription := "mockDescription"
+	args := &model.CommandArgs{
+		UserId:    mockUserID,
+		ChannelId: mockChannelID,
+	}
 	for _, testCase := range []struct {
 		description      string
 		params           []string
@@ -638,7 +638,6 @@ func TestHandleListSubscriptions(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			defer mockAPI.AssertExpectations(t)
-			// wg := sync.WaitGroup{}
 			assert := assert.New(t)
 			c := mock_plugin.NewClient(t)
 			testCase.setupAPI(mockAPI)
@@ -663,7 +662,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -746,7 +745,7 @@ func TestHandleEditSubscription(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: "mockUserID",
+		UserId: mockUserID,
 	}
 	for _, testCase := range []struct {
 		description   string
@@ -828,41 +827,41 @@ func TestParseCommand(t *testing.T) {
 		expectedParameters []string
 	}{
 		{
-			description:        "ParseCommand: command 1",
+			description:        "ParseCommand: subscriptions list command",
 			input:              " /servicenow subscriptions   list  me  all_channels ",
 			expectedAction:     "subscriptions",
 			expectedParameters: []string{"list", "me", "all_channels"},
 		},
 		{
-			description:        "ParseCommand: command 2",
+			description:        "ParseCommand: subscriptions add command",
 			input:              "/servicenow subscriptions add",
 			expectedAction:     "subscriptions",
 			expectedParameters: []string{"add"},
 		},
 		{
-			description:        "ParseCommand: command 3",
+			description:        "ParseCommand: subscriptions edit command",
 			input:              "/servicenow subscriptions edit mockID",
 			expectedAction:     "subscriptions",
 			expectedParameters: []string{"edit", "mockID"},
 		},
 		{
-			description:        "ParseCommand: command 4",
+			description:        "ParseCommand: subscriptions delete command",
 			input:              "     /servicenow       subscriptions      delete     mockID    ",
 			expectedAction:     "subscriptions",
 			expectedParameters: []string{"delete", "mockID"},
 		},
 		{
-			description:    "ParseCommand: command 5",
+			description:    "ParseCommand: share command",
 			input:          "/servicenow share",
 			expectedAction: "share",
 		},
 		{
-			description:    "ParseCommand: command 6",
+			description:    "ParseCommand: connect command",
 			input:          "/servicenow connect",
 			expectedAction: "connect",
 		},
 		{
-			description:    "ParseCommand: command 6",
+			description:    "ParseCommand: disconnect command",
 			input:          "/servicenow disconnect",
 			expectedAction: "disconnect",
 		},

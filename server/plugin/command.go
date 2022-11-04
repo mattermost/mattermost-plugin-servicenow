@@ -98,9 +98,9 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	config := p.getConfiguration()
 	if validationErr := config.IsValid(); validationErr != nil {
-		text := "Please contact your system administrator to correctly configure the ServiceNow plugin."
+		text := constants.InvalidConfigUserMessage
 		if isSysAdmin {
-			text = fmt.Sprintf("Before using this plugin, you'll need to configure it in the System Console`: %s", validationErr.Error())
+			text = fmt.Sprintf("%s: %s", constants.InvalidConfigAdminMessage, validationErr.Error())
 		}
 
 		p.postCommandResponse(args, text)
@@ -110,9 +110,9 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if action == constants.CommandConnect {
 		message := ""
 		if _, userErr := p.GetUser(args.UserId); userErr == nil {
-			message = "You are already connected to ServiceNow."
+			message = constants.UserAlreadyConnectedMessage
 		} else {
-			message = fmt.Sprintf("[Click here to link your ServiceNow account.](%s%s)", p.GetPluginURL(), constants.PathOAuth2Connect)
+			message = fmt.Sprintf("[%s](%s%s)", constants.UserConnectMessage, p.GetPluginURL(), constants.PathOAuth2Connect)
 		}
 
 		p.postCommandResponse(args, message)
