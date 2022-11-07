@@ -4,12 +4,12 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CircularLoader, CustomModal as Modal, Dropdown, ModalFooter, ModalHeader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
-import {setConnected} from 'reducers/connectedState';
-import {hideModal as hideUpdateStateModal} from 'reducers/updateStateModal';
+import {setConnected} from 'src/reducers/connectedState';
+import {hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
 
 const UpdateState = () => {
     const [selectedState, setSelectedState] = useState<string | null>(null);
