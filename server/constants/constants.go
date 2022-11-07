@@ -19,6 +19,7 @@ const (
 	SysQueryParamOffset                       = "sysparm_offset"
 	SysQueryParamFields                       = "sysparm_fields"
 	SysQueryParamDisplayValue                 = "sysparm_display_value"
+	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
 	UpdateSetVersion            = "v2.0"
@@ -49,20 +50,21 @@ const (
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
 	ContextTokenKey ServiceNowOAuthToken = "ServiceNow-Oauth-Token"
 
-	DefaultPage                           = 0
-	DefaultPerPage                        = 20
-	MaxPerPage                            = 100
-	CharacterThresholdForSearchingRecords = 3
-	QueryParamPage                        = "page"
-	QueryParamPerPage                     = "per_page"
-	QueryParamChannelID                   = "channel_id"
-	QueryParamUserID                      = "user_id"
-	QueryParamSubscriptionType            = "subscription_type"
-	QueryParamSearchTerm                  = "search"
-	PathParamSubscriptionID               = "subscription_id"
-	PathParamTeamID                       = "team_id"
-	PathParamRecordType                   = "record_type"
-	PathParamRecordID                     = "record_id"
+	DefaultPage                                = 0
+	DefaultPerPage                             = 20
+	MaxPerPage                                 = 100
+	CharacterThresholdForSearchingRecords      = 3
+	CharacterThresholdForSearchingCatalogItems = 4
+	QueryParamPage                             = "page"
+	QueryParamPerPage                          = "per_page"
+	QueryParamChannelID                        = "channel_id"
+	QueryParamUserID                           = "user_id"
+	QueryParamSubscriptionType                 = "subscription_type"
+	QueryParamSearchTerm                       = "search"
+	PathParamSubscriptionID                    = "subscription_id"
+	PathParamTeamID                            = "team_id"
+	PathParamRecordType                        = "record_type"
+	PathParamRecordID                          = "record_id"
 
 	// ServiceNow table fields
 	FieldSysID                = "sys_id"
@@ -94,6 +96,7 @@ const (
 	APIErrorInsufficientPermissions      = "Insufficient Permissions"
 	APIErrorIDRefreshTokenExpired        = "refresh_token_expired"
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
+	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -128,6 +131,7 @@ const (
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
 	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
+	ErrorSearchTermThreshold              = "The search term must be at least %d characters long."
 )
 
 var (
