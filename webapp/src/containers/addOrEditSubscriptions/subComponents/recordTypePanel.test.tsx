@@ -32,7 +32,7 @@ describe('Record Type Panel', () => {
         component = shallow(
             <RecordTypePanel
                 {...recordTypePanelProps}
-                error={'mockError'}
+                error='mockError'
                 showFooter={true}
             />);
     });
@@ -55,7 +55,7 @@ describe('Record Type Panel', () => {
         component = shallow(
             <RecordTypePanel
                 {...recordTypePanelProps}
-                error={'mockError'}
+                error='mockError'
             />);
         expect(component.find('Dropdown')).toHaveLength(1);
         expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
@@ -64,7 +64,7 @@ describe('Record Type Panel', () => {
 
     it('Should render the error correctly', () => {
         expect(component.contains(
-            <ModalSubtitleAndError error={'mockError'}/>,
+            <ModalSubtitleAndError error='mockError'/>,
         )).toBeTruthy();
     });
 

@@ -47,6 +47,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathOpenCommentModal, p.checkAuth(p.handleOpenCommentModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
+	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 
@@ -98,18 +99,8 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 	return func(w http.ResponseWriter, r *http.Request) {
 		client := p.GetClientFromRequest(r)
 		if _, err := client.ActivateSubscriptions(); err != nil {
-			if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotConfigured) {
-				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotConfigured, StatusCode: http.StatusBadRequest, Message: constants.APIErrorSubscriptionsNotConfigured})
-				return
-			}
-
-			if strings.EqualFold(err.Error(), constants.APIErrorIDSubscriptionsNotAuthorized) {
-				p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDSubscriptionsNotAuthorized, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorSubscriptionsNotAuthorized})
-				return
-			}
-
+			_ = p.handleClientError(w, r, err, false, 0, "", "")
 			p.API.LogError("Unable to check or activate subscriptions in ServiceNow.", "Error", err.Error())
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: err.Error()})
 			return
 		}
 
@@ -221,8 +212,8 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	exists, statusCode, err := client.CheckForDuplicateSubscription(subscription)
 	if err != nil {
+		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
 		p.API.LogError("Error in checking for duplicate subscription", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: err.Error()})
 		return
 	}
 
@@ -232,8 +223,8 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if statusCode, err = client.CreateSubscription(subscription); err != nil {
+		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
 		p.API.LogError("Error in creating subscription", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: err.Error()})
 		return
 	}
 
@@ -270,8 +261,8 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	page, perPage := GetPageAndPerPage(r)
 	subscriptions, statusCode, err := client.GetAllSubscriptions(channelID, userID, subscriptionType, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetSubscriptions, err.Error()))
 		p.API.LogError(constants.ErrorGetSubscriptions, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetSubscriptions, err.Error())})
 		return
 	}
 
@@ -305,7 +296,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 		if statusCode != http.StatusNotFound {
 			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorDeleteSubscription, err.Error())
 		}
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: responseMessage})
+		p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
 		return
 	}
 
@@ -335,7 +326,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		if statusCode != http.StatusNotFound {
 			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, err.Error())
 		}
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: responseMessage})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
 		return
 	}
 
@@ -400,7 +391,7 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	records, statusCode, err := client.SearchRecordsInServiceNow(recordType, searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
 	if err != nil {
 		p.API.LogError(constants.ErrorSearchingRecord, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorSearchingRecord, err.Error())})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorSearchingRecord, err.Error()))
 		return
 	}
 
@@ -421,7 +412,7 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 	record, statusCode, err := client.GetRecordFromServiceNow(recordType, recordID)
 	if err != nil {
 		p.API.LogError(constants.ErrorGetRecord, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetRecord, err.Error())})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetRecord, err.Error()))
 		return
 	}
 
@@ -501,7 +492,7 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 	comments, statusCode, err := client.GetAllComments(recordType, recordID)
 	if err != nil {
 		p.API.LogError(constants.ErrorGetComments, "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s Error: %s", constants.ErrorGetComments, err.Error())})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetComments, err.Error()))
 		return
 	}
 
@@ -529,7 +520,7 @@ func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
 	statusCode, err := client.AddComment(recordType, recordID, payload)
 	if err != nil {
 		p.API.LogError(constants.ErrorCreateComment, "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorCreateComment, err.Error())})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorCreateComment, err.Error()))
 		return
 	}
 
@@ -552,13 +543,8 @@ func (p *Plugin) getStatesForRecordType(w http.ResponseWriter, r *http.Request) 
 	client := p.GetClientFromRequest(r)
 	states, statusCode, err := client.GetStatesFromServiceNow(recordType)
 	if err != nil {
-		if strings.EqualFold(err.Error(), constants.APIErrorIDLatestUpdateSetNotUploaded) {
-			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDLatestUpdateSetNotUploaded, StatusCode: statusCode, Message: constants.APIErrorLatestUpdateSetNotUploaded})
-			return
-		}
-
 		p.API.LogError(constants.ErrorGetStates, "Record Type", recordType, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetStates, err.Error())})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetStates, err.Error()))
 		return
 	}
 
@@ -591,8 +577,13 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
 	if err != nil {
+		if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, ID: constants.APIErrorIDInsufficientPermissions, Message: constants.APIErrorInsufficientPermissions})
+			return
+		}
+
 		p.API.LogError(constants.ErrorUpdateState, "Record ID", recordID, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUpdateState, err.Error())})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorUpdateState, err.Error()))
 		return
 	}
 
@@ -611,6 +602,25 @@ func (p *Plugin) handleOpenCommentModal(w http.ResponseWriter, r *http.Request) 
 
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCommentModal,
+		postActionIntegrationRequest.Context,
+		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
+	)
+
+	p.returnPostActionIntegrationResponse(w, response)
+}
+
+func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
+	response := &model.PostActionIntegrationResponse{}
+	decoder := json.NewDecoder(r.Body)
+	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
+	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
+		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
+		p.returnPostActionIntegrationResponse(w, response)
+		return
+	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenUpdateStateModal,
 		postActionIntegrationRequest.Context,
 		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
 	)

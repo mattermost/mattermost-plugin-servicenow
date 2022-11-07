@@ -6,10 +6,11 @@ import {SubscriptionEventsMap} from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
 import {refetch} from 'src/reducers/refetchState';
-import {showModal as showAddSubcriptionModal} from 'src/reducers/addSubscriptionModal';
-import {showModal as showEditSubcriptionModal} from 'src/reducers/editSubscriptionModal';
-import {showModal as showShareRecordModal} from 'src/reducers/shareRecordModal';
-import {showModal as showCommentModal} from 'src/reducers/commentModal';
+import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'src/reducers/addSubscriptionModal';
+import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'src/reducers/editSubscriptionModal';
+import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
+import {showModal as showCommentModal, hideModal as hideCommentModal} from 'src/reducers/commentModal';
+import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
@@ -24,6 +25,11 @@ export function handleConnect(store: Store<GlobalState, Action<Record<string, un
 export function handleDisconnect(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(false) as Action);
+        store.dispatch(hideAddSubscriptionModal() as Action);
+        store.dispatch(hideEditSubscriptionModal() as Action);
+        store.dispatch(hideShareRecordModal() as Action);
+        store.dispatch(hideCommentModal() as Action);
+        store.dispatch(hideUpdateStateModal() as Action);
     };
 }
 
@@ -68,10 +74,21 @@ export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Reco
 export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (msg: WebsocketEventParams) => {
         const {data} = msg;
-        const commentModalData: CommentModalData = {
+        const commentModalData: CommentAndStateModalData = {
             recordType: data.record_type as RecordType,
             recordId: data.record_id,
         };
         store.dispatch(showCommentModal(commentModalData) as Action);
+    };
+}
+
+export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (msg: WebsocketEventParams) => {
+        const {data} = msg;
+        const updateStateModalData: CommentAndStateModalData = {
+            recordType: data.record_type as RecordType,
+            recordId: data.record_id,
+        };
+        store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
     };
 }

@@ -22,7 +22,7 @@ type SearchRecordsPanelProps = {
     setSuggestionChosen: (suggestion: boolean) => void;
     setRecordData?: (value: RecordData | null) => void;
     recordType: RecordType | null;
-    setApiError: (error: string | null) => void;
+    setApiError: (error: APIError | null) => void;
     setApiResponseValid?: (valid: boolean) => void;
     setShowModalLoader: (show: boolean) => void;
     recordId: string | null;
@@ -64,12 +64,12 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     const getRecordsSuggestions = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload as SearchRecordsParams);
-        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     const getRecordDataState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getSuggestionDataPayload as GetRecordParams);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     // Get the suggestions from the API
@@ -147,7 +147,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (searchSuggestionsState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
-        if (searchSuggestionsState.isError) {
+        if (searchSuggestionsState.isError && searchSuggestionsState.error) {
             setApiError(searchSuggestionsState.error);
         }
         if (searchSuggestionsState.data) {
@@ -161,7 +161,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (recordDataState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
-        if (recordDataState.isError) {
+        if (recordDataState.isError && recordDataState.error) {
             setApiError(recordDataState.error);
         }
     }, [getRecordDataState().isLoading, getRecordDataState().isError]);

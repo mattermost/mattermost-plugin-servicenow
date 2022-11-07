@@ -10,6 +10,7 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import Constants from 'src/plugin_constants';
 
 import {hideModal as hideCommentModal} from 'src/reducers/commentModal';
+import {setConnected} from 'src/reducers/connectedState';
 
 import './styles.scss';
 
@@ -50,13 +51,13 @@ const AddOrViewComments = () => {
     const getCommentsState = () => {
         const payload = getCommentsPayload();
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
-        return {isLoading, isSuccess, isError, data: data as string, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)};
+        return {isLoading, isSuccess, isError, data: data as string, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     const addCommentState = () => {
         const payload = getCommentsPayload();
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
-        return {isLoading, isSuccess, isError, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     const addComment = () => {
@@ -88,12 +89,13 @@ const AddOrViewComments = () => {
             setCommentsData(data);
         }
 
-        if (isError) {
-            if (error?.id === Constants.ApiErrorIdNotConnected) {
+        if (isError && error) {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
                 setShowErrorPanel(true);
             }
 
-            setApiError(error?.message ?? '');
+            setApiError(error.message);
         }
 
         if (isLoading) {
@@ -111,7 +113,11 @@ const AddOrViewComments = () => {
         }
 
         if (error) {
-            setApiError(error);
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+                setShowErrorPanel(true);
+            }
+            setApiError(error.message);
         }
 
         setShowModalLoader(isLoading);
@@ -143,11 +149,11 @@ const AddOrViewComments = () => {
                     <ResultPanel
                         header={apiError}
                         className='wizard__secondary-panel--slide-in result-panel'
-                        secondaryBtn={{
+                        primaryBtn={{
                             text: 'Close',
                             onClick: hideModal,
                         }}
-                        iconClass='fa-times-circle-o result-panel-icon--error result-panel-error-icon'
+                        iconClass='fa-times-circle-o result-panel-icon--error'
                     />
                 ) : (
                     <>

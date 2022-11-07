@@ -10,6 +10,7 @@ import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, Re
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
+import {setConnected} from 'src/reducers/connectedState';
 import {refetch} from 'src/reducers/refetchState';
 
 import ChannelPanel from './channelPanel';
@@ -54,7 +55,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEvents[]>([]);
 
     // API error
-    const [apiError, setApiError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<APIError | null>(null);
     const [apiResponseValid, setApiResponseValid] = useState(false);
 
     // Loaders
@@ -84,13 +85,13 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Get create subscription state
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     // Get edit subscription state
     const getEditSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, editSubscriptionPayload as EditSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message || ''};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     useEffect(() => {
@@ -119,7 +120,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (createSubscriptionState.isLoading) {
             setApiResponseValid(true);
         }
-        if (createSubscriptionState.isError && apiResponseValid) {
+        if (createSubscriptionState.isError && apiResponseValid && createSubscriptionState.error) {
             setApiError(createSubscriptionState.error);
         }
         if (createSubscriptionState.isSuccess && apiResponseValid) {
@@ -134,7 +135,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (editSubscriptionState.isLoading) {
             setApiResponseValid(true);
         }
-        if (editSubscriptionState.isError && apiResponseValid) {
+        if (editSubscriptionState.isError && apiResponseValid && editSubscriptionState.error) {
             setApiError(editSubscriptionState.error);
         }
         if (editSubscriptionState.data && apiResponseValid) {
@@ -257,6 +258,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns action handler for primary button in the result panel
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
         if (apiError && apiResponseValid) {
+            if (apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+                return action ? hideModal : 'Close';
+            }
             return action ? resetFailureState : 'Back';
         } else if (subscriptionData) {
             return null;
@@ -267,7 +272,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
-            return apiError;
+            return apiError.message;
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }
@@ -435,7 +440,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     }}
                     secondaryBtn={{
                         text: 'Close',
-                        onClick: hideModal,
+                        onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
                     }}
                 />
             </>

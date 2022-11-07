@@ -19,7 +19,7 @@ type ChannelPanelProps = {
     channel: string | null;
     setChannel: (value: string | null) => void;
     setShowModalLoader: (show: boolean) => void;
-    setApiError: (error: string | null) => void;
+    setApiError: (error: APIError | null) => void;
     setApiResponseValid?: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
     setChannelOptions: (channelOptions: DropdownOptionType[]) => void;
@@ -53,7 +53,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
+        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     const mapChannelsToSuggestions = useCallback((channels: ChannelData[]): Array<Record<string, string>> => channels.map((ch) => ({

@@ -134,6 +134,13 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 		actions = append(actions, &model.PostAction{
 			Type: model.POST_ACTION_TYPE_BUTTON,
 			Name: "Update State",
+			Integration: &model.PostActionIntegration{
+				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),
+				Context: map[string]interface{}{
+					constants.ContextNameRecordType: sr.RecordType,
+					constants.ContextNameRecordID:   sr.SysID,
+				},
+			},
 		})
 	}
 
