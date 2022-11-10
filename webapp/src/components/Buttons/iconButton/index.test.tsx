@@ -19,7 +19,7 @@ describe('IconButton', () => {
             iconClassName: 'mockIconClassName',
             extraClass: 'mockExtraClass',
             onClick: jest.fn(),
-            children: (<span>{'Dummytext'}</span>),
+            children: (<></>),
         };
         const wrapper = shallow(<IconButton {...props}/>);
         expect(wrapper).toMatchSnapshot();
