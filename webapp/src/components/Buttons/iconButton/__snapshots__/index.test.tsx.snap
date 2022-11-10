@@ -18,9 +18,6 @@ exports[`IconButton should match snapshot with all the props 1`] = `
     <i
       className="mockIconClassName"
     />
-    <span>
-      Dummytext
-    </span>
   </Button>
 </Tooltip>
 `;
