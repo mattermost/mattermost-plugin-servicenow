@@ -2,7 +2,14 @@
  * Utils
  */
 
-import {SubscriptionType, RecordType} from 'plugin_constants';
+import React from 'react';
+
+import {Button} from '@brightscout/mattermost-ui-library';
+
+import {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
+
+import Utils from 'utils';
+
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {
@@ -57,9 +64,28 @@ export const onPressingEnterKey = (event: React.KeyboardEvent<HTMLSpanElement> |
     func();
 };
 
+const getContentForResultPanelIfDisconnected = (message: string, onClick: () => void) => (
+    <>
+        <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
+        <a
+            target='_blank'
+            rel='noreferrer'
+            href={Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
+        >
+            <Button
+                text='Connect your account'
+
+                // extraClass='margin-top-25'
+                onClick={onClick}
+            />
+        </a>
+    </>
+);
+
 export default {
     getBaseUrls,
     debounce,
     getSubscriptionHeaderLink,
     onPressingEnterKey,
+    getContentForResultPanelIfDisconnected,
 };

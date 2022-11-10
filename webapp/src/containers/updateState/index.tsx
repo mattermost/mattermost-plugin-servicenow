@@ -11,6 +11,8 @@ import Constants from 'plugin_constants';
 import {setConnected} from 'reducers/connectedState';
 import {hideModal as hideUpdateStateModal} from 'reducers/updateStateModal';
 
+import Utils from 'utils';
+
 const UpdateState = () => {
     const [selectedState, setSelectedState] = useState<string | null>(null);
     const [getStatesParams, setGetStatesParams] = useState<GetStatesParams | null>(null);
@@ -21,7 +23,7 @@ const UpdateState = () => {
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
 
     // API error
-    const [apiError, setApiError] = useState('');
+    const [apiError, setApiError] = useState<APIError | null>(null);
 
     const dispatch = useDispatch();
 
@@ -29,13 +31,13 @@ const UpdateState = () => {
         setSelectedState(null);
         setGetStatesParams(null);
         setUpdateStatePayload(null);
-        setApiError('');
+        setApiError(null);
         setShowResultPanel(false);
     }, []);
 
     const hideModal = useCallback(() => {
-        resetStates();
         dispatch(hideUpdateStateModal());
+        resetStates();
     }, []);
 
     const getStateForGetStatesAPI = () => {
@@ -71,12 +73,12 @@ const UpdateState = () => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
-            setApiError(error.message);
+            setApiError(error);
             setShowResultPanel(true);
         }
 
         if (isSuccess) {
-            setApiError('');
+            setApiError(null);
             setShowResultPanel(true);
         }
     }, [getStateForUpdateStateAPI().isError, getStateForUpdateStateAPI().isSuccess]);
@@ -87,14 +89,25 @@ const UpdateState = () => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
-            setApiError(error.message);
+            setApiError(error);
             setShowResultPanel(true);
         }
 
         if (isSuccess) {
-            setApiError('');
+            setApiError(null);
         }
     }, [getStateForGetStatesAPI().isError, getStateForGetStatesAPI().isSuccess]);
+
+    // Returns heading for the result panel
+    const getResultPanelHeader = () => {
+        if (apiError) {
+            return apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired ?
+                Utils.getContentForResultPanelIfDisconnected(apiError.message, hideModal) :
+                apiError.message;
+        }
+
+        return Constants.StateUpdatedMsg;
+    };
 
     const {isLoading: statesLoading, data: stateOptions} = getStateForGetStatesAPI();
     const {isLoading: stateUpdating} = getStateForUpdateStateAPI();
@@ -115,7 +128,7 @@ const UpdateState = () => {
                 {showResultPanel ? (
                     <ResultPanel
                         className='wizard__secondary-panel--slide-in result-panel'
-                        header={apiError || 'State updated successfully'}
+                        header={getResultPanelHeader()}
                         primaryBtn={{
                             text: 'Close',
                             onClick: hideModal,

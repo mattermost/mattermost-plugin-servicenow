@@ -1,11 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, ResultPanel} from '@brightscout/mattermost-ui-library';
-
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {GlobalState} from 'mattermost-redux/types/store';
+
+import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -17,6 +17,8 @@ import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channe
 
 import {setConnected} from 'reducers/connectedState';
 import {hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
+
+import Utils from 'utils';
 
 const ShareRecords = () => {
     // Record states
@@ -135,6 +137,17 @@ const ShareRecords = () => {
         return action ? handleOpenShareRecordModal : 'Share another record';
     }, [apiError]);
 
+    // Returns heading for the result panel
+    const getResultPanelHeader = () => {
+        if (apiError) {
+            return apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired ?
+                Utils.getContentForResultPanelIfDisconnected(apiError.message, hideModal) :
+                apiError.message;
+        }
+
+        return Constants.RecordSharedMsg;
+    };
+
     return (
         <Modal
             show={pluginState.openShareRecordModalReducer.open}
@@ -149,7 +162,7 @@ const ShareRecords = () => {
                 />
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={apiError?.message || 'Record shared successfully!'}
+                        header={getResultPanelHeader()}
                         className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,
