@@ -31,6 +31,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Channel panel values
     const [channel, setChannel] = useState<string | null>(null);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
+    const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
 
     // Subscription type panel values
     const [subscriptionType, setSubscriptionType] = useState<SubscriptionType | null>(null);
@@ -95,6 +96,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     useEffect(() => {
+        if (open) {
+            if (currentChannelId) {
+                setChannel(currentChannelId);
+            }
+        }
+
         if (open && subscriptionData) {
             // Set values for channel panel
             setChannel(subscriptionData.channel);
@@ -112,7 +119,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             // Set initial value for events panel
             setSubscriptionEvents(subscriptionData.subscriptionEvents);
         }
-    }, [open, subscriptionData]);
+    }, [open, subscriptionData, currentChannelId]);
 
     useEffect(() => {
         const createSubscriptionState = getCreateSubscriptionState();
@@ -147,7 +154,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
-        setChannel(null);
         setSubscriptionType(null);
         setRecordValue('');
         setSuggestionChosen(false);
@@ -357,7 +363,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     channelOptions={channelOptions}
                     setChannelOptions={setChannelOptions}
                     actionBtnDisabled={showModalLoader}
-                    editing={Boolean(subscriptionData)}
+                    editing={true}
                     showFooter={true}
                 />
                 <SubscriptionTypePanel

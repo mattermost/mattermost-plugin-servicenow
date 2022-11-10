@@ -2,7 +2,7 @@
  * Utils
  */
 
-import {SubscriptionType, RecordType} from 'plugin_constants';
+import {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey} from 'plugin_constants';
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {
@@ -57,9 +57,32 @@ export const onPressingEnterKey = (event: React.KeyboardEvent<HTMLSpanElement> |
     func();
 };
 
+export const getLinkData = (value: string): LinkData => {
+    const data = value.split(']');
+    return ({
+        display_value: data[0].slice(1),
+        link: data[1].slice(1, -1),
+    });
+};
+
+export const validateKeys = (key: string) => {
+    if (key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
+        key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
+        key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
+        key === RecordDataLabelConfigKey.ASSIGNED_TO ||
+        key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
+    ) {
+        return true;
+    }
+
+    return false;
+};
+
 export default {
     getBaseUrls,
     debounce,
     getSubscriptionHeaderLink,
     onPressingEnterKey,
+    getLinkData,
+    validateKeys,
 };

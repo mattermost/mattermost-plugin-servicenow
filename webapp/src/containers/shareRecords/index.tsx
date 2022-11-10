@@ -50,7 +50,6 @@ const ShareRecords = () => {
         setRecordId(null);
         setSuggestionChosen(false);
         setResetRecordPanelStates(false);
-        setChannel(null);
         setChannelOptions([]);
         setShowChannelValidationError(false);
         setApiError(null);
@@ -96,6 +95,7 @@ const ShareRecords = () => {
 
         const payload: ShareRecordPayload = {
             channel_id: channel,
+            number: recordData?.number || '',
             record_type: recordType as RecordType,
             sys_id: recordId || '',
             assigned_to: recordData?.assigned_to || '',
