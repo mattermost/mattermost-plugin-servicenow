@@ -39,12 +39,14 @@ This plugin contains the following features:
 - Ability to delete the subscriptions from the Right-Hand Sidebar or slash command.
 - Ability to filter subscriptions using the slash command to get a post containing filtered subscriptions.
 - Ability to filter subscriptions in the Right-Hand Sidebar using the filter icon.
-- Search and share a ServiceNow record in a specified channel.
+- Search and share a ServiceNow record in a specific channel.
 - Ability to open search and share record modal through UI or slash command.
-- Add and view comments of a ServiceNow record.
+- View comments on a ServiceNow record and add new comments.
+- Supported record types for adding new comments - incident, problem, change_request, task, change_task and cert_follow_on_task.
 - Update the state of a ServiceNow record.
-- Ability to open, add and view comments modal or update state modal through buttons present in a notification post or a shared record post.
-- Supported record types for sharing a record or updating a record state - incident, problem, change_request, kb_knowledge, task, change_task and cert_follow_on_task.
+- Ability to open the "Add and View comments" modal or "Update State" modal through buttons present in a notification post or a shared record post.
+- Supported record types for sharing a record - incident, problem, change_request, kb_knowledge, task, change_task and cert_follow_on_task.
+- Supported record types for updating a record state - incident, task, change_task and cert_follow_on_task.
 
 ## Basic Knowledge
 
