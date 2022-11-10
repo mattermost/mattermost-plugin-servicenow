@@ -70,7 +70,7 @@ func TestCall(t *testing.T) {
 			expectedStatusCode:   http.StatusInternalServerError,
 		},
 		{
-			description: "Call: Do method returns an error 2",
+			description: "Call: Do method returns an error while making request",
 			setupClient: func(c *client) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
 					return &http.Response{}, errors.New("mockError")
