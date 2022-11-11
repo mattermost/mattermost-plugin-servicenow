@@ -6,9 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
-
-import Utils from 'utils';
+import Constants, {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -64,28 +62,36 @@ export const onPressingEnterKey = (event: React.KeyboardEvent<HTMLSpanElement> |
     func();
 };
 
-const getContentForResultPanelIfDisconnected = (message: string, onClick: () => void) => (
+const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
     <>
         <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
         <a
             target='_blank'
             rel='noreferrer'
-            href={Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
+            href={getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
         >
             <Button
                 text='Connect your account'
-
-                // extraClass='margin-top-25'
                 onClick={onClick}
             />
         </a>
     </>
 );
 
+const getResultPanelHeader = (error: APIError | null, onClick: () => void, successMessage?: string) => {
+    if (error) {
+        return error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired ?
+            getContentForResultPanelWhenDisconnected(error.message, onClick) :
+            error.message;
+    }
+
+    return successMessage;
+};
+
 export default {
     getBaseUrls,
     debounce,
     getSubscriptionHeaderLink,
     onPressingEnterKey,
-    getContentForResultPanelIfDisconnected,
+    getResultPanelHeader,
 };

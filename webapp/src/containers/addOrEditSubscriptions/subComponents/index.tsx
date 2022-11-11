@@ -274,9 +274,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
-            return apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired ?
-                Utils.getContentForResultPanelIfDisconnected(apiError.message, hideModal) :
-                apiError.message;
+            return Utils.getResultPanelHeader(apiError, hideModal);
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }

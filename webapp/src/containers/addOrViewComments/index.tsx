@@ -149,10 +149,7 @@ const AddOrViewComments = () => {
                 {showModalLoader && !comments && <CircularLoader/>}
                 {(showErrorPanel && apiError) ? (
                     <ResultPanel
-                        header={(apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired) ?
-                            Utils.getContentForResultPanelIfDisconnected(apiError.message, hideModal) :
-                            apiError.message
-                        }
+                        header={Utils.getResultPanelHeader(apiError, hideModal)}
                         className='wizard__secondary-panel--slide-in result-panel'
                         primaryBtn={{
                             text: 'Close',

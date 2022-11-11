@@ -137,17 +137,6 @@ const ShareRecords = () => {
         return action ? handleOpenShareRecordModal : 'Share another record';
     }, [apiError]);
 
-    // Returns heading for the result panel
-    const getResultPanelHeader = () => {
-        if (apiError) {
-            return apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired ?
-                Utils.getContentForResultPanelIfDisconnected(apiError.message, hideModal) :
-                apiError.message;
-        }
-
-        return Constants.RecordSharedMsg;
-    };
-
     return (
         <Modal
             show={pluginState.openShareRecordModalReducer.open}
@@ -162,7 +151,7 @@ const ShareRecords = () => {
                 />
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={getResultPanelHeader()}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.RecordSharedMsg)}
                         className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

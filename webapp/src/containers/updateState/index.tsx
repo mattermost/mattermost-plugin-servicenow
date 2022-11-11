@@ -98,17 +98,6 @@ const UpdateState = () => {
         }
     }, [getStateForGetStatesAPI().isError, getStateForGetStatesAPI().isSuccess]);
 
-    // Returns heading for the result panel
-    const getResultPanelHeader = () => {
-        if (apiError) {
-            return apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired ?
-                Utils.getContentForResultPanelIfDisconnected(apiError.message, hideModal) :
-                apiError.message;
-        }
-
-        return Constants.StateUpdatedMsg;
-    };
-
     const {isLoading: statesLoading, data: stateOptions} = getStateForGetStatesAPI();
     const {isLoading: stateUpdating} = getStateForUpdateStateAPI();
     const showLoader = statesLoading || stateUpdating;
@@ -128,7 +117,7 @@ const UpdateState = () => {
                 {showResultPanel ? (
                     <ResultPanel
                         className='wizard__secondary-panel--slide-in result-panel'
-                        header={getResultPanelHeader()}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.StateUpdatedMsg)}
                         primaryBtn={{
                             text: 'Close',
                             onClick: hideModal,
