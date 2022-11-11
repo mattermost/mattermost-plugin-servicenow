@@ -53,7 +53,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createIncident)))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -700,6 +700,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		SysID:            response.SysID,
 		Number:           response.Number,
 		ShortDescription: response.ShortDescription,
+		RecordType: constants.RecordTypeIncident,
 		State:            response.State,
 		Priority:         response.Priority,
 		AssignedTo:       response.AssignedTo,
