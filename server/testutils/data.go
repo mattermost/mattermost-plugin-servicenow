@@ -90,8 +90,10 @@ func GetServiceNowShortDescription() string {
 	return "Test description"
 }
 
-func GetServiceNowComments() string {
-	return "Test comment"
+func GetServiceNowComments() *serializer.ServiceNowComment {
+	return &serializer.ServiceNowComment{
+		CommentsAndWorkNotes: "Test comment",
+	}
 }
 
 func GetServiceNowPartialRecord() *serializer.ServiceNowPartialRecord {
