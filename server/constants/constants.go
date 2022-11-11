@@ -94,6 +94,7 @@ const (
 	APIErrorInsufficientPermissions      = "Insufficient Permissions"
 	APIErrorIDRefreshTokenExpired        = "refresh_token_expired"
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
+	APIErrorCreateIncident               = "Error in creating incident"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -129,6 +130,8 @@ const (
 	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
 	ErrorGetUsers                         = "Failed to get the users."
+	ErrorEmptyShortDescription            = "short description should not be empty"
+	ErrorGetBotChannel                    = "Couldn't get bot's DM channel"
 )
 
 var (

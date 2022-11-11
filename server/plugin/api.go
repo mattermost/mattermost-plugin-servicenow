@@ -53,6 +53,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createIncident)))).Methods(http.MethodPost)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -663,6 +664,60 @@ func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.writeJSONArray(w, http.StatusOK, users)
+}
+
+func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
+	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
+	incident, err := serializer.IncidentFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		return
+	}
+
+	if err = incident.IsValid(); err != nil {
+		p.API.LogError("Error in validating the request body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		return
+	}
+
+	client := p.GetClientFromRequest(r)
+	response, statusCode, err := client.CreateIncident(incident)
+	if err != nil {
+		p.API.LogError(constants.APIErrorCreateIncident, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: constants.APIErrorCreateIncident})
+		return
+	}
+
+	channel, channelErr := p.API.GetDirectChannel(mattermostUserID, p.botID)
+	if channelErr != nil {
+		p.API.LogError(constants.ErrorGetBotChannel, "userID", mattermostUserID, "Error", channelErr.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGetBotChannel})
+		return
+	}
+
+	record := serializer.ServiceNowRecord{
+		SysID:            response.SysID,
+		Number:           response.Number,
+		ShortDescription: response.ShortDescription,
+		State:            response.State,
+		Priority:         response.Priority,
+		AssignedTo:       response.AssignedTo,
+		AssignmentGroup:  response.AssignmentGroup,
+	}
+
+	if err := record.HandleNestedFields(); err != nil {
+		p.API.LogError("Invalid body", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Invalid body. Error: %s", err.Error())})
+		return
+	}
+
+	post := record.CreateSharingPost(channel.Id, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError("Unable to create post", "Error", postErr.Error())
+	}
+
+	returnStatusOK(w)
 }
 
 func returnStatusOK(w http.ResponseWriter) {
