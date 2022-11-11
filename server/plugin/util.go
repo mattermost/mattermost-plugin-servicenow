@@ -38,7 +38,6 @@ func (p *Plugin) writeJSON(w http.ResponseWriter, statusCode int, v interface{})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
 	b, err := json.Marshal(v)
 	if err != nil {
 		p.API.LogError("Failed to marshal JSON response", "Error", err.Error())
@@ -51,6 +50,8 @@ func (p *Plugin) writeJSON(w http.ResponseWriter, statusCode int, v interface{})
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(statusCode)
 }
 
 func (p *Plugin) writeJSONArray(w http.ResponseWriter, statusCode int, v interface{}) {
@@ -59,20 +60,23 @@ func (p *Plugin) writeJSONArray(w http.ResponseWriter, statusCode int, v interfa
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
 	b, err := json.Marshal(v)
 	if err != nil {
 		p.API.LogError("Failed to marshal JSON response", "Error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("[]"))
 		return
 	}
 
 	if string(b) == "null" {
+		w.WriteHeader(statusCode)
 		_, _ = w.Write([]byte("[]"))
 	} else if _, err = w.Write(b); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+
+	w.WriteHeader(statusCode)
 }
 
 func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.SubscriptionResponse) string {
@@ -252,6 +256,14 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		}
 
 		return constants.APIErrorIDLatestUpdateSetNotUploaded
+	}
+
+	if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDInsufficientPermissions, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorInsufficientPermissions})
+		}
+
+		return message
 	}
 
 	if w != nil {

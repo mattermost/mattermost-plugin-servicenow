@@ -2,7 +2,12 @@
  * Utils
  */
 
-import {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey} from 'plugin_constants';
+import React from 'react';
+
+import {Button} from '@brightscout/mattermost-ui-library';
+
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
+
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {
@@ -78,6 +83,32 @@ export const validateKeys = (key: string) => {
     return false;
 };
 
+const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
+    <>
+        <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
+        <a
+            target='_blank'
+            rel='noreferrer'
+            href={getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
+        >
+            <Button
+                text='Connect your account'
+                onClick={onClick}
+            />
+        </a>
+    </>
+);
+
+const getResultPanelHeader = (error: APIError | null, onClick: () => void, successMessage?: string) => {
+    if (error) {
+        return error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired ?
+            getContentForResultPanelWhenDisconnected(error.message, onClick) :
+            error.message;
+    }
+
+    return successMessage;
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -85,4 +116,5 @@ export default {
     onPressingEnterKey,
     getLinkData,
     validateKeys,
+    getResultPanelHeader,
 };

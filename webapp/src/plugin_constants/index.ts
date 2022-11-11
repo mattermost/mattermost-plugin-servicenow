@@ -32,6 +32,8 @@ const SubscriptionAddedMsg = 'Subscription added successfully!';
 const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
 const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
+const RecordSharedMsg = 'Record shared successfully!';
+const StateUpdatedMsg = 'State updated successfully!';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
@@ -331,6 +333,8 @@ export default {
     SubscriptionUpdatedMsg,
     DeleteSubscriptionHeading,
     DeleteSubscriptionMsg,
+    RecordSharedMsg,
+    StateUpdatedMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
     recordTypeOptions,

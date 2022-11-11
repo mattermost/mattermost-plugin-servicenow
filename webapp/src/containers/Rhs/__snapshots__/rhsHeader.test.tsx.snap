@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RHSHeader should match snapshot 1`] = `
+<Fragment>
+  <div
+    className="position-relative rhs-header-divider"
+  >
+    <div
+      className="d-flex align-item-center"
+    >
+      <p
+        className="rhs-title"
+      >
+        Subscriptions
+      </p>
+      <IconButton
+        extraClass="margin-left-auto flex-basis-initial margin-right-8 filter-button"
+        onClick={[Function]}
+        tooltipText="Filter"
+      >
+        <SVGWrapper
+          height={12}
+          viewBox="0 0 18 12"
+          width={18}
+        >
+          <path
+            d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
+            fill="#8A8C94"
+          />
+        </SVGWrapper>
+      </IconButton>
+      <button
+        className="btn btn-primary share-record-btn"
+        onClick={[Function]}
+      >
+        <span>
+          <SVGWrapper
+            className="share-record-icon"
+            height={16}
+            viewBox="0 0 14 12"
+            width={16}
+          >
+            <path
+              d="M9.5 8.37999C9.05667 8.37999 8.66 8.55499 8.35667 8.82916L4.1975 6.40832C4.22667 6.27416 4.25 6.13999 4.25 5.99999C4.25 5.85999 4.22667 5.72582 4.1975 5.59166L8.31 3.19416C8.625 3.48582 9.03917 3.66666 9.5 3.66666C10.4683 3.66666 11.25 2.88499 11.25 1.91666C11.25 0.948323 10.4683 0.166656 9.5 0.166656C8.53167 0.166656 7.75 0.948323 7.75 1.91666C7.75 2.05666 7.77333 2.19082 7.8025 2.32499L3.69 4.72249C3.375 4.43082 2.96083 4.24999 2.5 4.24999C1.53167 4.24999 0.75 5.03166 0.75 5.99999C0.75 6.96832 1.53167 7.74999 2.5 7.74999C2.96083 7.74999 3.375 7.56916 3.69 7.27749L7.84333 9.69832C7.81417 9.82082 7.79667 9.94916 7.79667 10.0833C7.79667 11.0225 8.56083 11.7808 9.5 11.7808C10.4392 11.7808 11.2033 11.0225 11.2033 10.0833C11.2033 9.14416 10.4392 8.37999 9.5 8.37999ZM9.5 1.33332C9.82083 1.33332 10.0833 1.59582 10.0833 1.91666C10.0833 2.23749 9.82083 2.49999 9.5 2.49999C9.17917 2.49999 8.91667 2.23749 8.91667 1.91666C8.91667 1.59582 9.17917 1.33332 9.5 1.33332ZM2.5 6.58332C2.17917 6.58332 1.91667 6.32082 1.91667 5.99999C1.91667 5.67916 2.17917 5.41666 2.5 5.41666C2.82083 5.41666 3.08333 5.67916 3.08333 5.99999C3.08333 6.32082 2.82083 6.58332 2.5 6.58332ZM9.5 10.6667C9.17917 10.6667 8.91667 10.4042 8.91667 10.0833C8.91667 9.76249 9.17917 9.49999 9.5 9.49999C9.82083 9.49999 10.0833 9.76249 10.0833 10.0833C10.0833 10.4042 9.82083 10.6667 9.5 10.6667Z"
+              fill="white"
+            />
+          </SVGWrapper>
+        </span>
+        Share
+      </button>
+    </div>
+  </div>
+</Fragment>
+`;
+
+exports[`RHSHeader should match snapshot 2`] = `
+<Fragment>
+  <div
+    className="position-relative rhs-header-divider"
+  >
+    <div
+      className="d-flex align-item-center"
+    >
+      <p
+        className="rhs-title"
+      >
+        Subscriptions
+      </p>
+      <IconButton
+        extraClass="margin-left-auto flex-basis-initial margin-right-8 filter-button"
+        onClick={[Function]}
+        tooltipText="Filter"
+      >
+        <SVGWrapper
+          height={12}
+          viewBox="0 0 18 12"
+          width={18}
+        >
+          <path
+            d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
+            fill="#8A8C94"
+          />
+        </SVGWrapper>
+      </IconButton>
+      <button
+        className="btn btn-primary share-record-btn"
+        onClick={[Function]}
+      >
+        <span>
+          <SVGWrapper
+            className="share-record-icon"
+            height={16}
+            viewBox="0 0 14 12"
+            width={16}
+          >
+            <path
+              d="M9.5 8.37999C9.05667 8.37999 8.66 8.55499 8.35667 8.82916L4.1975 6.40832C4.22667 6.27416 4.25 6.13999 4.25 5.99999C4.25 5.85999 4.22667 5.72582 4.1975 5.59166L8.31 3.19416C8.625 3.48582 9.03917 3.66666 9.5 3.66666C10.4683 3.66666 11.25 2.88499 11.25 1.91666C11.25 0.948323 10.4683 0.166656 9.5 0.166656C8.53167 0.166656 7.75 0.948323 7.75 1.91666C7.75 2.05666 7.77333 2.19082 7.8025 2.32499L3.69 4.72249C3.375 4.43082 2.96083 4.24999 2.5 4.24999C1.53167 4.24999 0.75 5.03166 0.75 5.99999C0.75 6.96832 1.53167 7.74999 2.5 7.74999C2.96083 7.74999 3.375 7.56916 3.69 7.27749L7.84333 9.69832C7.81417 9.82082 7.79667 9.94916 7.79667 10.0833C7.79667 11.0225 8.56083 11.7808 9.5 11.7808C10.4392 11.7808 11.2033 11.0225 11.2033 10.0833C11.2033 9.14416 10.4392 8.37999 9.5 8.37999ZM9.5 1.33332C9.82083 1.33332 10.0833 1.59582 10.0833 1.91666C10.0833 2.23749 9.82083 2.49999 9.5 2.49999C9.17917 2.49999 8.91667 2.23749 8.91667 1.91666C8.91667 1.59582 9.17917 1.33332 9.5 1.33332ZM2.5 6.58332C2.17917 6.58332 1.91667 6.32082 1.91667 5.99999C1.91667 5.67916 2.17917 5.41666 2.5 5.41666C2.82083 5.41666 3.08333 5.67916 3.08333 5.99999C3.08333 6.32082 2.82083 6.58332 2.5 6.58332ZM9.5 10.6667C9.17917 10.6667 8.91667 10.4042 8.91667 10.0833C8.91667 9.76249 9.17917 9.49999 9.5 9.49999C9.82083 9.49999 10.0833 9.76249 10.0833 10.0833C10.0833 10.4042 9.82083 10.6667 9.5 10.6667Z"
+              fill="white"
+            />
+          </SVGWrapper>
+        </span>
+        Share
+      </button>
+    </div>
+  </div>
+  <div
+    className="rhs-filter-popover"
+  >
+    <div
+      className="d-flex align-item-center margin-bottom-15 toggle-class"
+    >
+      <ToggleSwitch
+        active={false}
+        label="Show all subscriptions"
+        labelPositioning="right"
+        onChange={[Function]}
+      />
+    </div>
+    <div
+      className="margin-bottom-15"
+    >
+      <Dropdown
+        disabled={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "Me",
+              "value": "me",
+            },
+            Object {
+              "label": "Anyone",
+              "value": "anyone",
+            },
+          ]
+        }
+        placeholder="Created By"
+        value="mockUser"
+      />
+    </div>
+    <div
+      className="text-align-right"
+    >
+      <Button
+        extraClass="margin-right-8"
+        isDisabled={false}
+        isSecondaryButton={true}
+        onClick={[Function]}
+        text="Reset"
+      />
+      <Button
+        onClick={[Function]}
+        text="Hide"
+      />
+    </div>
+  </div>
+</Fragment>
+`;

@@ -1,11 +1,11 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-export type UpdateStateModalState = {
+export type UpdateStateModalReduxState = {
     open: boolean;
     data?: CommentAndStateModalData;
 }
 
-const initialState: UpdateStateModalState = {
+const initialState: UpdateStateModalReduxState = {
     open: false,
 };
 
