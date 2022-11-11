@@ -185,9 +185,9 @@ func ConvertSubscriptionToMap(subscription *serializer.SubscriptionResponse) (ma
 	return m, nil
 }
 
-// filterSubscriptionsOnRecordData filters the given subscriptions based on if they contain record data or not.
+// FilterSubscriptionsOnRecordData filters the given subscriptions based on if they contain record data or not.
 // It keeps only those subscriptions which contain record data (number and short description) and discards the rest of them
-func filterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionResponse) []*serializer.SubscriptionResponse {
+func FilterSubscriptionsOnRecordData(subscripitons []*serializer.SubscriptionResponse) []*serializer.SubscriptionResponse {
 	n := 0
 	for _, subscription := range subscripitons {
 		if subscription.Type == constants.SubscriptionTypeBulk || (subscription.Number != "" && subscription.ShortDescription != "") {
@@ -258,7 +258,7 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		return constants.APIErrorIDLatestUpdateSetNotUploaded
 	}
 
-	if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
+	if statusCode == http.StatusNotFound && strings.Contains(err.Error(), constants.ErrorACLRestrictsRecordRetrieval) {
 		if w != nil {
 			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDInsufficientPermissions, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorInsufficientPermissions})
 		}
