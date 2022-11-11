@@ -58,9 +58,17 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		return err
 	}
 
+	client := p.NewClient(ctx, token)
+	serviceNowUser, _, err := client.GetMe(user.Email)
+	if err != nil {
+		return err
+	}
+
 	u := &serializer.User{
 		MattermostUserID: mattermostUserID,
+		Username: user.Username,
 		OAuth2Token:      encryptedToken,
+		ServiceNowUser:   *serviceNowUser,
 	}
 
 	if err = p.store.StoreUser(u); err != nil {

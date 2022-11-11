@@ -21,10 +21,12 @@ const (
 	PathGetStatesForRecordType = "/states/{record_type}"
 	PathUpdateStateOfRecord    = "/states/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
 	PathOpenStateModal         = "/state-modal"
+	PathGetUsers               = "/users"
 
 	// ServiceNow API paths
 	PathActivateSubscriptions    = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
 	PathSubscriptionCRUD         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
 	PathGetRecordsFromServiceNow = "api/now/table/{tableName}"
 	PathGetStatesFromServiceNow  = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
+	PathGetUserFromServiceNow    = "/api/now/table/sys_user"
 )

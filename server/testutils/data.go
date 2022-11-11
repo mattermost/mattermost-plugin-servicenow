@@ -139,6 +139,9 @@ func GetSerializerUser() *serializer.User {
 	return &serializer.User{
 		MattermostUserID: GetID(),
 		OAuth2Token:      "test-oauthtoken",
+		ServiceNowUser: serializer.ServiceNowUser{
+			UserID: GetServiceNowSysID(),
+		},
 	}
 }
 

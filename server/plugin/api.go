@@ -52,6 +52,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -651,6 +652,17 @@ func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
 	)
 
 	p.returnPostActionIntegrationResponse(w, response)
+}
+
+func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := p.store.GetAllUsers()
+	if err != nil {
+		p.API.LogError(constants.ErrorGetUsers, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorGetUsers, err.Error())})
+		return
+	}
+
+	p.writeJSONArray(w, http.StatusOK, users)
 }
 
 func returnStatusOK(w http.ResponseWriter) {

@@ -208,6 +208,36 @@ func (_m *Client) GetAllSubscriptions(channelID string, userID string, subscript
 	return r0, r1, r2
 }
 
+// GetMe provides a mock function with given fields: userEmail
+func (_m *Client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error) {
+	ret := _m.Called(userEmail)
+
+	var r0 *serializer.ServiceNowUser
+	if rf, ok := ret.Get(0).(func(string) *serializer.ServiceNowUser); ok {
+		r0 = rf(userEmail)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serializer.ServiceNowUser)
+		}
+	}
+
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string) int); ok {
+		r1 = rf(userEmail)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string) error); ok {
+		r2 = rf(userEmail)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // GetRecordFromServiceNow provides a mock function with given fields: tableName, sysID
 func (_m *Client) GetRecordFromServiceNow(tableName string, sysID string) (*serializer.ServiceNowRecord, int, error) {
 	ret := _m.Called(tableName, sysID)

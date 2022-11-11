@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -269,4 +270,25 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 	}
 
 	return genericErrorMessage
+}
+
+func IsValidUserKey(key string) (string, bool) {
+	res := strings.Split(key, "_")
+	if len(res) == 2 && res[0]+"_" == UserKeyPrefix {
+		return res[1], true
+	}
+	return "", false
+}
+
+func decodeKey(key string) (string, error) {
+	if key == "" {
+		return "", nil
+	}
+
+	decodedKey, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decodedKey), nil
 }

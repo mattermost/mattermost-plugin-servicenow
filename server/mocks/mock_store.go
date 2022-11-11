@@ -31,6 +31,29 @@ func (_m *Store) DeleteUser(mattermostUserID string) error {
 	return r0
 }
 
+// GetAllUsers provides a mock function with given fields:
+func (_m *Store) GetAllUsers() ([]*serializer.IncidentCaller, error) {
+	ret := _m.Called()
+
+	var r0 []*serializer.IncidentCaller
+	if rf, ok := ret.Get(0).(func() []*serializer.IncidentCaller); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*serializer.IncidentCaller)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // LoadUser provides a mock function with given fields: mattermostUserID
 func (_m *Store) LoadUser(mattermostUserID string) (*serializer.User, error) {
 	ret := _m.Called(mattermostUserID)
