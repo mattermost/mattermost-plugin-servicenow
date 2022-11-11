@@ -844,20 +844,6 @@ func TestUpdateStateOfRecord(t *testing.T) {
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
-		"failed to update state due to insufficient permissions": {
-			RecordType: constants.RecordTypeIncident,
-			RequestBody: `{
-				"state": "mockState"
-			}`,
-			SetupAPI: func(api *plugintest.API) {},
-			SetupClient: func(client *mock_plugin.Client) {
-				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
-					http.StatusNotFound, fmt.Errorf("ACL restricts the record retrieval"),
-				)
-			},
-			ExpectedStatusCode:   http.StatusUnauthorized,
-			ExpectedErrorMessage: constants.APIErrorInsufficientPermissions,
-		},
 		"failed to update state": {
 			RecordType: constants.RecordTypeIncident,
 			RequestBody: `{

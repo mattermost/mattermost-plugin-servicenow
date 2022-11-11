@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 	"sync"
 
 	"path/filepath"
@@ -602,11 +601,6 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
 	if err != nil {
-		if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, ID: constants.APIErrorIDInsufficientPermissions, Message: constants.APIErrorInsufficientPermissions})
-			return
-		}
-
 		p.API.LogError("Error in updating the state", "Record ID", recordID, "Error", err.Error())
 		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("Error in updating the state. Error: %s", err.Error()))
 		return

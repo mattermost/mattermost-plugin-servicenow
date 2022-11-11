@@ -258,6 +258,14 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		return constants.APIErrorIDLatestUpdateSetNotUploaded
 	}
 
+	if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDInsufficientPermissions, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorInsufficientPermissions})
+		}
+
+		return message
+	}
+
 	if w != nil {
 		if statusCode == 0 {
 			statusCode = http.StatusInternalServerError
