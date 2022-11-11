@@ -37,8 +37,6 @@ func (p *Plugin) mockHandleSearchAndShare(*plugin.Context, *model.CommandArgs, [
 	return "mockHandleSearchAndShare"
 }
 
-const mockUserID = "mockUserID"
-
 func setMockConfigurations(p *Plugin) {
 	p.setConfiguration(&configuration{
 		ServiceNowBaseURL:           "mockServiceNowBaseURL",
@@ -76,7 +74,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 		},
 		{
-			description: "ExecuteCommand: Not able to authorize user",
+			description: "ExecuteCommand: Not able to check if user is system admin",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogWarn", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -87,7 +85,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: "Error checking user's permissions",
@@ -103,7 +101,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: fmt.Sprintf("%s: %s", constants.InvalidConfigAdminMessage, constants.ErrorEmptyServiceNowURL),
@@ -122,7 +120,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: fmt.Sprintf("[%s](%s%s)", constants.UserConnectMessage, p.GetPluginURL(), constants.PathOAuth2Connect),
@@ -135,13 +133,13 @@ func TestExecuteCommand(t *testing.T) {
 					return true, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetUser", func(*Plugin, string) (*serializer.User, error) {
-					return &serializer.User{}, nil
+					return testutils.GetSerializerUser(), nil
 				})
 				setMockConfigurations(&p)
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow connect",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: constants.UserAlreadyConnectedMessage,
@@ -154,13 +152,13 @@ func TestExecuteCommand(t *testing.T) {
 					return true, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetUser", func(*Plugin, string) (*serializer.User, error) {
-					return &serializer.User{}, nil
+					return testutils.GetSerializerUser(), nil
 				})
 				setMockConfigurations(&p)
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow help",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: p.getHelpMessage(helpCommandHeader, true),
@@ -173,13 +171,13 @@ func TestExecuteCommand(t *testing.T) {
 					return true, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetUser", func(*Plugin, string) (*serializer.User, error) {
-					return &serializer.User{}, nil
+					return testutils.GetSerializerUser(), nil
 				})
 				setMockConfigurations(&p)
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow invalid",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: "Unknown action `invalid`",
@@ -195,7 +193,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			args: &model.CommandArgs{
 				Command: "/servicenow disconnect",
-				UserId:  mockUserID,
+				UserId:  testutils.GetID(),
 			},
 			isResponse:       true,
 			expectedResponse: "mockHandleDisconnect",
@@ -218,7 +216,7 @@ func TestExecuteCommand(t *testing.T) {
 			resp, err := p.ExecuteCommand(&plugin.Context{}, testCase.args)
 
 			assert.EqualValues(&model.CommandResponse{}, resp)
-			assert.EqualValues((*model.AppError)(nil), err)
+			assert.Nil(err)
 		})
 	}
 }
@@ -228,7 +226,7 @@ func TestCheckConnected(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -265,7 +263,7 @@ func TestCheckConnected(t *testing.T) {
 			p.SetAPI(mockAPI)
 
 			monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetUser", func(*Plugin, string) (*serializer.User, error) {
-				return &serializer.User{}, testCase.errorMessage
+				return testutils.GetSerializerUser(), testCase.errorMessage
 			})
 
 			if testCase.isResponse {
@@ -330,7 +328,7 @@ func TestGetClientFromUser(t *testing.T) {
 			}
 
 			resp := p.GetClientFromUser(&model.CommandArgs{}, &serializer.User{
-				OAuth2Token: "mockOAuth2Token",
+				OAuth2Token: testutils.GetSerializerUser().OAuth2Token,
 			})
 
 			if testCase.errorMessage != nil {
@@ -348,7 +346,7 @@ func TestHandleDisconnect(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -392,7 +390,7 @@ func TestHandleDisconnect(t *testing.T) {
 func TestHandleSubscriptions(t *testing.T) {
 	p := Plugin{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -421,7 +419,7 @@ func TestHandleSubscribe(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description   string
@@ -452,7 +450,7 @@ func TestHandleSearchAndShare(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description   string
@@ -482,14 +480,9 @@ func TestHandleSearchAndShare(t *testing.T) {
 func TestHandleListSubscriptions(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
-	mockSysID := "mockSysID"
-	mockNumber := "mockNumber"
-	mockChannelID := "mockChannelID"
-	mockUser := "mockUser"
-	mockDescription := "mockDescription"
 	args := &model.CommandArgs{
-		UserId:    mockUserID,
-		ChannelId: mockChannelID,
+		UserId:    testutils.GetID(),
+		ChannelId: testutils.GetChannelID(),
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -501,14 +494,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 		expectedError    string
 	}{
 		{
-			description:   "HandleListSubscriptions: Invalid number of params",
+			description:   "HandleListSubscriptions: Invalid filter for user subscriptions",
 			params:        []string{"invalid"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
 			expectedError: "Unknown filter invalid",
 		},
 		{
-			description:   "HandleListSubscriptions: Invalid number of params 2",
+			description:   "HandleListSubscriptions: Invalid filter for channel subscriptions",
 			params:        []string{"me", "invalid"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
@@ -537,7 +530,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					[]*serializer.SubscriptionResponse{}, 0, nil,
+					testutils.GetSubscriptions(0), 0, nil,
 				)
 			},
 			isResponse:       true,
@@ -558,36 +551,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					[]*serializer.SubscriptionResponse{
-						{
-							SysID:              mockSysID,
-							Type:               constants.SubscriptionTypeRecord,
-							Number:             mockNumber,
-							ChannelID:          mockChannelID,
-							UserName:           mockUser,
-							ShortDescription:   mockDescription,
-							RecordType:         constants.RecordTypeIncident,
-							SubscriptionEvents: constants.SubscriptionEventState,
-						},
-						{
-							SysID:              mockSysID,
-							Type:               constants.SubscriptionTypeBulk,
-							ChannelID:          mockChannelID,
-							UserName:           mockUser,
-							RecordType:         constants.RecordTypeIncident,
-							SubscriptionEvents: constants.SubscriptionEventState,
-						},
-					}, 0, nil,
+					testutils.GetSubscriptions(3), 0, nil,
 				)
 				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
-					&serializer.ServiceNowRecord{
-						Number:           mockNumber,
-						ShortDescription: mockDescription,
-					}, 0, nil,
+					testutils.GetServiceNowRecord(), 0, nil,
 				)
 			},
 			isResponse:       true,
-			expectedResponse: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|mockSysID|Incident|State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|mockSysID|Incident|mockNumber|mockDescription|State changed|N/A|N/A|",
+			expectedResponse: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|",
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
@@ -595,7 +566,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			params:      []string{"me", "all_channels"},
 			setupAPI: func(a *plugintest.API) {
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
-					&model.User{Username: "mockUsername"}, nil,
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
 				)
 				a.On("GetChannel", mock.AnythingOfType("string")).Return(
 					testutils.GetChannel(model.CHANNEL_PRIVATE), nil,
@@ -603,36 +574,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					[]*serializer.SubscriptionResponse{
-						{
-							SysID:              mockSysID,
-							Type:               constants.SubscriptionTypeRecord,
-							Number:             mockNumber,
-							ChannelID:          mockChannelID,
-							UserName:           mockUser,
-							ShortDescription:   mockDescription,
-							RecordType:         constants.RecordTypeIncident,
-							SubscriptionEvents: constants.SubscriptionEventState,
-						},
-						{
-							SysID:              mockSysID,
-							Type:               constants.SubscriptionTypeBulk,
-							ChannelID:          mockChannelID,
-							UserName:           mockUser,
-							RecordType:         constants.RecordTypeIncident,
-							SubscriptionEvents: constants.SubscriptionEventState,
-						},
-					}, 0, nil,
+					testutils.GetSubscriptions(3), 0, nil,
 				)
 				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
-					&serializer.ServiceNowRecord{
-						Number:           mockNumber,
-						ShortDescription: mockDescription,
-					}, 0, nil,
+					testutils.GetServiceNowRecord(), 0, nil,
 				)
 			},
 			isResponse:       true,
-			expectedResponse: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|mockSysID|Incident|State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|mockSysID|Incident|mockNumber|mockDescription|State changed|N/A|N/A|",
+			expectedResponse: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|",
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 	} {
@@ -662,7 +611,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -675,12 +624,12 @@ func TestHandleDeleteSubscription(t *testing.T) {
 	}{
 		{
 			description: "HandleDeleteSubscription: Success",
-			params:      []string{"efe53526975a1110f357bfb3f153afa1"},
+			params:      []string{testutils.GetSubscriptionID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("DeleteSubscription", "efe53526975a1110f357bfb3f153afa1").Return(
+				client.On("DeleteSubscription", testutils.GetSubscriptionID()).Return(
 					0, nil,
 				)
 			},
@@ -705,12 +654,12 @@ func TestHandleDeleteSubscription(t *testing.T) {
 		},
 		{
 			description: "HandleDeleteSubscription: Unable to delete subscription",
-			params:      []string{"efe53526975a1110f357bfb3f153afa1"},
+			params:      []string{testutils.GetSubscriptionID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("DeleteSubscription", "efe53526975a1110f357bfb3f153afa1").Return(
+				client.On("DeleteSubscription", testutils.GetSubscriptionID()).Return(
 					0, errors.New("mockError"),
 				)
 			},
@@ -745,7 +694,7 @@ func TestHandleEditSubscription(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
-		UserId: mockUserID,
+		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description   string
@@ -756,15 +705,13 @@ func TestHandleEditSubscription(t *testing.T) {
 	}{
 		{
 			description: "HandleEditSubscription: Success",
-			params:      []string{"efe53526975a1110f357bfb3f153afa1"},
+			params:      []string{testutils.GetSubscriptionID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("GetSubscription", "efe53526975a1110f357bfb3f153afa1").Return(
-					&serializer.SubscriptionResponse{
-						Type: constants.SubscriptionTypeBulk,
-					}, 0, nil,
+				client.On("GetSubscription", testutils.GetSubscriptionID()).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeBulk), 0, nil,
 				)
 			},
 		},
@@ -783,12 +730,12 @@ func TestHandleEditSubscription(t *testing.T) {
 		},
 		{
 			description: "HandleEditSubscription: Unable to get subscription",
-			params:      []string{"efe53526975a1110f357bfb3f153afa1"},
+			params:      []string{testutils.GetSubscriptionID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("GetSubscription", "efe53526975a1110f357bfb3f153afa1").Return(
+				client.On("GetSubscription", testutils.GetSubscriptionID()).Return(
 					nil, 0, errors.New("mockError"),
 				)
 			},
