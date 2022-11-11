@@ -69,42 +69,44 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 	defer monkey.UnpatchAll()
 	for _, testCase := range []struct {
 		description string
-		setupAPI    func(api *plugintest.API) *plugintest.API
+		setupAPI    func(api *plugintest.API)
 		expectedErr bool
 		isAdmin     bool
 	}{
 		{
 			description: "IsAuthorizedSysAdmin: with admin",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", testutils.GetID()).Return(&model.User{
-					Roles: model.SYSTEM_ADMIN_ROLE_ID,
-				}, nil)
-				return api
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetUser", testutils.GetID()).Return(
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+				)
 			},
 			isAdmin: true,
 		},
 		{
 			description: "IsAuthorizedSysAdmin: with normal user",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", testutils.GetID()).Return(&model.User{}, nil)
-				return api
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetUser", testutils.GetID()).Return(
+					testutils.GetUser(model.SYSTEM_USER_ROLE_ID), nil,
+				)
 			},
 		},
 		{
 			description: "IsAuthorizedSysAdmin: error while getting user",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				api.On("GetUser", testutils.GetID()).Return(nil, testutils.GetInternalServerAppError())
-				return api
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetUser", testutils.GetID()).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
 			},
 			expectedErr: true,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-			api := testCase.setupAPI(&plugintest.API{})
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			testCase.setupAPI(api)
 			defer api.AssertExpectations(t)
 
-			p := setupTestPlugin(api, nil)
 			isAdmin, err := p.isAuthorizedSysAdmin(testutils.GetID())
 
 			if testCase.expectedErr {
@@ -216,17 +218,16 @@ func TestHandleClientError(t *testing.T) {
 	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateSubscription)
 	for _, testCase := range []struct {
 		description        string
-		setupAPI           func(api *plugintest.API) *plugintest.API
+		setupAPI           func(api *plugintest.API)
 		setupPlugin        func()
+		statusCode         int
 		errorMessage       error
 		expectedResponse   string
 		expectedStatusCode int
 	}{
 		{
-			description: "handleClientError",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			description:        "handleClientError",
+			setupAPI:           func(api *plugintest.API) {},
 			setupPlugin:        func() {},
 			errorMessage:       errors.New("mockError"),
 			expectedResponse:   genericErrorMessage,
@@ -234,9 +235,7 @@ func TestHandleClientError(t *testing.T) {
 		},
 		{
 			description: "handleClientError: with token not fetched",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			setupAPI:    func(api *plugintest.API) {},
 			setupPlugin: func() {
 				var p *Plugin
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "DisconnectUser", func(*Plugin, string) error {
@@ -248,9 +247,8 @@ func TestHandleClientError(t *testing.T) {
 		},
 		{
 			description: "handleClientError: with token not fetched and disconnect error",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
+			setupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string")).Return()
-				return api
 			},
 			setupPlugin: func() {
 				var p *Plugin
@@ -263,45 +261,48 @@ func TestHandleClientError(t *testing.T) {
 			expectedStatusCode: http.StatusInternalServerError,
 		},
 		{
-			description: "handleClientError: with subscriptions not configured",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			description:        "handleClientError: with subscriptions not configured",
+			setupAPI:           func(api *plugintest.API) {},
 			setupPlugin:        func() {},
 			errorMessage:       errors.New(constants.APIErrorIDSubscriptionsNotConfigured),
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
-			description: "handleClientError: with update set not uploaded",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			description:        "handleClientError: with latest update set not uploaded",
+			setupAPI:           func(api *plugintest.API) {},
 			setupPlugin:        func() {},
 			errorMessage:       errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded),
 			expectedResponse:   constants.APIErrorIDLatestUpdateSetNotUploaded,
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
-			description: "handleClientError: with subscriptions not authorized",
-			setupAPI: func(api *plugintest.API) *plugintest.API {
-				return api
-			},
+			description:        "handleClientError: with subscriptions not authorized",
+			setupAPI:           func(api *plugintest.API) {},
 			setupPlugin:        func() {},
 			errorMessage:       errors.New(constants.APIErrorIDSubscriptionsNotAuthorized),
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			description:        "handleClientError: with status not found and err: ACL restricts the record retrieval",
+			setupAPI:           func(api *plugintest.API) {},
+			setupPlugin:        func() {},
+			statusCode:         http.StatusNotFound,
+			errorMessage:       errors.New(constants.ErrorACLRestrictsRecordRetrieval),
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-			api := testCase.setupAPI(&plugintest.API{})
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			testCase.setupAPI(api)
 			defer api.AssertExpectations(t)
 
-			p := setupTestPlugin(api, nil)
 			testCase.setupPlugin()
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, requestURL, nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
-			response := p.handleClientError(w, r, testCase.errorMessage, true, 0, testutils.GetID(), "")
+			response := p.handleClientError(w, r, testCase.errorMessage, true, testCase.statusCode, testutils.GetID(), "")
 
 			assert.EqualValues(testCase.expectedResponse, response)
 			assert.EqualValues(testCase.expectedStatusCode, w.Result().StatusCode)
