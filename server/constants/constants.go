@@ -70,6 +70,10 @@ const (
 	FieldNumber               = "number"
 	FieldShortDescription     = "short_description"
 	FieldCommentsAndWorkNotes = "comments_and_work_notes"
+	FieldAssignedTo           = "assigned_to"
+	FieldAssignmentGroup      = "assignment_group"
+	FieldKnowledgeBase        = "knowledge_base"
+	FieldCategory             = "category"
 
 	// Websocket events
 	WSEventConnect                        = "connect"

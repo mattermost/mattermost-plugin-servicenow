@@ -439,6 +439,13 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	record.RecordType = recordType
+	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
+		p.API.LogError("Error in handling the nested fields", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Error in handling the nested fields. Error: %s", err.Error())})
+		return
+	}
+
 	p.writeJSON(w, 0, record)
 }
 
@@ -476,12 +483,6 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 	if !constants.ValidRecordTypesForSearching[record.RecordType] {
 		p.API.LogError("Invalid record type while trying to share record", "Record type", record.RecordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
-		return
-	}
-
-	if err := record.HandleNestedFields(); err != nil {
-		p.API.LogError("Invalid request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Invalid request body. Error: %s", err.Error())})
 		return
 	}
 
