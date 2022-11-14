@@ -205,9 +205,9 @@ func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (st
 	url := serviceNowURL
 	switch fieldType {
 	case constants.FieldAssignedTo:
-		url += fmt.Sprintf(constants.PathAssignedTo, sysID)
+		url += fmt.Sprintf(constants.PathSysUser, sysID)
 	case constants.FieldAssignmentGroup:
-		url += fmt.Sprintf(constants.PathAssignmentGroup, sysID)
+		url += fmt.Sprintf(constants.PathSysUserGroup, sysID)
 	case constants.FieldKnowledgeBase:
 		url += fmt.Sprintf(constants.PathKnowledgeBase, sysID)
 	case constants.FieldCategory:

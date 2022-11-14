@@ -70,13 +70,13 @@ export const getLinkData = (value: string): LinkData => {
     });
 };
 
-export const validateKeysContainingLink = (key: string) => {
-    return key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
-        key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
-        key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
-        key === RecordDataLabelConfigKey.ASSIGNED_TO ||
-        key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP;
-};
+export const validateKeysContainingLink = (key: string) => (
+    key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
+    key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
+    key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
+    key === RecordDataLabelConfigKey.ASSIGNED_TO ||
+    key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
+);
 
 const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
     <>
