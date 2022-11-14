@@ -1,7 +1,8 @@
 .comment-body {
     padding: 0px 32px 24px 32px;
     overflow-y: auto;
-    height: 420px;
+    min-height: 250px;
+    max-height: 420px;
 
     &__height {
       height: 250px;

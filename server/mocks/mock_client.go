@@ -151,14 +151,16 @@ func (_m *Client) EditSubscription(subscriptionID string, subscription *serializ
 }
 
 // GetAllComments provides a mock function with given fields: recordType, recordID
-func (_m *Client) GetAllComments(recordType string, recordID string) (string, int, error) {
+func (_m *Client) GetAllComments(recordType string, recordID string) (*serializer.ServiceNowComment, int, error) {
 	ret := _m.Called(recordType, recordID)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+	var r0 *serializer.ServiceNowComment
+	if rf, ok := ret.Get(0).(func(string, string) *serializer.ServiceNowComment); ok {
 		r0 = rf(recordType, recordID)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serializer.ServiceNowComment)
+		}
 	}
 
 	var r1 int

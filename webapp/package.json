@@ -56,7 +56,6 @@
     "jest": "26.1.0",
     "jest-canvas-mock": "2.2.0",
     "jest-junit": "11.0.1",
-    "mattermost-webapp": "github:mattermost/mattermost-webapp#23f5f93d9f12a7e2b5623e5cee6814366abd9a0f",
     "node-sass": "4.14.1",
     "sass-loader": "9.0.2",
     "style-loader": "1.2.1",
@@ -64,13 +63,14 @@
     "webpack-cli": "3.3.12"
   },
   "dependencies": {
-    "@brightscout/mattermost-ui-library": "1.0.4",
+    "@brightscout/mattermost-ui-library": "1.0.8",
     "@reduxjs/toolkit": "1.8.3",
     "@types/redux-mock-store": "1.0.3",
     "bootstrap": "4.6.2",
     "core-js": "3.6.5",
     "js-cookie": "3.0.1",
     "mattermost-redux": "5.27.0",
+    "mattermost-webapp": "github:mattermost/mattermost-webapp#v5.37.9",
     "react": "16.13.1",
     "react-bootstrap": "1.0.0",
     "react-infinite-scroll-component": "6.1.0",

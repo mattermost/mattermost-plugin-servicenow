@@ -1,22 +1,24 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, ResultPanel} from '@brightscout/mattermost-ui-library';
-
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 
-import usePluginApi from 'hooks/usePluginApi';
+import {CustomModal as Modal, ModalFooter, ModalHeader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
-import Constants from 'plugin_constants';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import RecordTypePanel from 'containers/addOrEditSubscriptions/subComponents/recordTypePanel';
-import SearchRecordsPanel from 'containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
-import ChannelPanel from 'containers/addOrEditSubscriptions/subComponents/channelPanel';
+import Constants from 'src/plugin_constants';
 
-import {setConnected} from 'reducers/connectedState';
-import {hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
+import {hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
+import RecordTypePanel from 'src/containers/addOrEditSubscriptions/subComponents/recordTypePanel';
+import SearchRecordsPanel from 'src/containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
+import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
+
+import {setConnected} from 'src/reducers/connectedState';
+
+import Utils from 'src/utils';
 
 const ShareRecords = () => {
     // Record states
@@ -50,7 +52,6 @@ const ShareRecords = () => {
         setRecordId(null);
         setSuggestionChosen(false);
         setResetRecordPanelStates(false);
-        setChannel(null);
         setChannelOptions([]);
         setShowChannelValidationError(false);
         setApiError(null);
@@ -96,6 +97,7 @@ const ShareRecords = () => {
 
         const payload: ShareRecordPayload = {
             channel_id: channel,
+            number: recordData?.number || '',
             record_type: recordType as RecordType,
             sys_id: recordId || '',
             assigned_to: recordData?.assigned_to || '',
@@ -149,7 +151,7 @@ const ShareRecords = () => {
                 />
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={apiError?.message || 'Record shared successfully!'}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.RecordSharedMsg)}
                         className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

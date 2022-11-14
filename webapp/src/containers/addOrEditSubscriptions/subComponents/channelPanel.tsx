@@ -1,14 +1,14 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 import {General as MMConstants} from 'mattermost-redux/constants';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/mattermost-ui-library';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
 type ChannelPanelProps = {
     className?: string;

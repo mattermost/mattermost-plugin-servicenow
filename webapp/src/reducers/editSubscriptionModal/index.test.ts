@@ -1,5 +1,5 @@
-import {RecordType, SubscriptionType} from 'plugin_constants';
-import reducer, {showModal, hideModal, SubscriptionModalState} from 'reducers/editSubscriptionModal';
+import {RecordType, SubscriptionType} from 'src/plugin_constants';
+import reducer, {showModal, hideModal, SubscriptionModalState} from 'src/reducers/editSubscriptionModal';
 
 const previousState: SubscriptionModalState = {
     open: false,

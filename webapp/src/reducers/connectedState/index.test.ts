@@ -1,4 +1,4 @@
-import reducer, {setConnected, ConnectedState} from 'reducers/connectedState';
+import reducer, {setConnected, ConnectedState} from 'src/reducers/connectedState';
 
 const previousState: ConnectedState = {
     connected: false,

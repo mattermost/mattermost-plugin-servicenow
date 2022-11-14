@@ -4,7 +4,7 @@ import {shallow, ShallowWrapper} from 'enzyme';
 
 import {ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'src/plugin_constants';
 
 import RecordTypePanel from './recordTypePanel';
 

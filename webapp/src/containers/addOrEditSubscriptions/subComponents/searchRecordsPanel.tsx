@@ -3,11 +3,11 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'src/plugin_constants';
 
-import Utils from 'utils';
+import Utils, {getLinkData, validateKeysContainingLink} from 'src/utils';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
 type SearchRecordsPanelProps = {
     className?: string;
@@ -223,16 +223,19 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (!value) {
             return null;
         } else if (typeof value === 'string') {
-            return value;
-        } else if (value.display_value && value.link) {
+            if (value === Constants.EmptyFieldsInServiceNow || !validateKeysContainingLink(key)) {
+                return value;
+            }
+
+            const data: LinkData = getLinkData(value);
             return (
                 <a
-                    href={value.link}
+                    href={data.link}
                     target='_blank'
                     rel='noreferrer'
                     className='btn btn-link padding-0'
                 >
-                    {value.display_value}
+                    {data.display_value}
                 </a>
             );
         }

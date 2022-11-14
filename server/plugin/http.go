@@ -34,7 +34,6 @@ func (c *client) CallJSON(method, path string, in, out interface{}, params url.V
 	return c.Call(method, path, contentType, buf, out, params)
 }
 
-// TODO: Write a unit test for this function
 func (c *client) Call(method, path, contentType string, inBody io.Reader, out interface{}, params url.Values) (responseData []byte, statusCode int, err error) {
 	errContext := fmt.Sprintf("serviceNow: Call failed: method:%s, path:%s", method, path)
 	pathURL, err := url.Parse(path)

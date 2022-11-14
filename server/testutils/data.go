@@ -19,6 +19,10 @@ func GetID() string {
 	return "sfmq19kpztg5iy47ebe51hb31w"
 }
 
+func GetChannelID() string {
+	return "bnqnzipmnir4zkkj95ggba5pde"
+}
+
 func GetChannel(channelType string) *model.Channel {
 	return &model.Channel{
 		Id:   api4.GenerateTestId(),
@@ -29,6 +33,14 @@ func GetChannel(channelType string) *model.Channel {
 func GetPost() *model.Post {
 	return &model.Post{
 		Id: api4.GenerateTestId(),
+	}
+}
+
+func GetUser(role string) *model.User {
+	return &model.User{
+		Id:       api4.GenerateTestId(),
+		Username: "test-user",
+		Roles:    role,
 	}
 }
 
@@ -79,11 +91,24 @@ func GetServiceNowShortDescription() string {
 	return "Test description"
 }
 
+func GetServiceNowComments() *serializer.ServiceNowComment {
+	return &serializer.ServiceNowComment{
+		CommentsAndWorkNotes: "Test comment",
+	}
+}
+
 func GetServiceNowPartialRecord() *serializer.ServiceNowPartialRecord {
 	return &serializer.ServiceNowPartialRecord{
 		SysID:            GetServiceNowSysID(),
 		Number:           GetServiceNowNumber(),
 		ShortDescription: GetServiceNowShortDescription(),
+	}
+}
+
+func GetServiceNowState() *serializer.ServiceNowState {
+	return &serializer.ServiceNowState{
+		Label: constants.RecordTypeIncident,
+		Value: constants.RecordTypeIncident,
 	}
 }
 
@@ -98,6 +123,19 @@ func GetServiceNowPartialRecords(count int) []*serializer.ServiceNowPartialRecor
 	}
 
 	return records
+}
+
+func GetServiceNowStates(count int) []*serializer.ServiceNowState {
+	if count == 0 {
+		return nil
+	}
+
+	states := make([]*serializer.ServiceNowState, count)
+	for i := 0; i < count; i++ {
+		states[i] = GetServiceNowState()
+	}
+
+	return states
 }
 
 func GetSerializerUser() *serializer.User {

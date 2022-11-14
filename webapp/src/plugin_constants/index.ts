@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const DOWNLOAD_UPDATE_SET_LINK = '/download';
+export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.0.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 
 const MMCSRF = 'MMCSRF';
@@ -32,12 +32,15 @@ const SubscriptionAddedMsg = 'Subscription added successfully!';
 const SubscriptionUpdatedMsg = 'Subscription updated successfully!';
 const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
+const RecordSharedMsg = 'Record shared successfully!';
+const StateUpdatedMsg = 'State updated successfully!';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
 const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
+const EmptyFieldsInServiceNow = 'N/A';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -131,22 +134,30 @@ const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
     },
 ]);
 
+export enum RecordDataLabelConfigKey {
+    SHORT_DESCRIPTION = 'short_description',
+    STATE = 'state',
+    PRIORITY = 'priority',
+    ASSIGNED_TO = 'assigned_to',
+    ASSIGNMENT_GROUP = 'assignment_group',
+}
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: 'short_description',
+        key: RecordDataLabelConfigKey.SHORT_DESCRIPTION,
         label: 'Short Description',
     }, {
-        key: 'state',
+        key: RecordDataLabelConfigKey.STATE,
         label: 'State',
     }, {
-        key: 'priority',
+        key: RecordDataLabelConfigKey.PRIORITY,
         label: 'Priority',
     }, {
-        key: 'assigned_to',
+        key: RecordDataLabelConfigKey.ASSIGNED_TO,
         label: 'Assigned To',
     }, {
-        key: 'assignment_group',
+        key: RecordDataLabelConfigKey.ASSIGNMENT_GROUP,
         label: 'Assignment Group',
     },
 ];
@@ -171,21 +182,29 @@ export const SubscriptionFilterCreatedByOptions = [
     },
 ];
 
+export enum KnowledgeRecordDataLabelConfigKey {
+    SHORT_DESCRIPTION = 'short_description',
+    WORKFLOW_STATE = 'workflow_state',
+    AUTHOR = 'author',
+    CATEGORY = 'kb_category',
+    KNOWLEDGE_BASE = 'kb_knowledge_base',
+}
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: 'short_description',
+        key: KnowledgeRecordDataLabelConfigKey.SHORT_DESCRIPTION,
         label: 'Short Description',
     }, {
-        key: 'workflow_state',
+        key: KnowledgeRecordDataLabelConfigKey.WORKFLOW_STATE,
         label: 'Workflow',
     }, {
-        key: 'author',
+        key: KnowledgeRecordDataLabelConfigKey.AUTHOR,
         label: 'Author',
     }, {
-        key: 'kb_category',
+        key: KnowledgeRecordDataLabelConfigKey.CATEGORY,
         label: 'Category',
     }, {
-        key: 'kb_knowledge_base',
+        key: KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE,
         label: 'Knowledge Base',
     },
 ];
@@ -284,7 +303,7 @@ export default {
     RightSidebarHeader,
     RhsSubscritpions,
     ShareRecordButton,
-    DOWNLOAD_UPDATE_SET_LINK,
+    UPLOAD_SET_FILENAME,
     pluginApiServiceConfigs,
     MMCSRF,
     HeaderCSRFToken,
@@ -314,6 +333,8 @@ export default {
     SubscriptionUpdatedMsg,
     DeleteSubscriptionHeading,
     DeleteSubscriptionMsg,
+    RecordSharedMsg,
+    StateUpdatedMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
     recordTypeOptions,
@@ -325,4 +346,5 @@ export default {
     SubscriptionFilters,
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
+    EmptyFieldsInServiceNow,
 };

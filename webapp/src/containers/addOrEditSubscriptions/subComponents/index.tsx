@@ -1,17 +1,19 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'src/plugin_constants';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import {setConnected} from 'reducers/connectedState';
-import {refetch} from 'reducers/refetchState';
+import {setConnected} from 'src/reducers/connectedState';
+import {refetch} from 'src/reducers/refetchState';
+
+import Utils from 'src/utils';
 
 import ChannelPanel from './channelPanel';
 import SubscriptionTypePanel from './subscriptionTypePanel';
@@ -31,6 +33,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Channel panel values
     const [channel, setChannel] = useState<string | null>(null);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
+    const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
 
     // Subscription type panel values
     const [subscriptionType, setSubscriptionType] = useState<SubscriptionType | null>(null);
@@ -95,6 +98,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     useEffect(() => {
+        if (open && currentChannelId) {
+            setChannel(currentChannelId);
+        }
+
         if (open && subscriptionData) {
             // Set values for channel panel
             setChannel(subscriptionData.channel);
@@ -112,7 +119,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             // Set initial value for events panel
             setSubscriptionEvents(subscriptionData.subscriptionEvents);
         }
-    }, [open, subscriptionData]);
+    }, [open, subscriptionData, currentChannelId]);
 
     useEffect(() => {
         const createSubscriptionState = getCreateSubscriptionState();
@@ -147,7 +154,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
-        setChannel(null);
         setSubscriptionType(null);
         setRecordValue('');
         setSuggestionChosen(false);
@@ -272,7 +278,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
-            return apiError.message;
+            return Utils.getResultPanelHeader(apiError, hideModal);
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }
@@ -357,7 +363,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     channelOptions={channelOptions}
                     setChannelOptions={setChannelOptions}
                     actionBtnDisabled={showModalLoader}
-                    editing={Boolean(subscriptionData)}
+                    editing={true}
                     showFooter={true}
                 />
                 <SubscriptionTypePanel
