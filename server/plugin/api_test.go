@@ -395,7 +395,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(), nil,
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
@@ -455,7 +455,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(), nil,
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
@@ -533,7 +533,7 @@ func TestGetCommentsForRecord(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllComments", constants.RecordTypeIncident, testutils.GetServiceNowSysID()).Return(
-					"", http.StatusInternalServerError, fmt.Errorf("new error"),
+					nil, http.StatusInternalServerError, fmt.Errorf("new error"),
 				)
 			},
 			ExpectedStatusCode:   http.StatusInternalServerError,
@@ -843,20 +843,6 @@ func TestUpdateStateOfRecord(t *testing.T) {
 			},
 			SetupClient:        func(client *mock_plugin.Client) {},
 			ExpectedStatusCode: http.StatusBadRequest,
-		},
-		"failed to update state due to insufficient permissions": {
-			RecordType: constants.RecordTypeIncident,
-			RequestBody: `{
-				"state": "mockState"
-			}`,
-			SetupAPI: func(api *plugintest.API) {},
-			SetupClient: func(client *mock_plugin.Client) {
-				client.On("UpdateStateOfRecordInServiceNow", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("*serializer.ServiceNowUpdateStatePayload")).Return(
-					http.StatusNotFound, fmt.Errorf("ACL restricts the record retrieval"),
-				)
-			},
-			ExpectedStatusCode:   http.StatusUnauthorized,
-			ExpectedErrorMessage: constants.APIErrorInsufficientPermissions,
 		},
 		"failed to update state": {
 			RecordType: constants.RecordTypeIncident,

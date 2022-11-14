@@ -129,6 +129,7 @@ const (
 	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
 	ErrorGetUsers                         = "Failed to get the users."
+	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 )
 
 var (
