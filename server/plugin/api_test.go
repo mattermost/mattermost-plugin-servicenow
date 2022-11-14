@@ -395,7 +395,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(), nil,
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
@@ -455,7 +455,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(), nil,
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(

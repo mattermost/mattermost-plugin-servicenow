@@ -132,6 +132,7 @@ const (
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
 	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
+	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 )
 
 var (
