@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
-
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
+
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -12,13 +12,15 @@ import Constants from 'src/plugin_constants';
 import {hideModal as hideCommentModal} from 'src/reducers/commentModal';
 import {setConnected} from 'src/reducers/connectedState';
 
+import Utils from 'src/utils';
+
 import './styles.scss';
 
 const AddOrViewComments = () => {
     const [commentsData, setCommentsData] = useState<string>('');
     const [comments, setComments] = useState('');
     const [showModalLoader, setShowModalLoader] = useState(false);
-    const [apiError, setApiError] = useState('');
+    const [apiError, setApiError] = useState<APIError | null>(null);
     const [showErrorPanel, setShowErrorPanel] = useState(false);
     const [validationError, setValidationError] = useState('');
     const [refetch, setRefetch] = useState(false);
@@ -32,7 +34,7 @@ const AddOrViewComments = () => {
         setCommentsData('');
         setComments('');
         setShowModalLoader(false);
-        setApiError('');
+        setApiError(null);
         setValidationError('');
         setRefetch(false);
     }, []);
@@ -92,10 +94,10 @@ const AddOrViewComments = () => {
         if (isError && error) {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
-                setShowErrorPanel(true);
             }
 
-            setApiError(error.message);
+            setShowErrorPanel(true);
+            setApiError(error);
         }
 
         if (isLoading) {
@@ -117,7 +119,7 @@ const AddOrViewComments = () => {
                 dispatch(setConnected(false));
                 setShowErrorPanel(true);
             }
-            setApiError(error.message);
+            setApiError(error);
         }
 
         setShowModalLoader(isLoading);
@@ -145,9 +147,9 @@ const AddOrViewComments = () => {
                 />
                 <ModalLoader loading={addCommentState().isLoading}/>
                 {showModalLoader && !comments && <CircularLoader/>}
-                {showErrorPanel ? (
+                {(showErrorPanel && apiError) ? (
                     <ResultPanel
-                        header={apiError}
+                        header={Utils.getResultPanelHeader(apiError, hideModal)}
                         className='wizard__secondary-panel--slide-in result-panel'
                         primaryBtn={{
                             text: 'Close',
@@ -179,7 +181,7 @@ const AddOrViewComments = () => {
                                 !showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>
                             )}
                         </div>
-                        <ModalSubtitleAndError error={apiError}/>
+                        <ModalSubtitleAndError error={apiError?.message}/>
                         <ModalFooter
                             onConfirm={addComment}
                             confirmBtnText='Submit'

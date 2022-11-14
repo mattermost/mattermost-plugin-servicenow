@@ -13,6 +13,8 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import {setConnected} from 'src/reducers/connectedState';
 import {refetch} from 'src/reducers/refetchState';
 
+import Utils from 'src/utils';
+
 import ChannelPanel from './channelPanel';
 import SubscriptionTypePanel from './subscriptionTypePanel';
 import RecordTypePanel from './recordTypePanel';
@@ -272,7 +274,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
-            return apiError.message;
+            return Utils.getResultPanelHeader(apiError, hideModal);
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }

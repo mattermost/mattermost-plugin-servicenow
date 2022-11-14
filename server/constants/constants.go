@@ -146,6 +146,7 @@ const (
 	ErrorGetRecord                        = "Error in getting record from ServiceNow"
 	ErrorGetStates                        = "Error in getting the states"
 	ErrorUpdateState                      = "Error in updating the state"
+	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 )
 
 var (

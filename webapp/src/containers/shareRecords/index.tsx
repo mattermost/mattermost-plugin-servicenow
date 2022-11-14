@@ -1,11 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {CustomModal as Modal, ModalFooter, ModalHeader, ModalSubtitleAndError, ResultPanel} from '@brightscout/mattermost-ui-library';
-
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
+
+import {CustomModal as Modal, ModalFooter, ModalHeader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -17,6 +17,8 @@ import SearchRecordsPanel from 'src/containers/addOrEditSubscriptions/subCompone
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
 import {setConnected} from 'src/reducers/connectedState';
+
+import Utils from 'src/utils';
 
 const ShareRecords = () => {
     // Record states
@@ -149,7 +151,7 @@ const ShareRecords = () => {
                 />
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={apiError?.message || 'Record shared successfully!'}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.RecordSharedMsg)}
                         className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

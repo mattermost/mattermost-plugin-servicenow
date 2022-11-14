@@ -11,6 +11,8 @@ import Constants from 'src/plugin_constants';
 import {setConnected} from 'src/reducers/connectedState';
 import {hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
 
+import Utils from 'src/utils';
+
 const UpdateState = () => {
     const [selectedState, setSelectedState] = useState<string | null>(null);
     const [getStatesParams, setGetStatesParams] = useState<GetStatesParams | null>(null);
@@ -21,7 +23,7 @@ const UpdateState = () => {
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
 
     // API error
-    const [apiError, setApiError] = useState('');
+    const [apiError, setApiError] = useState<APIError | null>(null);
 
     const dispatch = useDispatch();
 
@@ -29,13 +31,13 @@ const UpdateState = () => {
         setSelectedState(null);
         setGetStatesParams(null);
         setUpdateStatePayload(null);
-        setApiError('');
+        setApiError(null);
         setShowResultPanel(false);
     }, []);
 
     const hideModal = useCallback(() => {
-        resetStates();
         dispatch(hideUpdateStateModal());
+        resetStates();
     }, []);
 
     const getStateForGetStatesAPI = () => {
@@ -71,12 +73,12 @@ const UpdateState = () => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
-            setApiError(error.message);
+            setApiError(error);
             setShowResultPanel(true);
         }
 
         if (isSuccess) {
-            setApiError('');
+            setApiError(null);
             setShowResultPanel(true);
         }
     }, [getStateForUpdateStateAPI().isError, getStateForUpdateStateAPI().isSuccess]);
@@ -87,12 +89,12 @@ const UpdateState = () => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
-            setApiError(error.message);
+            setApiError(error);
             setShowResultPanel(true);
         }
 
         if (isSuccess) {
-            setApiError('');
+            setApiError(null);
         }
     }, [getStateForGetStatesAPI().isError, getStateForGetStatesAPI().isSuccess]);
 
@@ -115,7 +117,7 @@ const UpdateState = () => {
                 {showResultPanel ? (
                     <ResultPanel
                         className='wizard__secondary-panel--slide-in result-panel'
-                        header={apiError || 'State updated successfully'}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.StateUpdatedMsg)}
                         primaryBtn={{
                             text: 'Close',
                             onClick: hideModal,

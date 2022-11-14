@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"sync"
 
 	"path/filepath"
@@ -280,7 +279,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
-	recordSubscriptions = filterSubscriptionsOnRecordData(recordSubscriptions)
+	recordSubscriptions = FilterSubscriptionsOnRecordData(recordSubscriptions)
 	bulkSubscriptions = append(bulkSubscriptions, recordSubscriptions...)
 
 	p.writeJSONArray(w, statusCode, bulkSubscriptions)
@@ -489,14 +488,14 @@ func (p *Plugin) getCommentsForRecord(w http.ResponseWriter, r *http.Request) {
 
 	recordID := pathParams[constants.PathParamRecordID]
 	client := p.GetClientFromRequest(r)
-	comments, statusCode, err := client.GetAllComments(recordType, recordID)
+	response, statusCode, err := client.GetAllComments(recordType, recordID)
 	if err != nil {
 		p.API.LogError(constants.ErrorGetComments, "Record ID", recordID, "Error", err.Error())
 		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetComments, err.Error()))
 		return
 	}
 
-	p.writeJSON(w, statusCode, comments)
+	p.writeJSON(w, statusCode, response.CommentsAndWorkNotes)
 }
 
 func (p *Plugin) addCommentsOnRecord(w http.ResponseWriter, r *http.Request) {
@@ -577,13 +576,8 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	statusCode, err := client.UpdateStateOfRecordInServiceNow(recordType, recordID, payload)
 	if err != nil {
-		if statusCode == http.StatusNotFound && strings.Contains(err.Error(), "ACL restricts the record retrieval") {
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusUnauthorized, ID: constants.APIErrorIDInsufficientPermissions, Message: constants.APIErrorInsufficientPermissions})
-			return
-		}
-
-		p.API.LogError(constants.ErrorUpdateState, "Record ID", recordID, "Error", err.Error())
-		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorUpdateState, err.Error()))
+		p.API.LogError("Error in updating the state", "Record ID", recordID, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("Error in updating the state. Error: %s", err.Error()))
 		return
 	}
 
