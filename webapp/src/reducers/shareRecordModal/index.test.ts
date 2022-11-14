@@ -1,4 +1,4 @@
-import reducer, {showModal, hideModal, ShareRecordModalState} from 'reducers/shareRecordModal';
+import reducer, {showModal, hideModal, ShareRecordModalState} from 'src/reducers/shareRecordModal';
 
 const previousState: ShareRecordModalState = {
     open: false,

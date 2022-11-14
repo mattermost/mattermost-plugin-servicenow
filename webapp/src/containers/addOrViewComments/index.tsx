@@ -5,14 +5,14 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
-import {hideModal as hideCommentModal} from 'reducers/commentModal';
-import {setConnected} from 'reducers/connectedState';
+import {hideModal as hideCommentModal} from 'src/reducers/commentModal';
+import {setConnected} from 'src/reducers/connectedState';
 
-import Utils from 'utils';
+import Utils from 'src/utils';
 
 import './styles.scss';
 

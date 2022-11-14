@@ -6,21 +6,23 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {
     pluginApiBaseUrl: string;
     mattermostApiBaseUrl: string;
+    publicFilesUrl: string;
 } => {
     const url = new URL(window.location.href);
     const baseUrl = `${url.protocol}//${url.host}`;
     const pluginUrl = `${baseUrl}/plugins/${pluginId}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
     const mattermostApiBaseUrl = `${baseUrl}/api/v4`;
+    const publicFilesUrl = `${pluginUrl}/public/`;
 
-    return {pluginApiBaseUrl, mattermostApiBaseUrl};
+    return {pluginApiBaseUrl, mattermostApiBaseUrl, publicFilesUrl};
 };
 
 /**

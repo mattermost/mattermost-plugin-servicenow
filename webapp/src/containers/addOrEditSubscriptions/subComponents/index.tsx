@@ -1,19 +1,19 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 import Cookies from 'js-cookie';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
-import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'plugin_constants';
+import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'src/plugin_constants';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import {setConnected} from 'reducers/connectedState';
-import {refetch} from 'reducers/refetchState';
+import {setConnected} from 'src/reducers/connectedState';
+import {refetch} from 'src/reducers/refetchState';
 
-import Utils from 'utils';
+import Utils from 'src/utils';
 
 import ChannelPanel from './channelPanel';
 import SubscriptionTypePanel from './subscriptionTypePanel';

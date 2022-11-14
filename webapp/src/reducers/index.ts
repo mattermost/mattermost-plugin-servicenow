@@ -1,6 +1,6 @@
 import {combineReducers} from 'redux';
 
-import services from 'services';
+import services from 'src/services';
 
 import openAddSubscriptionModalReducer from './addSubscriptionModal';
 import openEditSubscriptionModalReducer from './editSubscriptionModal';

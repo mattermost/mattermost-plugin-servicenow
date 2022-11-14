@@ -601,6 +601,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 			}
 
 			resp := p.handleListSubscriptions(&plugin.Context{}, args, testCase.params, c, true)
+
+			// This is used to wait for goroutine to finish.
 			time.Sleep(100 * time.Millisecond)
 			assert.EqualValues(testCase.expectedError, resp)
 		})

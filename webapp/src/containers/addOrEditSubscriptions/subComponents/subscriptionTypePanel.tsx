@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'plugin_constants';
+import Constants, {SubscriptionType, SubscriptionTypeLabelMap} from 'src/plugin_constants';
 
 type SubscriptionTypePanelProps = {
     className?: string;

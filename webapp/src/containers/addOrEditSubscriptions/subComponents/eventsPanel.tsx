@@ -2,7 +2,7 @@ import React, {forwardRef} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Checkbox} from '@brightscout/mattermost-ui-library';
 
-import {SubscriptionEvents, RecordTypeLabelMap, RecordType, SubscriptionType, SubscriptionEventLabels} from 'plugin_constants';
+import {SubscriptionEvents, RecordTypeLabelMap, RecordType, SubscriptionType, SubscriptionEventLabels} from 'src/plugin_constants';
 
 type EventsPanelProps = {
     className?: string;

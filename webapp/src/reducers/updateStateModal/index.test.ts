@@ -1,6 +1,6 @@
-import {RecordType} from 'plugin_constants';
+import {RecordType} from 'src/plugin_constants';
 
-import reducer, {showModal, hideModal, UpdateStateModalReduxState} from 'reducers/updateStateModal';
+import reducer, {showModal, hideModal, UpdateStateModalReduxState} from 'src/reducers/updateStateModal';
 
 const previousState: UpdateStateModalReduxState = {
     open: false,
