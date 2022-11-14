@@ -71,9 +71,13 @@ func (p *Plugin) writeJSONArray(w http.ResponseWriter, statusCode int, v interfa
 	if string(b) == "null" {
 		w.WriteHeader(statusCode)
 		_, _ = w.Write([]byte("[]"))
-	} else if _, err = w.Write(b); err != nil {
+		return
+	}
+
+	if _, err = w.Write(b); err != nil {
 		p.API.LogError("Error while writing response", "Error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(statusCode)
