@@ -27,4 +27,11 @@ const (
 	PathSubscriptionCRUD         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
 	PathGetRecordsFromServiceNow = "api/now/table/{tableName}"
 	PathGetStatesFromServiceNow  = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
+
+	// ServiceNow URLs
+	PathServiceNowURL = "/now/nav/ui/classic/params/target"
+	PathSysUser       = "/sys_user.do?sys_id=%s"
+	PathSysUserGroup  = "/sys_user_group.do?sys_id=%s"
+	PathKnowledgeBase = PathServiceNowURL + "/kb_knowledge_base.do%%3Fsys_id=%s"
+	PathCategory      = PathServiceNowURL + "/kb_category.do%%3Fsys_id=%s"
 )

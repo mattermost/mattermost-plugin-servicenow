@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -62,6 +62,22 @@ export const onPressingEnterKey = (event: React.KeyboardEvent<HTMLSpanElement> |
     func();
 };
 
+export const getLinkData = (value: string): LinkData => {
+    const data = value.split(']');
+    return ({
+        display_value: data[0].slice(1),
+        link: data[1].slice(1, -1),
+    });
+};
+
+export const validateKeysContainingLink = (key: string) => (
+    key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
+    key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
+    key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
+    key === RecordDataLabelConfigKey.ASSIGNED_TO ||
+    key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
+);
+
 const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
     <>
         <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
@@ -93,5 +109,7 @@ export default {
     debounce,
     getSubscriptionHeaderLink,
     onPressingEnterKey,
+    getLinkData,
+    validateKeysContainingLink,
     getResultPanelHeader,
 };

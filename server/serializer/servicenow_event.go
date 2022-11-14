@@ -68,6 +68,13 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 		actions = append(actions, &model.PostAction{
 			Type: model.POST_ACTION_TYPE_BUTTON,
 			Name: "Update State",
+			Integration: &model.PostActionIntegration{
+				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),
+				Context: map[string]interface{}{
+					constants.ContextNameRecordType: se.RecordType,
+					constants.ContextNameRecordID:   se.RecordID,
+				},
+			},
 		})
 	}
 
