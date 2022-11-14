@@ -551,14 +551,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					testutils.GetSubscriptions(3), 0, nil,
+					testutils.GetSubscriptions(2), 0, nil,
 				)
 				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
 					testutils.GetServiceNowRecord(), 0, nil,
 				)
 			},
 			isResponse:       true,
-			expectedResponse: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|",
+			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
@@ -574,14 +574,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					testutils.GetSubscriptions(3), 0, nil,
+					testutils.GetSubscriptions(2), 0, nil,
 				)
 				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
 					testutils.GetServiceNowRecord(), 0, nil,
 				)
 			},
 			isResponse:       true,
-			expectedResponse: "#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|d5d4f60807861110da0ef4be7c1ed0d6|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|",
+			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 	} {
@@ -624,12 +624,12 @@ func TestHandleDeleteSubscription(t *testing.T) {
 	}{
 		{
 			description: "HandleDeleteSubscription: Success",
-			params:      []string{testutils.GetSubscriptionID()},
+			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("DeleteSubscription", testutils.GetSubscriptionID()).Return(
+				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
 					0, nil,
 				)
 			},
@@ -654,12 +654,12 @@ func TestHandleDeleteSubscription(t *testing.T) {
 		},
 		{
 			description: "HandleDeleteSubscription: Unable to delete subscription",
-			params:      []string{testutils.GetSubscriptionID()},
+			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("DeleteSubscription", testutils.GetSubscriptionID()).Return(
+				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
 					0, errors.New("mockError"),
 				)
 			},
@@ -705,12 +705,12 @@ func TestHandleEditSubscription(t *testing.T) {
 	}{
 		{
 			description: "HandleEditSubscription: Success",
-			params:      []string{testutils.GetSubscriptionID()},
+			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("GetSubscription", testutils.GetSubscriptionID()).Return(
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
 					testutils.GetSubscription(constants.SubscriptionTypeBulk), 0, nil,
 				)
 			},
@@ -730,12 +730,12 @@ func TestHandleEditSubscription(t *testing.T) {
 		},
 		{
 			description: "HandleEditSubscription: Unable to get subscription",
-			params:      []string{testutils.GetSubscriptionID()},
+			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("GetSubscription", testutils.GetSubscriptionID()).Return(
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
 					nil, 0, errors.New("mockError"),
 				)
 			},
