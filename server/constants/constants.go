@@ -71,7 +71,7 @@ const (
 	FieldShortDescription     = "short_description"
 	FieldCommentsAndWorkNotes = "comments_and_work_notes"
 	FieldAssignedTo           = "assigned_to"
-	FieldAssignedGroup        = "assigned_group"
+	FieldAssignmentGroup      = "assignment_group"
 	FieldKnowledgeBase        = "knowledge_base"
 	FieldCategory             = "category"
 

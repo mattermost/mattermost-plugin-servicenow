@@ -70,17 +70,12 @@ export const getLinkData = (value: string): LinkData => {
     });
 };
 
-export const validateKeys = (key: string) => {
-    if (key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
+export const validateKeysContainingLink = (key: string) => {
+    return key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
         key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
         key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
         key === RecordDataLabelConfigKey.ASSIGNED_TO ||
-        key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
-    ) {
-        return true;
-    }
-
-    return false;
+        key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP;
 };
 
 const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
@@ -115,6 +110,6 @@ export default {
     getSubscriptionHeaderLink,
     onPressingEnterKey,
     getLinkData,
-    validateKeys,
+    validateKeysContainingLink,
     getResultPanelHeader,
 };

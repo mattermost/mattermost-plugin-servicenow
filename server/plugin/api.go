@@ -441,8 +441,8 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 
 	record.RecordType = recordType
 	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
-		p.API.LogError("Invalid body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Invalid body. Error: %s", err.Error())})
+		p.API.LogError("Error in handling the nested fields", "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Error in handling the nested fields. Error: %s", err.Error())})
 		return
 	}
 

@@ -98,10 +98,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     useEffect(() => {
-        if (open) {
-            if (currentChannelId) {
-                setChannel(currentChannelId);
-            }
+        if (open && currentChannelId) {
+            setChannel(currentChannelId);
         }
 
         if (open && subscriptionData) {

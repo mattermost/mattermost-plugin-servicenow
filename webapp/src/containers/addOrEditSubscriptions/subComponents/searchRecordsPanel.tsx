@@ -5,7 +5,7 @@ import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@
 
 import Constants, {RecordType} from 'plugin_constants';
 
-import Utils, {getLinkData, validateKeys} from 'utils';
+import Utils, {getLinkData, validateKeysContainingLink} from 'utils';
 
 import usePluginApi from 'hooks/usePluginApi';
 
@@ -223,7 +223,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         if (!value) {
             return null;
         } else if (typeof value === 'string') {
-            if (value === Constants.EmptyFieldsInServiceNow || !validateKeys(key)) {
+            if (value === Constants.EmptyFieldsInServiceNow || !validateKeysContainingLink(key)) {
                 return value;
             }
 

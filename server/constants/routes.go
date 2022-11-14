@@ -29,8 +29,9 @@ const (
 	PathGetStatesFromServiceNow  = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
 
 	// ServiceNow URLs
-	PathAssignmentTo    = "/sys_user.do?sys_id=%s"
+	PathServiceNowURL   = "/now/nav/ui/classic/params/target"
+	PathAssignedTo      = "/sys_user.do?sys_id=%s"
 	PathAssignmentGroup = "/sys_user_group.do?sys_id=%s"
-	PathKnowledgeBase   = "/now/nav/ui/classic/params/target/kb_knowledge_base.do%%3Fsys_id=%s"
-	PathCategory        = "/now/nav/ui/classic/params/target/kb_category.do%%3Fsys_id=%s"
+	PathKnowledgeBase   = PathServiceNowURL + "/kb_knowledge_base.do%%3Fsys_id=%s"
+	PathCategory        = PathServiceNowURL + "/kb_category.do%%3Fsys_id=%s"
 )

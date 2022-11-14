@@ -177,7 +177,7 @@ func (sr *ServiceNowRecord) HandleNestedFields(serviceNowURL string) error {
 		if err != nil {
 			return fmt.Errorf("%w : assigned_to", err)
 		}
-		sr.AssignmentGroup, err = GetNestedFieldValue(sr.AssignmentGroup, constants.FieldAssignedGroup, serviceNowURL)
+		sr.AssignmentGroup, err = GetNestedFieldValue(sr.AssignmentGroup, constants.FieldAssignmentGroup, serviceNowURL)
 		if err != nil {
 			return fmt.Errorf("%w : assignment_group", err)
 		}
@@ -205,8 +205,8 @@ func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (st
 	url := serviceNowURL
 	switch fieldType {
 	case constants.FieldAssignedTo:
-		url += fmt.Sprintf(constants.PathAssignmentTo, sysID)
-	case constants.FieldAssignedGroup:
+		url += fmt.Sprintf(constants.PathAssignedTo, sysID)
+	case constants.FieldAssignmentGroup:
 		url += fmt.Sprintf(constants.PathAssignmentGroup, sysID)
 	case constants.FieldKnowledgeBase:
 		url += fmt.Sprintf(constants.PathKnowledgeBase, sysID)
