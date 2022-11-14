@@ -51,7 +51,7 @@ This plugin contains the following features:
 
 - Notifications will be sent in the form of a post created by the ServiceNow bot in the channel specified while creating the subscription.
 
-    ![image](https://user-images.githubusercontent.com/77336594/201641601-cdc5995a-b8db-4ceb-b435-cd5cbb6e0acb.png)
+    ![image](https://user-images.githubusercontent.com/77336594/201694614-50960fd4-20cb-4011-8b47-4721dec0a867.png)
 
 - Ability to see the existing subscriptions in the Right-Hand Sidebar or slash command.
     * In Right-hand sidebar
