@@ -3,7 +3,7 @@ import {FormGroup, Col, Button} from 'react-bootstrap';
 
 import Utils from 'src/utils';
 
-import {UPLOAD_SET_FILE} from 'src/plugin_constants';
+import {UPLOAD_SET_FILENAME} from 'src/plugin_constants';
 
 type HelpText = {
     key: string | null;
@@ -30,7 +30,7 @@ const DownloadButton = ({label, helpText}: Props) => (
         </Col>
         <Col sm={8}>
             <a
-                href={Utils.getBaseUrls().uploadSetFile + UPLOAD_SET_FILE}
+                href={Utils.getBaseUrls().publicFilesUrl + UPLOAD_SET_FILENAME}
                 download={true}
             >
                 <Button>

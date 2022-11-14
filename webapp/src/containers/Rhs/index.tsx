@@ -9,7 +9,7 @@ import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDial
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILE} from 'src/plugin_constants';
+import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILENAME} from 'src/plugin_constants';
 
 import {refetch, resetRefetch} from 'src/reducers/refetchState';
 
@@ -247,7 +247,7 @@ const Rhs = (): JSX.Element => {
                             subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
                             buttonConfig={isCurrentUserSysAdmin ? ({
                                 text: 'Download update set',
-                                link: Utils.getBaseUrls().uploadSetFile + UPLOAD_SET_FILE,
+                                link: Utils.getBaseUrls().publicFilesUrl + UPLOAD_SET_FILENAME,
                                 download: true,
                             }) : null
                             }
