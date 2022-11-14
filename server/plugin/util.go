@@ -158,7 +158,7 @@ func (p *Plugin) getHelpMessage(header string, isSysAdmin bool) string {
 	return sb.String()
 }
 
-func (p *Plugin) isAuthorizedSysAdmin(userID string) (bool, error) {
+func (p *Plugin) IsAuthorizedSysAdmin(userID string) (bool, error) {
 	user, appErr := p.API.GetUser(userID)
 	if appErr != nil {
 		return false, appErr

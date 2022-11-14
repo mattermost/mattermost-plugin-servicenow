@@ -40,6 +40,7 @@ const NoSubscriptionPresent = 'No more subscriptions present.';
 const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
+const EmptyFieldsInServiceNow = 'N/A';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -133,22 +134,30 @@ const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
     },
 ]);
 
+export enum RecordDataLabelConfigKey {
+    SHORT_DESCRIPTION = 'short_description',
+    STATE = 'state',
+    PRIORITY = 'priority',
+    ASSIGNED_TO = 'assigned_to',
+    ASSIGNMENT_GROUP = 'assignment_group',
+}
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: 'short_description',
+        key: RecordDataLabelConfigKey.SHORT_DESCRIPTION,
         label: 'Short Description',
     }, {
-        key: 'state',
+        key: RecordDataLabelConfigKey.STATE,
         label: 'State',
     }, {
-        key: 'priority',
+        key: RecordDataLabelConfigKey.PRIORITY,
         label: 'Priority',
     }, {
-        key: 'assigned_to',
+        key: RecordDataLabelConfigKey.ASSIGNED_TO,
         label: 'Assigned To',
     }, {
-        key: 'assignment_group',
+        key: RecordDataLabelConfigKey.ASSIGNMENT_GROUP,
         label: 'Assignment Group',
     },
 ];
@@ -173,21 +182,29 @@ export const SubscriptionFilterCreatedByOptions = [
     },
 ];
 
+export enum KnowledgeRecordDataLabelConfigKey {
+    SHORT_DESCRIPTION = 'short_description',
+    WORKFLOW_STATE = 'workflow_state',
+    AUTHOR = 'author',
+    CATEGORY = 'kb_category',
+    KNOWLEDGE_BASE = 'kb_knowledge_base',
+}
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: 'short_description',
+        key: KnowledgeRecordDataLabelConfigKey.SHORT_DESCRIPTION,
         label: 'Short Description',
     }, {
-        key: 'workflow_state',
+        key: KnowledgeRecordDataLabelConfigKey.WORKFLOW_STATE,
         label: 'Workflow',
     }, {
-        key: 'author',
+        key: KnowledgeRecordDataLabelConfigKey.AUTHOR,
         label: 'Author',
     }, {
-        key: 'kb_category',
+        key: KnowledgeRecordDataLabelConfigKey.CATEGORY,
         label: 'Category',
     }, {
-        key: 'kb_knowledge_base',
+        key: KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE,
         label: 'Knowledge Base',
     },
 ];
@@ -329,4 +346,5 @@ export default {
     SubscriptionFilters,
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
+    EmptyFieldsInServiceNow,
 };

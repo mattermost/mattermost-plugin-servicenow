@@ -107,7 +107,7 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 			testCase.setupAPI(api)
 			defer api.AssertExpectations(t)
 
-			isAdmin, err := p.isAuthorizedSysAdmin(testutils.GetID())
+			isAdmin, err := p.IsAuthorizedSysAdmin(testutils.GetID())
 
 			if testCase.expectedErr {
 				assert.NotNil(err)
