@@ -32,7 +32,7 @@ func TestDM(t *testing.T) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), testutils.GetInternalServerAppError())
 			},
-			expectedError: "channol not found",
+			expectedError: "channel not found",
 		},
 		{
 			description: "DM: error in CreatePost method",
