@@ -301,7 +301,7 @@ func TestGetClientFromUser(t *testing.T) {
 			setupAPI:    func(a *plugintest.API) {},
 		},
 		{
-			description: "GetClientFromUser: Unable to parse  thetoken",
+			description: "GetClientFromUser: Unable to parse the token",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
