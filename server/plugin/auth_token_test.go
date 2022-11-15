@@ -136,23 +136,23 @@ func Test_ParseAuthToken(t *testing.T) {
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because aes.NewCipher gives error",
-			expectedError: "error becuase aes.NewCipher gives error",
+			expectedError: "error because aes.NewCipher gives error",
 			setupPlugin: func() {
 				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
-					return &mockBLock{}, errors.New("error becuase aes.NewCipher gives error")
+					return &mockBLock{}, errors.New("error because aes.NewCipher gives error")
 				})
 			},
 			encodedToken: "mockEncodedToken",
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because cipher.NewGCM gives error",
-			expectedError: "error becuase cipher.NewGCM gives error",
+			expectedError: "error because cipher.NewGCM gives error",
 			setupPlugin: func() {
 				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
 					return &mockBLock{}, nil
 				})
 				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
-					return &mockAesgcm{}, errors.New("error becuase cipher.NewGCM gives error")
+					return &mockAesgcm{}, errors.New("error because cipher.NewGCM gives error")
 				})
 			},
 			encodedToken: "mockEncodedToken",
@@ -171,7 +171,7 @@ func Test_ParseAuthToken(t *testing.T) {
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because json.Unmarshal gives error",
-			expectedError: "error becuase json.Unmarshal gives error",
+			expectedError: "error because json.Unmarshal gives error",
 			setupPlugin: func() {
 				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
 					return &mockBLock{}, nil
@@ -180,7 +180,7 @@ func Test_ParseAuthToken(t *testing.T) {
 					return &mockAesgcm{}, nil
 				})
 				monkey.Patch(json.Unmarshal, func(_ []byte, _ interface{}) error {
-					return errors.New("error becuase json.Unmarshal gives error")
+					return errors.New("error because json.Unmarshal gives error")
 				})
 			},
 			encodedToken: "mockEncodedToken",
