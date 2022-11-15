@@ -159,6 +159,7 @@ const (
 	ErrorGetStates                        = "Error in getting the states"
 	ErrorUpdateState                      = "Error in updating the state"
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
+	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 )
 
 var (

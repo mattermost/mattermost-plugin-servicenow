@@ -419,8 +419,8 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 
 	record.RecordType = recordType
 	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
-		p.API.LogError("Error in handling the nested fields", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Error in handling the nested fields. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
 	}
 
@@ -640,14 +640,14 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	incident, err := serializer.IncidentFromJSON(r.Body)
 	if err != nil {
-		p.API.LogError("Error in unmarshalling the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in unmarshalling the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
 	if err = incident.IsValid(); err != nil {
-		p.API.LogError("Error in validating the request body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Error in validating the request body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorValidatingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorValidatingRequestBody, err.Error())})
 		return
 	}
 
@@ -678,14 +678,14 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
-		p.API.LogError("Invalid body", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("Invalid body. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
 	}
 
 	post := record.CreateSharingPost(channel.Id, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
-		p.API.LogError("Unable to create post", "Error", postErr.Error())
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
 	returnStatusOK(w)
