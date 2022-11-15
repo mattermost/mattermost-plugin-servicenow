@@ -11,11 +11,6 @@ import (
 )
 
 const (
-	UserKeyPrefix   = "user_"
-	OAuth2KeyPrefix = "oauth2_"
-)
-
-const (
 	OAuth2KeyExpiration   = 15 * time.Minute
 	oAuth2StateTimeToLive = 300 // seconds
 )
@@ -52,8 +47,8 @@ func (p *Plugin) NewStore(api plugin.API) Store {
 	return &pluginStore{
 		plugin:   p,
 		basicKV:  basicKV,
-		userKV:   kvstore.NewHashedKeyStore(basicKV, UserKeyPrefix),
-		oauth2KV: kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(api, OAuth2KeyExpiration), OAuth2KeyPrefix),
+		userKV:   kvstore.NewHashedKeyStore(basicKV, constants.UserKeyPrefix),
+		oauth2KV: kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(api, OAuth2KeyExpiration), constants.OAuth2KeyPrefix),
 	}
 }
 

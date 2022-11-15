@@ -162,6 +162,12 @@ const (
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 )
 
+// kv store keys prefix
+const (
+	UserKeyPrefix   = "user_"
+	OAuth2KeyPrefix = "oauth2_"
+)
+
 var (
 	ValidSubscriptionTypes = map[string]bool{
 		SubscriptionTypeRecord: true,
