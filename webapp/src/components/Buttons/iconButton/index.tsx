@@ -3,7 +3,7 @@ import {Button} from 'react-bootstrap';
 
 import {Tooltip} from '@brightscout/mattermost-ui-library';
 
-import {onPressingEnterKey} from 'utils';
+import {onPressingEnterKey} from 'src/utils';
 
 import './styles.scss';
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import {useDispatch} from 'react-redux';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import {hideModal as hideEditModal} from 'reducers/editSubscriptionModal';
+import {hideModal as hideEditModal} from 'src/reducers/editSubscriptionModal';
 
 import AddOrEditSubscriptionModal from '../subComponents';
 

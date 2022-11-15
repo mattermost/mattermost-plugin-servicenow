@@ -2,7 +2,7 @@ import React, {forwardRef, useState, useEffect} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Dropdown} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'plugin_constants';
+import Constants, {RecordType} from 'src/plugin_constants';
 
 type RecordTypePanelProps = {
     className?: string;

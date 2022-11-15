@@ -1,20 +1,20 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {EmptyState, SubscriptionCard, BellIcon, ToggleSwitch} from '@brightscout/mattermost-ui-library';
+import {EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
 
-import Spinner from 'components/spinner';
+import Spinner from 'src/components/spinner';
 
-import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'src/plugin_constants';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import {showModal as showAddModal} from 'reducers/addSubscriptionModal';
+import {showModal as showAddModal} from 'src/reducers/addSubscriptionModal';
 
-import Utils from 'utils';
+import Utils from 'src/utils';
 
 import Header from './rhsHeader';
 
@@ -34,8 +34,8 @@ type RhsDataProps = {
     setResetFilter: (resetFilter: boolean) => void;
 }
 
-// TODO: Add proper type here
-const BulkSubscriptionHeaders: Record<string, string> = {
+type BulkSubscriptionRecordType = Extract<RecordType, RecordType.INCIDENT | RecordType.PROBLEM | RecordType.CHANGE_REQUEST>;
+const BulkSubscriptionHeaders: Record<BulkSubscriptionRecordType, string> = {
     [RecordType.INCIDENT]: 'Incidents',
     [RecordType.PROBLEM]: 'Problems',
     [RecordType.CHANGE_REQUEST]: 'Change Requests',
@@ -89,7 +89,7 @@ const RhsData = ({
 
     const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
         const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
-        const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type];
+        const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type as BulkSubscriptionRecordType];
         const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
 
         return (

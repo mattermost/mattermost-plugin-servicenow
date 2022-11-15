@@ -1,4 +1,4 @@
-import reducer, {showModal, hideModal, SubscriptionModalState} from 'reducers/addSubscriptionModal';
+import reducer, {showModal, hideModal, SubscriptionModalState} from 'src/reducers/addSubscriptionModal';
 
 const previousState: SubscriptionModalState = {
     open: false,

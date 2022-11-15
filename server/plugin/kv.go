@@ -114,7 +114,7 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 
 				users = append(users, &serializer.IncidentCaller{
 					MattermostUserID: user.MattermostUserID,
-					Username: user.Username,
+					Username:         user.Username,
 					ServiceNowUser:   user.ServiceNowUser,
 				})
 			}

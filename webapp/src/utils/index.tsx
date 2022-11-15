@@ -2,20 +2,27 @@
  * Utils
  */
 
-import {SubscriptionType, RecordType} from 'plugin_constants';
+import React from 'react';
+
+import {Button} from '@brightscout/mattermost-ui-library';
+
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'src/plugin_constants';
+
 import {id as pluginId} from '../manifest';
 
 const getBaseUrls = (): {
     pluginApiBaseUrl: string;
     mattermostApiBaseUrl: string;
+    publicFilesUrl: string;
 } => {
     const url = new URL(window.location.href);
     const baseUrl = `${url.protocol}//${url.host}`;
     const pluginUrl = `${baseUrl}/plugins/${pluginId}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
     const mattermostApiBaseUrl = `${baseUrl}/api/v4`;
+    const publicFilesUrl = `${pluginUrl}/public/`;
 
-    return {pluginApiBaseUrl, mattermostApiBaseUrl};
+    return {pluginApiBaseUrl, mattermostApiBaseUrl, publicFilesUrl};
 };
 
 /**
@@ -57,9 +64,54 @@ export const onPressingEnterKey = (event: React.KeyboardEvent<HTMLSpanElement> |
     func();
 };
 
+export const getLinkData = (value: string): LinkData => {
+    const data = value.split(']');
+    return ({
+        display_value: data[0].slice(1),
+        link: data[1].slice(1, -1),
+    });
+};
+
+export const validateKeysContainingLink = (key: string) => (
+    key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
+    key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
+    key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
+    key === RecordDataLabelConfigKey.ASSIGNED_TO ||
+    key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
+);
+
+const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
+    <>
+        <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
+        <a
+            target='_blank'
+            rel='noreferrer'
+            href={getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
+        >
+            <Button
+                text='Connect your account'
+                onClick={onClick}
+            />
+        </a>
+    </>
+);
+
+const getResultPanelHeader = (error: APIError | null, onClick: () => void, successMessage?: string) => {
+    if (error) {
+        return error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired ?
+            getContentForResultPanelWhenDisconnected(error.message, onClick) :
+            error.message;
+    }
+
+    return successMessage;
+};
+
 export default {
     getBaseUrls,
     debounce,
     getSubscriptionHeaderLink,
     onPressingEnterKey,
+    getLinkData,
+    validateKeysContainingLink,
+    getResultPanelHeader,
 };

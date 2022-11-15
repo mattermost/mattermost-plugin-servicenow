@@ -11,6 +11,10 @@ const (
 
 	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin\n" +
 		"You've successfully connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n"
+	UserAlreadyConnectedMessage = "You are already connected to ServiceNow."
+	UserConnectMessage          = "Click here to link your ServiceNow account."
+	InvalidConfigUserMessage    = "Please contact your system administrator to correctly configure the ServiceNow plugin."
+	InvalidConfigAdminMessage   = "Before using this plugin, you'll need to configure it in the System Console`"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
@@ -70,6 +74,10 @@ const (
 	FieldNumber               = "number"
 	FieldShortDescription     = "short_description"
 	FieldCommentsAndWorkNotes = "comments_and_work_notes"
+	FieldAssignedTo           = "assigned_to"
+	FieldAssignmentGroup      = "assignment_group"
+	FieldKnowledgeBase        = "knowledge_base"
+	FieldCategory             = "category"
 
 	// Websocket events
 	WSEventConnect                        = "connect"
@@ -123,6 +131,8 @@ const (
 	ErrorInvalidRecordType                = "Invalid record type"
 	ErrorInvalidTeamID                    = "Invalid team ID"
 	ErrorInvalidChannelID                 = "Invalid channel ID"
+	ErrorInvalidSecret                    = "Invalid secret"
+	ErrorInvalidQueryParam                = "Invalid query param"
 	ErrorNotAuthorized                    = "Not authorized"
 	ErrorUserAlreadyConnected             = "user is already connected to ServiceNow"
 	ErrorMissingUserCodeState             = "missing user, code or state"
@@ -132,6 +142,23 @@ const (
 	ErrorGetUsers                         = "Failed to get the users."
 	ErrorEmptyShortDescription            = "short description should not be empty"
 	ErrorGetBotChannel                    = "Couldn't get bot's DM channel"
+	ErrorGetUser                          = "Unable to get the user"
+	ErrorCreatePost                       = "Unable to create post"
+	ErrorGetChannel                       = "Error in getting channels for team and user"
+	ErrorGetBundlePath                    = "Error in getting the bundle path"
+	ErrorReadingFile                      = "Error in reading the file"
+	ErrorUnmarshallingRequestBody         = "Error in unmarshalling the request body"
+	ErrorValidatingRequestBody            = "Error in validating the request body"
+	ErrorGetSubscriptions                 = "Error in getting all subscriptions"
+	ErrorEditingSubscription              = "Error in editing the subscription"
+	ErrorDeleteSubscription               = "Error in deleting the subscription"
+	ErrorGetComments                      = "Error in getting all comments"
+	ErrorCreateComment                    = "Error in creating the comment"
+	ErrorSearchingRecord                  = "Error in searching for records in ServiceNow"
+	ErrorGetRecord                        = "Error in getting record from ServiceNow"
+	ErrorGetStates                        = "Error in getting the states"
+	ErrorUpdateState                      = "Error in updating the state"
+	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 )
 
 var (

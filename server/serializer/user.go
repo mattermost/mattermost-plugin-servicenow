@@ -11,8 +11,8 @@ type ServiceNowUser struct {
 }
 
 type User struct {
-	MattermostUserID string 
+	MattermostUserID string
 	OAuth2Token      string
-	Username string 
+	Username         string
 	ServiceNowUser
 }

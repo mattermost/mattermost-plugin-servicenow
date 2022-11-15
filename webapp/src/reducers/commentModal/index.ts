@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-type CommentModalState = {
+export type CommentModalState = {
     open: boolean;
     data?: CommentAndStateModalData;
 }

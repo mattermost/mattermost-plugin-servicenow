@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-server/v5/model"
@@ -159,27 +160,27 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	return post
 }
 
-func (sr *ServiceNowRecord) HandleNestedFields() error {
+func (sr *ServiceNowRecord) HandleNestedFields(serviceNowURL string) error {
 	var err error
 	if sr.RecordType == constants.RecordTypeKnowledge {
-		sr.KnowledgeBase, err = GetNestedFieldValue(sr.KnowledgeBase)
+		sr.KnowledgeBase, err = GetNestedFieldValue(sr.KnowledgeBase, constants.FieldKnowledgeBase, serviceNowURL)
 		if err != nil {
 			return fmt.Errorf("%w : kb_knowledge_base", err)
 		}
-		sr.Category, err = GetNestedFieldValue(sr.Category)
+		sr.Category, err = GetNestedFieldValue(sr.Category, constants.FieldCategory, serviceNowURL)
 		if err != nil {
 			return fmt.Errorf("%w : kb_category", err)
 		}
-		sr.Author, err = GetNestedFieldValue(sr.Author)
+		sr.Author, err = GetNestedFieldValue(sr.Author, constants.FieldAssignedTo, serviceNowURL)
 		if err != nil {
 			return fmt.Errorf("%w : author", err)
 		}
 	} else {
-		sr.AssignedTo, err = GetNestedFieldValue(sr.AssignedTo)
+		sr.AssignedTo, err = GetNestedFieldValue(sr.AssignedTo, constants.FieldAssignedTo, serviceNowURL)
 		if err != nil {
 			return fmt.Errorf("%w : assigned_to", err)
 		}
-		sr.AssignmentGroup, err = GetNestedFieldValue(sr.AssignmentGroup)
+		sr.AssignmentGroup, err = GetNestedFieldValue(sr.AssignmentGroup, constants.FieldAssignmentGroup, serviceNowURL)
 		if err != nil {
 			return fmt.Errorf("%w : assignment_group", err)
 		}
@@ -188,7 +189,7 @@ func (sr *ServiceNowRecord) HandleNestedFields() error {
 	return err
 }
 
-func GetNestedFieldValue(field interface{}) (string, error) {
+func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (string, error) {
 	if _, ok := field.(string); ok || field == nil {
 		return "N/A", nil
 	}
@@ -203,5 +204,23 @@ func GetNestedFieldValue(field interface{}) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("[%s](%s)", nf.DisplayValue, nf.Link), nil
+	sysID := GetSysID(nf.Link)
+	url := serviceNowURL
+	switch fieldType {
+	case constants.FieldAssignedTo:
+		url += fmt.Sprintf(constants.PathSysUser, sysID)
+	case constants.FieldAssignmentGroup:
+		url += fmt.Sprintf(constants.PathSysUserGroup, sysID)
+	case constants.FieldKnowledgeBase:
+		url += fmt.Sprintf(constants.PathKnowledgeBase, sysID)
+	case constants.FieldCategory:
+		url += fmt.Sprintf(constants.PathCategory, sysID)
+	}
+
+	return fmt.Sprintf("[%s](%s)", nf.DisplayValue, url), nil
+}
+
+func GetSysID(link string) string {
+	linkData := strings.Split(link, "/")
+	return linkData[len(linkData)-1]
 }

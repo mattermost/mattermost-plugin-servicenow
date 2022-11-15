@@ -1,4 +1,4 @@
-import reducer, {refetch, resetRefetch, RefetchState} from 'reducers/refetchState';
+import reducer, {refetch, resetRefetch, RefetchState} from 'src/reducers/refetchState';
 
 const previousState: RefetchState = {
     refetch: false,

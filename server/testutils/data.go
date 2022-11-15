@@ -36,10 +36,11 @@ func GetPost() *model.Post {
 	}
 }
 
-func GetUser() *model.User {
+func GetUser(role string) *model.User {
 	return &model.User{
 		Id:       api4.GenerateTestId(),
 		Username: "test-user",
+		Roles:    role,
 	}
 }
 
@@ -90,8 +91,10 @@ func GetServiceNowShortDescription() string {
 	return "Test description"
 }
 
-func GetServiceNowComments() string {
-	return "Test comment"
+func GetServiceNowComments() *serializer.ServiceNowComment {
+	return &serializer.ServiceNowComment{
+		CommentsAndWorkNotes: "Test comment",
+	}
 }
 
 func GetServiceNowPartialRecord() *serializer.ServiceNowPartialRecord {
@@ -147,6 +150,12 @@ func GetSerializerUser() *serializer.User {
 
 func GetLimitAndOffset() (limit, offset string) {
 	return fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPerPage * constants.DefaultPage)
+}
+
+func GetServiceNowUser() *serializer.ServiceNowUser {
+	return &serializer.ServiceNowUser{
+		UserID: GetServiceNowSysID(),
+	}
 }
 
 func GetServiceNowRecord() *serializer.ServiceNowRecord {
