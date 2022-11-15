@@ -332,8 +332,8 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 			description:        "SearchRecordsInServiceNow: with error",
 			statusCode:         http.StatusInternalServerError,
 			expectedStatusCode: http.StatusInternalServerError,
-			errorMessage:       errors.New("error in searching records"),
-			expectedErr:        "error in searching records",
+			errorMessage:       errors.New("error in searching the records"),
+			expectedErr:        "error in searching the records",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -371,8 +371,8 @@ func TestGetRecordFromServiceNowClient(t *testing.T) {
 			description:        "GetRecordFromServiceNow: with error",
 			statusCode:         http.StatusInternalServerError,
 			expectedStatusCode: http.StatusInternalServerError,
-			errorMessage:       errors.New("error in getting records"),
-			expectedErr:        "error in getting records",
+			errorMessage:       errors.New("error in getting the records"),
+			expectedErr:        "error in getting the records",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -410,8 +410,8 @@ func TestGetAllCommentsClient(t *testing.T) {
 			description:        "GetAllComments: with error",
 			statusCode:         http.StatusInternalServerError,
 			expectedStatusCode: http.StatusInternalServerError,
-			errorMessage:       errors.New("error in getting comments"),
-			expectedErr:        "error in getting comments",
+			errorMessage:       errors.New("error in getting the comments"),
+			expectedErr:        "error in getting the comments",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -449,8 +449,8 @@ func TestAddCommentClient(t *testing.T) {
 			description:        "AddComment: with error",
 			statusCode:         http.StatusInternalServerError,
 			expectedStatusCode: http.StatusInternalServerError,
-			errorMessage:       errors.New("error in adding comment"),
-			expectedErr:        "error in adding comment",
+			errorMessage:       errors.New("error in adding the comment"),
+			expectedErr:        "error in adding the comment",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -498,8 +498,8 @@ func TestGetStatesFromServiceNowClient(t *testing.T) {
 			description:        "GetStatesFromServiceNow: with error",
 			statusCode:         http.StatusInternalServerError,
 			expectedStatusCode: http.StatusInternalServerError,
-			errorMessage:       errors.New("error in getting state"),
-			expectedErr:        "error in getting state",
+			errorMessage:       errors.New("error in getting the state"),
+			expectedErr:        "error in getting the state",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {

@@ -114,7 +114,7 @@ func TestExecuteCommand(t *testing.T) {
 					return true, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetUser", func(*Plugin, string) (*serializer.User, error) {
-					return nil, errors.New("error while getting user")
+					return nil, errors.New("error while getting the user")
 				})
 				setMockConfigurations(&p)
 			},
@@ -247,13 +247,13 @@ func TestCheckConnected(t *testing.T) {
 			errorMessage:     ErrNotFound,
 		},
 		{
-			description: "CheckConnected: Unable to get user",
+			description: "CheckConnected: Unable to get the user",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			isResponse:       true,
 			expectedResponse: genericErrorMessage,
-			errorMessage:     errors.New("unable to get user"),
+			errorMessage:     errors.New("unable to get the user"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -301,13 +301,13 @@ func TestGetClientFromUser(t *testing.T) {
 			setupAPI:    func(a *plugintest.API) {},
 		},
 		{
-			description: "GetClientFromUser: Unable to parse token",
+			description: "GetClientFromUser: Unable to parse  thetoken",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			isResponse:       true,
 			expectedResponse: genericErrorMessage,
-			errorMessage:     errors.New("unable to parse token"),
+			errorMessage:     errors.New("unable to parse the token"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -362,12 +362,12 @@ func TestHandleDisconnect(t *testing.T) {
 			expectedResponse: disconnectSuccessMessage,
 		},
 		{
-			description: "HandleDisconnect: Unable to disconnect user",
+			description: "HandleDisconnect: Unable to disconnect the user",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			expectedResponse: disconnectErrorMessage,
-			errorMessage:     errors.New("unable to disconnect user"),
+			errorMessage:     errors.New("unable to disconnect the user"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -508,14 +508,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 			expectedError: "Unknown filter invalid",
 		},
 		{
-			description: "HandleListSubscriptions: Unable to get subscriptions",
+			description: "HandleListSubscriptions: Unable to get the subscriptions",
 			params:      []string{"me", "all_channels"},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					nil, 0, errors.New("unable to get subscriptions"),
+					nil, 0, errors.New("unable to get the subscriptions"),
 				)
 			},
 			isResponse:       true,
@@ -655,14 +655,14 @@ func TestHandleDeleteSubscription(t *testing.T) {
 			expectedError:    genericWaitMessage,
 		},
 		{
-			description: "HandleDeleteSubscription: Unable to delete subscription",
+			description: "HandleDeleteSubscription: Unable to delete the subscription",
 			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
-					0, errors.New("unable to delete subscriptions"),
+					0, errors.New("unable to delete the subscriptions"),
 				)
 			},
 			isResponse:       true,
@@ -731,14 +731,14 @@ func TestHandleEditSubscription(t *testing.T) {
 			expectedError: invalidSubscriptionIDMessage,
 		},
 		{
-			description: "HandleEditSubscription: Unable to get subscription",
+			description: "HandleEditSubscription: Unable to get the subscription",
 			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					nil, 0, errors.New("unable to get subscriptions"),
+					nil, 0, errors.New("unable to get the subscriptions"),
 				)
 			},
 			expectedError: genericErrorMessage,

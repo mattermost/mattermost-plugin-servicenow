@@ -42,7 +42,7 @@ func TestDM(t *testing.T) {
 				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), nil)
 				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), testutils.GetInternalServerAppError())
 			},
-			expectedError: "error in creating post",
+			expectedError: "error in creating the post",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {

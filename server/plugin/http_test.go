@@ -70,13 +70,13 @@ func TestCall(t *testing.T) {
 			expectedStatusCode:   http.StatusInternalServerError,
 		},
 		{
-			description: "Call: Do method returns an error while making request",
+			description: "Call: Do method returns an error while making the request",
 			setupClient: func(c *client) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
-					return &http.Response{}, errors.New("error while making request")
+					return &http.Response{}, errors.New("error while making the request")
 				})
 			},
-			expectedErrorMessage: "error while making request",
+			expectedErrorMessage: "error while making the request",
 			expectedStatusCode:   http.StatusInternalServerError,
 		},
 		{
