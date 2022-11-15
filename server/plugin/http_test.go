@@ -63,7 +63,7 @@ func TestCall(t *testing.T) {
 			description: "Call: Do method returns an error",
 			setupClient: func(c *client) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
-					return &http.Response{}, errors.New("mockError invalid character '<'")
+					return &http.Response{}, errors.New("invalid character '<'")
 				})
 			},
 			expectedErrorMessage: ErrorContentTypeNotJSON.Error(),
@@ -73,10 +73,10 @@ func TestCall(t *testing.T) {
 			description: "Call: Do method returns an error while making request",
 			setupClient: func(c *client) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
-					return &http.Response{}, errors.New("mockError")
+					return &http.Response{}, errors.New("error while making request")
 				})
 			},
-			expectedErrorMessage: "mockError",
+			expectedErrorMessage: "error while making request",
 			expectedStatusCode:   http.StatusInternalServerError,
 		},
 		{

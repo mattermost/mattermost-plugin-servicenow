@@ -80,7 +80,7 @@ func TestExecuteCommand(t *testing.T) {
 			},
 			setupPlugin: func() {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "IsAuthorizedSysAdmin", func(*Plugin, string) (bool, error) {
-					return false, errors.New("mockError")
+					return false, errors.New("error while checking for user authorization")
 				})
 			},
 			args: &model.CommandArgs{
@@ -114,7 +114,7 @@ func TestExecuteCommand(t *testing.T) {
 					return true, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetUser", func(*Plugin, string) (*serializer.User, error) {
-					return nil, errors.New("mockError")
+					return nil, errors.New("error while getting user")
 				})
 				setMockConfigurations(&p)
 			},
@@ -253,7 +253,7 @@ func TestCheckConnected(t *testing.T) {
 			},
 			isResponse:       true,
 			expectedResponse: genericErrorMessage,
-			errorMessage:     errors.New("mockError"),
+			errorMessage:     errors.New("unable to get user"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -307,7 +307,7 @@ func TestGetClientFromUser(t *testing.T) {
 			},
 			isResponse:       true,
 			expectedResponse: genericErrorMessage,
-			errorMessage:     errors.New("mockError"),
+			errorMessage:     errors.New("unable to parse token"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -367,7 +367,7 @@ func TestHandleDisconnect(t *testing.T) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
 			expectedResponse: disconnectErrorMessage,
-			errorMessage:     errors.New("mockError"),
+			errorMessage:     errors.New("unable to disconnect user"),
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -515,7 +515,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
-					nil, 0, errors.New("mockError"),
+					nil, 0, errors.New("unable to get subscriptions"),
 				)
 			},
 			isResponse:       true,
@@ -662,7 +662,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
-					0, errors.New("mockError"),
+					0, errors.New("unable to delete subscriptions"),
 				)
 			},
 			isResponse:       true,
@@ -738,7 +738,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					nil, 0, errors.New("mockError"),
+					nil, 0, errors.New("unable to get subscriptions"),
 				)
 			},
 			expectedError: genericErrorMessage,
