@@ -46,9 +46,9 @@ func IncidentFromJSON(data io.Reader) (*IncidentPayload, error) {
 	return ip, nil
 }
 
-func (i *IncidentPayload) IsValid() error {
-	i.ShortDescription = strings.TrimSpace(i.ShortDescription)
-	if i.ShortDescription == "" {
+func (ip *IncidentPayload) IsValid() error {
+	ip.ShortDescription = strings.TrimSpace(ip.ShortDescription)
+	if ip.ShortDescription == "" {
 		return errors.New(constants.ErrorEmptyShortDescription)
 	}
 
