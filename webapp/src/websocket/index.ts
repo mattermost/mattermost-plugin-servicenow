@@ -1,23 +1,21 @@
 import {Store, Action} from 'redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'mattermost-webapp/types/store';
 
-import {SubscriptionEventsMap} from 'plugin_constants';
+import {SubscriptionEventsMap} from 'src/plugin_constants';
 
-import {setConnected} from 'reducers/connectedState';
-import {refetch} from 'reducers/refetchState';
-import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'reducers/addSubscriptionModal';
-import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'reducers/editSubscriptionModal';
-import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'reducers/shareRecordModal';
-import {showModal as showCommentModal, hideModal as hideCommentModal} from 'reducers/commentModal';
-import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'reducers/updateStateModal';
+import {setConnected} from 'src/reducers/connectedState';
+import {refetch} from 'src/reducers/refetchState';
+import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'src/reducers/addSubscriptionModal';
+import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'src/reducers/editSubscriptionModal';
+import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
+import {showModal as showCommentModal, hideModal as hideCommentModal} from 'src/reducers/commentModal';
+import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(true) as Action);
-
-        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
-        const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
+        const {rhsState, pluggableId} = (store.getState() as GlobalState).views.rhs;
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
         }
@@ -60,8 +58,7 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
 
 export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
-        // TODO: Fix the type of state below by importing the GlobalState from mattermost-webapp
-        const {rhsState, pluggableId} = (store.getState() as any).views.rhs;
+        const {rhsState, pluggableId} = (store.getState() as GlobalState).views.rhs;
         if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
             store.dispatch(refetch() as Action);
         }

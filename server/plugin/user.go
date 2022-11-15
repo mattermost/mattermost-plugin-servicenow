@@ -66,7 +66,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 
 	u := &serializer.User{
 		MattermostUserID: mattermostUserID,
-		Username: user.Username,
+		Username:         user.Username,
 		OAuth2Token:      encryptedToken,
 		ServiceNowUser:   *serviceNowUser,
 	}

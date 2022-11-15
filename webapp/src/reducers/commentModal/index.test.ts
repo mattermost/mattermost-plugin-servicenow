@@ -1,6 +1,6 @@
-import {RecordType} from 'plugin_constants';
+import {RecordType} from 'src/plugin_constants';
 
-import reducer, {showModal, hideModal, CommentModalState} from 'reducers/commentModal';
+import reducer, {showModal, hideModal, CommentModalState} from 'src/reducers/commentModal';
 
 const previousState: CommentModalState = {
     open: false,

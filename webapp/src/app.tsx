@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
 
-import usePluginApi from 'hooks/usePluginApi';
+import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants from 'plugin_constants';
+import Constants from 'src/plugin_constants';
 
 const GetConfig = (): JSX.Element => {
     const {makeApiRequest} = usePluginApi();

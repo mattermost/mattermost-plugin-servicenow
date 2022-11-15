@@ -4,7 +4,7 @@ import {shallow, ShallowWrapper} from 'enzyme';
 
 import {ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
 
-import {SubscriptionType} from 'plugin_constants';
+import {SubscriptionType} from 'src/plugin_constants';
 
 import SubscriptionTypePanel from './subscriptionTypePanel';
 

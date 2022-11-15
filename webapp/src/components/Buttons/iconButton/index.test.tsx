@@ -1,7 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 
-import IconButton from 'components/Buttons/iconButton';
+import IconButton from 'src/components/Buttons/iconButton';
 
 describe('IconButton', () => {
     const baseProps = {

@@ -4,7 +4,6 @@ const (
 	PathPrefix                 = "/api/v1"
 	PathOAuth2Connect          = "/oauth2/connect"
 	PathOAuth2Complete         = "/oauth2/complete"
-	PathDownloadUpdateSet      = "/download"
 	PathCreateSubscription     = "/subscriptions"
 	PathGetAllSubscriptions    = PathCreateSubscription
 	PathDeleteSubscription     = PathCreateSubscription + "/{subscription_id:" + ServiceNowSysIDRegex + "}"
@@ -29,4 +28,11 @@ const (
 	PathGetRecordsFromServiceNow = "api/now/table/{tableName}"
 	PathGetStatesFromServiceNow  = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
 	PathGetUserFromServiceNow    = "/api/now/table/sys_user"
+
+	// ServiceNow URLs
+	PathServiceNowURL = "/now/nav/ui/classic/params/target"
+	PathSysUser       = "/sys_user.do?sys_id=%s"
+	PathSysUserGroup  = "/sys_user_group.do?sys_id=%s"
+	PathKnowledgeBase = PathServiceNowURL + "/kb_knowledge_base.do%%3Fsys_id=%s"
+	PathCategory      = PathServiceNowURL + "/kb_category.do%%3Fsys_id=%s"
 )
