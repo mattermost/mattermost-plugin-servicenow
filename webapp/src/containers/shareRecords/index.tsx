@@ -202,7 +202,7 @@ const ShareRecords = () => {
                             />
                         )}
                         <ModalFooter
-                            onConfirm={recordData ? shareRecord : null}
+                            onConfirm={recordData?.sys_id ? shareRecord : null}
                             confirmBtnText='Share'
                             confirmDisabled={showModalLoader}
                             onHide={hideModal}
