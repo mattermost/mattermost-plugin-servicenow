@@ -688,7 +688,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
-	returnStatusOK(w)
+	p.writeJSON(w, statusCode, record)
 }
 
 func returnStatusOK(w http.ResponseWriter) {
