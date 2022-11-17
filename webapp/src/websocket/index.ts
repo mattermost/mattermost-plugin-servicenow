@@ -8,6 +8,7 @@ import {setConnected} from 'src/reducers/connectedState';
 import {refetch} from 'src/reducers/refetchState';
 import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'src/reducers/addSubscriptionModal';
 import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'src/reducers/editSubscriptionModal';
+import {showModal as showIncidentModal, hideModal as hideIncidentModal} from 'src/reducers/incidentModal';
 import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
 import {showModal as showCommentModal, hideModal as hideCommentModal} from 'src/reducers/commentModal';
 import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
@@ -30,6 +31,7 @@ export function handleDisconnect(store: Store<GlobalState, Action<Record<string,
         store.dispatch(hideShareRecordModal() as Action);
         store.dispatch(hideCommentModal() as Action);
         store.dispatch(hideUpdateStateModal() as Action);
+        store.dispatch(hideIncidentModal() as Action);
     };
 }
 
@@ -90,5 +92,11 @@ export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Reco
             recordId: data.record_id,
         };
         store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
+    };
+}
+
+export function handleOpenIncidentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(showIncidentModal() as Action);
     };
 }

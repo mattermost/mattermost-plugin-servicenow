@@ -199,6 +199,8 @@ const ShareRecords = () => {
                                 placeholder='Search channel to share'
                                 validationError={showChannelValidationError}
                                 editing={true}
+                                required={true}
+                                className='padding-top-10'
                             />
                         )}
                         <ModalFooter

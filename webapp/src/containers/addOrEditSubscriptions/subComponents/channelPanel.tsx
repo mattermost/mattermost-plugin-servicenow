@@ -26,6 +26,7 @@ type ChannelPanelProps = {
     editing?: boolean;
     showFooter? :boolean;
     placeholder?: string;
+    required?: boolean;
 }
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
@@ -43,6 +44,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     editing = false,
     showFooter = false,
     placeholder,
+    required = false,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
     const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
@@ -149,7 +151,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
             className={className}
             ref={channelPanelRef}
         >
-            <div className={`padding-h-12 ${showFooter ? 'padding-v-20 wizard__body-container' : 'padding-top-10'}`}>
+            <div className={`padding-h-12 ${showFooter && 'padding-v-20 wizard__body-container'}`}>
                 <AutoSuggest
                     placeholder={placeholder || 'Select Channel'}
                     inputValue={channelAutoSuggestValue}
@@ -159,7 +161,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                         suggestions: channelSuggestions,
                         renderValue: (suggestion) => getChannelAutoSuggestOptionJSX(suggestion.channelName, suggestion.channelType),
                     }}
-                    required={true}
+                    required={required}
                     error={(validationFailed || validationError) && Constants.RequiredMsg}
                     disabled={getChannelState().isLoading}
                     loadingSuggestions={getChannelState().isLoading}

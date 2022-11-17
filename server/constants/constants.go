@@ -88,6 +88,7 @@ const (
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
 	WSEventOpenCommentModal               = "comment_modal"
 	WSEventOpenUpdateStateModal           = "update_state"
+	WSEventOpenCreateIncidentModal        = "create_incident"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -115,6 +116,8 @@ const (
 	CommandSubscriptions  = "subscriptions"
 	CommandUnsubscribe    = "unsubscribe"
 	CommandSearchAndShare = "share"
+	CommandCreate         = "create"
+	SubCommandIncident    = "incident"
 	SubCommandList        = "list"
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"

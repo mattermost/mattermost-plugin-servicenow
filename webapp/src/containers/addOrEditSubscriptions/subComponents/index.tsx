@@ -365,6 +365,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     actionBtnDisabled={showModalLoader}
                     editing={true}
                     showFooter={true}
+                    required={true}
                 />
                 <SubscriptionTypePanel
                     className={`

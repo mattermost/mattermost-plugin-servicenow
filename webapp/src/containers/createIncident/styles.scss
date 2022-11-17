@@ -1,0 +1,56 @@
+.incident-body {
+    padding: 25px 32px 0px 32px;
+    overflow-y: auto;
+    min-height: 450px;
+    max-height: 480px;
+
+    &__input-field {
+        .form-group {
+            &__control {
+                border-color: rgba(var(--center-channel-color-rgb), 0.1);
+                border-width: 1px;
+                box-shadow: none;
+                &::placeholder {
+                    color: rgba(var(--center-channel-color-rgb), 0.7) !important;
+                }
+                &:focus {
+                    border-color: rgba(var(--center-channel-color-rgb), 0.2);
+                }
+            }
+            &__control--err {
+                &::placeholder {
+                  color: rgba(var(--error-text-color-rgb), 0.8) !important;
+                }
+            }
+        }
+    }
+
+    &__text-area {
+        margin-bottom: 10px;
+        margin-left: 1px;
+
+        .textarea__control {
+            margin-top: 5px;
+            min-width: 533px;
+            max-width: 533px;
+            height: 50px;
+            min-height: 37px;
+            border-width: 1px;
+            border-color: rgba(var(--center-channel-color-rgb), 0.1);
+            &::placeholder {
+                color: rgba(var(--center-channel-color-rgb), 0.7);
+            }
+            &:focus {
+                border-color: rgba(var(--center-channel-color-rgb), 0.2);
+            }
+        }
+
+    }
+
+    &__auto-suggest {
+        .auto-suggest {
+            width: 534px;
+            margin-left: -12px;
+        }
+    }
+}

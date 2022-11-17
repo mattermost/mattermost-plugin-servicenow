@@ -169,3 +169,15 @@ type StateData = {
     label: string;
     value: string;
 }
+
+type ServiceNowUser = {
+    sys_id: string;
+    email: string;
+    user_name: string;
+}
+
+type CallerData = {
+    mattermostUserID: string;
+    username: string;
+    serviceNowUser: ServiceNowUser;
+}

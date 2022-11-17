@@ -219,6 +219,21 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
     [SubscriptionEvents.ASSIGNMENT_GROUP]: 'Assignment group changed',
 };
 
+export const IncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
+    {
+        value: '1',
+        label: 'High',
+    },
+    {
+        value: '2',
+        label: 'Medium',
+    },
+    {
+        value: '3',
+        label: 'Low',
+    },
+];
+
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
     getChannels: {
