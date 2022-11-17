@@ -111,7 +111,7 @@ const Header = ({
                                 isDisabled={!isFilterApplied()}
                             />
                             <Button
-                                text='Hide'
+                                text='Close'
                                 onClick={() => setShowFilter(false)}
                             />
                         </div>

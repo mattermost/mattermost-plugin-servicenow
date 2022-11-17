@@ -222,11 +222,14 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if statusCode, err = client.CreateSubscription(subscription); err != nil {
+	resp, statusCode, err := client.CreateSubscription(subscription)
+	if err != nil {
 		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
 		p.API.LogError("Error in creating subscription", "Error", err.Error())
 		return
 	}
+
+	p.Ephemeral(resp.UserID, resp.ChannelID, "", fmt.Sprintf("Subscription created successfully with ID: %s.", resp.SysID))
 
 	// Here, we are setting the Content-Type header even when it is being set in the "returnStatusOK" function
 	// because after "WriteHeader" is called, no headers can be set, so we have to set it before the call to "WriteHeader"

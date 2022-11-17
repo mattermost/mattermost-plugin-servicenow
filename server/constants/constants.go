@@ -155,6 +155,7 @@ const (
 	ErrorGetStates                        = "Error in getting the states"
 	ErrorUpdateState                      = "Error in updating the state"
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
+	ErrorCommandInvalidNumberOfParams     = "One or more fields are missing to run the command. Please run `/servicenow help` for more information."
 )
 
 var (
