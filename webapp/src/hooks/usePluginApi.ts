@@ -4,7 +4,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import services from 'src/services';
 
 function usePluginApi() {
-    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
+    const pluginState = useSelector((state: ReduxState) => state['plugins-mattermost-plugin-servicenow']);
     const dispatch = useDispatch();
 
     const makeApiRequest = useCallback((apiServiceName: string, payload?: APIPayloadType) => {

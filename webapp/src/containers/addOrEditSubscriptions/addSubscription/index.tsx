@@ -1,18 +1,21 @@
 import React from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 
-import {hideModal as hideAddModal} from 'src/reducers/addSubscriptionModal';
+import usePluginApi from 'src/hooks/usePluginApi';
+
+import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {isAddSubscriptionModalOpen} from 'src/selectors';
 
 import AddOrEditSubscriptionModal from '../subComponents';
 
 const AddSubscriptions = () => {
     const dispatch = useDispatch();
-    const pluginState = useSelector((state: PluginState) => state['plugins-mattermost-plugin-servicenow']);
+    const {pluginState} = usePluginApi();
 
     return (
         <AddOrEditSubscriptionModal
-            open={pluginState.openAddSubscriptionModalReducer.open}
-            close={() => dispatch(hideAddModal())}
+            open={isAddSubscriptionModalOpen(pluginState)}
+            close={() => dispatch(resetGlobalModalState())}
         />
     );
 };
