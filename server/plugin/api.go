@@ -229,7 +229,10 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.Ephemeral(resp.UserID, resp.ChannelID, "", fmt.Sprintf("Subscription created successfully with ID: %s.", resp.SysID))
+	post := resp.CreateSubscriptionPost(p.botID, p.configuration.ServiceNowBaseURL)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
+	}
 
 	// Here, we are setting the Content-Type header even when it is being set in the "returnStatusOK" function
 	// because after "WriteHeader" is called, no headers can be set, so we have to set it before the call to "WriteHeader"
