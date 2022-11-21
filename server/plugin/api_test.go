@@ -957,14 +957,16 @@ func TestCreateSubscription(t *testing.T) {
 	}{
 		"success": {
 			RequestBody: "{}",
-			SetupAPI:    func(api *plugintest.API) {},
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusOK, nil,
 				)
 
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusCreated, nil,
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusCreated, nil,
 				)
 
 				var s *serializer.SubscriptionPayload
@@ -1041,7 +1043,7 @@ func TestCreateSubscription(t *testing.T) {
 				)
 
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusForbidden, fmt.Errorf("create subscription error"),
+					nil, http.StatusForbidden, fmt.Errorf("create subscription error"),
 				)
 
 				var s *serializer.SubscriptionPayload
@@ -1051,6 +1053,30 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "create subscription error",
+		},
+		"failed to create the post": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					false, http.StatusOK, nil,
+				)
+
+				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusCreated, nil,
+				)
+
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+			},
+			ExpectedStatusCode: http.StatusCreated,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

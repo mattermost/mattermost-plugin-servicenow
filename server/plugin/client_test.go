@@ -100,7 +100,6 @@ func TestCreateSubscriptionClient(t *testing.T) {
 				assert.Nil(t, resp)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, resp)
 			}
 
 			assert.Equal(t, testCase.statusCode, statusCode)
