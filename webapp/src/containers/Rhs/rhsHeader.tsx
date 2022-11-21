@@ -1,7 +1,7 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useRef} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {Dropdown, Button, SvgWrapper, ToggleSwitch} from '@brightscout/mattermost-ui-library';
+import {Dropdown, Button, SvgWrapper} from '@brightscout/mattermost-ui-library';
 
 import useOutsideClick from 'src/hooks/useClickOutside';
 
@@ -11,24 +11,21 @@ import IconButton from 'src/components/Buttons/iconButton';
 import {setGlobalModalState} from 'src/reducers/globalModal';
 
 type HeaderProps = {
-    showAllSubscriptions: boolean;
-    setShowAllSubscriptions: (active: boolean) => void;
+    showFilter: boolean;
+    setShowFilter: (filter: boolean) => void;
     filter: SubscriptionFilters;
     setFilter: (filter: SubscriptionFilters) => void;
-    setResetFilter: (resetFilter: boolean) => void;
 }
 
 const Header = ({
-    showAllSubscriptions,
-    setShowAllSubscriptions,
+    showFilter,
+    setShowFilter,
     filter,
     setFilter,
-    setResetFilter,
 }: HeaderProps) => {
-    const [showFilter, setShowFilter] = useState(false);
     const dispatch = useDispatch();
 
-    const isFilterApplied = useCallback(() => showAllSubscriptions || filter.createdBy !== Constants.DefaultSubscriptionFilters.createdBy, [filter, showAllSubscriptions]);
+    const isFilterApplied = useCallback(() => filter.createdBy !== Constants.DefaultSubscriptionFilters.createdBy, [filter]);
 
     // Detects and closes the filter popover whenever it is opened and the user clicks outside of it
     const wrapperRef = useRef(null);
@@ -38,7 +35,7 @@ const Header = ({
 
     return (
         <>
-            <div className='position-relative rhs-header-divider'>
+            <div className='position-relative'>
                 <div className='d-flex align-item-center'>
                     <p className='rhs-title'>{'Subscriptions'}</p>
                     <IconButton
@@ -78,14 +75,6 @@ const Header = ({
                         ref={wrapperRef}
                         className='rhs-filter-popover'
                     >
-                        <div className='d-flex align-item-center margin-bottom-15 toggle-class'>
-                            <ToggleSwitch
-                                active={showAllSubscriptions}
-                                onChange={(active) => setShowAllSubscriptions(active)}
-                                label={Constants.RhsToggleLabel}
-                                labelPositioning='right'
-                            />
-                        </div>
                         <div className='margin-bottom-15'>
                             <Dropdown
                                 placeholder='Created By'
@@ -101,9 +90,7 @@ const Header = ({
                             <Button
                                 text='Reset'
                                 onClick={() => {
-                                    setResetFilter(true);
                                     setFilter(Constants.DefaultSubscriptionFilters);
-                                    setShowAllSubscriptions(false);
                                 }}
                                 extraClass='margin-right-8'
                                 isSecondaryButton={true}

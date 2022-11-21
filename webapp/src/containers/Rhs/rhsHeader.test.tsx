@@ -28,17 +28,15 @@ describe('RHSHeader', () => {
         const wrapper = shallow(<RHSHeader {...baseProps}/>);
 
         expect(wrapper).toMatchSnapshot();
-        expect(wrapper.find('ToggleSwitch').exists()).toBeFalsy();
         wrapper.find('button').simulate('click');
         expect(mockDispatch).toBeCalled();
 
         wrapper.find('IconButton').simulate('click');
         expect(wrapper).toMatchSnapshot();
-        expect(wrapper.find('ToggleSwitch').exists()).toBeTruthy();
+        expect(wrapper.find('Dropdown').exists()).toBeTruthy();
+        expect(wrapper.find('Button')).toHaveLength(2);
 
         wrapper.find('Button').first().simulate('click');
-        expect(baseProps.setShowAllSubscriptions).toBeCalled();
         expect(baseProps.setFilter).toBeCalled();
-        expect(baseProps.setResetFilter).toBeCalled();
     });
 });

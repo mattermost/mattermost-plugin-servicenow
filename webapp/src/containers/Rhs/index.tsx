@@ -44,7 +44,6 @@ const Rhs = (): JSX.Element => {
     const [totalSubscriptions, setTotalSubscriptions] = useState<SubscriptionData[]>([]);
     const [render, setRender] = useState(true);
     const [filter, setFilter] = useState<SubscriptionFilters>(Constants.DefaultSubscriptionFilters);
-    const [resetFilter, setResetFilter] = useState(false);
 
     const getSubscriptionsState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
@@ -92,8 +91,7 @@ const Rhs = (): JSX.Element => {
     // Reset states on changing channel or using toggle switch
     useEffect(() => {
         // This is used to prevent calling of fetch subscription API twice
-        if (render || resetFilter) {
-            setResetFilter(false);
+        if (render) {
             return;
         }
 
@@ -224,7 +222,6 @@ const Rhs = (): JSX.Element => {
                         handlePagination={handlePagination}
                         filter={filter}
                         setFilter={handleSetFilter}
-                        setResetFilter={setResetFilter}
                     />
                     {toBeDeleted && (
                         <ConfirmationDialog

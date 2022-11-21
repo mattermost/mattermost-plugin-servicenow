@@ -3,7 +3,7 @@
 exports[`RHSHeader should match snapshot 1`] = `
 <Fragment>
   <div
-    className="position-relative rhs-header-divider"
+    className="position-relative"
   >
     <div
       className="d-flex align-item-center"
@@ -56,7 +56,7 @@ exports[`RHSHeader should match snapshot 1`] = `
 exports[`RHSHeader should match snapshot 2`] = `
 <Fragment>
   <div
-    className="position-relative rhs-header-divider"
+    className="position-relative"
   >
     <div
       className="d-flex align-item-center"
@@ -106,16 +106,6 @@ exports[`RHSHeader should match snapshot 2`] = `
   <div
     className="rhs-filter-popover"
   >
-    <div
-      className="d-flex align-item-center margin-bottom-15 toggle-class"
-    >
-      <ToggleSwitch
-        active={false}
-        label="Show all subscriptions"
-        labelPositioning="right"
-        onChange={[Function]}
-      />
-    </div>
     <div
       className="margin-bottom-15"
     >

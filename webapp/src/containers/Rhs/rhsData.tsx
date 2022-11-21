@@ -1,10 +1,10 @@
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {GlobalState} from 'mattermost-webapp/types/store';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
+import {EmptyState, SubscriptionCard, BellIcon, ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
 import Spinner from 'src/components/spinner';
 
@@ -31,7 +31,6 @@ type RhsDataProps = {
     handlePagination: () => void;
     filter: SubscriptionFilters;
     setFilter: (filter: SubscriptionFilters) => void;
-    setResetFilter: (resetFilter: boolean) => void;
 }
 
 type BulkSubscriptionRecordType = Extract<RecordType, RecordType.INCIDENT | RecordType.PROBLEM | RecordType.CHANGE_REQUEST>;
@@ -54,8 +53,9 @@ const RhsData = ({
     handlePagination,
     filter,
     setFilter,
-    setResetFilter,
 }: RhsDataProps) => {
+    const [showFilter, setShowFilter] = useState(false);
+
     const dispatch = useDispatch();
     const {makeApiRequest, getApiState} = usePluginApi();
     const {currentTeamId} = useSelector((state: GlobalState) => state.entities.teams);
@@ -112,12 +112,19 @@ const RhsData = ({
     return (
         <>
             <Header
-                showAllSubscriptions={showAllSubscriptions}
-                setShowAllSubscriptions={setShowAllSubscriptions}
+                showFilter={showFilter}
+                setShowFilter={setShowFilter}
                 filter={filter}
                 setFilter={setFilter}
-                setResetFilter={setResetFilter}
             />
+            <div className='d-flex align-item-center margin-bottom-15 margin-top-5 toggle-class rhs-header-divider'>
+                <ToggleSwitch
+                    active={showAllSubscriptions}
+                    onChange={(active) => setShowAllSubscriptions(active)}
+                    label={Constants.RhsToggleLabel}
+                    labelPositioning='right'
+                />
+            </div>
             {error && (
                 <EmptyState
                     title={Constants.GeneralErrorMessage}
@@ -128,7 +135,7 @@ const RhsData = ({
             )}
             <div
                 id='scrollableArea'
-                className='rhs-content__cards-container'
+                className={`rhs-content__cards-container ${showFilter && totalSubscriptions.length ? 'height-300 margin-top-110' : 'rhs-content__hide-filter-height'}`}
             >
                 {totalSubscriptions.length > 0 && (
                     <InfiniteScroll

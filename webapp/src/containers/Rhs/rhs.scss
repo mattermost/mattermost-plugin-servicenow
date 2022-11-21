@@ -20,8 +20,11 @@
     font-weight: bold;
   }
 
-  &__cards-container {
+  &__hide-filter-height {
     height: calc(100% - #{$rhs-footer-height} - #{$rhs-toggle-section-height});
+  }
+
+  &__cards-container {
     padding-right: 10px;
     overflow-y: auto;
   }
@@ -59,12 +62,11 @@
 
 .rhs-header-divider {
   margin-bottom: 20px;
-  padding-bottom: 20px;
   border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.2);
 }
 
 .rhs-filter-popover {
-  top: 68px;
+  top: 52px;
   width: calc(100% - 40px);
   margin-top: 8px;
   padding: 20px;
@@ -74,6 +76,7 @@
   border-color: rgba(var(--center-channel-color-rgb), 0.16);
   background: var(--center-channel-bg);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1;
 }
 
 .toggle-class {
