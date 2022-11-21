@@ -24,6 +24,7 @@ func (p *Plugin) handleAPIError(w http.ResponseWriter, apiErr *serializer.APIErr
 	}
 
 	w.WriteHeader(apiErr.StatusCode)
+
 	if _, err = w.Write(errorBytes); err != nil {
 		p.API.LogError("Failed to write JSON response", "Error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

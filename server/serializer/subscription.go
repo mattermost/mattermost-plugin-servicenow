@@ -178,37 +178,3 @@ func SubscriptionFromJSON(data io.Reader) (*SubscriptionPayload, error) {
 
 	return sp, nil
 }
-
-func (s *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL string) *model.Post {
-	post := &model.Post{
-		ChannelId: s.ChannelID,
-		UserId:    botID,
-	}
-
-	subscriptionEvents := ""
-	events := strings.Split(s.SubscriptionEvents, ",")
-	for index, event := range events {
-		subscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
-		if index != len(events)-1 {
-			subscriptionEvents += ", "
-		}
-	}
-
-	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
-	slackAttachment := &model.SlackAttachment{
-		Title: fmt.Sprintf("Subscription created successfully for [%s](%s)", s.RecordType, titleLink),
-		Fields: []*model.SlackAttachmentField{
-			{
-				Title: "Subscription ID",
-				Value: s.SysID,
-			},
-			{
-				Title: "Subscription Event(s)",
-				Value: subscriptionEvents,
-			},
-		},
-	}
-
-	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})
-	return post
-}

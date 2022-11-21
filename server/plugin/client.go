@@ -15,7 +15,7 @@ import (
 
 type Client interface {
 	ActivateSubscriptions() (int, error)
-	CreateSubscription(*serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error)
+	CreateSubscription(*serializer.SubscriptionPayload) (int, error)
 	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error)
 	GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
 	DeleteSubscription(subscriptionID string) (int, error)
@@ -80,14 +80,13 @@ func (c *client) ActivateSubscriptions() (int, error) {
 	return http.StatusOK, nil
 }
 
-func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error) {
-	subscriptionResult := &serializer.SubscriptionResult{}
-	_, statusCode, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, subscriptionResult, nil)
+func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) (int, error) {
+	_, statusCode, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, nil, nil)
 	if err != nil {
-		return nil, statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
+		return statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
 	}
 
-	return subscriptionResult.Result, statusCode, nil
+	return statusCode, nil
 }
 
 func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {

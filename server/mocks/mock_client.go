@@ -88,33 +88,24 @@ func (_m *Client) CheckForDuplicateSubscription(_a0 *serializer.SubscriptionPayl
 }
 
 // CreateSubscription provides a mock function with given fields: _a0
-func (_m *Client) CreateSubscription(_a0 *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error) {
+func (_m *Client) CreateSubscription(_a0 *serializer.SubscriptionPayload) (int, error) {
 	ret := _m.Called(_a0)
 
-	var r0 *serializer.SubscriptionResponse
-	if rf, ok := ret.Get(0).(func(*serializer.SubscriptionPayload) *serializer.SubscriptionResponse); ok {
+	var r0 int
+	if rf, ok := ret.Get(0).(func(*serializer.SubscriptionPayload) int); ok {
 		r0 = rf(_a0)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*serializer.SubscriptionResponse)
-		}
+		r0 = ret.Get(0).(int)
 	}
 
-	var r1 int
-	if rf, ok := ret.Get(1).(func(*serializer.SubscriptionPayload) int); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*serializer.SubscriptionPayload) error); ok {
 		r1 = rf(_a0)
 	} else {
-		r1 = ret.Get(1).(int)
+		r1 = ret.Error(1)
 	}
 
-	var r2 error
-	if rf, ok := ret.Get(2).(func(*serializer.SubscriptionPayload) error); ok {
-		r2 = rf(_a0)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
+	return r0, r1
 }
 
 // DeleteSubscription provides a mock function with given fields: subscriptionID
