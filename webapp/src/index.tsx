@@ -6,8 +6,6 @@ import {GlobalState} from 'mattermost-webapp/types/store';
 // eslint-disable-next-line import/no-unresolved
 import {PluginRegistry} from 'src/types/mattermost-webapp';
 
-import {ServiceNowIcon} from '@brightscout/mattermost-ui-library';
-
 import reducer from 'src/reducers';
 
 import Rhs from 'src/containers/Rhs';
@@ -21,6 +19,8 @@ import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
 import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal} from 'src/websocket';
+
+import Utils from 'src/utils';
 
 import App from './app';
 
@@ -40,9 +40,14 @@ export default class Plugin {
         registry.registerRootComponent(UpdateState);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(<ServiceNowIcon className='servicenow-icon'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
+        registry.registerChannelHeaderButtonAction(
+            <img
+                src={`${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
+                className='servicenow-icon'
+            />, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
-
+        const iconUrl = `${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`;
+        registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
