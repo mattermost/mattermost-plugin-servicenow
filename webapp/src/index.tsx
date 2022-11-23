@@ -7,7 +7,6 @@ import {GlobalState} from 'mattermost-webapp/types/store';
 import {PluginRegistry} from 'src/types/mattermost-webapp';
 
 import reducer from 'src/reducers';
-
 import Rhs from 'src/containers/Rhs';
 import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
@@ -19,7 +18,6 @@ import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
 import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal} from 'src/websocket';
-
 import Utils from 'src/utils';
 
 import App from './app';
