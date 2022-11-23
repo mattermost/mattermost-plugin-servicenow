@@ -9,6 +9,7 @@ export interface PluginRegistry {
     registerAdminConsoleCustomSetting(key: string, component: React.ElementType)
     registerSlashCommandWillBePostedHook(hook: (message: string, args: MmHookArgTypes) => Promise<({message?: string, args?: MmHookArgTypes})>)
     registerWebSocketEventHandler(event: string, handler: (msg: any) => void)
+    registerAppBarComponent(iconUrl: string, action: () => void, tooltipText: string)
 
     // Add more if needed from https://developers.mattermost.com/extend/plugins/webapp/reference
 }
