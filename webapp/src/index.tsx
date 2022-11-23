@@ -6,6 +6,8 @@ import {GlobalState} from 'mattermost-webapp/types/store';
 // eslint-disable-next-line import/no-unresolved
 import {PluginRegistry} from 'src/types/mattermost-webapp';
 
+import {ServiceNowIcon} from '@brightscout/mattermost-ui-library';
+
 import reducer from 'src/reducers';
 import Rhs from 'src/containers/Rhs';
 import AddOrViewComments from 'src/containers/addOrViewComments';
@@ -38,11 +40,7 @@ export default class Plugin {
         registry.registerRootComponent(UpdateState);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
-        registry.registerChannelHeaderButtonAction(
-            <img
-                src={`${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
-                className='servicenow-icon'
-            />, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
+        registry.registerChannelHeaderButtonAction(<ServiceNowIcon className='servicenow-icon'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
         const iconUrl = `${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`;
         registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
