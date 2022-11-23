@@ -11,12 +11,13 @@ import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
 
-import {hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
 import RecordTypePanel from 'src/containers/addOrEditSubscriptions/subComponents/recordTypePanel';
 import SearchRecordsPanel from 'src/containers/addOrEditSubscriptions/subComponents/searchRecordsPanel';
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
 import {setConnected} from 'src/reducers/connectedState';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {isShareRecordModalOpen} from 'src/selectors';
 
 import Utils from 'src/utils';
 
@@ -63,7 +64,7 @@ const ShareRecords = () => {
 
     const hideModal = useCallback(() => {
         resetFieldStates();
-        dispatch(hideShareRecordModal());
+        dispatch(resetGlobalModalState());
     }, []);
 
     // Opens share record modal
@@ -127,7 +128,7 @@ const ShareRecords = () => {
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-    }, [currentChannelId, pluginState.openShareRecordModalReducer.open]);
+    }, [currentChannelId, isShareRecordModalOpen(pluginState)]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
         if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
@@ -139,7 +140,7 @@ const ShareRecords = () => {
 
     return (
         <Modal
-            show={pluginState.openShareRecordModalReducer.open}
+            show={isShareRecordModalOpen(pluginState)}
             onHide={hideModal}
             className='rhs-modal'
         >
