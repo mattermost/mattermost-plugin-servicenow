@@ -252,15 +252,15 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 
 	_, statusCode, err := c.CallJSON(http.MethodGet, path, nil, userDetails, params)
 	if err != nil {
-		return nil, statusCode, errors.Wrap(err, "failed to get user details")
+		return nil, statusCode, errors.Wrap(err, "failed to get the user details")
 	}
 
 	if len(userDetails.UserDetails) == 0 {
-		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow with email %s", userEmail)
+		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow instance %s with email %s", c.plugin.getConfiguration().ServiceNowBaseURL, userEmail)
 	}
 
 	if len(userDetails.UserDetails) > 1 {
-		c.plugin.API.LogWarn("multiple users with the same email address exist on ServiceNow instance", "Email", userEmail, "Instance", c.plugin.getConfiguration().ServiceNowBaseURL)
+		c.plugin.API.LogWarn("Multiple users with the same email address exist on ServiceNow instance", "Email", userEmail, "Instance", c.plugin.getConfiguration().ServiceNowBaseURL)
 	}
 
 	return userDetails.UserDetails[0], statusCode, nil

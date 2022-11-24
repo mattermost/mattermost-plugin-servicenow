@@ -91,15 +91,11 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 			return nil, err
 		}
 
-		if len(kvList) == 0 {
-			return users, nil
-		}
-
 		for _, key := range kvList {
 			if userID, isValidUserKey := IsValidUserKey(key); isValidUserKey {
-				decodedKey, decordErr := decodeKey(userID)
-				if decordErr != nil {
-					return nil, decordErr
+				decodedKey, decodeErr := decodeKey(userID)
+				if decodeErr != nil {
+					return nil, decodeErr
 				}
 
 				user, loadErr := s.LoadUser(decodedKey)
@@ -115,8 +111,14 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 			}
 		}
 
+		if len(kvList) < constants.DefaultPerPage {
+			break
+		}
+
 		page++
 	}
+
+	return users, nil
 }
 
 func (s *pluginStore) VerifyOAuth2State(state string) error {
