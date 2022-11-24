@@ -30,10 +30,10 @@ func Test_LoadUser(t *testing.T) {
 			description: "User is not loaded from the KV store",
 			setupTest: func() {
 				monkey.Patch(kvstore.LoadJSON, func(_ kvstore.KVStore, _ string, _ interface{}) error {
-					return fmt.Errorf("error in loading user")
+					return fmt.Errorf("error in loading the user")
 				})
 			},
-			expectedError: fmt.Errorf("error in loading user"),
+			expectedError: fmt.Errorf("error in loading the user"),
 		},
 	} {
 		t.Run(test.description, func(t *testing.T) {
@@ -99,10 +99,10 @@ func TestDeleteUser(t *testing.T) {
 			description: "User is not loaded from the KV store using mattermostUserID",
 			setupTest: func() {
 				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
-					return nil, fmt.Errorf("mockError")
+					return nil, fmt.Errorf("error in loading the user")
 				})
 			},
-			expectedError: fmt.Errorf("mockError"),
+			expectedError: fmt.Errorf("error in loading the user"),
 		},
 		{
 			description: "User is deleted from the KV store",
@@ -122,10 +122,10 @@ func TestDeleteUser(t *testing.T) {
 					return testutils.GetSerializerUser(), nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(ps.userKV), "Delete", func(*kvstore.HashedKeyStore, string) error {
-					return fmt.Errorf("mockError")
+					return fmt.Errorf("error in deleting the user")
 				})
 			},
-			expectedError: fmt.Errorf("mockError"),
+			expectedError: fmt.Errorf("error in deleting the user"),
 		},
 	} {
 		t.Run(test.description, func(t *testing.T) {
