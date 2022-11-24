@@ -301,15 +301,15 @@ func (_m *Client) GetSubscription(subscriptionID string) (*serializer.Subscripti
 }
 
 // SearchCatalogItemsInServiceNow provides a mock function with given fields: searchTerm, limit, offset
-func (_m *Client) SearchCatalogItemsInServiceNow(searchTerm string, limit string, offset string) ([]*serializer.ServiceNowCatalogItems, int, error) {
+func (_m *Client) SearchCatalogItemsInServiceNow(searchTerm string, limit string, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
 	ret := _m.Called(searchTerm, limit, offset)
 
-	var r0 []*serializer.ServiceNowCatalogItems
-	if rf, ok := ret.Get(0).(func(string, string, string) []*serializer.ServiceNowCatalogItems); ok {
+	var r0 []*serializer.ServiceNowCatalogItem
+	if rf, ok := ret.Get(0).(func(string, string, string) []*serializer.ServiceNowCatalogItem); ok {
 		r0 = rf(searchTerm, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*serializer.ServiceNowCatalogItems)
+			r0 = ret.Get(0).([]*serializer.ServiceNowCatalogItem)
 		}
 	}
 

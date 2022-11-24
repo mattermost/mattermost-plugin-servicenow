@@ -27,7 +27,7 @@ type Client interface {
 	AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error)
 	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
-	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItems, int, error)
+	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 }
 
 type client struct {
@@ -244,7 +244,7 @@ func (c *client) UpdateStateOfRecordInServiceNow(recordType, recordID string, pa
 	return statusCode, err
 }
 
-func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItems, int, error) {
+func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
 	queryParams := url.Values{
 		constants.SysQueryParamText:   {searchTerm},
 		constants.SysQueryParamLimit:  {limit},

@@ -1,6 +1,6 @@
 package serializer
 
-type ServiceNowCatalogItems struct {
+type ServiceNowCatalogItem struct {
 	SysID            string   `json:"sys_id"`
 	Name             string   `json:"name"`
 	ShortDescription string   `json:"short_description"`
@@ -14,5 +14,5 @@ type Category struct {
 }
 
 type ServiceNowCatalogItemsResult struct {
-	Result []*ServiceNowCatalogItems `json:"result"`
+	Result []*ServiceNowCatalogItem `json:"result"`
 }
