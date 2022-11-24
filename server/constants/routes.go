@@ -20,12 +20,14 @@ const (
 	PathGetStatesForRecordType = "/states/{record_type}"
 	PathUpdateStateOfRecord    = "/states/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"
 	PathOpenStateModal         = "/state-modal"
+	PathSearchCatalogItems     = "/catalog"
 
 	// ServiceNow API paths
-	PathActivateSubscriptions    = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
-	PathSubscriptionCRUD         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
-	PathGetRecordsFromServiceNow = "api/now/table/{tableName}"
-	PathGetStatesFromServiceNow  = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
+	PathActivateSubscriptions         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
+	PathSubscriptionCRUD              = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
+	PathGetRecordsFromServiceNow      = "api/now/table/{tableName}"
+	PathGetStatesFromServiceNow       = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
+	PathGetCatalogItemsFromServiceNow = "api/sn_sc/servicecatalog/items"
 
 	// ServiceNow URLs
 	PathServiceNowURL = "/now/nav/ui/classic/params/target"

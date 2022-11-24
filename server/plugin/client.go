@@ -27,6 +27,7 @@ type Client interface {
 	AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error)
 	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
+	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 }
 
 type client struct {
@@ -241,4 +242,20 @@ func (c *client) UpdateStateOfRecordInServiceNow(recordType, recordID string, pa
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", url, recordID), payload, nil, nil)
 	return statusCode, err
+}
+
+func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamText:   {searchTerm},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+	}
+
+	items := &serializer.ServiceNowCatalogItemsResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetCatalogItemsFromServiceNow, nil, items, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return items.Result, statusCode, nil
 }

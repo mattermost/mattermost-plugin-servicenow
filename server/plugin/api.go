@@ -50,6 +50,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -382,7 +383,7 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 
 	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
 	if len(searchTerm) < constants.CharacterThresholdForSearchingRecords {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("The search term must be at least %d characters long.", constants.CharacterThresholdForSearchingRecords)})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.CharacterThresholdForSearchingRecords)})
 		return
 	}
 
@@ -625,6 +626,25 @@ func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
 	)
 
 	p.returnPostActionIntegrationResponse(w, response)
+}
+
+func (p *Plugin) searchCatalogItemsInServiceNow(w http.ResponseWriter, r *http.Request) {
+	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
+	if len(searchTerm) < constants.CharacterThresholdForSearchingCatalogItems {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.CharacterThresholdForSearchingCatalogItems)})
+		return
+	}
+
+	page, perPage := GetPageAndPerPage(r)
+	client := p.GetClientFromRequest(r)
+	items, statusCode, err := client.SearchCatalogItemsInServiceNow(searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	if err != nil {
+		p.API.LogError(constants.APIErrorSearchingCatalogItems, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.APIErrorSearchingCatalogItems, err.Error()))
+		return
+	}
+
+	p.writeJSONArray(w, statusCode, items)
 }
 
 func returnStatusOK(w http.ResponseWriter) {
