@@ -14,5 +14,5 @@ type User struct {
 	MattermostUserID string
 	OAuth2Token      string
 	Username         string
-	ServiceNowUser
+	ServiceNowUser   *ServiceNowUser
 }

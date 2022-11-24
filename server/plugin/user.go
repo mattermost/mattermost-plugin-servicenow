@@ -68,7 +68,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 		MattermostUserID: mattermostUserID,
 		Username:         user.Username,
 		OAuth2Token:      encryptedToken,
-		ServiceNowUser:   *serviceNowUser,
+		ServiceNowUser:   serviceNowUser,
 	}
 
 	if err = p.store.StoreUser(u); err != nil {

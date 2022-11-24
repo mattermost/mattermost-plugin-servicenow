@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 
 	"path/filepath"
@@ -51,6 +52,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
+	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -383,7 +385,7 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 
 	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
 	if len(searchTerm) < constants.CharacterThresholdForSearchingRecords {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("The search term must be at least %d characters long.", constants.CharacterThresholdForSearchingRecords)})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.CharacterThresholdForSearchingRecords)})
 		return
 	}
 
@@ -396,6 +398,9 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	for _, record := range records {
+		record.ShortDescription = strings.ReplaceAll(record.ShortDescription, "\n", "")
+	}
 	p.writeJSONArray(w, statusCode, records)
 }
 
@@ -655,10 +660,11 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	response, statusCode, err := client.CreateIncident(incident)
 	if err != nil {
 		p.API.LogError(constants.APIErrorCreateIncident, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: constants.APIErrorCreateIncident})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.APIErrorCreateIncident, err.Error()))
 		return
 	}
 
+	// TODO: post the created incident in the current channel instead of DM
 	channel, channelErr := p.API.GetDirectChannel(mattermostUserID, p.botID)
 	if channelErr != nil {
 		p.API.LogError(constants.ErrorGetBotChannel, "userID", mattermostUserID, "Error", channelErr.Error())
@@ -679,7 +685,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 
 	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
 		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
 	}
 
@@ -689,6 +695,25 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.writeJSON(w, statusCode, record)
+}
+
+func (p *Plugin) searchCatalogItemsInServiceNow(w http.ResponseWriter, r *http.Request) {
+	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
+	if len(searchTerm) < constants.CharacterThresholdForSearchingCatalogItems {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.CharacterThresholdForSearchingCatalogItems)})
+		return
+	}
+
+	page, perPage := GetPageAndPerPage(r)
+	client := p.GetClientFromRequest(r)
+	items, statusCode, err := client.SearchCatalogItemsInServiceNow(searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	if err != nil {
+		p.API.LogError(constants.APIErrorSearchingCatalogItems, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.APIErrorSearchingCatalogItems, err.Error()))
+		return
+	}
+
+	p.writeJSONArray(w, statusCode, items)
 }
 
 func returnStatusOK(w http.ResponseWriter) {

@@ -337,7 +337,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 
 func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
-		return "Invalid number of params for this command."
+		return constants.ErrorCommandInvalidNumberOfParams
 	}
 
 	go func() {
@@ -374,7 +374,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 
 func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
-		return "Invalid number of params for this command."
+		return constants.ErrorCommandInvalidNumberOfParams
 	}
 	subscriptionID := params[0]
 	valid, err := regexp.MatchString(constants.ServiceNowSysIDRegex, subscriptionID)

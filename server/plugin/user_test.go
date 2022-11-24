@@ -193,7 +193,7 @@ func TestCompleteOAuth2(t *testing.T) {
 			},
 			expectedErrorMessage: "encryption error",
 		},
-		"failed to get service now user": {
+		"failed to get ServiceNow user": {
 			authenticatedUserID: mockUserID,
 			code:                mockCode,
 			state:               mockState,
@@ -214,10 +214,10 @@ func TestCompleteOAuth2(t *testing.T) {
 					return &mock_plugin.Client{}
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(client), "GetMe", func(_ *mock_plugin.Client, _ string) (*serializer.ServiceNowUser, int, error) {
-					return nil, http.StatusInternalServerError, errors.New("failed to get service now user")
+					return nil, http.StatusInternalServerError, errors.New("failed to get ServiceNow user")
 				})
 			},
-			expectedErrorMessage: "failed to get service now user",
+			expectedErrorMessage: "failed to get ServiceNow user",
 		},
 		"failed to store user": {
 			authenticatedUserID: mockUserID,

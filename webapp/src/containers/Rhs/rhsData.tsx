@@ -12,7 +12,7 @@ import Constants, {SubscriptionEvents, SubscriptionType, RecordType, Subscriptio
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import {showModal as showAddModal} from 'src/reducers/addSubscriptionModal';
+import {setGlobalModalState} from 'src/reducers/globalModal';
 
 import Utils from 'src/utils';
 
@@ -159,7 +159,7 @@ const RhsData = ({
                             <div className='rhs-btn-container padding-12 channel-bg'>
                                 <button
                                     className='btn btn-primary rhs-btn plugin-btn'
-                                    onClick={() => dispatch(showAddModal())}
+                                    onClick={() => dispatch(setGlobalModalState({modalId: 'addSubscription'}))}
                                 >
                                     {'Add Subscription'}
                                 </button>
@@ -172,7 +172,7 @@ const RhsData = ({
                         title='No Subscriptions Found'
                         buttonConfig={{
                             text: 'Add new Subscription',
-                            action: () => dispatch(showAddModal()),
+                            action: () => dispatch(setGlobalModalState({modalId: 'addSubscription'})),
                         }}
                         icon={<BellIcon/>}
                     />

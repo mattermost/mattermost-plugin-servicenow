@@ -29,6 +29,7 @@ type Client interface {
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
 	GetMe(userEmail string) (*serializer.ServiceNowUser, int, error)
 	CreateIncident(*serializer.IncidentPayload) (*serializer.IncidentResponse, int, error)
+	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 }
 
 type client struct {
@@ -253,15 +254,15 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 
 	_, statusCode, err := c.CallJSON(http.MethodGet, path, nil, userDetails, params)
 	if err != nil {
-		return nil, statusCode, errors.Wrap(err, "failed to get user details")
+		return nil, statusCode, errors.Wrap(err, "failed to get the user details")
 	}
 
 	if len(userDetails.UserDetails) == 0 {
-		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow with email %s", userEmail)
+		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow instance %s with email %s", c.plugin.getConfiguration().ServiceNowBaseURL, userEmail)
 	}
 
 	if len(userDetails.UserDetails) > 1 {
-		c.plugin.API.LogWarn("multiple users with the same email address exist on ServiceNow instance", "Email", userEmail, "Instance", c.plugin.getConfiguration().ServiceNowBaseURL)
+		c.plugin.API.LogWarn("Multiple users with the same email address exist on ServiceNow instance", "Email", userEmail, "Instance", c.plugin.getConfiguration().ServiceNowBaseURL)
 	}
 
 	return userDetails.UserDetails[0], statusCode, nil
@@ -275,5 +276,21 @@ func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializ
 		return nil, statusCode, errors.Wrap(err, "failed to create the incident in ServiceNow")
 	}
 
-	return &response.Result, statusCode, nil
+	return response.Result, statusCode, nil
+}
+
+func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamText:   {searchTerm},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+	}
+
+	items := &serializer.ServiceNowCatalogItemsResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetCatalogItemsFromServiceNow, nil, items, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return items.Result, statusCode, nil
 }

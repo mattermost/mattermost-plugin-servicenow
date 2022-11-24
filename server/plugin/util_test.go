@@ -142,10 +142,10 @@ func TestConvertSubscriptionToMap(t *testing.T) {
 			description: "ConvertSubscriptionToMap: marshaling gives error",
 			setupPlugin: func() {
 				monkey.Patch(json.Marshal, func(interface{}) ([]byte, error) {
-					return nil, errors.New("mockError")
+					return nil, errors.New("error while marshaling")
 				})
 			},
-			expectedErr: "mockError",
+			expectedErr: "error while marshaling",
 		},
 		{
 			description: "ConvertSubscriptionToMap: unmarshalling gives error",
@@ -154,10 +154,10 @@ func TestConvertSubscriptionToMap(t *testing.T) {
 					return []byte("mockData"), nil
 				})
 				monkey.Patch(json.Unmarshal, func([]byte, interface{}) error {
-					return errors.New("mockError")
+					return errors.New("error while unmarshalling")
 				})
 			},
-			expectedErr: "mockError",
+			expectedErr: "error while unmarshalling",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -229,7 +229,7 @@ func TestHandleClientError(t *testing.T) {
 			description:        "handleClientError",
 			setupAPI:           func(api *plugintest.API) {},
 			setupPlugin:        func() {},
-			errorMessage:       errors.New("mockError"),
+			errorMessage:       errors.New("handle client error"),
 			expectedResponse:   genericErrorMessage,
 			expectedStatusCode: http.StatusInternalServerError,
 		},

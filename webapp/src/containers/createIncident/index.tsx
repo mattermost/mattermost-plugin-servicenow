@@ -7,9 +7,10 @@ import Input from '@brightscout/mattermost-ui-library/build/cjs/components/Input
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import {hideModal as hideCreateIncidentModal} from 'src/reducers/incidentModal';
-
 import Constants, {IncidentImpactAndUrgencyOptions} from 'src/plugin_constants';
+
+import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {isCreateIncidentModalOpen} from 'src/selectors';
 
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
@@ -63,7 +64,7 @@ const UpdateState = () => {
         setChannelOptions([]);
         setApiError(null);
         setValidationError(null);
-        dispatch(hideCreateIncidentModal());
+        dispatch(resetGlobalModalState());
     }, []);
 
     const onShortDescriptionChangeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +87,7 @@ const UpdateState = () => {
 
     return (
         <Modal
-            show={pluginState.openIncidentModalReducer.open}
+            show={isCreateIncidentModalOpen(pluginState)}
             onHide={hideModal}
             className='rhs-modal'
         >

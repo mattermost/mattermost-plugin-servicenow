@@ -5,13 +5,8 @@ import {GlobalState} from 'mattermost-webapp/types/store';
 import {SubscriptionEventsMap} from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
+import {setGlobalModalState, resetGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
-import {showModal as showAddSubcriptionModal, hideModal as hideAddSubscriptionModal} from 'src/reducers/addSubscriptionModal';
-import {showModal as showEditSubcriptionModal, hideModal as hideEditSubscriptionModal} from 'src/reducers/editSubscriptionModal';
-import {showModal as showIncidentModal, hideModal as hideIncidentModal} from 'src/reducers/incidentModal';
-import {showModal as showShareRecordModal, hideModal as hideShareRecordModal} from 'src/reducers/shareRecordModal';
-import {showModal as showCommentModal, hideModal as hideCommentModal} from 'src/reducers/commentModal';
-import {showModal as showUpdateStateModal, hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
@@ -26,18 +21,13 @@ export function handleConnect(store: Store<GlobalState, Action<Record<string, un
 export function handleDisconnect(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(false) as Action);
-        store.dispatch(hideAddSubscriptionModal() as Action);
-        store.dispatch(hideEditSubscriptionModal() as Action);
-        store.dispatch(hideShareRecordModal() as Action);
-        store.dispatch(hideCommentModal() as Action);
-        store.dispatch(hideUpdateStateModal() as Action);
-        store.dispatch(hideIncidentModal() as Action);
+        store.dispatch(resetGlobalModalState() as Action);
     };
 }
 
 export function handleOpenAddSubscriptionModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(showAddSubcriptionModal() as Action);
+        store.dispatch(setGlobalModalState({modalId: 'addSubscription'}) as Action);
     };
 }
 
@@ -54,7 +44,7 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
             recordType: data.record_type as RecordType,
             subscriptionEvents,
         };
-        store.dispatch(showEditSubcriptionModal(subscriptionData) as Action);
+        store.dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}) as Action);
     };
 }
 
@@ -69,7 +59,7 @@ export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Recor
 
 export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(showShareRecordModal() as Action);
+        store.dispatch(setGlobalModalState({modalId: 'shareRecord'}) as Action);
     };
 }
 
@@ -80,7 +70,7 @@ export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<s
             recordType: data.record_type as RecordType,
             recordId: data.record_id,
         };
-        store.dispatch(showCommentModal(commentModalData) as Action);
+        store.dispatch(setGlobalModalState({modalId: 'addOrViewComments', data: commentModalData}) as Action);
     };
 }
 
@@ -91,12 +81,12 @@ export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Reco
             recordType: data.record_type as RecordType,
             recordId: data.record_id,
         };
-        store.dispatch(showUpdateStateModal(updateStateModalData) as Action);
+        store.dispatch(setGlobalModalState({modalId: 'updateState', data: updateStateModalData}) as Action);
     };
 }
 
 export function handleOpenIncidentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(showIncidentModal() as Action);
+        store.dispatch(setGlobalModalState({modalId: 'createIncident'}) as Action);
     };
 }

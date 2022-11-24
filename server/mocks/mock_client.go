@@ -360,6 +360,36 @@ func (_m *Client) GetSubscription(subscriptionID string) (*serializer.Subscripti
 	return r0, r1, r2
 }
 
+// SearchCatalogItemsInServiceNow provides a mock function with given fields: searchTerm, limit, offset
+func (_m *Client) SearchCatalogItemsInServiceNow(searchTerm string, limit string, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
+	ret := _m.Called(searchTerm, limit, offset)
+
+	var r0 []*serializer.ServiceNowCatalogItem
+	if rf, ok := ret.Get(0).(func(string, string, string) []*serializer.ServiceNowCatalogItem); ok {
+		r0 = rf(searchTerm, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*serializer.ServiceNowCatalogItem)
+		}
+	}
+
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string, string, string) int); ok {
+		r1 = rf(searchTerm, limit, offset)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string, string, string) error); ok {
+		r2 = rf(searchTerm, limit, offset)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // SearchRecordsInServiceNow provides a mock function with given fields: tableName, searchTerm, limit, offset
 func (_m *Client) SearchRecordsInServiceNow(tableName string, searchTerm string, limit string, offset string) ([]*serializer.ServiceNowPartialRecord, int, error) {
 	ret := _m.Called(tableName, searchTerm, limit, offset)

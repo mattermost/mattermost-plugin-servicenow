@@ -10,13 +10,13 @@ import (
 )
 
 type IncidentCaller struct {
-	MattermostUserID string         `json:"mattermostUserID"`
-	Username         string         `json:"username"`
-	ServiceNowUser   ServiceNowUser `json:"serviceNowUser"`
+	MattermostUserID string          `json:"mattermostUserID"`
+	Username         string          `json:"username"`
+	ServiceNowUser   *ServiceNowUser `json:"serviceNowUser"`
 }
 
 type IncidentResult struct {
-	Result IncidentResponse `json:"result"`
+	Result *IncidentResponse `json:"result"`
 }
 
 type IncidentPayload struct {
