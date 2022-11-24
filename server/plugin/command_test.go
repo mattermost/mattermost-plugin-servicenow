@@ -643,7 +643,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 			description:   "HandleDeleteSubscription: Invalid number of params",
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
-			expectedError: "Invalid number of params for this command.",
+			expectedError: constants.ErrorCommandInvalidNumberOfParams,
 		},
 		{
 			description:      "HandleDeleteSubscription: Invalid subscription ID",
@@ -721,7 +721,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			description:   "HandleEditSubscription: Invalid number of params",
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
-			expectedError: "Invalid number of params for this command.",
+			expectedError: constants.ErrorCommandInvalidNumberOfParams,
 		},
 		{
 			description:   "HandleEditSubscription: Invalid subscription ID",

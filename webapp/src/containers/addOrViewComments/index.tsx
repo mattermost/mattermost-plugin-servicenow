@@ -9,8 +9,9 @@ import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
 
-import {hideModal as hideCommentModal} from 'src/reducers/commentModal';
 import {setConnected} from 'src/reducers/connectedState';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {getGlobalModalState, isCommentModalOpen} from 'src/selectors';
 
 import Utils from 'src/utils';
 
@@ -40,13 +41,13 @@ const AddOrViewComments = () => {
     }, []);
 
     const hideModal = useCallback(() => {
-        dispatch(hideCommentModal());
+        dispatch(resetGlobalModalState());
         resetFieldStates();
     }, []);
 
     const getCommentsPayload = (): CommentsPayload => ({
-        record_type: pluginState.openCommentModalReducer.data?.recordType,
-        record_id: pluginState.openCommentModalReducer.data?.recordId,
+        record_type: getGlobalModalState(pluginState).data?.recordType as RecordType,
+        record_id: getGlobalModalState(pluginState).data?.recordId as string,
         comments,
     });
 
@@ -78,11 +79,11 @@ const AddOrViewComments = () => {
     };
 
     useEffect(() => {
-        if (pluginState.openCommentModalReducer.open) {
+        if (isCommentModalOpen(pluginState)) {
             const payload = getCommentsPayload();
             makeApiRequest(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
         }
-    }, [pluginState.openCommentModalReducer.open]);
+    }, [isCommentModalOpen(pluginState)]);
 
     useEffect(() => {
         const {isLoading, isSuccess, error, data, isError} = getCommentsState();
@@ -136,7 +137,7 @@ const AddOrViewComments = () => {
 
     return (
         <Modal
-            show={pluginState.openCommentModalReducer.open}
+            show={isCommentModalOpen(pluginState)}
             onHide={hideModal}
         >
             <>

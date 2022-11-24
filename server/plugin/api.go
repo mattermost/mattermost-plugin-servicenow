@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 
 	"path/filepath"
@@ -395,6 +396,9 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	for _, record := range records {
+		record.ShortDescription = strings.ReplaceAll(record.ShortDescription, "\n", "")
+	}
 	p.writeJSONArray(w, statusCode, records)
 }
 
