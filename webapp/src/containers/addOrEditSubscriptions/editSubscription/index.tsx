@@ -3,7 +3,8 @@ import {useDispatch} from 'react-redux';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import {hideModal as hideEditModal} from 'src/reducers/editSubscriptionModal';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {getGlobalModalState, isEditSubscriptionModalOpen} from 'src/selectors';
 
 import AddOrEditSubscriptionModal from '../subComponents';
 
@@ -13,9 +14,9 @@ const EditSubscription = () => {
 
     return (
         <AddOrEditSubscriptionModal
-            open={pluginState.openEditSubscriptionModalReducer.open}
-            close={() => dispatch(hideEditModal())}
-            subscriptionData={pluginState.openEditSubscriptionModalReducer.data}
+            open={isEditSubscriptionModalOpen(pluginState)}
+            close={() => dispatch(resetGlobalModalState())}
+            subscriptionData={getGlobalModalState(pluginState).data as EditSubscriptionData}
         />
     );
 };

@@ -114,7 +114,11 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     // Provide the default value when subscription is being edited
     useEffect(() => {
         if (editing && getChannelState().isSuccess) {
-            setAutoSuggestDefaultValue(mapChannelsToSuggestions(getChannelState()?.data?.filter((ch) => ch.id === channel) as unknown as ChannelData[])?.[0]);
+            const channelValue = mapChannelsToSuggestions(getChannelState()?.data?.filter((ch) => ch.id === channel) as unknown as ChannelData[])?.[0];
+            setAutoSuggestDefaultValue(channelValue);
+            if (!channelValue) {
+                setChannel(null);
+            }
         }
     }, [editing, getChannelState().isSuccess]);
 

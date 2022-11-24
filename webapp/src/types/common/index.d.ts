@@ -2,18 +2,89 @@
  * Keep all common types here which are to be used throughout the project
 */
 
-type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+// TODO: Create an enum for the below modal Ids
+type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | null
+type SubscriptionType = import('../../plugin_constants').SubscriptionType;
+type RecordType = import('../../plugin_constants').RecordType;
 
-type ApiServiceName = 'getChannels' | 'searchRecords' | 'getRecord' | 'createSubscription' | 'fetchSubscriptions' | 'editSubscription' | 'deleteSubscription' | 'getConfig' | 'shareRecord' | 'getComments' | 'addComments' | 'getStates' | 'updateState';
+type ChannelData = {
+    create_at: number;
+    creator_id: string;
+    delete_at: number;
+    display_name: string;
+    extra_update_at: number;
+    group_constrained: null | string;
+    header: string;
+    id: string;
+    last_post_at: number;
+    last_root_post_at: number;
+    name: string;
+    policy_id: null | unknown;
+    props: null | unknown;
+    purpose: string;
+    scheme_id: null | string;
+    shared: null | string;
+    team_display_name: string;
+    team_id: string;
+    team_name: string;
+    team_update_at: number;
+    total_msg_count: number;
+    total_msg_count_root: number;
+    type: string;
+    update_at: number;
+};
 
-type PluginApiService = {
-    path: string,
-    method: httpMethod,
-    apiServiceName: ApiServiceName,
+type Suggestion = {
+    number: string;
+    short_description: string;
+    sys_id: string;
 }
 
-type PluginState = {
-    'plugins-mattermost-plugin-servicenow': RootState<{ [x: string]: QueryDefinition<void, BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta>, never, void, 'pluginApi'>; }, never, 'pluginApi'>
+type RecordData = {
+    assigned_to: string | LinkData;
+    assignment_group: string | LinkData;
+    number: string;
+    priority: string;
+    short_description: string;
+    state: string;
+    sys_id: string;
+    author: string | LinkData;
+    kb_category: string | LinkData;
+    kb_knowledge_base: string | LinkData;
+    workflow_state: string;
+}
+
+type SubscriptionData = {
+    server_url: string;
+    is_active: boolean;
+    user_id: string;
+    type: SubscriptionType;
+    record_type: RecordType;
+    record_id: string;
+    subscription_events: string;
+    channel_id: string;
+    sys_id: string;
+    number: string;
+    short_description: string;
+}
+
+type ConfigData = {
+    ServiceNowBaseURL: string;
+    ServiceNowOAuthClientID: string;
+    ServiceNowOAuthClientSecret: string;
+    EncryptionSecret: string;
+    WebhookSecret: string;
+    ServiceNowUpdateSetDownload: string;
+}
+
+type LinkData = {
+    display_value: string;
+    link: string;
+}
+
+type StateData = {
+    label: string;
+    value: string;
 }
 
 type DropdownOptionType = {
@@ -43,13 +114,6 @@ type RecordDataLabelConfigType = {
     label: string;
 }
 
-type APIPayloadType = FetchChannelsParams | SearchRecordsParams | GetRecordParams | CreateSubscriptionPayload | FetchSubscriptionsParams | EditSubscriptionPayload | ShareRecordPayload | CommentsPayload | GetStatesParams | UpdateStateParams | string;
-
-type APIError = {
-    id: string,
-    message: string,
-}
-
 type WebsocketEventParams = {
     event: string,
     data: Record<string, string>,
@@ -57,10 +121,5 @@ type WebsocketEventParams = {
 
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
-    labelValuePairs?: Array<{label: string, value: string}>,
-}
-
-type CommentAndStateModalData = {
-    recordType: RecordType;
-    recordId: string;
+    labelValuePairs?: Array<{ label: string, value: string }>,
 }
