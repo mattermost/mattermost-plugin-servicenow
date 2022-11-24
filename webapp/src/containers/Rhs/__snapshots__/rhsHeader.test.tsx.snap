@@ -150,7 +150,7 @@ exports[`RHSHeader should match snapshot 2`] = `
       />
       <Button
         onClick={[Function]}
-        text="Hide"
+        text="Close"
       />
     </div>
   </div>

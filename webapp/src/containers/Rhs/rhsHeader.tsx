@@ -8,8 +8,7 @@ import useOutsideClick from 'src/hooks/useClickOutside';
 import Constants from 'src/plugin_constants';
 import SVGIcons from 'src/plugin_constants/icons';
 import IconButton from 'src/components/Buttons/iconButton';
-
-import {showModal as showRecordModal} from 'src/reducers/shareRecordModal';
+import {setGlobalModalState} from 'src/reducers/globalModal';
 
 type HeaderProps = {
     showAllSubscriptions: boolean;
@@ -57,7 +56,7 @@ const Header = ({
                     </IconButton>
                     <button
                         className='btn btn-primary share-record-btn'
-                        onClick={() => dispatch(showRecordModal())}
+                        onClick={() => dispatch(setGlobalModalState({modalId: 'shareRecord'}))}
                     >
                         <span>
                             <SvgWrapper
@@ -111,7 +110,7 @@ const Header = ({
                                 isDisabled={!isFilterApplied()}
                             />
                             <Button
-                                text='Hide'
+                                text='Close'
                                 onClick={() => setShowFilter(false)}
                             />
                         </div>
