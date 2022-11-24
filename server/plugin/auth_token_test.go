@@ -136,23 +136,23 @@ func Test_ParseAuthToken(t *testing.T) {
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because aes.NewCipher gives error",
-			expectedError: "error because aes.NewCipher gives error",
+			expectedError: "aes.NewCipher gives error",
 			setupPlugin: func() {
 				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
-					return &mockBLock{}, errors.New("error because aes.NewCipher gives error")
+					return &mockBLock{}, errors.New("aes.NewCipher gives error")
 				})
 			},
 			encodedToken: "mockEncodedToken",
 		},
 		{
 			description:   "ParseAuthToken: failed to decode the oAuth token because cipher.NewGCM gives error",
-			expectedError: "error because cipher.NewGCM gives error",
+			expectedError: "cipher.NewGCM gives error",
 			setupPlugin: func() {
 				monkey.Patch(aes.NewCipher, func(a []byte) (cipher.Block, error) {
 					return &mockBLock{}, nil
 				})
 				monkey.Patch(cipher.NewGCM, func(_ cipher.Block) (cipher.AEAD, error) {
-					return &mockAesgcm{}, errors.New("error because cipher.NewGCM gives error")
+					return &mockAesgcm{}, errors.New("cipher.NewGCM gives error")
 				})
 			},
 			encodedToken: "mockEncodedToken",

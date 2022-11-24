@@ -662,7 +662,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
-					0, errors.New("unable to delete the subscriptions"),
+					0, errors.New("unable to delete the subscription"),
 				)
 			},
 			isResponse:       true,
@@ -738,7 +738,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					nil, 0, errors.New("unable to get the subscriptions"),
+					nil, 0, errors.New("unable to get the subscription"),
 				)
 			},
 			expectedError: genericErrorMessage,
