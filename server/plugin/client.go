@@ -275,5 +275,5 @@ func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializ
 		return nil, statusCode, errors.Wrap(err, "failed to create the incident in ServiceNow")
 	}
 
-	return &response.Result, statusCode, nil
+	return response.Result, statusCode, nil
 }

@@ -655,10 +655,11 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	response, statusCode, err := client.CreateIncident(incident)
 	if err != nil {
 		p.API.LogError(constants.APIErrorCreateIncident, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: constants.APIErrorCreateIncident})
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.APIErrorCreateIncident, err.Error()))
 		return
 	}
 
+	// TODO: post the created incident in the current channel instead of DM
 	channel, channelErr := p.API.GetDirectChannel(mattermostUserID, p.botID)
 	if channelErr != nil {
 		p.API.LogError(constants.ErrorGetBotChannel, "userID", mattermostUserID, "Error", channelErr.Error())
@@ -679,7 +680,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 
 	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
 		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
 	}
 

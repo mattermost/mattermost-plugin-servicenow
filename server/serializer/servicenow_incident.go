@@ -16,7 +16,7 @@ type IncidentCaller struct {
 }
 
 type IncidentResult struct {
-	Result IncidentResponse `json:"result"`
+	Result *IncidentResponse `json:"result"`
 }
 
 type IncidentPayload struct {

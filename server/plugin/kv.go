@@ -97,9 +97,9 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 
 		for _, key := range kvList {
 			if userID, isValidUserKey := IsValidUserKey(key); isValidUserKey {
-				decodedKey, decordErr := decodeKey(userID)
-				if decordErr != nil {
-					s.plugin.API.LogError("Unable to decode key", "UserID", userID, "Error", decordErr.Error())
+				decodedKey, decodeErr := decodeKey(userID)
+				if decodeErr != nil {
+					s.plugin.API.LogError("Unable to decode key", "UserID", userID, "Error", decodeErr.Error())
 					continue
 				}
 
