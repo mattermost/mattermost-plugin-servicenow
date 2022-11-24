@@ -13,8 +13,8 @@ import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILEN
 
 import {refetch, resetRefetch} from 'src/reducers/refetchState';
 
-import {showModal as showEditModal} from 'src/reducers/editSubscriptionModal';
 import {setConnected} from 'src/reducers/connectedState';
+import {setGlobalModalState} from 'src/reducers/globalModal';
 
 import Utils from 'src/utils';
 
@@ -136,7 +136,7 @@ const Rhs = (): JSX.Element => {
             subscriptionEvents,
             id: subscription.sys_id,
         };
-        dispatch(showEditModal(subscriptionData));
+        dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}));
     }, [dispatch]);
 
     // Handles action when the delete button is clicked

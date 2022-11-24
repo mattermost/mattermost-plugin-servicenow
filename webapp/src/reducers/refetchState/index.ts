@@ -1,9 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-export type RefetchState = {
-    refetch: boolean;
-};
-
 const initialState: RefetchState = {
     refetch: false,
 };

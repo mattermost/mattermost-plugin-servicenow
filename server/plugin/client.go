@@ -28,6 +28,7 @@ type Client interface {
 	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
 	GetMe(userEmail string) (*serializer.ServiceNowUser, int, error)
+	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 }
 
 type client struct {
@@ -264,4 +265,20 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 	}
 
 	return userDetails.UserDetails[0], statusCode, nil
+}
+
+func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamText:   {searchTerm},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+	}
+
+	items := &serializer.ServiceNowCatalogItemsResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetCatalogItemsFromServiceNow, nil, items, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return items.Result, statusCode, nil
 }

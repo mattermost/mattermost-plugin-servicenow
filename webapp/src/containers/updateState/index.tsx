@@ -9,7 +9,8 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import Constants from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
-import {hideModal as hideUpdateStateModal} from 'src/reducers/updateStateModal';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {getGlobalModalState, isUpdateStateModalOpen} from 'src/selectors';
 
 import Utils from 'src/utils';
 
@@ -36,7 +37,7 @@ const UpdateState = () => {
     }, []);
 
     const hideModal = useCallback(() => {
-        dispatch(hideUpdateStateModal());
+        dispatch(resetGlobalModalState());
         resetStates();
     }, []);
 
@@ -51,19 +52,22 @@ const UpdateState = () => {
     };
 
     useEffect(() => {
-        const {data, open} = pluginState.openUpdateStateModalReducer;
-        if (open && data?.recordType && data?.recordId) {
+        const {data} = getGlobalModalState(pluginState);
+        if (isUpdateStateModalOpen(pluginState) && data?.recordType && data?.recordId) {
             const params: GetStatesParams = {recordType: data.recordType};
             setGetStatesParams(params);
             makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
         }
-    }, [pluginState.openUpdateStateModalReducer.open]);
+    }, [isUpdateStateModalOpen(pluginState)]);
 
     const updateState = () => {
-        const {recordType, recordId} = pluginState.openUpdateStateModalReducer.data;
-        const payload: UpdateStatePayload = {recordType, recordId, state: selectedState ?? ''};
-        setUpdateStatePayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.updateState.apiServiceName, payload);
+        const {data} = getGlobalModalState(pluginState);
+        if (data) {
+            const {recordType, recordId} = data;
+            const payload: UpdateStatePayload = {recordType, recordId, state: selectedState ?? ''};
+            setUpdateStatePayload(payload);
+            makeApiRequest(Constants.pluginApiServiceConfigs.updateState.apiServiceName, payload);
+        }
     };
 
     useEffect(() => {
@@ -103,7 +107,7 @@ const UpdateState = () => {
     const showLoader = statesLoading || stateUpdating;
     return (
         <Modal
-            show={pluginState.openUpdateStateModalReducer.open}
+            show={isUpdateStateModalOpen(pluginState)}
             onHide={hideModal}
             className='rhs-modal'
         >
