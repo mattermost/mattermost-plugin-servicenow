@@ -18,6 +18,7 @@ type ChannelPanelProps = {
     actionBtnDisabled?: boolean;
     channel: string | null;
     setChannel: (value: string | null) => void;
+    showModalLoader?: boolean;
     setShowModalLoader: (show: boolean) => void;
     setApiError: (error: APIError | null) => void;
     setApiResponseValid?: (valid: boolean) => void;
@@ -37,6 +38,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     actionBtnDisabled,
     channel,
     setChannel,
+    showModalLoader,
     setShowModalLoader,
     setApiError,
     setApiResponseValid,
@@ -167,7 +169,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                     }}
                     required={required}
                     error={(validationFailed || validationError) && Constants.RequiredMsg}
-                    disabled={getChannelState().isLoading}
+                    disabled={getChannelState().isLoading || showModalLoader}
                     loadingSuggestions={getChannelState().isLoading}
                     charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
                     defaultValue={autoSuggestDefaultValue}

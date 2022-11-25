@@ -1,77 +1,47 @@
 import React, {forwardRef, useEffect, useState} from 'react';
 import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 
-import Constants from 'src/plugin_constants';
+import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-const incidentCallerOptions: CallerData[] = [
-    {
-        mattermostUserID: 'user id 1',
-        username: 'user 1',
-        serviceNowUser: {
-            sys_id: 'sys_id 1',
-            email: 'user email',
-            user_name: 'user 1',
-        },
-    },
-    {
-        mattermostUserID: 'user id 2',
-        username: 'user 2',
-        serviceNowUser: {
-            sys_id: 'sys_id 2',
-            email: 'user email',
-            user_name: 'user 2',
-        },
-    },
-    {
-        mattermostUserID: 'caller id 1',
-        username: 'caller 1',
-        serviceNowUser: {
-            sys_id: 'sys_id 3',
-            email: 'caller email',
-            user_name: 'caller 3',
-        },
-    },
-    {
-        mattermostUserID: 'caller id 4',
-        username: 'caller 4',
-        serviceNowUser: {
-            sys_id: 'sys_id 4',
-            email: 'caller email',
-            user_name: 'caller 4',
-        },
-    },
-];
+import Constants from 'src/plugin_constants';
+import usePluginApi from 'src/hooks/usePluginApi';
 
 type CallerPanelProps = {
     className?: string;
-    actionBtnDisabled?: boolean;
     caller: string | null;
     setCaller: (value: string | null) => void;
-    setShowModalLoader: (show: boolean) => void;
+    showModalLoader: boolean;
+    setShowModalLoader: (showModalLoader: boolean) => void;
+    setApiError: (apiError: APIError | null) => void;
     placeholder?: string;
 }
 
 const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
     className,
-    actionBtnDisabled,
     caller,
     setCaller,
+    showModalLoader,
+    setShowModalLoader,
+    setApiError,
     placeholder,
 }: CallerPanelProps): JSX.Element => {
-    const [callerOptions, setCallerlOptions] = useState<CallerData[]>(incidentCallerOptions);
+    const [callerOptions, setCallerOptions] = useState<CallerData[]>([]);
     const [callerSuggestions, setCallerSuggestions] = useState<Record<string, string>[]>([]);
     const [callerAutoSuggestValue, setCallerAutoSuggestValue] = useState('');
+
+    // usePluginApi hook
+    const {makeApiRequest, getApiState} = usePluginApi();
 
     const mapCallersToSuggestions = (callers: CallerData[]): Array<Record<string, string>> => callers.map((c) => ({
         userId: c.serviceNowUser.sys_id,
         userName: c.username,
     }));
 
-    // Set the suggestions when the input value of the auto-suggest changes;
-    useEffect(() => {
-        const callersToSuggest = callerOptions?.filter((c) => c.username.toLowerCase().includes(callerAutoSuggestValue.toLowerCase())) || [];
-        setCallerSuggestions(mapCallersToSuggestions(callersToSuggest));
-    }, [callerAutoSuggestValue]);
+    // Get users state
+    const getUsers = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
+        return {isLoading, isSuccess, isError, data: data as CallerData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
 
     // Set the callerID when any of the suggestion is selected
     const handleCallerSelection = (callerSuggestion: Record<string, string> | null) => {
@@ -79,12 +49,37 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
         setCaller(callerSuggestion?.userId || null);
     };
 
+    // Set the suggestions when the input value of the auto-suggest changes;
     useEffect(() => {
-        // When the caller value is reset, reset the caller auto-suggest input as well;
+        const callersToSuggest = callerOptions?.filter((c) => c.username.toLowerCase().includes(callerAutoSuggestValue.toLowerCase())) || [];
+        setCallerSuggestions(mapCallersToSuggestions(callersToSuggest));
+    }, [callerAutoSuggestValue, callerOptions]);
+
+    useEffect(() => {
+        const {isLoading, isError, isSuccess, error, data} = getUsers();
+        if (isError && error) {
+            setApiError(error);
+        }
+
+        if (isSuccess) {
+            setApiError(null);
+            setCallerOptions(data);
+        }
+
+        setShowModalLoader(isLoading);
+    }, [getUsers().isError, getUsers().isSuccess, getUsers().isLoading]);
+
+    useEffect(() => {
+        // When the caller value is reset, reset the caller auto-suggest input as well
         if (!caller) {
             setCallerAutoSuggestValue('');
         }
     }, [caller]);
+
+    // Make a request to fetch connected users
+    useEffect(() => {
+        makeApiRequest(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
+    }, []);
 
     return (
         <div
@@ -96,7 +91,7 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
                     inputValue={callerAutoSuggestValue}
                     onInputValueChange={setCallerAutoSuggestValue}
                     onChangeSelectedSuggestion={handleCallerSelection}
-                    disabled={actionBtnDisabled}
+                    disabled={getUsers().isLoading || showModalLoader}
                     suggestionConfig={{
                         suggestions: callerSuggestions,
                         renderValue: (suggestion) => suggestion.userName,

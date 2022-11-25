@@ -192,6 +192,7 @@ const ShareRecords = () => {
                             <ChannelPanel
                                 channel={channel}
                                 setChannel={setChannel}
+                                showModalLoader={showModalLoader}
                                 setShowModalLoader={setShowModalLoader}
                                 setApiError={setApiError}
                                 channelOptions={channelOptions}

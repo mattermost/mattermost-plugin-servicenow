@@ -25,6 +25,7 @@ type IncidentPayload struct {
 	Urgency          int    `json:"urgency"`
 	Impact           int    `json:"impact"`
 	Caller           string `json:"caller_id"`
+	ChannelID        string `json:"channel_id"`
 }
 
 type IncidentResponse struct {

@@ -642,7 +642,6 @@ func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
-	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	incident, err := serializer.IncidentFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
@@ -664,14 +663,6 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: post the created incident in the current channel instead of DM
-	channel, channelErr := p.API.GetDirectChannel(mattermostUserID, p.botID)
-	if channelErr != nil {
-		p.API.LogError(constants.ErrorGetBotChannel, "userID", mattermostUserID, "Error", channelErr.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGetBotChannel})
-		return
-	}
-
 	record := serializer.ServiceNowRecord{
 		SysID:            response.SysID,
 		Number:           response.Number,
@@ -689,7 +680,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(channel.Id, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	post := record.CreateSharingPost(incident.ChannelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}

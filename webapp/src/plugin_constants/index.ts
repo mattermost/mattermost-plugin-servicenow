@@ -35,6 +35,7 @@ const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const RecordSharedMsg = 'Record shared successfully!';
 const StateUpdatedMsg = 'State updated successfully!';
+const IncidentCreatedMsg = 'Incident created successfully!';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
@@ -302,6 +303,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    getUsers: {
+        path: '/users',
+        method: 'GET',
+        apiServiceName: 'getUsers',
+    },
+    createIncident: {
+        path: '/incident',
+        method: 'POST',
+        apiServiceName: 'createIncident',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -352,6 +363,7 @@ export default {
     DeleteSubscriptionMsg,
     RecordSharedMsg,
     StateUpdatedMsg,
+    IncidentCreatedMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
     recordTypeOptions,
