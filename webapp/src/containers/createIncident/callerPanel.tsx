@@ -25,9 +25,9 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
     setApiError,
     placeholder,
 }: CallerPanelProps): JSX.Element => {
-    const [callerOptions, setCallerOptions] = useState<CallerData[]>([]);
-    const [callerSuggestions, setCallerSuggestions] = useState<Record<string, string>[]>([]);
-    const [callerAutoSuggestValue, setCallerAutoSuggestValue] = useState('');
+    const [options, setOptions] = useState<CallerData[]>([]);
+    const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
+    const [autoSuggestValue, setAutoSuggestValue] = useState('');
 
     // usePluginApi hook
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -45,15 +45,15 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
 
     // Set the callerID when any of the suggestion is selected
     const handleCallerSelection = (callerSuggestion: Record<string, string> | null) => {
-        setCallerAutoSuggestValue(callerSuggestion?.userName || '');
+        setAutoSuggestValue(callerSuggestion?.userName || '');
         setCaller(callerSuggestion?.userId || null);
     };
 
-    // Set the suggestions when the input value of the auto-suggest changes;
+    // Set the suggestions when the input value of the auto-suggest changes
     useEffect(() => {
-        const callersToSuggest = callerOptions?.filter((c) => c.username.toLowerCase().includes(callerAutoSuggestValue.toLowerCase())) || [];
-        setCallerSuggestions(mapCallersToSuggestions(callersToSuggest));
-    }, [callerAutoSuggestValue, callerOptions]);
+        const callersToSuggest = options?.filter((c) => c.username.toLowerCase().includes(autoSuggestValue.toLowerCase())) || [];
+        setSuggestions(mapCallersToSuggestions(callersToSuggest));
+    }, [autoSuggestValue, options]);
 
     useEffect(() => {
         const {isLoading, isError, isSuccess, error, data} = getUsers();
@@ -63,7 +63,7 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
 
         if (isSuccess) {
             setApiError(null);
-            setCallerOptions(data);
+            setOptions(data);
         }
 
         setShowModalLoader(isLoading);
@@ -72,7 +72,7 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
     useEffect(() => {
         // When the caller value is reset, reset the caller auto-suggest input as well
         if (!caller) {
-            setCallerAutoSuggestValue('');
+            setAutoSuggestValue('');
         }
     }, [caller]);
 
@@ -88,12 +88,12 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
             <div className='padding-h-12 padding-top-10'>
                 <AutoSuggest
                     placeholder={placeholder || 'Select caller'}
-                    inputValue={callerAutoSuggestValue}
-                    onInputValueChange={setCallerAutoSuggestValue}
+                    inputValue={autoSuggestValue}
+                    onInputValueChange={setAutoSuggestValue}
                     onChangeSelectedSuggestion={handleCallerSelection}
                     disabled={getUsers().isLoading || showModalLoader}
                     suggestionConfig={{
-                        suggestions: callerSuggestions,
+                        suggestions,
                         renderValue: (suggestion) => suggestion.userName,
                     }}
                     charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
