@@ -53,8 +53,16 @@ const UpdateState = () => {
 
     useEffect(() => {
         const {data} = getGlobalModalState(pluginState);
-        if (isUpdateStateModalOpen(pluginState) && data?.recordType && data?.recordId) {
-            const params: GetStatesParams = {recordType: data.recordType};
+        let record_type = '';
+        let record_id = '';
+        if (data) {
+            const {recordId, recordType} = getGlobalModalState(pluginState).data as CommentAndStateModalData;
+            record_id = recordId;
+            record_type = recordType;
+        }
+
+        if (isUpdateStateModalOpen(pluginState) && record_type && record_id) {
+            const params: GetStatesParams = {recordType: record_type as RecordType};
             setGetStatesParams(params);
             makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
         }
@@ -63,7 +71,7 @@ const UpdateState = () => {
     const updateState = () => {
         const {data} = getGlobalModalState(pluginState);
         if (data) {
-            const {recordType, recordId} = data;
+            const {recordType, recordId} = data as CommentAndStateModalData;
             const payload: UpdateStatePayload = {recordType, recordId, state: selectedState ?? ''};
             setUpdateStatePayload(payload);
             makeApiRequest(Constants.pluginApiServiceConfigs.updateState.apiServiceName, payload);

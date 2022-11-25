@@ -15,7 +15,8 @@ type ApiServiceName =
     'getStates' |
     'updateState' |
     'getUsers' |
-    'createIncident';
+    'createIncident' |
+    'getConnectedUser';
 
 type PluginApiService = {
     path: string,

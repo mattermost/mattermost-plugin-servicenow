@@ -18,7 +18,7 @@ import Constants, {IncidentImpactAndUrgencyOptions, RecordType, SubscriptionEven
 import {setConnected} from 'src/reducers/connectedState';
 import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
-import {isCreateIncidentModalOpen} from 'src/selectors';
+import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
 
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
@@ -54,6 +54,7 @@ const UpdateState = () => {
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const dispatch = useDispatch();
+    const open = isCreateIncidentModalOpen(pluginState);
 
     // Reset the field states
     const resetFieldStates = useCallback(() => {
@@ -188,9 +189,17 @@ const UpdateState = () => {
         }
     }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
 
+    useEffect(() => {
+        if (open && getGlobalModalState(pluginState).data) {
+            const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
+            setShortDescription(reduxStateShortDescription);
+            setDescription(reduxStateDescription);
+        }
+    }, [open]);
+
     return (
         <Modal
-            show={isCreateIncidentModalOpen(pluginState)}
+            show={open}
             onHide={hideModal}
             className='rhs-modal'
         >
