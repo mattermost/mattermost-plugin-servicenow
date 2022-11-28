@@ -9,6 +9,7 @@ export enum ToggleSwitchLabelPositioning {
 export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.0.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
+export const REQUEST_BASE_URL = 'com.glideapp.servicecatalog_cat_item_view.do?v=1&sysparm_id=';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
@@ -36,12 +37,14 @@ const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?
 const RecordSharedMsg = 'Record shared successfully!';
 const StateUpdatedMsg = 'State updated successfully!';
 const CharThresholdToSuggestChannel = 0;
+const CharThresholdToSuggestRequest = 4;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
 const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
+const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -210,6 +213,25 @@ const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     },
 ];
 
+export enum RequestDataLabelConfigKey {
+    SHORT_DESCRIPTION = 'short_description',
+    PRICE = 'price',
+    CATEGORY = 'title',
+}
+
+const RequestDataLabelConfig = [
+    {
+        key: RequestDataLabelConfigKey.SHORT_DESCRIPTION,
+        label: 'Short Description',
+    }, {
+        key: RequestDataLabelConfigKey.CATEGORY,
+        label: 'Category',
+    }, {
+        key: RequestDataLabelConfigKey.PRICE,
+        label: 'Price',
+    },
+];
+
 // Map subscription events to texts to be shown in the UI(on cards)
 export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
     [SubscriptionEvents.CREATED]: 'New record created',
@@ -321,12 +343,14 @@ export default {
     ShareRecordButton,
     UPLOAD_SET_FILENAME,
     SERVICENOW_ICON_URL,
+    REQUEST_BASE_URL,
     pluginApiServiceConfigs,
     MMCSRF,
     HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
     KnowledgeRecordDataLabelConfig,
+    RequestDataLabelConfig,
     MMUSERID,
     SubscriptionsConfigErrorTitle,
     SubscriptionsConfigErrorSubtitleForAdmin,
@@ -353,6 +377,7 @@ export default {
     RecordSharedMsg,
     StateUpdatedMsg,
     CharThresholdToSuggestChannel,
+    CharThresholdToSuggestRequest,
     RequiredMsg,
     recordTypeOptions,
     shareRecordTypeOptions,
@@ -364,4 +389,5 @@ export default {
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
+    RequestButtonRedirectText,
 };

@@ -3,7 +3,7 @@
 */
 
 // TODO: Create an enum for the below modal Ids
-type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | null
+type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | 'createRequest' | null
 type SubscriptionType = import('../../plugin_constants').SubscriptionType;
 type RecordType = import('../../plugin_constants').RecordType;
 
@@ -134,4 +134,17 @@ type CallerData = {
     mattermostUserID: string;
     username: string;
     serviceNowUser: ServiceNowUser;
+}
+
+type RequestCategoryData = {
+    sys_id: string,
+    title: string
+}
+
+type RequestData = {
+    sys_id: string,
+    name: string,
+    short_description: string,
+    price: string,
+    category: RequestCategoryData
 }

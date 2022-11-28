@@ -90,3 +90,9 @@ export function handleOpenIncidentModal(store: Store<GlobalState, Action<Record<
         store.dispatch(setGlobalModalState({modalId: 'createIncident'}) as Action);
     };
 }
+
+export function handleOpenRequestModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(setGlobalModalState({modalId: 'createRequest'}) as Action);
+    };
+}

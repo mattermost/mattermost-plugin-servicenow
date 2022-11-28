@@ -25,3 +25,7 @@ export const isUpdateStateModalOpen = (state: PluginState): boolean => {
 export const isCreateIncidentModalOpen = (state: PluginState): boolean => {
     return state.globalModalReducer.modalId === 'createIncident';
 };
+
+export const isCreateRequestModalOpen = (state: PluginState): boolean => {
+    return state.globalModalReducer.modalId === 'createRequest';
+};
