@@ -1,8 +1,10 @@
 import React, {forwardRef, useEffect, useState} from 'react';
+
 import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 
 import Constants from 'src/plugin_constants';
 
+// TODO: remove after integration with the APIs
 const incidentCallerOptions: CallerData[] = [
     {
         mattermostUserID: 'user id 1',

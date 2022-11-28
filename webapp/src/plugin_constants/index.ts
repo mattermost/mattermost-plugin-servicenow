@@ -17,6 +17,7 @@ const RightSidebarHeader = 'ServiceNow';
 const RhsSubscritpions = 'Subscriptions';
 const ShareRecordButton = 'Share';
 const RhsToggleLabel = 'Show all subscriptions';
+const ChannelPanelToggleLabel = 'Create subscription';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
@@ -333,6 +334,7 @@ export default {
     SubscriptionsConfigErrorSubtitleForUser,
     ChannelHeaderTooltipText,
     RhsToggleLabel,
+    ChannelPanelToggleLabel,
     DefaultCharThresholdToShowSuggestions,
     DefaultPage,
     DefaultPageSize,
