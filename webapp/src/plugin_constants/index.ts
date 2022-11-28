@@ -325,6 +325,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    searchItems: {
+        path: '/catalog',
+        method: 'GET',
+        apiServiceName: 'searchItems',
+    },
 };
 
 export const PanelDefaultHeights = {

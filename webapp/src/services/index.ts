@@ -108,6 +108,14 @@ const pluginApi = createApi({
                 body,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.searchItems.apiServiceName]: builder.query<RequestData[], SearchItemsParams>({
+            query: ({search, perPage}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.searchItems.path,
+                method: Constants.pluginApiServiceConfigs.searchItems.method,
+                params: {search, perPage: perPage || 10},
+            }),
+        }),
     }),
 });
 
