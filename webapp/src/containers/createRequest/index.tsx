@@ -173,7 +173,7 @@ const CreateRequest = () => {
                                         rel='noreferrer'
                                         target='_blank'
                                     >
-                                        {'Submit Request on ServiceNow'}
+                                        {Constants.RequestButtonText}
                                     </a>
                                     <div className='request-button__redirect-text'>
                                         {Constants.RequestButtonRedirectText}

@@ -44,6 +44,7 @@ const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
+const RequestButtonText = 'Submit Request on ServiceNow';
 const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
 
 export enum SubscriptionEvents {
@@ -389,5 +390,6 @@ export default {
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
+    RequestButtonText,
     RequestButtonRedirectText,
 };
