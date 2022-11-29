@@ -247,25 +247,25 @@ func (c *client) UpdateStateOfRecordInServiceNow(recordType, recordID string, pa
 }
 
 func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error) {
-	userDetails := &serializer.UserDetails{}
+	userList := &serializer.UserList{}
 	path := fmt.Sprintf("%s%s", c.plugin.getConfiguration().ServiceNowBaseURL, constants.PathGetUserFromServiceNow)
 	params := url.Values{}
 	params.Add(constants.SysQueryParam, fmt.Sprintf("email=%s", userEmail))
 
-	_, statusCode, err := c.CallJSON(http.MethodGet, path, nil, userDetails, params)
+	_, statusCode, err := c.CallJSON(http.MethodGet, path, nil, userList, params)
 	if err != nil {
 		return nil, statusCode, errors.Wrap(err, "failed to get the user details")
 	}
 
-	if len(userDetails.UserDetails) == 0 {
+	if len(userList.UserDetails) == 0 {
 		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow instance %s with email %s", c.plugin.getConfiguration().ServiceNowBaseURL, userEmail)
 	}
 
-	if len(userDetails.UserDetails) > 1 {
+	if len(userList.UserDetails) > 1 {
 		c.plugin.API.LogWarn("Multiple users with the same email address exist on ServiceNow instance", "Email", userEmail, "Instance", c.plugin.getConfiguration().ServiceNowBaseURL)
 	}
 
-	return userDetails.UserDetails[0], statusCode, nil
+	return userList.UserDetails[0], statusCode, nil
 }
 
 func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializer.IncidentResponse, int, error) {

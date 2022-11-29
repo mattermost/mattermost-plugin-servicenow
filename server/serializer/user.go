@@ -1,6 +1,6 @@
 package serializer
 
-type UserDetails struct {
+type UserList struct {
 	UserDetails []*ServiceNowUser `json:"result"`
 }
 
