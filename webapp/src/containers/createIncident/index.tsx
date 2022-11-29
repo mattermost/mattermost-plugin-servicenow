@@ -1,9 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, Dropdown, ModalFooter, ModalHeader, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
-
-import Input from '@brightscout/mattermost-ui-library/build/cjs/components/InputField';
+import {CustomModal as Modal, InputField as Input, Dropdown, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
@@ -39,6 +37,7 @@ const UpdateState = () => {
     const [showResultPanel, setShowResultPanel] = useState(false);
     const [incidentPayload, setIncidentPayload] = useState<IncidentPayload | null>(null);
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
+    const [showChannelPanel, setShowChannelPanel] = useState(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -69,6 +68,7 @@ const UpdateState = () => {
         setShowResultPanel(false);
         setIncidentPayload(null);
         setSubscriptionPayload(null);
+        setShowChannelPanel(false);
     }, []);
 
     // Hide the modal and reset the states
@@ -87,9 +87,7 @@ const UpdateState = () => {
         setValidationError('');
     };
 
-    const onDescriptionChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setDescription(e.target.value);
-    };
+    const onDescriptionChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
     // Get incident state
     const getIncidentData = () => {
@@ -118,7 +116,7 @@ const UpdateState = () => {
             return;
         }
 
-        // Set lowest impact and urgency by default.
+        // Set the lowest impact and urgency by default.
         const payload: IncidentPayload = {
             short_description: shortDescription,
             description,
@@ -142,7 +140,7 @@ const UpdateState = () => {
 
         if (isSuccess) {
             setApiError(null);
-            if (!channel) {
+            if (!showChannelPanel) {
                 setShowResultPanel(true);
                 return;
             }
@@ -163,7 +161,7 @@ const UpdateState = () => {
                 record_type: RecordType.INCIDENT,
                 record_id: data.sys_id || '',
                 subscription_events: subscriptionEvents.join(','),
-                channel_id: channel,
+                channel_id: channel ?? currentChannelId,
             };
 
             setSubscriptionPayload(payload);
@@ -187,6 +185,12 @@ const UpdateState = () => {
             }
         }
     }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
+
+    useEffect(() => {
+        if (currentChannelId) {
+            setChannel(currentChannelId);
+        }
+    }, [currentChannelId, isCreateIncidentModalOpen(pluginState)]);
 
     return (
         <Modal
@@ -223,8 +227,8 @@ const UpdateState = () => {
                                 value={shortDescription}
                                 onChange={onShortDescriptionChangeHandle}
                                 error={validationError ?? ''}
-                                disabled={showModalLoader}
                                 className='incident-body__input-field'
+                                required={true}
                             />
                             <TextArea
                                 placeholder='Description'
@@ -255,20 +259,30 @@ const UpdateState = () => {
                                 showModalLoader={showModalLoader}
                                 setShowModalLoader={setShowModalLoader}
                                 setApiError={setApiError}
-                                className='incident-body__auto-suggest'
+                                className={`incident-body__auto-suggest ${caller && 'incident-body__suggestion-chosen'}`}
                             />
-                            <ChannelPanel
-                                channel={channel}
-                                setChannel={setChannel}
-                                showModalLoader={showModalLoader}
-                                setShowModalLoader={setShowModalLoader}
-                                setApiError={setApiError}
-                                channelOptions={channelOptions}
-                                setChannelOptions={setChannelOptions}
-                                actionBtnDisabled={showModalLoader}
-                                placeholder='Select channel to create subscription'
-                                className='incident-body__auto-suggest'
+                            <ToggleSwitch
+                                active={showChannelPanel}
+                                onChange={(active) => setShowChannelPanel(active)}
+                                label={Constants.ChannelPanelToggleLabel}
+                                labelPositioning='right'
+                                className='incident-body__toggle-switch'
                             />
+                            {showChannelPanel && (
+                                <ChannelPanel
+                                    channel={channel}
+                                    setChannel={setChannel}
+                                    showModalLoader={showModalLoader}
+                                    setShowModalLoader={setShowModalLoader}
+                                    setApiError={setApiError}
+                                    channelOptions={channelOptions}
+                                    setChannelOptions={setChannelOptions}
+                                    actionBtnDisabled={showModalLoader}
+                                    editing={true}
+                                    placeholder='Select channel to create subscription'
+                                    className={`incident-body__auto-suggest ${channel && 'incident-body__suggestion-chosen'}`}
+                                />
+                            )}
                         </div>
                         <ModalFooter
                             onConfirm={createIncident}

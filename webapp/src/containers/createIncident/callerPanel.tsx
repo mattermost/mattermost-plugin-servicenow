@@ -1,4 +1,5 @@
 import React, {forwardRef, useEffect, useState} from 'react';
+
 import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
@@ -70,7 +71,7 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
     }, [getUsers().isError, getUsers().isSuccess, getUsers().isLoading]);
 
     useEffect(() => {
-        // When the caller value is reset, reset the caller auto-suggest input as well
+        // Reset the caller auto-suggest input, if the caller value is reset.
         if (!caller) {
             setAutoSuggestValue('');
         }
