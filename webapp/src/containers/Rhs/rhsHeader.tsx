@@ -57,7 +57,7 @@ const Header = ({
                         </SvgWrapper>
                     </IconButton>
                     <IconButton
-                        tooltipText='Menu'
+                        tooltipText='Actions'
                         onClick={() => setShowMenu(!showMenu)}
                     >
                         <SvgWrapper
@@ -137,7 +137,7 @@ const Header = ({
                                         </SvgWrapper>
                                     ),
                                     onClick: (() => dispatch(setGlobalModalState({modalId: 'createRequest'}))),
-                                    text: 'Catalog',
+                                    text: 'Begin catalog request',
                                 },
                                 {
                                     icon: (
@@ -150,7 +150,7 @@ const Header = ({
                                         </SvgWrapper>
                                     ),
                                     onClick: (() => dispatch(setGlobalModalState({modalId: 'createIncident'}))),
-                                    text: 'Incident',
+                                    text: 'Create an incident',
                                 },
                                 {
                                     icon: (
@@ -163,7 +163,7 @@ const Header = ({
                                         </SvgWrapper>
                                     ),
                                     onClick: (() => dispatch(setGlobalModalState({modalId: 'shareRecord'}))),
-                                    text: 'Share',
+                                    text: 'Share a record',
                                 },
                             ]}
                         />
