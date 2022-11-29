@@ -1,7 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {Dropdown, Button, SvgWrapper, ToggleSwitch} from '@brightscout/mattermost-ui-library';
+import {Dropdown, Button, SvgWrapper, ToggleSwitch, MenuButtons} from '@brightscout/mattermost-ui-library';
 
 import useOutsideClick from 'src/hooks/useClickOutside';
 
@@ -26,6 +26,7 @@ const Header = ({
     setResetFilter,
 }: HeaderProps) => {
     const [showFilter, setShowFilter] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
     const dispatch = useDispatch();
 
     const isFilterApplied = useCallback(() => showAllSubscriptions || filter.createdBy !== Constants.DefaultSubscriptionFilters.createdBy, [filter, showAllSubscriptions]);
@@ -34,6 +35,7 @@ const Header = ({
     const wrapperRef = useRef(null);
     useOutsideClick(wrapperRef, () => {
         setShowFilter(false);
+        setShowMenu(false);
     });
 
     return (
@@ -54,22 +56,19 @@ const Header = ({
                             {SVGIcons.filter}
                         </SvgWrapper>
                     </IconButton>
-                    <button
-                        className='btn btn-primary share-record-btn'
-                        onClick={() => dispatch(setGlobalModalState({modalId: 'shareRecord'}))}
+                    <IconButton
+                        tooltipText='Menu'
+                        onClick={() => setShowMenu(!showMenu)}
                     >
-                        <span>
-                            <SvgWrapper
-                                width={16}
-                                height={16}
-                                viewBox='0 0 14 12'
-                                className='share-record-icon'
-                            >
-                                {SVGIcons.share}
-                            </SvgWrapper>
-                        </span>
-                        {Constants.ShareRecordButton}
-                    </button>
+                        <SvgWrapper
+                            width={16}
+                            height={28}
+                            viewBox='0 -1 11 10'
+                            className='padding-left-6'
+                        >
+                            {SVGIcons.menu}
+                        </SvgWrapper>
+                    </IconButton>
                 </div>
             </div>
             {
@@ -114,6 +113,60 @@ const Header = ({
                                 onClick={() => setShowFilter(false)}
                             />
                         </div>
+                    </div>
+                )
+            }
+            {
+                showMenu && (
+                    <div
+                        ref={wrapperRef}
+                        className='rhs-filter-popover rhs-menu-popover'
+                    >
+                        {/* TODO: icons may change later */}
+                        <MenuButtons
+                            buttons={[
+                                {
+                                    icon: (
+                                        <SvgWrapper
+                                            width={16}
+                                            height={16}
+                                            viewBox='0 0 17 12'
+                                        >
+
+                                            {SVGIcons.catalog}
+                                        </SvgWrapper>
+                                    ),
+                                    onClick: (() => dispatch(setGlobalModalState({modalId: 'createRequest'}))),
+                                    text: 'Catalog',
+                                },
+                                {
+                                    icon: (
+                                        <SvgWrapper
+                                            width={16}
+                                            height={16}
+                                            viewBox='0 0 17 17'
+                                        >
+                                            {SVGIcons.incident}
+                                        </SvgWrapper>
+                                    ),
+                                    onClick: (() => dispatch(setGlobalModalState({modalId: 'createIncident'}))),
+                                    text: 'Incident',
+                                },
+                                {
+                                    icon: (
+                                        <SvgWrapper
+                                            width={14}
+                                            height={14}
+                                            viewBox='0 2 16 10'
+                                        >
+                                            {SVGIcons.share}
+                                        </SvgWrapper>
+                                    ),
+                                    onClick: (() => dispatch(setGlobalModalState({modalId: 'shareRecord'}))),
+                                    text: 'Share',
+                                },
+                            ]}
+                        />
                     </div>
                 )
             }
