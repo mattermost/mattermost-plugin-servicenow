@@ -1,9 +1,7 @@
 import React, {useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CustomModal as Modal, Dropdown, ModalFooter, ModalHeader, TextArea} from '@brightscout/mattermost-ui-library';
-
-import Input from '@brightscout/mattermost-ui-library/build/cjs/components/InputField';
+import {CustomModal as Modal, InputField as Input, Dropdown, ModalFooter, ModalHeader, TextArea, ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -18,6 +16,7 @@ import CallerPanel from './callerPanel';
 
 import './styles.scss';
 
+// TODO: remove after integration with the APIs
 const channelDropDownOptions: DropdownOptionType[] = [
     {
         label: 'Channel 1',
@@ -41,6 +40,7 @@ const UpdateState = () => {
     const [caller, setCaller] = useState<string | null>(null);
     const [channel, setChannel] = useState<string | null>(null);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>(channelDropDownOptions);
+    const [showChannelPanel, setShowChannelPanel] = useState(false);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
@@ -64,6 +64,7 @@ const UpdateState = () => {
         setChannelOptions([]);
         setApiError(null);
         setValidationError(null);
+        setShowChannelPanel(false);
         dispatch(resetGlobalModalState());
     }, []);
 
@@ -72,9 +73,7 @@ const UpdateState = () => {
         setValidationError('');
     };
 
-    const onDescriptionChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setDescription(e.target.value);
-    };
+    const onDescriptionChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
     const createIncident = () => {
         if (!shortDescription) {
@@ -104,6 +103,7 @@ const UpdateState = () => {
                         onChange={onShortDescriptionChangeHandle}
                         error={validationError ?? ''}
                         className='incident-body__input-field'
+                        required={true}
                     />
                     <TextArea
                         placeholder='Description'
@@ -133,19 +133,28 @@ const UpdateState = () => {
                         setCaller={setCaller}
                         actionBtnDisabled={showModalLoader}
                         setShowModalLoader={setShowModalLoader}
-                        className='incident-body__auto-suggest'
+                        className={`incident-body__auto-suggest ${caller && 'incident-body__suggestion-chosen'}`}
                     />
-                    <ChannelPanel
-                        channel={channel}
-                        setChannel={setChannel}
-                        setShowModalLoader={setShowModalLoader}
-                        setApiError={setApiError}
-                        channelOptions={channelOptions}
-                        setChannelOptions={setChannelOptions}
-                        actionBtnDisabled={showModalLoader}
-                        placeholder='Select channel to create subscription'
-                        className='incident-body__auto-suggest'
+                    <ToggleSwitch
+                        active={showChannelPanel}
+                        onChange={(active) => setShowChannelPanel(active)}
+                        label={Constants.ChannelPanelToggleLabel}
+                        labelPositioning='right'
+                        className='incident-body__toggle-switch'
                     />
+                    {showChannelPanel && (
+                        <ChannelPanel
+                            channel={channel}
+                            setChannel={setChannel}
+                            setShowModalLoader={setShowModalLoader}
+                            setApiError={setApiError}
+                            channelOptions={channelOptions}
+                            setChannelOptions={setChannelOptions}
+                            actionBtnDisabled={showModalLoader}
+                            placeholder='Select channel to create subscription'
+                            className={`incident-body__auto-suggest ${channel && 'incident-body__suggestion-chosen'}`}
+                        />
+                    )}
                 </div>
                 <ModalFooter
                     onConfirm={createIncident}
