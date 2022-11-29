@@ -132,7 +132,7 @@ const CreateRequest = () => {
         >
             <>
                 <ModalHeader
-                    title='Create a request'
+                    title='Begin Catalog Request'
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
