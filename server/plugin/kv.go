@@ -3,15 +3,11 @@ package plugin
 import (
 	"time"
 
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"github.com/pkg/errors"
-)
-
-const (
-	UserKeyPrefix   = "user_"
-	OAuth2KeyPrefix = "oauth2_"
 )
 
 const (
@@ -30,6 +26,7 @@ type UserStore interface {
 	LoadUser(mattermostUserID string) (*serializer.User, error)
 	StoreUser(user *serializer.User) error
 	DeleteUser(mattermostUserID string) error
+	GetAllUsers() ([]*serializer.IncidentCaller, error)
 }
 
 // OAuth2StateStore manages OAuth2 state
@@ -50,8 +47,8 @@ func (p *Plugin) NewStore(api plugin.API) Store {
 	return &pluginStore{
 		plugin:   p,
 		basicKV:  basicKV,
-		userKV:   kvstore.NewHashedKeyStore(basicKV, UserKeyPrefix),
-		oauth2KV: kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(api, OAuth2KeyExpiration), OAuth2KeyPrefix),
+		userKV:   kvstore.NewHashedKeyStore(basicKV, constants.UserKeyPrefix),
+		oauth2KV: kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(api, OAuth2KeyExpiration), constants.OAuth2KeyPrefix),
 	}
 }
 
@@ -83,6 +80,45 @@ func (s *pluginStore) DeleteUser(mattermostUserID string) error {
 	}
 
 	return nil
+}
+
+func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
+	page := 0
+	users := []*serializer.IncidentCaller{}
+	for {
+		kvList, err := s.plugin.API.KVList(page, constants.DefaultPerPage)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, key := range kvList {
+			if userID, isValidUserKey := IsValidUserKey(key); isValidUserKey {
+				decodedKey, decodeErr := decodeKey(userID)
+				if decodeErr != nil {
+					return nil, decodeErr
+				}
+
+				user, loadErr := s.LoadUser(decodedKey)
+				if loadErr != nil {
+					return nil, loadErr
+				}
+
+				users = append(users, &serializer.IncidentCaller{
+					MattermostUserID: user.MattermostUserID,
+					Username:         user.Username,
+					ServiceNowUser:   user.ServiceNowUser,
+				})
+			}
+		}
+
+		if len(kvList) < constants.DefaultPerPage {
+			break
+		}
+
+		page++
+	}
+
+	return users, nil
 }
 
 func (s *pluginStore) VerifyOAuth2State(state string) error {

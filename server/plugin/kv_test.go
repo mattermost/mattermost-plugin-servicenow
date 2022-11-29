@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
@@ -89,7 +90,7 @@ func TestDeleteUser(t *testing.T) {
 	defer monkey.UnpatchAll()
 	ps := new(pluginStore)
 	p := Plugin{}
-	ps.userKV = kvstore.NewHashedKeyStore(kvstore.NewPluginStore(p.API), UserKeyPrefix)
+	ps.userKV = kvstore.NewHashedKeyStore(kvstore.NewPluginStore(p.API), constants.UserKeyPrefix)
 	for _, test := range []struct {
 		description   string
 		setupTest     func()
@@ -146,7 +147,7 @@ func TestDeleteUser(t *testing.T) {
 func TestVerifyOAuth2State(t *testing.T) {
 	ps := new(pluginStore)
 	p := Plugin{}
-	ps.oauth2KV = kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(p.API, OAuth2KeyExpiration), OAuth2KeyPrefix)
+	ps.oauth2KV = kvstore.NewHashedKeyStore(kvstore.NewOneTimePluginStore(p.API, OAuth2KeyExpiration), constants.OAuth2KeyPrefix)
 	for _, test := range []struct {
 		description   string
 		errorMessage  error

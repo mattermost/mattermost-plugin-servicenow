@@ -27,6 +27,7 @@ type Client interface {
 	AddComment(recordType, recordID string, payload *serializer.ServiceNowCommentPayload) (int, error)
 	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
+	GetMe(userEmail string) (*serializer.ServiceNowUser, int, error)
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 }
 
@@ -242,6 +243,28 @@ func (c *client) UpdateStateOfRecordInServiceNow(recordType, recordID string, pa
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", url, recordID), payload, nil, nil)
 	return statusCode, err
+}
+
+func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error) {
+	userList := &serializer.UserList{}
+	path := fmt.Sprintf("%s%s", c.plugin.getConfiguration().ServiceNowBaseURL, constants.PathGetUserFromServiceNow)
+	params := url.Values{}
+	params.Add(constants.SysQueryParam, fmt.Sprintf("email=%s", userEmail))
+
+	_, statusCode, err := c.CallJSON(http.MethodGet, path, nil, userList, params)
+	if err != nil {
+		return nil, statusCode, errors.Wrap(err, "failed to get the user details")
+	}
+
+	if len(userList.UserDetails) == 0 {
+		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow instance %s with email %s", c.plugin.getConfiguration().ServiceNowBaseURL, userEmail)
+	}
+
+	if len(userList.UserDetails) > 1 {
+		c.plugin.API.LogWarn("Multiple users with the same email address exist on ServiceNow instance", "Email", userEmail, "Instance", c.plugin.getConfiguration().ServiceNowBaseURL)
+	}
+
+	return userList.UserDetails[0], statusCode, nil
 }
 
 func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {

@@ -2,13 +2,16 @@ package plugin
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 
 	"bou.ke/monkey"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	mock_plugin "github.com/Brightscout/mattermost-plugin-servicenow/server/mocks"
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
@@ -67,6 +70,10 @@ func TestInitOAuth2(t *testing.T) {
 }
 
 func TestCompleteOAuth2(t *testing.T) {
+	mockUserID := "mockUserID"
+	mockCode := "mockCode"
+	mockState := "mockState_mockUserID"
+	client := &mock_plugin.Client{}
 	for name, test := range map[string]struct {
 		authenticatedUserID  string
 		code                 string
@@ -77,15 +84,15 @@ func TestCompleteOAuth2(t *testing.T) {
 		expectedErrorMessage string
 	}{
 		"success": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
-			state:               "mockState_mockUserID",
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
+				s.On("VerifyOAuth2State", mockState).Return(nil)
 				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
-				a.On("GetUser", "mockUserID").Return(&model.User{}, nil)
+				a.On("GetUser", mockUserID).Return(testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil)
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
@@ -97,6 +104,12 @@ func TestCompleteOAuth2(t *testing.T) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "DM", func(_ *Plugin, _, _ string, _ ...interface{}) (string, error) {
 					return "", nil
 				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewClient", func(_ *Plugin, _ context.Context, _ *oauth2.Token) Client {
+					return &mock_plugin.Client{}
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(client), "GetMe", func(_ *mock_plugin.Client, _ string) (*serializer.ServiceNowUser, int, error) {
+					return testutils.GetServiceNowUser(), http.StatusOK, nil
+				})
 			},
 		},
 		"missing userID, code or state": {
@@ -107,19 +120,19 @@ func TestCompleteOAuth2(t *testing.T) {
 			expectedErrorMessage: constants.ErrorMissingUserCodeState,
 		},
 		"failed to verify state": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
-			state:               "mockState_mockUserID",
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(fmt.Errorf("failed to verify state"))
+				s.On("VerifyOAuth2State", mockState).Return(fmt.Errorf("failed to verify state"))
 			},
 			setupAPI:             func(a *plugintest.API) {},
 			setupPlugin:          func(p *Plugin) {},
 			expectedErrorMessage: "failed to verify state",
 		},
 		"failed to match user ID": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
 			state:               "mockState_mockUser",
 			setupStore: func(s *mock_plugin.Store) {
 				s.On("VerifyOAuth2State", "mockState_mockUser").Return(nil)
@@ -129,29 +142,29 @@ func TestCompleteOAuth2(t *testing.T) {
 			expectedErrorMessage: constants.ErrorUserIDMismatchInOAuth,
 		},
 		"failed to get Mattermost user": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
-			state:               "mockState_mockUserID",
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
+				s.On("VerifyOAuth2State", mockState).Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
 				err := testutils.GetBadRequestAppError()
 				err.Message = "failed to get MM user"
-				a.On("GetUser", "mockUserID").Return(nil, err)
+				a.On("GetUser", mockUserID).Return(nil, err)
 			},
 			setupPlugin:          func(p *Plugin) {},
 			expectedErrorMessage: "failed to get MM user",
 		},
 		"failed to exchange token": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
-			state:               "mockState_mockUserID",
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
+				s.On("VerifyOAuth2State", mockState).Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
-				a.On("GetUser", "mockUserID").Return(&model.User{}, nil)
+				a.On("GetUser", mockUserID).Return(&model.User{}, nil)
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
@@ -161,14 +174,14 @@ func TestCompleteOAuth2(t *testing.T) {
 			expectedErrorMessage: "failed to exchange token",
 		},
 		"failed to encrypt token": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
-			state:               "mockState_mockUserID",
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
+				s.On("VerifyOAuth2State", mockState).Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
-				a.On("GetUser", "mockUserID").Return(&model.User{}, nil)
+				a.On("GetUser", mockUserID).Return(&model.User{}, nil)
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
@@ -180,16 +193,15 @@ func TestCompleteOAuth2(t *testing.T) {
 			},
 			expectedErrorMessage: "encryption error",
 		},
-		"failed to store user": {
-			authenticatedUserID: "mockUserID",
-			code:                "mockCode",
-			state:               "mockState_mockUserID",
+		"failed to get ServiceNow user": {
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
 			setupStore: func(s *mock_plugin.Store) {
-				s.On("VerifyOAuth2State", "mockState_mockUserID").Return(nil)
-				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(fmt.Errorf("failed to store user"))
+				s.On("VerifyOAuth2State", mockState).Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
-				a.On("GetUser", "mockUserID").Return(&model.User{}, nil)
+				a.On("GetUser", mockUserID).Return(&model.User{}, nil)
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
@@ -197,6 +209,39 @@ func TestCompleteOAuth2(t *testing.T) {
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewEncodedAuthToken", func(_ *Plugin, _ *oauth2.Token) (string, error) {
 					return "mockToken", nil
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewClient", func(_ *Plugin, _ context.Context, _ *oauth2.Token) Client {
+					return &mock_plugin.Client{}
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(client), "GetMe", func(_ *mock_plugin.Client, _ string) (*serializer.ServiceNowUser, int, error) {
+					return nil, http.StatusInternalServerError, errors.New("failed to get ServiceNow user")
+				})
+			},
+			expectedErrorMessage: "failed to get ServiceNow user",
+		},
+		"failed to store user": {
+			authenticatedUserID: mockUserID,
+			code:                mockCode,
+			state:               mockState,
+			setupStore: func(s *mock_plugin.Store) {
+				s.On("VerifyOAuth2State", mockState).Return(nil)
+				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(fmt.Errorf("failed to store user"))
+			},
+			setupAPI: func(a *plugintest.API) {
+				a.On("GetUser", mockUserID).Return(&model.User{}, nil)
+			},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+					return &oauth2.Token{}, nil
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewEncodedAuthToken", func(_ *Plugin, _ *oauth2.Token) (string, error) {
+					return "mockToken", nil
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewClient", func(_ *Plugin, _ context.Context, _ *oauth2.Token) Client {
+					return &mock_plugin.Client{}
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(client), "GetMe", func(_ *mock_plugin.Client, _ string) (*serializer.ServiceNowUser, int, error) {
+					return testutils.GetServiceNowUser(), http.StatusOK, nil
 				})
 			},
 			expectedErrorMessage: "failed to store user",

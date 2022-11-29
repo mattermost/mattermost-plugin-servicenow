@@ -142,11 +142,20 @@ func GetSerializerUser() *serializer.User {
 	return &serializer.User{
 		MattermostUserID: GetID(),
 		OAuth2Token:      "test-oauthtoken",
+		ServiceNowUser: &serializer.ServiceNowUser{
+			UserID: GetServiceNowSysID(),
+		},
 	}
 }
 
 func GetLimitAndOffset() (limit, offset string) {
 	return fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPerPage * constants.DefaultPage)
+}
+
+func GetServiceNowUser() *serializer.ServiceNowUser {
+	return &serializer.ServiceNowUser{
+		UserID: GetServiceNowSysID(),
+	}
 }
 
 func GetServiceNowRecord() *serializer.ServiceNowRecord {

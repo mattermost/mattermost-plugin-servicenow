@@ -141,6 +141,7 @@ const (
 	ErrorUserIDMismatchInOAuth            = "not authorized, user ID mismatch"
 	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
+	ErrorGetUsers                         = "Failed to get the users."
 	ErrorSearchTermThreshold              = "The search term must be at least %d characters long."
 	ErrorGetUser                          = "Unable to get the user"
 	ErrorCreatePost                       = "Unable to create post"
@@ -160,6 +161,12 @@ const (
 	ErrorUpdateState                      = "Error in updating the state"
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+)
+
+// kv store keys prefix
+const (
+	UserKeyPrefix   = "user_"
+	OAuth2KeyPrefix = "oauth2_"
 )
 
 var (
