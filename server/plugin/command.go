@@ -256,6 +256,7 @@ func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs
 	return ""
 }
 
+// TODO: remove extra arguments
 func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
