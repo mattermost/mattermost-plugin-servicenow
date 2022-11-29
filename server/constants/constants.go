@@ -104,6 +104,7 @@ const (
 	APIErrorInsufficientPermissions      = "Insufficient Permissions"
 	APIErrorIDRefreshTokenExpired        = "refresh_token_expired"
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
+	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
 
 	// Slack attachment context constants
@@ -142,6 +143,8 @@ const (
 	ErrorEmptyComment                     = "comment should not be empty"
 	ErrorGeneric                          = "Something went wrong."
 	ErrorGetUsers                         = "Failed to get the users."
+	ErrorEmptyShortDescription            = "short description should not be empty"
+	ErrorGetBotChannel                    = "Couldn't get the bot's DM channel"
 	ErrorSearchTermThreshold              = "The search term must be at least %d characters long."
 	ErrorGetUser                          = "Unable to get the user"
 	ErrorCreatePost                       = "Unable to create post"
@@ -160,6 +163,7 @@ const (
 	ErrorGetStates                        = "Error in getting the states"
 	ErrorUpdateState                      = "Error in updating the state"
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
+	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
 )
 

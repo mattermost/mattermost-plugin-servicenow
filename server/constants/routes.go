@@ -22,6 +22,7 @@ const (
 	PathOpenStateModal         = "/state-modal"
 	PathSearchCatalogItems     = "/catalog"
 	PathGetUsers               = "/users"
+	PathCreateIncident         = "/incident"
 
 	// ServiceNow API paths
 	PathActivateSubscriptions         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"

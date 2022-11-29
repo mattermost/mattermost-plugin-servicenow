@@ -148,9 +148,12 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	slackAttachment := &model.SlackAttachment{
 		Title:     sr.Number,
 		TitleLink: titleLink,
-		Pretext:   fmt.Sprintf("Shared by @%s", sharedByUsername),
 		Fields:    fields,
 		Actions:   actions,
+	}
+
+	if sharedByUsername != "" {
+		slackAttachment.Pretext = fmt.Sprintf("Shared by @%s", sharedByUsername)
 	}
 
 	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})

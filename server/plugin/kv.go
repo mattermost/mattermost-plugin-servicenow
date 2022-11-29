@@ -95,12 +95,14 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 			if userID, isValidUserKey := IsValidUserKey(key); isValidUserKey {
 				decodedKey, decodeErr := decodeKey(userID)
 				if decodeErr != nil {
-					return nil, decodeErr
+					s.plugin.API.LogError("Unable to decode key", "UserID", userID, "Error", decodeErr.Error())
+					continue
 				}
 
 				user, loadErr := s.LoadUser(decodedKey)
 				if loadErr != nil {
-					return nil, loadErr
+					s.plugin.API.LogError("Unable to load user", "UserID", userID, "Error", loadErr.Error())
+					continue
 				}
 
 				users = append(users, &serializer.IncidentCaller{

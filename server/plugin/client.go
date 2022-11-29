@@ -28,6 +28,7 @@ type Client interface {
 	GetStatesFromServiceNow(recordType string) ([]*serializer.ServiceNowState, int, error)
 	UpdateStateOfRecordInServiceNow(recordType, recordID string, payload *serializer.ServiceNowUpdateStatePayload) (int, error)
 	GetMe(userEmail string) (*serializer.ServiceNowUser, int, error)
+	CreateIncident(*serializer.IncidentPayload) (*serializer.IncidentResponse, int, error)
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 }
 
@@ -265,6 +266,17 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 	}
 
 	return userList.UserDetails[0], statusCode, nil
+}
+
+func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializer.IncidentResponse, int, error) {
+	response := &serializer.IncidentResult{}
+	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", constants.RecordTypeIncident, 1)
+	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, nil)
+	if err != nil {
+		return nil, statusCode, errors.Wrap(err, "failed to create the incident in ServiceNow")
+	}
+
+	return response.Result, statusCode, nil
 }
 
 func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {

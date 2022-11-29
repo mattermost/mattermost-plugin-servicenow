@@ -51,6 +51,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
 
 	// 404 handler
@@ -423,8 +424,8 @@ func (p *Plugin) getRecordFromServiceNow(w http.ResponseWriter, r *http.Request)
 
 	record.RecordType = recordType
 	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
-		p.API.LogError("Error in handling the nested fields", "Error", err.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("Error in handling the nested fields. Error: %s", err.Error())})
+		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
 	}
 
@@ -638,6 +639,62 @@ func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.writeJSONArray(w, http.StatusOK, users)
+}
+
+func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
+	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
+	incident, err := serializer.IncidentFromJSON(r.Body)
+	if err != nil {
+		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
+		return
+	}
+
+	if err = incident.IsValid(); err != nil {
+		p.API.LogError(constants.ErrorValidatingRequestBody, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorValidatingRequestBody, err.Error())})
+		return
+	}
+
+	client := p.GetClientFromRequest(r)
+	response, statusCode, err := client.CreateIncident(incident)
+	if err != nil {
+		p.API.LogError(constants.APIErrorCreateIncident, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.APIErrorCreateIncident, err.Error()))
+		return
+	}
+
+	// TODO: post the created incident in the current channel instead of DM
+	channel, channelErr := p.API.GetDirectChannel(mattermostUserID, p.botID)
+	if channelErr != nil {
+		p.API.LogError(constants.ErrorGetBotChannel, "userID", mattermostUserID, "Error", channelErr.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGetBotChannel})
+		return
+	}
+
+	record := serializer.ServiceNowRecord{
+		SysID:            response.SysID,
+		Number:           response.Number,
+		ShortDescription: response.ShortDescription,
+		RecordType:       constants.RecordTypeIncident,
+		State:            response.State,
+		Priority:         response.Priority,
+		AssignedTo:       response.AssignedTo,
+		AssignmentGroup:  response.AssignmentGroup,
+	}
+
+	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
+		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
+		return
+	}
+
+	post := record.CreateSharingPost(channel.Id, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
+	}
+
+	p.writeJSON(w, statusCode, record)
 }
 
 func (p *Plugin) searchCatalogItemsInServiceNow(w http.ResponseWriter, r *http.Request) {
