@@ -1,27 +1,13 @@
-export const getGlobalModalState = (state: PluginState): GlobalModalState => {
-    return state.globalModalReducer;
-};
+export const getGlobalModalState = (state: PluginState): GlobalModalState => state.globalModalReducer;
 
-export const isAddSubscriptionModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'addSubscription';
-};
+export const isAddSubscriptionModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'addSubscription';
 
-export const isEditSubscriptionModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'editSubscription';
-};
+export const isEditSubscriptionModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'editSubscription';
 
-export const isShareRecordModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'shareRecord';
-};
+export const isShareRecordModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'shareRecord';
 
-export const isCommentModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'addOrViewComments';
-};
+export const isCommentModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'addOrViewComments';
 
-export const isUpdateStateModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'updateState';
-};
+export const isUpdateStateModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'updateState';
 
-export const isCreateIncidentModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'createIncident';
-};
+export const isCreateIncidentModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'createIncident';
