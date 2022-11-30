@@ -127,7 +127,9 @@
 
 .configuration-not-enabled-err-state {
   overflow: auto;
+  height: calc(100% - 90px) !important;
 
+  // TODO: change to custom class later
   .flex-column {
     height: 100%;
   }
