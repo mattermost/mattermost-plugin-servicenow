@@ -11,6 +11,7 @@ import IconButton from 'src/components/Buttons/iconButton';
 import {setGlobalModalState} from 'src/reducers/globalModal';
 
 type HeaderProps = {
+    showFilterIcon: boolean;
     showAllSubscriptions: boolean;
     setShowAllSubscriptions: (active: boolean) => void;
     filter: SubscriptionFilters;
@@ -19,6 +20,7 @@ type HeaderProps = {
 }
 
 const Header = ({
+    showFilterIcon,
     showAllSubscriptions,
     setShowAllSubscriptions,
     filter,
@@ -41,21 +43,23 @@ const Header = ({
             <div className='position-relative rhs-header-divider'>
                 <div className='d-flex align-item-center'>
                     <p className='rhs-title'>{'Subscriptions'}</p>
-                    <IconButton
-                        tooltipText='Filter'
-                        extraClass={`margin-left-auto flex-basis-initial margin-right-8 ${isFilterApplied() && 'filter-button'}`}
-                        onClick={() => setShowFilter(!showFilter)}
-                    >
-                        <SvgWrapper
-                            width={18}
-                            height={12}
-                            viewBox='0 0 18 12'
+                    {showFilterIcon && (
+                        <IconButton
+                            tooltipText='Filter'
+                            extraClass={`margin-left-auto flex-basis-initial margin-right-8 ${isFilterApplied() && 'filter-button'}`}
+                            onClick={() => setShowFilter(!showFilter)}
                         >
-                            {SVGIcons.filter}
-                        </SvgWrapper>
-                    </IconButton>
+                            <SvgWrapper
+                                width={18}
+                                height={12}
+                                viewBox='0 0 18 12'
+                            >
+                                {SVGIcons.filter}
+                            </SvgWrapper>
+                        </IconButton>
+                    )}
                     <button
-                        className='btn btn-primary share-record-btn'
+                        className={`btn btn-primary share-record-btn ${!showFilterIcon && 'share-record-btn__without-filter'}`}
                         onClick={() => dispatch(setGlobalModalState({modalId: 'shareRecord'}))}
                     >
                         <span>
