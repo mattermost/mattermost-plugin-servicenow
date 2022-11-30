@@ -114,6 +114,11 @@
   width: 88px;
   height: 40px;
   border-radius: 4px;
+
+  &__without-filter {
+    position: absolute;
+    right: 0;
+  }
 }
 
 .share-record-icon {

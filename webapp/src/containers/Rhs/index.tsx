@@ -19,6 +19,7 @@ import {setGlobalModalState} from 'src/reducers/globalModal';
 import Utils from 'src/utils';
 
 import RhsData from './rhsData';
+import Header from './rhsHeader';
 
 import './rhs.scss';
 
@@ -209,6 +210,16 @@ const Rhs = (): JSX.Element => {
     return (
         <div className='rhs-content position-relative padding-top-15 padding-bottom-12 padding-h-12'>
             {subscriptionsLoading && !paginationQueryParams.page && <CircularLoader/>}
+            {connected && (
+                <Header
+                    showFilterIcon={subscriptionsEnabled && subscriptionsAuthorized}
+                    showAllSubscriptions={showAllSubscriptions}
+                    setShowAllSubscriptions={setShowAllSubscriptions}
+                    filter={filter}
+                    setFilter={setFilter}
+                    setResetFilter={setResetFilter}
+                />
+            )}
             {connected && subscriptionsEnabled && subscriptionsAuthorized && (
                 <>
                     <RhsData

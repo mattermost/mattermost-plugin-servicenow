@@ -16,8 +16,6 @@ import {setGlobalModalState} from 'src/reducers/globalModal';
 
 import Utils from 'src/utils';
 
-import Header from './rhsHeader';
-
 type RhsDataProps = {
     showAllSubscriptions: boolean;
     setShowAllSubscriptions: (show: boolean) => void;
@@ -43,7 +41,6 @@ const BulkSubscriptionHeaders: Record<BulkSubscriptionRecordType, string> = {
 
 const RhsData = ({
     showAllSubscriptions,
-    setShowAllSubscriptions,
     totalSubscriptions,
     loadingSubscriptions,
     handleEditSubscription,
@@ -52,9 +49,6 @@ const RhsData = ({
     isCurrentUserSysAdmin,
     paginationQueryParams,
     handlePagination,
-    filter,
-    setFilter,
-    setResetFilter,
 }: RhsDataProps) => {
     const dispatch = useDispatch();
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -111,13 +105,6 @@ const RhsData = ({
 
     return (
         <>
-            <Header
-                showAllSubscriptions={showAllSubscriptions}
-                setShowAllSubscriptions={setShowAllSubscriptions}
-                filter={filter}
-                setFilter={setFilter}
-                setResetFilter={setResetFilter}
-            />
             {error && (
                 <EmptyState
                     title={Constants.GeneralErrorMessage}
