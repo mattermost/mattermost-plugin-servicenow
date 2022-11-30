@@ -262,7 +262,7 @@ const Rhs = (): JSX.Element => {
                                 download: true,
                             }) : null
                             }
-                            className='configuration-err-state'
+                            className='configuration-not-enabled-err-state'
                             icon={<UnlinkIcon/>}
                         />
                     )}

@@ -125,3 +125,15 @@
   margin-right: 3px;
   margin-top: 4px;
 }
+
+.configuration-not-enabled-err-state {
+  overflow: auto;
+
+  .flex-column {
+    height: 100%;
+  }
+
+  .empty-state__icon {
+    flex-shrink: 0;
+  }
+}
