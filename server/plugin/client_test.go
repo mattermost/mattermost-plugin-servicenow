@@ -9,6 +9,7 @@ import (
 	"bou.ke/monkey"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
+	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -550,6 +551,136 @@ func TestUpdateStateOfRecordInServiceNowClient(t *testing.T) {
 				State: "mockState",
 			})
 
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.EqualValues(t, testCase.statusCode, statusCode)
+		})
+	}
+}
+
+func TestGetMeClient(t *testing.T) {
+	defer monkey.UnpatchAll()
+	c := new(client)
+	c.plugin = &Plugin{}
+	c.plugin.setConfiguration(&configuration{
+		ServiceNowBaseURL: "mockServiceNowBaseURL",
+	})
+	for _, testCase := range []struct {
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
+	}{
+		{
+			description:        "GetMe: user don't exist on ServiceNow",
+			statusCode:         http.StatusNotFound,
+			expectedStatusCode: http.StatusNotFound,
+			expectedErr:        "user doesn't exist on ServiceNow instance mockServiceNowBaseURL with email mockEmail",
+		},
+		{
+			description:        "GetMe: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("error in getting the user details"),
+			expectedErr:        "failed to get the user details: error in getting the user details",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
+
+			_, statusCode, err := c.GetMe("mockEmail")
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.EqualValues(t, testCase.statusCode, statusCode)
+		})
+	}
+}
+
+func TestCreateIncidentClient(t *testing.T) {
+	defer monkey.UnpatchAll()
+	c := new(client)
+	for _, testCase := range []struct {
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
+	}{
+		{
+			description:        "CreateIncident: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			description:        "CreateIncident: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("error in creating the incident"),
+			expectedErr:        "failed to create the incident in ServiceNow: error in creating the incident",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
+
+			_, statusCode, err := c.CreateIncident(&serializer.IncidentPayload{
+				ShortDescription: testutils.GetServiceNowShortDescription(),
+			})
+
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.EqualValues(t, testCase.statusCode, statusCode)
+		})
+	}
+}
+
+func TestSearchCatalogItemsInServiceNowClient(t *testing.T) {
+	defer monkey.UnpatchAll()
+	c := new(client)
+	c.plugin = &Plugin{}
+	limit, offset := testutils.GetLimitAndOffset()
+	for _, testCase := range []struct {
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
+	}{
+		{
+			description:        "SearchCatalogItemsInServiceNow: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			description:        "SearchCatalogItemsInServiceNow: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("error in searching the catalog items"),
+			expectedErr:        "error in searching the catalog items",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
+
+			_, statusCode, err := c.SearchCatalogItemsInServiceNow("search", limit, offset)
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
 			} else {
