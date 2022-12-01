@@ -197,8 +197,8 @@ func GetSubscriptions(count int) []*serializer.SubscriptionResponse {
 	return subscriptions
 }
 
-func GetSearchTerm(valid bool) string {
-	l := constants.CharacterThresholdForSearchingRecords
+func GetSearchTerm(valid bool, threshold int) string {
+	l := threshold
 	if !valid {
 		l--
 	}
@@ -209,4 +209,49 @@ func GetSearchTerm(valid bool) string {
 	}
 
 	return sb.String()
+}
+
+func GetServiceNowIncidentResponse() *serializer.IncidentResponse {
+	return &serializer.IncidentResponse{
+		SysID:            GetServiceNowSysID(),
+		ShortDescription: GetServiceNowShortDescription(),
+	}
+}
+
+func GetServiceNowCatalogItem() *serializer.ServiceNowCatalogItem {
+	return &serializer.ServiceNowCatalogItem{
+		SysID: GetServiceNowSysID(),
+	}
+}
+
+func GetServiceNowCatalogItems(count int) []*serializer.ServiceNowCatalogItem {
+	if count == 0 {
+		return nil
+	}
+
+	items := make([]*serializer.ServiceNowCatalogItem, count)
+	for i := 0; i < count; i++ {
+		items[i] = GetServiceNowCatalogItem()
+	}
+
+	return items
+}
+
+func GetServiceNowIncidentCaller() *serializer.IncidentCaller {
+	return &serializer.IncidentCaller{
+		ServiceNowUser: GetServiceNowUser(),
+	}
+}
+
+func GetServiceNowIncidentCallers(count int) []*serializer.IncidentCaller {
+	if count == 0 {
+		return nil
+	}
+
+	users := make([]*serializer.IncidentCaller, count)
+	for i := 0; i < count; i++ {
+		users[i] = GetServiceNowIncidentCaller()
+	}
+
+	return users
 }
