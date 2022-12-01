@@ -5,7 +5,6 @@ package kvstore
 
 import (
 	"crypto/sha512"
-	"encoding/base64"
 	"fmt"
 
 	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
@@ -64,16 +63,6 @@ func (s HashedKeyStore) Delete(key string) error {
 	}
 
 	return s.store.Delete(encodeKey(s.prefix, key))
-}
-
-func encodeKey(prefix, key string) string {
-	if key == "" {
-		return prefix
-	}
-
-	encodedKey := base64.StdEncoding.EncodeToString([]byte(key))
-	encodedKey = fmt.Sprintf("%s%s", prefix, encodedKey)
-	return encodedKey
 }
 
 func hashKey(prefix, hashableKey string) string {

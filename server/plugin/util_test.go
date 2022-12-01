@@ -94,7 +94,7 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 			description: "IsAuthorizedSysAdmin: error while getting user",
 			setupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 			},
 			expectedErr: true,
@@ -306,6 +306,72 @@ func TestHandleClientError(t *testing.T) {
 
 			assert.EqualValues(testCase.expectedResponse, response)
 			assert.EqualValues(testCase.expectedStatusCode, w.Result().StatusCode)
+		})
+	}
+}
+
+func TestIsValidUserKey(t *testing.T) {
+	defer monkey.UnpatchAll()
+	for _, testCase := range []struct {
+		description      string
+		testKey          string
+		expectedKey      string
+		expectedResponse bool
+	}{
+		{
+			description:      "IsValidUserKey: valid key",
+			testKey:          "user_mockKey",
+			expectedKey:      "mockKey",
+			expectedResponse: true,
+		},
+		{
+			description: "IsValidUserKey: invalid key",
+			testKey:     "mockKey",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp, isValid := IsValidUserKey(testCase.testKey)
+
+			assert.EqualValues(testCase.expectedKey, resp)
+			assert.EqualValues(testCase.expectedResponse, isValid)
+		})
+	}
+}
+
+func TestDecodeKey(t *testing.T) {
+	defer monkey.UnpatchAll()
+	for _, testCase := range []struct {
+		description string
+		testKey     string
+		expectedKey string
+		expectedErr error
+	}{
+		{
+			description: "DecodeKey: success",
+			testKey:     "bW9ja0tleQ==",
+			expectedKey: "mockKey",
+		},
+		{
+			description: "DecodeKey: empty key",
+		},
+		{
+			description: "DecodeKey: error in decoding",
+			testKey:     "invalidKey",
+			expectedErr: errors.New("illegal base64 data at input byte 8"),
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp, err := decodeKey(testCase.testKey)
+
+			if testCase.expectedErr != nil {
+				assert.Error(err, testCase.expectedErr)
+			} else {
+				assert.Nil(err)
+			}
+
+			assert.EqualValues(testCase.expectedKey, resp)
 		})
 	}
 }

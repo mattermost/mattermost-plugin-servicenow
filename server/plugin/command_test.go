@@ -543,10 +543,10 @@ func TestHandleListSubscriptions(t *testing.T) {
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 				a.On("GetChannel", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 			},
 			setupClient: func(client *mock_plugin.Client) {
