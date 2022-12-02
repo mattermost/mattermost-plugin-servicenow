@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/store/kvstore"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
 
 func Test_LoadUser(t *testing.T) {

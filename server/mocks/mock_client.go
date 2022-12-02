@@ -7,7 +7,7 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 
-	serializer "github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
+	serializer "github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 
 	testing "testing"
 )
