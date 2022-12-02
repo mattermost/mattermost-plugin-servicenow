@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	mock_plugin "github.com/Brightscout/mattermost-plugin-servicenow/server/mocks"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	mock_plugin "github.com/mattermost/mattermost-plugin-servicenow/server/mocks"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 	"golang.org/x/oauth2"
 
 	"github.com/mattermost/mattermost-server/v5/model"

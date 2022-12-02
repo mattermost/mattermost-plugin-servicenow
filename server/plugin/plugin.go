@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/gorilla/mux"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"golang.org/x/oauth2"
 )

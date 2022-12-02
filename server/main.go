@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/plugin"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/plugin"
 	mmplugin "github.com/mattermost/mattermost-server/v5/plugin"
 )
 

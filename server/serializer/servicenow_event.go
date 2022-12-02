@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-server/v5/model"
 )
 

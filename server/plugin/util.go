@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"golang.org/x/oauth2"
 )
