@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 func TestActivateSubscriptions(t *testing.T) {

@@ -9,10 +9,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"golang.org/x/oauth2"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 func (p *Plugin) handleAPIError(w http.ResponseWriter, apiErr *serializer.APIErrorResponse) {

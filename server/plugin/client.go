@@ -7,10 +7,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 type Client interface {

@@ -3,9 +3,10 @@ package plugin
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 func TestIsValid(t *testing.T) {

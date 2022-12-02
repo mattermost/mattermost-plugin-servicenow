@@ -8,17 +8,17 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
-	mock_plugin "github.com/mattermost/mattermost-plugin-servicenow/server/mocks"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
-	"golang.org/x/oauth2"
-
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	mock_plugin "github.com/mattermost/mattermost-plugin-servicenow/server/mocks"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
 
 func (p *Plugin) mockHandleDisconnect(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {

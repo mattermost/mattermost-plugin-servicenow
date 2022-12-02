@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -96,7 +95,7 @@ func TestCall(t *testing.T) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
 					return &http.Response{
 						StatusCode: http.StatusNoContent,
-						Body:       ioutil.NopCloser(bytes.NewBufferString("mockBody")),
+						Body:       io.NopCloser(bytes.NewBufferString("mockBody")),
 					}, nil
 				})
 			},
@@ -108,7 +107,7 @@ func TestCall(t *testing.T) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
 					return &http.Response{
 						StatusCode: http.StatusOK,
-						Body:       ioutil.NopCloser(bytes.NewBufferString("mockBody")),
+						Body:       io.NopCloser(bytes.NewBufferString("mockBody")),
 					}, nil
 				})
 			},
