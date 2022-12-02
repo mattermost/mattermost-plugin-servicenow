@@ -3,11 +3,12 @@ package plugin
 import (
 	"time"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/store/kvstore"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/store/kvstore"
 )
 
 const (

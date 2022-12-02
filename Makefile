@@ -284,7 +284,7 @@ endif
 sync:
 ifndef STARTERTEMPLATE_PATH
 	@echo STARTERTEMPLATE_PATH is not set.
-	@echo Set STARTERTEMPLATE_PATH to a local clone of https://github.com/Brightscout/mattermost-plugin-servicenow and retry.
+	@echo Set STARTERTEMPLATE_PATH to a local clone of https://github.com/mattermost/mattermost-plugin-starter-template and retry.
 	@exit 1
 endif
 	cd ${STARTERTEMPLATE_PATH} && go run ./build/sync/main.go ./build/sync/plan.yml $(PWD)

@@ -4,8 +4,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 // configuration captures the plugin's external configuration as exposed in the Mattermost server
