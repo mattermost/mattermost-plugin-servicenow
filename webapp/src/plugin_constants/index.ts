@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.0.xml';
+export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
 
