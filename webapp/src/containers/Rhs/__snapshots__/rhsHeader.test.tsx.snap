@@ -30,7 +30,7 @@ exports[`RHSHeader should match snapshot 1`] = `
         </SVGWrapper>
       </IconButton>
       <button
-        className="btn btn-primary share-record-btn"
+        className="btn btn-primary share-record-btn false"
         onClick={[Function]}
       >
         <span>
@@ -83,7 +83,7 @@ exports[`RHSHeader should match snapshot 2`] = `
         </SVGWrapper>
       </IconButton>
       <button
-        className="btn btn-primary share-record-btn"
+        className="btn btn-primary share-record-btn false"
         onClick={[Function]}
       >
         <span>

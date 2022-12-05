@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 type IncidentCaller struct {

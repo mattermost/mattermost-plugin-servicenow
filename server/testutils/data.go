@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-server/v5/api4"
 	"github.com/mattermost/mattermost-server/v5/model"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 func GetSecret() string {

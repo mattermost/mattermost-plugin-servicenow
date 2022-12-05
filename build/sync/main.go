@@ -9,7 +9,7 @@ import (
 
 	"sigs.k8s.io/yaml"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/build/sync/plan"
+	"github.com/mattermost/mattermost-plugin-servicenow/build/sync/plan"
 )
 
 func main() {
