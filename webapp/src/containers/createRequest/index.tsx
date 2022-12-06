@@ -14,6 +14,7 @@ import {isCreateRequestModalOpen} from 'src/selectors';
 
 import './styles.scss';
 
+// TODO: remove later after integration with the APIs
 const requestOptions: RequestData[] = [
     {
         sys_id: 'sys_id 1',
