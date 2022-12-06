@@ -11,7 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
 
-	gitutil "github.com/Brightscout/mattermost-plugin-servicenow/build/sync/plan/git"
+	gitutil "github.com/mattermost/mattermost-plugin-servicenow/build/sync/plan/git"
 )
 
 var fileContents = []byte("abcdefg")
