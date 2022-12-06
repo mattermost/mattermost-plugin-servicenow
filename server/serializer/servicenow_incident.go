@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 type IncidentCaller struct {
@@ -36,6 +36,16 @@ type IncidentResponse struct {
 	Priority         string      `json:"priority,omitempty"`
 	AssignedTo       interface{} `json:"assigned_to,omitempty"`
 	AssignmentGroup  interface{} `json:"assignment_group,omitempty"`
+}
+
+type ServiceNowIncidentFieldsResult struct {
+	Result []*ServiceNowIncidentFields `json:"result"`
+}
+
+type ServiceNowIncidentFields struct {
+	Label   string `json:"label"`
+	Value   string `json:"value"`
+	Element string `json:"element"`
 }
 
 func IncidentFromJSON(data io.Reader) (*IncidentPayload, error) {

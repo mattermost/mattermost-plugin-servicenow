@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.0.xml';
+export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.2.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
 
@@ -17,7 +17,7 @@ const RightSidebarHeader = 'ServiceNow';
 const RhsSubscritpions = 'Subscriptions';
 const ShareRecordButton = 'Share';
 const RhsToggleLabel = 'Show all subscriptions';
-const ChannelPanelToggleLabel = 'Create subscription';
+const ChannelPanelToggleLabel = 'Subscribe to New Incident';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
@@ -222,17 +222,17 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
     [SubscriptionEvents.ASSIGNMENT_GROUP]: 'Assignment group changed',
 };
 
-export const IncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
+export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
     {
-        value: '1',
+        value: '1 - High',
         label: 'High',
     },
     {
-        value: '2',
+        value: '2 - Medium',
         label: 'Medium',
     },
     {
-        value: '3',
+        value: '3 - Low',
         label: 'Low',
     },
 ];
@@ -318,6 +318,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         path: '/connected',
         method: 'GET',
         apiServiceName: 'getConnectedUser',
+    },
+    getIncidentFeilds: {
+        path: '/incident-fields',
+        method: 'GET',
+        apiServiceName: 'getIncidentFeilds',
     },
 };
 

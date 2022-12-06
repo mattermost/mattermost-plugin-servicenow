@@ -114,9 +114,27 @@
   width: 88px;
   height: 40px;
   border-radius: 4px;
+
+  &__without-filter {
+    margin-left: auto;
+  }
 }
 
 .share-record-icon {
   margin-right: 3px;
   margin-top: 4px;
+}
+
+.configuration-not-enabled-err-state {
+  overflow: auto;
+  height: calc(100% - 90px) !important;
+
+  // TODO: change to custom class later
+  .flex-column {
+    height: 100%;
+  }
+
+  .empty-state__icon {
+    flex-shrink: 0;
+  }
 }

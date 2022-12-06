@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 
-	"path/filepath"
-	"runtime/debug"
-
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 // InitAPI initializes the REST API
@@ -53,6 +53,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -705,6 +706,18 @@ func (p *Plugin) searchCatalogItemsInServiceNow(w http.ResponseWriter, r *http.R
 	}
 
 	p.writeJSONArray(w, statusCode, items)
+}
+
+func (p *Plugin) getIncidentFields(w http.ResponseWriter, r *http.Request) {
+	client := p.GetClientFromRequest(r)
+	fields, statusCode, err := client.GetIncidentFieldsFromServiceNow()
+	if err != nil {
+		p.API.LogError(constants.ErrorGetIncidentFields, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetIncidentFields, err.Error()))
+		return
+	}
+
+	p.writeJSONArray(w, statusCode, fields)
 }
 
 func returnStatusOK(w http.ResponseWriter) {
