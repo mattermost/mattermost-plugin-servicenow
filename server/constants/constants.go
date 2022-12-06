@@ -26,7 +26,7 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.0"
+	UpdateSetVersion            = "v2.1"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"

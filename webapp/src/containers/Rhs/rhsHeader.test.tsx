@@ -6,6 +6,7 @@ import RHSHeader from './rhsHeader';
 
 describe('RHSHeader', () => {
     const baseProps = {
+        showFilterIcon: true,
         showAllSubscriptions: false,
         setShowAllSubscriptions: jest.fn(),
         filter: {createdBy: 'mockUser'},
