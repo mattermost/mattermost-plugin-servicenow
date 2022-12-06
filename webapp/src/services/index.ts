@@ -123,6 +123,13 @@ const pluginApi = createApi({
                 body,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName]: builder.query<IncidentFieldsData[], void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getIncidentFeilds.path,
+                method: Constants.pluginApiServiceConfigs.getIncidentFeilds.method,
+            }),
+        }),
     }),
 });
 

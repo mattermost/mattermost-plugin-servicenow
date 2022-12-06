@@ -26,7 +26,7 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.1"
+	UpdateSetVersion            = "v2.2"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
@@ -80,6 +80,8 @@ const (
 	FieldAssignmentGroup      = "assignment_group"
 	FieldKnowledgeBase        = "knowledge_base"
 	FieldCategory             = "category"
+	FieldUrgency              = "urgency"
+	FieldImpact               = "impact"
 
 	// Websocket events
 	WSEventConnect                        = "connect"
@@ -168,6 +170,7 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorGetIncidentFields                = "Error in getting the incident fields"
 )
 
 // kv store keys prefix

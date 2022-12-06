@@ -135,3 +135,9 @@ type CallerData = {
     username: string;
     serviceNowUser: ServiceNowUser;
 }
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
+}

@@ -38,6 +38,16 @@ type IncidentResponse struct {
 	AssignmentGroup  interface{} `json:"assignment_group,omitempty"`
 }
 
+type ServiceNowIncidentFieldsResult struct {
+	Result []*ServiceNowIncidentFields `json:"result"`
+}
+
+type ServiceNowIncidentFields struct {
+	Label   string `json:"label"`
+	Value   string `json:"value"`
+	Element string `json:"element"`
+}
+
 func IncidentFromJSON(data io.Reader) (*IncidentPayload, error) {
 	var ip *IncidentPayload
 	if err := json.NewDecoder(data).Decode(&ip); err != nil {
