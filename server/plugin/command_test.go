@@ -415,6 +415,34 @@ func TestHandleSubscriptions(t *testing.T) {
 	}
 }
 
+func TestHandleCreate(t *testing.T) {
+	p := Plugin{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+	for _, testCase := range []struct {
+		description      string
+		params           []string
+		expectedResponse string
+	}{
+		{
+			description:      "HandleCreate: Invalid number of params",
+			expectedResponse: "Invalid create command. Available commands are 'incident' and 'request'.",
+		},
+		{
+			description:      "HandleCreate: Unknown command",
+			params:           []string{"invalidCommand"},
+			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp := p.handleCreate(&plugin.Context{}, args, testCase.params, mock_plugin.NewClient(t), true)
+			assert.EqualValues(testCase.expectedResponse, resp)
+		})
+	}
+}
+
 func TestHandleSubscribe(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
@@ -471,6 +499,68 @@ func TestHandleSearchAndShare(t *testing.T) {
 			p.SetAPI(mockAPI)
 
 			resp := p.handleSearchAndShare(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
+
+			assert.EqualValues(testCase.expectedError, resp)
+		})
+	}
+}
+
+func TestHandleCreateIncident(t *testing.T) {
+	p := Plugin{}
+	mockAPI := &plugintest.API{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+	for _, testCase := range []struct {
+		description   string
+		setupAPI      func(*plugintest.API)
+		expectedError string
+	}{
+		{
+			description: "HandleCreateIncident: Success",
+			setupAPI: func(a *plugintest.API) {
+				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+			},
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			defer mockAPI.AssertExpectations(t)
+			assert := assert.New(t)
+			testCase.setupAPI(mockAPI)
+			p.SetAPI(mockAPI)
+
+			resp := p.handleCreateIncident(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
+
+			assert.EqualValues(testCase.expectedError, resp)
+		})
+	}
+}
+
+func TestHandleCreateRequest(t *testing.T) {
+	p := Plugin{}
+	mockAPI := &plugintest.API{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+	for _, testCase := range []struct {
+		description   string
+		setupAPI      func(*plugintest.API)
+		expectedError string
+	}{
+		{
+			description: "HandleCreateRequest: Success",
+			setupAPI: func(a *plugintest.API) {
+				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+			},
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			defer mockAPI.AssertExpectations(t)
+			assert := assert.New(t)
+			testCase.setupAPI(mockAPI)
+			p.SetAPI(mockAPI)
+
+			resp := p.handleCreateRequest(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
 
 			assert.EqualValues(testCase.expectedError, resp)
 		})
