@@ -231,14 +231,12 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 
 	switch command {
 	case constants.SubCommandIncident:
-		p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
+		return p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
 	case constants.SubCommandRequest:
-		p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
+		return p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
-
-	return ""
 }
 
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
@@ -262,20 +260,24 @@ func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs
 }
 
 // TODO: remove extra arguments
-func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) {
+func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
+
+	return ""
 }
 
-func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) {
+func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateRequestModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
+
+	return ""
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
