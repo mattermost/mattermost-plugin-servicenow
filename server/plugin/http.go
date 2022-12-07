@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -78,7 +77,7 @@ func (c *client) Call(method, path, contentType string, inBody io.Reader, out in
 	}
 	defer resp.Body.Close()
 
-	responseData, err = ioutil.ReadAll(resp.Body)
+	responseData, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

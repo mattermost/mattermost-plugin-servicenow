@@ -13,16 +13,17 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	mock_plugin "github.com/Brightscout/mattermost-plugin-servicenow/server/mocks"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/testutils"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	mock_plugin "github.com/mattermost/mattermost-plugin-servicenow/server/mocks"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
 
 func setupTestPlugin(api *plugintest.API, store *mock_plugin.Store) (*Plugin, *plugintest.API) {
