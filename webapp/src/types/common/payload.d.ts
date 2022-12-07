@@ -79,6 +79,15 @@ type ShareRecordPayload = {
     channel_id: string;
 }
 
+type IncidentPayload = {
+    short_description: string;
+    description: string;
+    urgency: number;
+    impact: number;
+    caller_id: string;
+    channel_id: string;
+}
+
 interface PaginationQueryParams {
     page: number;
     per_page: number;

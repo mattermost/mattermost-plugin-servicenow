@@ -148,3 +148,9 @@ type RequestData = {
     price: string,
     category: RequestCategoryData
 }
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
+}

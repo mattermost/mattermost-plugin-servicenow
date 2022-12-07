@@ -14,7 +14,10 @@ type ApiServiceName =
     'addComments' |
     'getStates' |
     'updateState' |
-    'searchItems';
+    'searchItems' |
+    'getUsers' |
+    'createIncident' |
+    'getIncidentFeilds';
 
 type PluginApiService = {
     path: string,
@@ -38,4 +41,5 @@ type APIPayloadType =
     CommentsPayload |
     GetStatesParams |
     UpdateStateParams |
+    IncidentPayload |
     string;
