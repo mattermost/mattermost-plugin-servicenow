@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/build/sync/plan"
+	"github.com/mattermost/mattermost-plugin-servicenow/build/sync/plan"
 )
 
 func TestCopyDirectory(t *testing.T) {

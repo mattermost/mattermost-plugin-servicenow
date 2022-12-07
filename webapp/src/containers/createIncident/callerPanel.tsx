@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 
@@ -12,17 +12,15 @@ type CallerPanelProps = {
     caller: string | null;
     setCaller: (value: string | null) => void;
     showModalLoader: boolean;
-    setShowModalLoader: (showModalLoader: boolean) => void;
     setApiError: (apiError: APIError | null) => void;
     placeholder?: string;
 }
 
-const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
+const CallerPanel = (({
     className,
     caller,
     setCaller,
     showModalLoader,
-    setShowModalLoader,
     setApiError,
     placeholder,
 }: CallerPanelProps): JSX.Element => {
@@ -57,7 +55,7 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
     }, [autoSuggestValue, options]);
 
     useEffect(() => {
-        const {isLoading, isError, isSuccess, error, data} = getUsers();
+        const {isError, isSuccess, error, data} = getUsers();
         if (isError && error) {
             setApiError(error);
         }
@@ -66,8 +64,6 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
             setApiError(null);
             setOptions(data);
         }
-
-        setShowModalLoader(isLoading);
     }, [getUsers().isError, getUsers().isSuccess, getUsers().isLoading]);
 
     useEffect(() => {
@@ -82,6 +78,7 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
         makeApiRequest(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
     }, []);
 
+    const {isLoading} = getUsers();
     return (
         <div
             className={className}
@@ -92,7 +89,8 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
                     inputValue={autoSuggestValue}
                     onInputValueChange={setAutoSuggestValue}
                     onChangeSelectedSuggestion={handleCallerSelection}
-                    disabled={getUsers().isLoading || showModalLoader}
+                    disabled={isLoading || showModalLoader}
+                    loadingSuggestions={isLoading}
                     suggestionConfig={{
                         suggestions,
                         renderValue: (suggestion) => suggestion.userName,

@@ -11,7 +11,7 @@ import Cookies from 'js-cookie';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants, {IncidentImpactAndUrgencyOptions, RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
+import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
 import {resetGlobalModalState} from 'src/reducers/globalModal';
@@ -38,6 +38,8 @@ const UpdateState = () => {
     const [incidentPayload, setIncidentPayload] = useState<IncidentPayload | null>(null);
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
     const [showChannelPanel, setShowChannelPanel] = useState(false);
+    const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
+    const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -61,7 +63,6 @@ const UpdateState = () => {
         setImpact(null);
         setUrgency(null);
         setCaller(null);
-        setChannel(null);
         setChannelOptions([]);
         setApiError(null);
         setValidationError(null);
@@ -82,12 +83,18 @@ const UpdateState = () => {
         resetFieldStates();
     }, []);
 
-    const onShortDescriptionChangeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleShortDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setShortDescription(e.target.value);
         setValidationError('');
     };
 
-    const onDescriptionChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
+
+    // Get incident fields state
+    const getIncidentFieldsData = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        return {isLoading, isSuccess, isError, data: data as IncidentFieldsData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
 
     // Get incident state
     const getIncidentData = () => {
@@ -116,12 +123,12 @@ const UpdateState = () => {
             return;
         }
 
-        // Set the lowest impact and urgency by default.
+        // Set the first impact and urgency values by default.
         const payload: IncidentPayload = {
             short_description: shortDescription,
             description,
-            impact: parseInt(impact ?? '3', 10),
-            urgency: parseInt(urgency ?? '3', 10),
+            impact: parseInt(impact ?? impactOptions[0].value, 10),
+            urgency: parseInt(urgency ?? urgencyOptions[0].value, 10),
             caller_id: caller ?? '',
             channel_id: channel ?? currentChannelId,
         };
@@ -129,6 +136,19 @@ const UpdateState = () => {
         setIncidentPayload(payload);
         makeApiRequest(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, payload);
     };
+
+    useEffect(() => {
+        const {isLoading, isError, isSuccess, error, data} = getIncidentFieldsData();
+        setShowModalLoader(isLoading);
+        if (isError && error) {
+            setApiError(error);
+            setShowResultPanel(true);
+        }
+
+        if (isSuccess) {
+            Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, data);
+        }
+    }, [getIncidentFieldsData().isError, getIncidentFieldsData().isSuccess, getIncidentFieldsData().isLoading]);
 
     useEffect(() => {
         const {isLoading, isError, isSuccess, error, data} = getIncidentData();
@@ -190,7 +210,11 @@ const UpdateState = () => {
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-    }, [currentChannelId, isCreateIncidentModalOpen(pluginState)]);
+
+        if (isCreateIncidentModalOpen(pluginState)) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        }
+    }, [isCreateIncidentModalOpen(pluginState)]);
 
     return (
         <Modal
@@ -225,15 +249,16 @@ const UpdateState = () => {
                             <Input
                                 placeholder='Short description'
                                 value={shortDescription}
-                                onChange={onShortDescriptionChangeHandle}
+                                onChange={handleShortDescriptionChange}
                                 error={validationError ?? ''}
                                 className='incident-body__input-field'
                                 required={true}
+                                disabled={showModalLoader}
                             />
                             <TextArea
                                 placeholder='Description'
                                 value={description}
-                                onChange={onDescriptionChangeHandle}
+                                onChange={handleDescriptionChange}
                                 className='incident-body__text-area'
                                 disabled={showModalLoader}
                             />
@@ -241,24 +266,25 @@ const UpdateState = () => {
                                 placeholder='Select impact'
                                 value={impact}
                                 onChange={setImpact}
-                                options={IncidentImpactAndUrgencyOptions}
-                                disabled={showModalLoader}
+                                options={impactOptions}
+                                disabled={showModalLoader || !impactOptions.length}
                                 className='margin-top-20'
+                                loadingOptions={showModalLoader || !impactOptions.length}
                             />
                             <Dropdown
                                 placeholder='Select urgency'
                                 value={urgency}
                                 onChange={setUrgency}
-                                options={IncidentImpactAndUrgencyOptions}
-                                disabled={showModalLoader}
+                                options={urgencyOptions}
+                                disabled={showModalLoader || !urgencyOptions.length}
                                 className='margin-top-20'
+                                loadingOptions={showModalLoader || !urgencyOptions.length}
                             />
                             <CallerPanel
                                 caller={caller}
                                 setCaller={setCaller}
-                                showModalLoader={showModalLoader}
-                                setShowModalLoader={setShowModalLoader}
                                 setApiError={setApiError}
+                                showModalLoader={showModalLoader}
                                 className={`incident-body__auto-suggest ${caller && 'incident-body__suggestion-chosen'}`}
                             />
                             <ToggleSwitch
