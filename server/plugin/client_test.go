@@ -692,3 +692,51 @@ func TestSearchCatalogItemsInServiceNowClient(t *testing.T) {
 		})
 	}
 }
+
+func TestGetIncidentFieldsFromServiceNowClient(t *testing.T) {
+	defer monkey.UnpatchAll()
+	c := new(client)
+	c.plugin = &Plugin{}
+	for _, testCase := range []struct {
+		description        string
+		statusCode         int
+		expectedStatusCode int
+		errorMessage       error
+		expectedErr        string
+	}{
+		{
+			description:        "GetIncidentFieldsFromServiceNow: valid",
+			statusCode:         http.StatusOK,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			description:        "GetIncidentFieldsFromServiceNow: with latest update set not uploaded",
+			statusCode:         http.StatusBadRequest,
+			expectedStatusCode: http.StatusBadRequest,
+			errorMessage:       errors.New("mockError: Requested URI does not represent any resource"),
+			expectedErr:        constants.APIErrorIDLatestUpdateSetNotUploaded,
+		},
+		{
+			description:        "GetIncidentFieldsFromServiceNow: with error",
+			statusCode:         http.StatusInternalServerError,
+			expectedStatusCode: http.StatusInternalServerError,
+			errorMessage:       errors.New("error in getting the incident fields"),
+			expectedErr:        "error in getting the incident fields",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
+
+			_, statusCode, err := c.GetIncidentFieldsFromServiceNow()
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.EqualValues(t, testCase.statusCode, statusCode)
+		})
+	}
+}
