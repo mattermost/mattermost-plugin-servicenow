@@ -1769,7 +1769,7 @@ func TestAPIGetIncidentFields(t *testing.T) {
 			ExpectedErrorMessage: fmt.Sprintf("%s. Error: unable to get the incident fields", constants.ErrorGetIncidentFields),
 			ExpectedCount:        -1,
 		},
-		"no states fetched from ServiceNow": {
+		"no fields fetched from ServiceNow": {
 			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetIncidentFieldsFromServiceNow").Return(
