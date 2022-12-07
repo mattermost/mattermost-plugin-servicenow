@@ -95,14 +95,14 @@ const CreateRequest = () => {
         category_id: r.category.sys_id,
     }));
 
-    // Set the suggestions when the input value of the auto-suggest changes;
+    // Set the suggestions when the input value of the auto-suggest changes
     useEffect(() => {
         const requestsToSuggest = options?.filter((r) => r.name.toLowerCase().includes(autoSuggestValue.toLowerCase())) || [];
         setSuggestions(mapRequestsToSuggestions(requestsToSuggest));
     }, [autoSuggestValue]);
 
     useEffect(() => {
-        // When the request value is reset, reset the caller auto-suggest input as well;
+        // Reset the caller auto-suggest input when the request value is reset
         if (!request) {
             setAutoSuggestValue('');
             setSuggestionChosen(false);
