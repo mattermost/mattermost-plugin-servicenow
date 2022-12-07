@@ -7,12 +7,13 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-plugin-api/experimental/command"
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 const (
@@ -230,12 +231,14 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 
 	switch command {
 	case constants.SubCommandIncident:
-		return p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
+		p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
 	case constants.SubCommandRequest:
-		return p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
+		p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
+
+	return ""
 }
 
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
@@ -259,24 +262,20 @@ func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs
 }
 
 // TODO: remove extra arguments
-func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
-
-	return ""
 }
 
-func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateRequestModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
-
-	return ""
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {

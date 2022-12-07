@@ -1,4 +1,4 @@
-module github.com/Brightscout/mattermost-plugin-servicenow/build
+module github.com/mattermost/mattermost-plugin-servicenow/build
 
 go 1.12
 

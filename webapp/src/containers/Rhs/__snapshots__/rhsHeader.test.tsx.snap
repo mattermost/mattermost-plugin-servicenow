@@ -18,11 +18,7 @@ exports[`RHSHeader should match snapshot 1`] = `
         onClick={[Function]}
         tooltipText="Filter"
       >
-        <SVGWrapper
-          height={12}
-          viewBox="0 0 18 12"
-          width={18}
-        >
+        <SVGWrapper>
           <path
             d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
             fill="#8A8C94"
@@ -68,11 +64,7 @@ exports[`RHSHeader should match snapshot 2`] = `
         onClick={[Function]}
         tooltipText="Filter"
       >
-        <SVGWrapper
-          height={12}
-          viewBox="0 0 18 12"
-          width={18}
-        >
+        <SVGWrapper>
           <path
             d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
             fill="#8A8C94"
