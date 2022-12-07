@@ -108,6 +108,28 @@ const pluginApi = createApi({
                 body,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.getUsers.apiServiceName]: builder.query<CallerData[], void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getUsers.path,
+                method: Constants.pluginApiServiceConfigs.getUsers.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.createIncident.apiServiceName]: builder.query<RecordData, IncidentPayload>({
+            query: (body) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.createIncident.path,
+                method: Constants.pluginApiServiceConfigs.createIncident.method,
+                body,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName]: builder.query<IncidentFieldsData[], void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getIncidentFeilds.path,
+                method: Constants.pluginApiServiceConfigs.getIncidentFeilds.method,
+            }),
+        }),
     }),
 });
 

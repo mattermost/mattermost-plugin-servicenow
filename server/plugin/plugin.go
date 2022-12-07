@@ -6,10 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/v5/plugin"
 	"golang.org/x/oauth2"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -37,6 +38,7 @@ func NewPlugin() *Plugin {
 		constants.CommandSubscriptions:  p.handleSubscriptions,
 		constants.CommandUnsubscribe:    p.handleDeleteSubscription,
 		constants.CommandSearchAndShare: p.handleSearchAndShare,
+		constants.CommandCreate:         p.handleCreate,
 	}
 
 	return p

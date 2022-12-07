@@ -7,10 +7,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/constants"
-	"github.com/Brightscout/mattermost-plugin-servicenow/server/serializer"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
 type Client interface {
@@ -30,6 +31,7 @@ type Client interface {
 	GetMe(userEmail string) (*serializer.ServiceNowUser, int, error)
 	CreateIncident(*serializer.IncidentPayload) (*serializer.IncidentResponse, int, error)
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
+	GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowIncidentFields, int, error)
 }
 
 type client struct {
@@ -293,4 +295,18 @@ func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string
 	}
 
 	return items.Result, statusCode, nil
+}
+
+func (c *client) GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowIncidentFields, int, error) {
+	fields := &serializer.ServiceNowIncidentFieldsResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetIncidentFieldsFromServiceNow, nil, fields, nil)
+	if err != nil {
+		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), "Requested URI does not represent any resource") {
+			return nil, statusCode, errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded)
+		}
+
+		return nil, statusCode, err
+	}
+
+	return fields.Result, statusCode, nil
 }
