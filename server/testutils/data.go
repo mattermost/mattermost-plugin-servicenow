@@ -256,3 +256,20 @@ func GetServiceNowIncidentCallers(count int) []*serializer.IncidentCaller {
 
 	return users
 }
+
+func GetServiceNowIncidentFields(count int) []*serializer.ServiceNowIncidentFields {
+	if count == 0 {
+		return nil
+	}
+
+	fields := make([]*serializer.ServiceNowIncidentFields, count)
+	for i := 0; i < count; i++ {
+		fields[i] = &serializer.ServiceNowIncidentFields{
+			Label:   "mockLabel",
+			Value:   "mockValue",
+			Element: "mockElement",
+		}
+	}
+
+	return fields
+}
