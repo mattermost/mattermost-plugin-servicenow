@@ -40,3 +40,7 @@ type CommentAndStateModalData = {
     recordType: RecordType;
     recordId: string;
 }
+
+type ApiRequestCompletionState = {
+    requests: ApiServiceName[]
+}

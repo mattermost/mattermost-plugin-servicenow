@@ -3,12 +3,11 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import {CustomModal as Modal, InputField as Input, Dropdown, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
 import {GlobalState} from 'mattermost-webapp/types/store';
 
 import Cookies from 'js-cookie';
 
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
@@ -26,7 +25,7 @@ import CallerPanel from './callerPanel';
 
 import './styles.scss';
 
-const UpdateState = () => {
+const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [impact, setImpact] = useState<string | null>(null);
@@ -44,11 +43,8 @@ const UpdateState = () => {
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
 
-    // Loaders
-    const [showModalLoader, setShowModalLoader] = useState(false);
-
     // usePluginApi hook
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -91,21 +87,21 @@ const UpdateState = () => {
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
     // Get incident fields state
-    const getIncidentFieldsData = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as IncidentFieldsData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    const getIncidentFieldsState = () => {
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        return {isLoading, data: data as IncidentFieldsData[]};
     };
 
     // Get incident state
-    const getIncidentData = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    const getIncidentState = () => {
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
+        return {isLoading, data: data as RecordData};
     };
 
     // Get subscription state
     const getSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
+        return {isLoading};
     };
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
@@ -134,31 +130,24 @@ const UpdateState = () => {
         };
 
         setIncidentPayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, payload);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, payload);
     };
 
-    useEffect(() => {
-        const {isLoading, isError, isSuccess, error, data} = getIncidentFieldsData();
-        setShowModalLoader(isLoading);
-        if (isError && error) {
-            setApiError(error);
-            setShowResultPanel(true);
-        }
+    const handleError = (error: APIError) => {
+        setApiError(error);
+        setShowResultPanel(true);
+    };
 
-        if (isSuccess) {
-            Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, data);
-        }
-    }, [getIncidentFieldsData().isError, getIncidentFieldsData().isSuccess, getIncidentFieldsData().isLoading]);
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName,
+        handleSuccess: () => Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, incidentFieldsData),
+        handleError: (error) => handleError(error),
+    });
 
-    useEffect(() => {
-        const {isLoading, isError, isSuccess, error, data} = getIncidentData();
-        setShowModalLoader(isLoading);
-        if (isError && error) {
-            setApiError(error);
-            setShowResultPanel(true);
-        }
-
-        if (isSuccess) {
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.createIncident.apiServiceName,
+        payload: incidentPayload,
+        handleSuccess: () => {
             setApiError(null);
             if (!showChannelPanel) {
                 setShowResultPanel(true);
@@ -179,32 +168,27 @@ const UpdateState = () => {
                 user_id: Cookies.get(Constants.MMUSERID) ?? '',
                 type: SubscriptionType.RECORD,
                 record_type: RecordType.INCIDENT,
-                record_id: data.sys_id || '',
+                record_id: createIncidentData.sys_id || '',
                 subscription_events: subscriptionEvents.join(','),
                 channel_id: channel ?? currentChannelId,
             };
 
             setSubscriptionPayload(payload);
-            makeApiRequest(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, payload);
-        }
-    }, [getIncidentData().isError, getIncidentData().isSuccess, getIncidentData().isLoading]);
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, payload);
+        },
+        handleError: (error) => handleError(error),
+    });
 
-    useEffect(() => {
-        if (subscriptionPayload) {
-            const {isLoading, isError, isSuccess, error} = getSubscriptionState();
-            setShowModalLoader(isLoading);
-            if (isError && error) {
-                setApiError(error);
-                setShowResultPanel(true);
-            }
-
-            if (isSuccess) {
-                setApiError(null);
-                dispatch(refetch());
-                setShowResultPanel(true);
-            }
-        }
-    }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.createSubscription.apiServiceName,
+        payload: subscriptionPayload,
+        handleSuccess: () => {
+            setApiError(null);
+            dispatch(refetch());
+            setShowResultPanel(true);
+        },
+        handleError: (error) => handleError(error),
+    });
 
     useEffect(() => {
         if (currentChannelId) {
@@ -212,10 +196,15 @@ const UpdateState = () => {
         }
 
         if (isCreateIncidentModalOpen(pluginState)) {
-            makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
         }
     }, [isCreateIncidentModalOpen(pluginState)]);
 
+    // Get services data
+    const {isLoading: incidentFieldsLoading, data: incidentFieldsData} = getIncidentFieldsState();
+    const {isLoading: createIncidentLoading, data: createIncidentData} = getIncidentState();
+    const {isLoading: createSubscriptionLoading} = getSubscriptionState();
+    const showLoader = incidentFieldsLoading || createIncidentLoading || createSubscriptionLoading;
     return (
         <Modal
             show={isCreateIncidentModalOpen(pluginState)}
@@ -228,7 +217,7 @@ const UpdateState = () => {
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                {showModalLoader && <CircularLoader/>}
+                {showLoader && <CircularLoader/>}
                 {showResultPanel || apiError ? (
                     <ResultPanel
                         header={Utils.getResultPanelHeader(apiError, hideModal, Constants.IncidentCreatedMsg)}
@@ -253,38 +242,38 @@ const UpdateState = () => {
                                 error={validationError ?? ''}
                                 className='incident-body__input-field'
                                 required={true}
-                                disabled={showModalLoader}
+                                disabled={showLoader}
                             />
                             <TextArea
                                 placeholder='Description'
                                 value={description}
                                 onChange={handleDescriptionChange}
                                 className='incident-body__text-area'
-                                disabled={showModalLoader}
+                                disabled={showLoader}
                             />
                             <Dropdown
                                 placeholder='Select impact'
                                 value={impact}
                                 onChange={setImpact}
                                 options={impactOptions}
-                                disabled={showModalLoader || !impactOptions.length}
+                                disabled={showLoader || !impactOptions.length}
                                 className='margin-top-20'
-                                loadingOptions={showModalLoader || !impactOptions.length}
+                                loadingOptions={!impactOptions.length}
                             />
                             <Dropdown
                                 placeholder='Select urgency'
                                 value={urgency}
                                 onChange={setUrgency}
                                 options={urgencyOptions}
-                                disabled={showModalLoader || !urgencyOptions.length}
+                                disabled={showLoader || !urgencyOptions.length}
                                 className='margin-top-20'
-                                loadingOptions={showModalLoader || !urgencyOptions.length}
+                                loadingOptions={!urgencyOptions.length}
                             />
                             <CallerPanel
                                 caller={caller}
                                 setCaller={setCaller}
                                 setApiError={setApiError}
-                                showModalLoader={showModalLoader}
+                                showModalLoader={showLoader}
                                 className={`incident-body__auto-suggest ${caller && 'incident-body__suggestion-chosen'}`}
                             />
                             <ToggleSwitch
@@ -298,12 +287,11 @@ const UpdateState = () => {
                                 <ChannelPanel
                                     channel={channel}
                                     setChannel={setChannel}
-                                    showModalLoader={showModalLoader}
-                                    setShowModalLoader={setShowModalLoader}
+                                    showModalLoader={showLoader}
                                     setApiError={setApiError}
                                     channelOptions={channelOptions}
                                     setChannelOptions={setChannelOptions}
-                                    actionBtnDisabled={showModalLoader}
+                                    actionBtnDisabled={showLoader}
                                     editing={true}
                                     placeholder='Select channel to create subscription'
                                     className={`incident-body__auto-suggest ${channel && 'incident-body__suggestion-chosen'}`}
@@ -313,10 +301,10 @@ const UpdateState = () => {
                         <ModalFooter
                             onConfirm={createIncident}
                             confirmBtnText='Create'
-                            confirmDisabled={showModalLoader}
+                            confirmDisabled={showLoader}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
-                            cancelDisabled={showModalLoader}
+                            cancelDisabled={showLoader}
                         />
                     </>
                 )}
@@ -325,4 +313,4 @@ const UpdateState = () => {
     );
 };
 
-export default UpdateState;
+export default CreateIncident;

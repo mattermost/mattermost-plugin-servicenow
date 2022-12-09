@@ -2,9 +2,8 @@ import React, {useEffect, useState} from 'react';
 
 import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
 import Constants from 'src/plugin_constants';
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 type CallerPanelProps = {
@@ -29,7 +28,7 @@ const CallerPanel = (({
     const [autoSuggestValue, setAutoSuggestValue] = useState('');
 
     // usePluginApi hook
-    const {makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
 
     const mapCallersToSuggestions = (callers: CallerData[]): Array<Record<string, string>> => callers.map((c) => ({
         userId: c.serviceNowUser.sys_id,
@@ -37,9 +36,9 @@ const CallerPanel = (({
     }));
 
     // Get users state
-    const getUsers = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as CallerData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    const getUsersState = () => {
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
+        return {isLoading, data: data as CallerData[]};
     };
 
     // Set the callerID when any of the suggestion is selected
@@ -54,17 +53,14 @@ const CallerPanel = (({
         setSuggestions(mapCallersToSuggestions(callersToSuggest));
     }, [autoSuggestValue, options]);
 
-    useEffect(() => {
-        const {isError, isSuccess, error, data} = getUsers();
-        if (isError && error) {
-            setApiError(error);
-        }
-
-        if (isSuccess) {
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.getUsers.apiServiceName,
+        handleSuccess: () => {
             setApiError(null);
             setOptions(data);
-        }
-    }, [getUsers().isError, getUsers().isSuccess, getUsers().isLoading]);
+        },
+        handleError: (error) => setApiError(error),
+    });
 
     useEffect(() => {
         // Reset the caller auto-suggest input, if the caller value is reset.
@@ -75,10 +71,10 @@ const CallerPanel = (({
 
     // Make a request to fetch connected users
     useEffect(() => {
-        makeApiRequest(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
     }, []);
 
-    const {isLoading} = getUsers();
+    const {isLoading, data} = getUsersState();
     return (
         <div
             className={className}

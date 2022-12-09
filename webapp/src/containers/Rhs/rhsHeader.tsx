@@ -5,7 +5,7 @@ import {Dropdown, Button, SvgWrapper, ToggleSwitch} from '@brightscout/mattermos
 
 import useOutsideClick from 'src/hooks/useClickOutside';
 
-import Constants from 'src/plugin_constants';
+import Constants, {ModalId} from 'src/plugin_constants';
 import SVGIcons from 'src/plugin_constants/icons';
 import IconButton from 'src/components/Buttons/iconButton';
 import {setGlobalModalState} from 'src/reducers/globalModal';
@@ -60,7 +60,7 @@ const Header = ({
                     )}
                     <button
                         className={`btn btn-primary share-record-btn ${!showFilterIcon && 'share-record-btn__without-filter'}`}
-                        onClick={() => dispatch(setGlobalModalState({modalId: 'shareRecord'}))}
+                        onClick={() => dispatch(setGlobalModalState({modalId: ModalId.SHARE_RECORD}))}
                     >
                         <span>
                             <SvgWrapper

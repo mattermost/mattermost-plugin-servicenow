@@ -49,6 +49,16 @@ const EmptyFieldsInServiceNow = 'N/A';
 const RequestButtonText = 'Submit Request on ServiceNow';
 const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
 
+export enum ModalId {
+    ADD_SUBSCRIPTION = 'addSubscription',
+    EDIT_SUBSCRIPTION = 'editSubscription',
+    SHARE_RECORD = 'shareRecord',
+    ADD_OR_VIEW_COMMENTS = 'addOrViewComments',
+    UPDATE_STATE = 'updateState',
+    CREATE_INCIDENT = 'createIncident',
+    CREATE_REQUEST = 'createRequest',
+}
+
 export enum SubscriptionEvents {
     CREATED = 'created',
     STATE = 'state',

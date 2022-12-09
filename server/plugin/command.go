@@ -209,11 +209,11 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 
 	switch command {
 	case constants.SubCommandList:
-		return p.handleListSubscriptions(c, args, parameters, client, isSysAdmin)
+		return p.handleListSubscriptions(args, parameters, client, isSysAdmin)
 	case constants.SubCommandAdd:
-		return p.handleSubscribe(c, args, parameters, client, isSysAdmin)
+		return p.handleSubscribe(args)
 	case constants.SubCommandEdit:
-		return p.handleEditSubscription(c, args, parameters, client, isSysAdmin)
+		return p.handleEditSubscription(args, parameters, client, isSysAdmin)
 	case constants.SubCommandDelete:
 		return p.handleDeleteSubscription(c, args, parameters, client, isSysAdmin)
 	default:
@@ -227,19 +227,18 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 	}
 
 	command := parameters[0]
-	parameters = parameters[1:]
 
 	switch command {
 	case constants.SubCommandIncident:
-		return p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
+		return p.handleCreateIncident(args)
 	case constants.SubCommandRequest:
-		return p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
+		return p.handleCreateRequest(args)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
 }
 
-func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleSubscribe(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenAddSubscriptionModal,
 		nil,
@@ -259,8 +258,7 @@ func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs
 	return ""
 }
 
-// TODO: remove extra arguments
-func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleCreateIncident(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
 		nil,
@@ -270,7 +268,7 @@ func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs
 	return ""
 }
 
-func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleCreateRequest(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateRequestModal,
 		nil,
@@ -280,7 +278,7 @@ func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs,
 	return ""
 }
 
-func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	userID := args.UserId
 	channelID := args.ChannelId
 	if len(params) >= 1 {
@@ -386,7 +384,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 	return genericWaitMessage
 }
 
-func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
 		return constants.ErrorCommandInvalidNumberOfParams
 	}

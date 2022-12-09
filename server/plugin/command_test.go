@@ -439,7 +439,7 @@ func TestHandleSubscribe(t *testing.T) {
 			testCase.setupAPI(mockAPI)
 			p.SetAPI(mockAPI)
 
-			resp := p.handleSubscribe(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
+			resp := p.handleSubscribe(args)
 
 			assert.EqualValues(testCase.expectedError, resp)
 		})
@@ -600,7 +600,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleListSubscriptions(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.handleListSubscriptions(args, testCase.params, c, true)
 
 			// This is used to wait for goroutine to finish.
 			time.Sleep(100 * time.Millisecond)
@@ -752,7 +752,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			testCase.setupClient(c)
 			p.SetAPI(mockAPI)
 
-			resp := p.handleEditSubscription(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.handleEditSubscription(args, testCase.params, c, true)
 
 			assert.EqualValues(testCase.expectedError, resp)
 		})
