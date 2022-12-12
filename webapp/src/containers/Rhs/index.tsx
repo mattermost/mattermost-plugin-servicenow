@@ -216,7 +216,7 @@ const Rhs = (): JSX.Element => {
                     showAllSubscriptions={showAllSubscriptions}
                     setShowAllSubscriptions={setShowAllSubscriptions}
                     filter={filter}
-                    setFilter={setFilter}
+                    setFilter={handleSetFilter}
                     setResetFilter={setResetFilter}
                 />
             )}
