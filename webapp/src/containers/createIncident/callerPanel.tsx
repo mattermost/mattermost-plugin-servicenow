@@ -89,23 +89,19 @@ const CallerPanel = forwardRef<HTMLDivElement, CallerPanelProps>(({
     }, [caller]);
 
     return (
-        <div
-            className={className}
-        >
-            <div className='padding-h-12 padding-top-10'>
-                <AutoSuggest
-                    placeholder={placeholder || 'Select caller'}
-                    inputValue={autoSuggestValue}
-                    onInputValueChange={setAutoSuggestValue}
-                    onChangeSelectedSuggestion={handleCallerSelection}
-                    disabled={actionBtnDisabled}
-                    suggestionConfig={{
-                        suggestions,
-                        renderValue: (suggestion) => suggestion.userName,
-                    }}
-                    charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
-                />
-            </div>
+        <div className={`padding-h-12 padding-top-10 ${className}`}>
+            <AutoSuggest
+                placeholder={placeholder || 'Select caller'}
+                inputValue={autoSuggestValue}
+                onInputValueChange={setAutoSuggestValue}
+                onChangeSelectedSuggestion={handleCallerSelection}
+                disabled={actionBtnDisabled}
+                suggestionConfig={{
+                    suggestions,
+                    renderValue: (suggestion) => suggestion.userName,
+                }}
+                charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
+            />
         </div>
     );
 });
