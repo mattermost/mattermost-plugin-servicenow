@@ -7,7 +7,7 @@ interface SpinnerProps {
 }
 
 const Spinner = ({extraClass = ''}: SpinnerProps): JSX.Element => (
-    <div className={`text-align-center spinner-wrapper ${extraClass}`}>
+    <div className={`text-align-center servicenow-spinner-wrapper ${extraClass}`}>
         <svg
             className='spinner'
             viewBox='0 0 80 80'
