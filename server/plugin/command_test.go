@@ -415,68 +415,6 @@ func TestHandleSubscriptions(t *testing.T) {
 	}
 }
 
-func TestHandleSubscribe(t *testing.T) {
-	p := Plugin{}
-	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
-	for _, testCase := range []struct {
-		description   string
-		setupAPI      func(*plugintest.API)
-		expectedError string
-	}{
-		{
-			description: "HandleSubscribe: Success",
-			setupAPI: func(a *plugintest.API) {
-				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-			},
-		},
-	} {
-		t.Run(testCase.description, func(t *testing.T) {
-			defer mockAPI.AssertExpectations(t)
-			assert := assert.New(t)
-			testCase.setupAPI(mockAPI)
-			p.SetAPI(mockAPI)
-
-			resp := p.handleSubscribe(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
-
-			assert.EqualValues(testCase.expectedError, resp)
-		})
-	}
-}
-
-func TestHandleSearchAndShare(t *testing.T) {
-	p := Plugin{}
-	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
-	for _, testCase := range []struct {
-		description   string
-		setupAPI      func(*plugintest.API)
-		expectedError string
-	}{
-		{
-			description: "HandleSearchAndShare: Success",
-			setupAPI: func(a *plugintest.API) {
-				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-			},
-		},
-	} {
-		t.Run(testCase.description, func(t *testing.T) {
-			defer mockAPI.AssertExpectations(t)
-			assert := assert.New(t)
-			testCase.setupAPI(mockAPI)
-			p.SetAPI(mockAPI)
-
-			resp := p.handleSearchAndShare(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
-
-			assert.EqualValues(testCase.expectedError, resp)
-		})
-	}
-}
-
 func TestHandleListSubscriptions(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
@@ -694,66 +632,33 @@ func TestHandleDeleteSubscription(t *testing.T) {
 
 func TestHandleEditSubscription(t *testing.T) {
 	p := Plugin{}
-	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
 		description   string
 		params        []string
-		setupAPI      func(*plugintest.API)
-		setupClient   func(client *mock_plugin.Client)
 		expectedError string
 	}{
 		{
 			description: "HandleEditSubscription: Success",
 			params:      []string{testutils.GetServiceNowSysID()},
-			setupAPI: func(a *plugintest.API) {
-				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-			},
-			setupClient: func(client *mock_plugin.Client) {
-				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					testutils.GetSubscription(constants.SubscriptionTypeBulk), 0, nil,
-				)
-			},
 		},
 		{
 			description:   "HandleEditSubscription: Invalid number of params",
-			setupAPI:      func(a *plugintest.API) {},
-			setupClient:   func(client *mock_plugin.Client) {},
 			expectedError: constants.ErrorCommandInvalidNumberOfParams,
 		},
 		{
 			description:   "HandleEditSubscription: Invalid subscription ID",
 			params:        []string{"invalidID"},
-			setupAPI:      func(a *plugintest.API) {},
-			setupClient:   func(client *mock_plugin.Client) {},
 			expectedError: invalidSubscriptionIDMessage,
-		},
-		{
-			description: "HandleEditSubscription: Unable to get the subscription",
-			params:      []string{testutils.GetServiceNowSysID()},
-			setupAPI: func(a *plugintest.API) {
-				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-			},
-			setupClient: func(client *mock_plugin.Client) {
-				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					nil, 0, errors.New("unable to get the subscription"),
-				)
-			},
-			expectedError: genericErrorMessage,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			defer mockAPI.AssertExpectations(t)
 			assert := assert.New(t)
 			c := mock_plugin.NewClient(t)
-			testCase.setupAPI(mockAPI)
-			testCase.setupClient(c)
-			p.SetAPI(mockAPI)
 
 			resp := p.handleEditSubscription(&plugin.Context{}, args, testCase.params, c, true)
-
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}

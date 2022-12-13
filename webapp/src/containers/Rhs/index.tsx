@@ -127,14 +127,12 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = useCallback((subscription: SubscriptionData) => {
-        const events = subscription.subscription_events.split(',');
-        const subscriptionEvents = events.map((event) => SubscriptionEventsMap[event]);
         const subscriptionData: EditSubscriptionData = {
             channel: subscription.channel_id,
             recordId: subscription.record_id,
             type: subscription.type,
             recordType: subscription.record_type,
-            subscriptionEvents,
+            subscriptionEvents: Utils.getSubscriptionEvents(subscription.subscription_events),
             id: subscription.sys_id,
         };
         dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}));
@@ -216,7 +214,7 @@ const Rhs = (): JSX.Element => {
                     showAllSubscriptions={showAllSubscriptions}
                     setShowAllSubscriptions={setShowAllSubscriptions}
                     filter={filter}
-                    setFilter={setFilter}
+                    setFilter={handleSetFilter}
                     setResetFilter={setResetFilter}
                 />
             )}

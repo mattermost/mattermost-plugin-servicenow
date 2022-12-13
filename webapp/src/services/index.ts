@@ -10,6 +10,20 @@ const pluginApi = createApi({
     baseQuery: fetchBaseQuery({baseUrl: Utils.getBaseUrls().pluginApiBaseUrl}),
     tagTypes: ['Posts'],
     endpoints: (builder) => ({
+        [Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName]: builder.query<void, void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.path,
+                method: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName]: builder.query<ConnectedState, void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getConnectedUser.path,
+                method: Constants.pluginApiServiceConfigs.getConnectedUser.method,
+            }),
+        }),
         [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelData[], FetchChannelsParams>({
             query: (params) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
@@ -46,6 +60,13 @@ const pluginApi = createApi({
                 url: `${Constants.pluginApiServiceConfigs.fetchSubscriptions.path}`,
                 method: Constants.pluginApiServiceConfigs.fetchSubscriptions.method,
                 params,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName]: builder.query<SubscriptionData, string>({
+            query: (id) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.fetchSubscription.path}/${id}`,
+                method: Constants.pluginApiServiceConfigs.fetchSubscription.method,
             }),
         }),
         [Constants.pluginApiServiceConfigs.editSubscription.apiServiceName]: builder.query<void, EditSubscriptionPayload>({

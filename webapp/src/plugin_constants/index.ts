@@ -42,6 +42,8 @@ const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
+const ServiceNowSysIdRegex = '[0-9a-f]{32}';
+const UserNotConnectedMessage = 'You have not connected your Mattermost account to ServiceNow.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -222,6 +224,16 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
+    getConnectedUser: {
+        path: '/connected',
+        method: 'GET',
+        apiServiceName: 'getConnectedUser',
+    },
+    checkSubscriptionsConfigured: {
+        path: '/subscriptions-configured',
+        method: 'GET',
+        apiServiceName: 'checkSubscriptionsConfigured',
+    },
     getChannels: {
         path: '/channels',
         method: 'GET',
@@ -246,6 +258,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         path: '/subscriptions',
         method: 'GET',
         apiServiceName: 'fetchSubscriptions',
+    },
+    fetchSubscription: {
+        path: '/subscriptions',
+        method: 'GET',
+        apiServiceName: 'fetchSubscription',
     },
     editSubscription: {
         path: '/subscriptions',
@@ -349,4 +366,6 @@ export default {
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
+    ServiceNowSysIdRegex,
+    UserNotConnectedMessage,
 };

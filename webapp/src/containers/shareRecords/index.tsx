@@ -44,6 +44,7 @@ const ShareRecords = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isShareRecordModalOpen(pluginState);
 
     const dispatch = useDispatch();
 
@@ -72,22 +73,37 @@ const ShareRecords = () => {
         resetFieldStates();
     }, []);
 
+    const getConnectedUserState = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
+        return {isLoading, isSuccess, isError, data: data as ConnectedState, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
+
     const getShareRecordState = () => {
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, shareRecordPayload as ShareRecordPayload);
         return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     useEffect(() => {
-        const shareRecordState = getShareRecordState();
-        if (shareRecordState.isError && shareRecordState.error) {
-            setApiError(shareRecordState.error);
+        const {data} = getConnectedUserState();
+        if (data && !data.connected) {
+            setApiError({
+                id: Constants.ApiErrorIdNotConnected,
+                message: Constants.UserNotConnectedMessage,
+            });
+        }
+    }, [getConnectedUserState().isLoading, getConnectedUserState().isError, getConnectedUserState().isSuccess]);
+
+    useEffect(() => {
+        const {error, isError, isLoading, isSuccess} = getShareRecordState();
+        if (isError && error) {
+            setApiError(error);
         }
 
-        if (shareRecordState.isSuccess) {
+        if (isSuccess) {
             setShowResultPanel(true);
         }
 
-        setShowModalLoader(shareRecordState.isLoading);
+        setShowModalLoader(isLoading);
     }, [getShareRecordState().isLoading, getShareRecordState().isError, getShareRecordState().isSuccess]);
 
     const shareRecord = () => {
@@ -123,12 +139,17 @@ const ShareRecords = () => {
         }
     }, [channel, suggestionChosen]);
 
-    // Set the channel when button is clicked
     useEffect(() => {
+        // Check if user is connected or not
+        if (open) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
+        }
+
+        // Set the channel when button is clicked
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-    }, [currentChannelId, isShareRecordModalOpen(pluginState)]);
+    }, [currentChannelId, open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
         if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
@@ -138,9 +159,13 @@ const ShareRecords = () => {
         return action ? handleOpenShareRecordModal : 'Share another record';
     }, [apiError]);
 
+    if (getConnectedUserState().isLoading) {
+        return <></>;
+    }
+
     return (
         <Modal
-            show={isShareRecordModalOpen(pluginState)}
+            show={open}
             onHide={hideModal}
             className='rhs-modal'
         >

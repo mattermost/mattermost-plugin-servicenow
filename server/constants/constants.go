@@ -156,6 +156,7 @@ const (
 	ErrorGetSubscriptions                 = "Error in getting all subscriptions"
 	ErrorEditingSubscription              = "Error in editing the subscription"
 	ErrorDeleteSubscription               = "Error in deleting the subscription"
+	ErrorGetSubscription                  = "Error in getting the subscription"
 	ErrorGetComments                      = "Error in getting all comments"
 	ErrorCreateComment                    = "Error in creating the comment"
 	ErrorSearchingRecord                  = "Error in searching for records in ServiceNow"
@@ -165,6 +166,7 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorSubscriptionsNotConfigured       = "Unable to check or activate subscriptions in ServiceNow."
 )
 
 // kv store keys prefix

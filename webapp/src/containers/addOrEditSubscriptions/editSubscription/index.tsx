@@ -11,12 +11,14 @@ import AddOrEditSubscriptionModal from '../subComponents';
 const EditSubscription = () => {
     const dispatch = useDispatch();
     const {pluginState} = usePluginApi();
+    const {data} = getGlobalModalState(pluginState);
+    const subscriptionData = typeof (data) === 'string' ? data as string : data as EditSubscriptionData;
 
     return (
         <AddOrEditSubscriptionModal
             open={isEditSubscriptionModalOpen(pluginState)}
             close={() => dispatch(resetGlobalModalState())}
-            subscriptionData={getGlobalModalState(pluginState).data as EditSubscriptionData}
+            subscriptionData={subscriptionData}
         />
     );
 };

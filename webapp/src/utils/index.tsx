@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'src/plugin_constants';
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -106,6 +106,24 @@ const getResultPanelHeader = (error: APIError | null, onClick: () => void, succe
     return successMessage;
 };
 
+const getCommandArgs = (command: string): string[] => {
+    const myRegexp = /[^\s"]+|"([^"]*)"/gi;
+    const myArray = [];
+    let match;
+    do {
+        match = myRegexp.exec(command);
+        if (match != null) {
+            myArray.push(match[1] ? match[1] : match[0]);
+        }
+    } while (match != null);
+    return myArray.length > 2 ? myArray.slice(2) : [];
+};
+
+const getSubscriptionEvents = (subscription_events: string): SubscriptionEvents[] => {
+    const events = subscription_events.split(',');
+    return events.map((event) => SubscriptionEventsMap[event]);
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -114,4 +132,6 @@ export default {
     getLinkData,
     validateKeysContainingLink,
     getResultPanelHeader,
+    getCommandArgs,
+    getSubscriptionEvents,
 };
