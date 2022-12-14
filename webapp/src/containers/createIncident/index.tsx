@@ -38,6 +38,7 @@ const UpdateState = () => {
     const [incidentPayload, setIncidentPayload] = useState<IncidentPayload | null>(null);
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
     const [showChannelPanel, setShowChannelPanel] = useState(false);
+    const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
 
@@ -49,6 +50,7 @@ const UpdateState = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isCreateIncidentModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -70,6 +72,7 @@ const UpdateState = () => {
         setIncidentPayload(null);
         setSubscriptionPayload(null);
         setShowChannelPanel(false);
+        setRefetchIncidentFields(true);
     }, []);
 
     // Hide the modal and reset the states
@@ -106,7 +109,7 @@ const UpdateState = () => {
     };
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired || apiError?.id === Constants.ApiErrorIdUpdateSetNotUploaded) {
+        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
             dispatch(setConnected(false));
             return action ? hideModal : 'Close';
         }
@@ -208,14 +211,15 @@ const UpdateState = () => {
             setChannel(currentChannelId);
         }
 
-        if (isCreateIncidentModalOpen(pluginState)) {
+        if (open && refetchIncidentFields) {
             makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            setRefetchIncidentFields(false);
         }
-    }, [isCreateIncidentModalOpen(pluginState)]);
+    }, [open, refetchIncidentFields]);
 
     return (
         <Modal
-            show={isCreateIncidentModalOpen(pluginState)}
+            show={open}
             onHide={hideModal}
             className='rhs-modal'
         >

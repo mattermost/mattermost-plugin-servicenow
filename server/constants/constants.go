@@ -109,7 +109,7 @@ const (
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
-	APIErrorUpdateSetNotUploaded         = "Requested URI does not represent any resource"
+	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"

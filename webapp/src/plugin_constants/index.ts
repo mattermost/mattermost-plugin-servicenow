@@ -25,7 +25,6 @@ const DefaultPage = 0;
 const DefaultPageSize = 20;
 const ApiErrorIdNotConnected = 'not_connected';
 const ApiErrorIdRefreshTokenExpired = 'refresh_token_expired';
-const ApiErrorIdUpdateSetNotUploaded = 'update_set_not_uploaded';
 const ApiErrorIdSubscriptionsNotConfigured = 'subscriptions_not_configured';
 const ApiErrorIdSubscriptionsUnauthorized = 'subscriptions_not_authorized';
 const GeneralErrorMessage = 'Something went wrong';
@@ -357,7 +356,6 @@ export default {
     DefaultPageSize,
     ApiErrorIdNotConnected,
     ApiErrorIdRefreshTokenExpired,
-    ApiErrorIdUpdateSetNotUploaded,
     ApiErrorIdSubscriptionsNotConfigured,
     ApiErrorIdSubscriptionsUnauthorized,
     SubscriptionsUnauthorizedErrorTitle,
