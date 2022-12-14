@@ -26,7 +26,7 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.1"
+	UpdateSetVersion            = "v2.2"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
@@ -80,6 +80,8 @@ const (
 	FieldAssignmentGroup      = "assignment_group"
 	FieldKnowledgeBase        = "knowledge_base"
 	FieldCategory             = "category"
+	FieldUrgency              = "urgency"
+	FieldImpact               = "impact"
 
 	// Websocket events
 	WSEventConnect                        = "connect"
@@ -90,6 +92,7 @@ const (
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
 	WSEventOpenCommentModal               = "comment_modal"
 	WSEventOpenUpdateStateModal           = "update_state"
+	WSEventOpenCreateIncidentModal        = "create_incident"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -106,6 +109,7 @@ const (
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
+	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -118,6 +122,8 @@ const (
 	CommandSubscriptions  = "subscriptions"
 	CommandUnsubscribe    = "unsubscribe"
 	CommandSearchAndShare = "share"
+	CommandCreate         = "create"
+	SubCommandIncident    = "incident"
 	SubCommandList        = "list"
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"
@@ -165,6 +171,7 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorGetIncidentFields                = "Error in getting the incident fields"
 )
 
 // kv store keys prefix

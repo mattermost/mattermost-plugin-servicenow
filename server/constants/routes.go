@@ -23,14 +23,16 @@ const (
 	PathSearchCatalogItems     = "/catalog"
 	PathGetUsers               = "/users"
 	PathCreateIncident         = "/incident"
+	PathGetIncidentFields      = "/incident-fields"
 
 	// ServiceNow API paths
-	PathActivateSubscriptions         = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
-	PathSubscriptionCRUD              = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
-	PathGetRecordsFromServiceNow      = "api/now/table/{tableName}"
-	PathGetStatesFromServiceNow       = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
-	PathGetCatalogItemsFromServiceNow = "api/sn_sc/servicecatalog/items"
-	PathGetUserFromServiceNow         = "/api/now/table/sys_user"
+	PathActivateSubscriptions           = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
+	PathSubscriptionCRUD                = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
+	PathGetRecordsFromServiceNow        = "api/now/table/{tableName}"
+	PathGetStatesFromServiceNow         = "api/" + ServiceNowForMattermostNotificationsAppID + "/getstates/{record_type}"
+	PathGetCatalogItemsFromServiceNow   = "api/sn_sc/servicecatalog/items"
+	PathGetUserFromServiceNow           = "/api/now/table/sys_user"
+	PathGetIncidentFieldsFromServiceNow = "api/" + ServiceNowForMattermostNotificationsAppID + "/getincidentfields"
 
 	// ServiceNow URLs
 	PathServiceNowURL = "/now/nav/ui/classic/params/target"

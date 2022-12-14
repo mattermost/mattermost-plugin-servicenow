@@ -3,7 +3,7 @@
 */
 
 // TODO: Create an enum for the below modal Ids
-type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | null
+type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | null
 type SubscriptionType = import('../../plugin_constants').SubscriptionType;
 type RecordType = import('../../plugin_constants').RecordType;
 
@@ -122,4 +122,22 @@ type WebsocketEventParams = {
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
     labelValuePairs?: Array<{ label: string, value: string }>,
+}
+
+type ServiceNowUser = {
+    sys_id: string;
+    email: string;
+    user_name: string;
+}
+
+type CallerData = {
+    mattermostUserID: string;
+    username: string;
+    serviceNowUser: ServiceNowUser;
+}
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
 }
