@@ -36,7 +36,6 @@ const CallerPanel = (({
         userName: c.username,
     }));
 
-    // Get users state
     const getUsers = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
         return {isLoading, isSuccess, isError, data: data as CallerData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
