@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
+export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.2.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
 
@@ -36,6 +36,7 @@ const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const RecordSharedMsg = 'Record shared successfully!';
 const StateUpdatedMsg = 'State updated successfully!';
+const IncidentCreatedMsg = 'Incident created successfully!';
 const CharThresholdToSuggestChannel = 0;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
@@ -221,17 +222,17 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
     [SubscriptionEvents.ASSIGNMENT_GROUP]: 'Assignment group changed',
 };
 
-export const IncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
+export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
     {
-        value: '1',
+        value: '1 - High',
         label: 'High',
     },
     {
-        value: '2',
+        value: '2 - Medium',
         label: 'Medium',
     },
     {
-        value: '3',
+        value: '3 - Low',
         label: 'Low',
     },
 ];
@@ -303,6 +304,21 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    getUsers: {
+        path: '/users',
+        method: 'GET',
+        apiServiceName: 'getUsers',
+    },
+    createIncident: {
+        path: '/incident',
+        method: 'POST',
+        apiServiceName: 'createIncident',
+    },
+    getIncidentFeilds: {
+        path: '/incident-fields',
+        method: 'GET',
+        apiServiceName: 'getIncidentFeilds',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -354,6 +370,7 @@ export default {
     DeleteSubscriptionMsg,
     RecordSharedMsg,
     StateUpdatedMsg,
+    IncidentCreatedMsg,
     CharThresholdToSuggestChannel,
     RequiredMsg,
     recordTypeOptions,

@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'src/plugin_constants';
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, DefaultIncidentImpactAndUrgencyOptions} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -106,6 +106,17 @@ const getResultPanelHeader = (error: APIError | null, onClick: () => void, succe
     return successMessage;
 };
 
+const getImpactAndUrgencyOptions = (
+    setImpactOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>,
+    setUrgencyOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>,
+    data: IncidentFieldsData[],
+) => {
+    const impactOptions = data.filter((item) => item.element === 'impact');
+    const urgencyOptions = data.filter((item) => item.element === 'urgency');
+    setImpactOptions(impactOptions.length ? impactOptions : DefaultIncidentImpactAndUrgencyOptions);
+    setUrgencyOptions(urgencyOptions.length ? urgencyOptions : DefaultIncidentImpactAndUrgencyOptions);
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -114,4 +125,5 @@ export default {
     getLinkData,
     validateKeysContainingLink,
     getResultPanelHeader,
+    getImpactAndUrgencyOptions,
 };
