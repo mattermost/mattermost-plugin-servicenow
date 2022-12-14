@@ -80,24 +80,20 @@ const CallerPanel = (({
 
     const {isLoading} = getUsers();
     return (
-        <div
-            className={className}
-        >
-            <div className='padding-h-12 padding-top-10'>
-                <AutoSuggest
-                    placeholder={placeholder || 'Select caller'}
-                    inputValue={autoSuggestValue}
-                    onInputValueChange={setAutoSuggestValue}
-                    onChangeSelectedSuggestion={handleCallerSelection}
-                    disabled={isLoading || showModalLoader}
-                    loadingSuggestions={isLoading}
-                    suggestionConfig={{
-                        suggestions,
-                        renderValue: (suggestion) => suggestion.userName,
-                    }}
-                    charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
-                />
-            </div>
+        <div className={`padding-h-12 padding-top-10 ${className}`}>
+            <AutoSuggest
+                placeholder={placeholder || 'Select caller'}
+                inputValue={autoSuggestValue}
+                onInputValueChange={setAutoSuggestValue}
+                onChangeSelectedSuggestion={handleCallerSelection}
+                disabled={isLoading || showModalLoader}
+                loadingSuggestions={isLoading}
+                suggestionConfig={{
+                    suggestions,
+                    renderValue: (suggestion) => suggestion.userName,
+                }}
+                charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
+            />
         </div>
     );
 });
