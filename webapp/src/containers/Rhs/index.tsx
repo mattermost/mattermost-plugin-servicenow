@@ -136,6 +136,7 @@ const Rhs = (): JSX.Element => {
             recordType: subscription.record_type,
             subscriptionEvents,
             id: subscription.sys_id,
+            userId: subscription.user_id,
         };
         dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}));
     }, [dispatch]);

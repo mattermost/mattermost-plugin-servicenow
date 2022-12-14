@@ -112,7 +112,22 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 }
 
 func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
-	p.writeJSON(w, 0, p.getConfiguration())
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	user, userErr := p.API.GetUser(userID)
+	if userErr != nil {
+		p.API.LogError(constants.ErrorGetUser, "UserID", userID, "Error", userErr.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGeneric})
+		return
+	}
+
+	if strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
+		p.writeJSON(w, 0, p.getConfiguration())
+		return
+	}
+
+	p.writeJSON(w, 0, map[string]string{
+		"ServiceNowBaseURL": p.getConfiguration().ServiceNowBaseURL,
+	})
 }
 
 func (p *Plugin) getConnected(w http.ResponseWriter, r *http.Request) {
@@ -212,6 +227,24 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	if userID != *subscription.UserID {
+		p.API.LogError(constants.ErrorUserMismatch)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorUserMismatch})
+		return
+	}
+
+	hasPermission, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	if permissionErr != nil {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+		return
+	}
+
+	if !hasPermission {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInsufficientPermission})
+		return
+	}
+
 	client := p.GetClientFromRequest(r)
 	exists, statusCode, err := client.CheckForDuplicateSubscription(subscription)
 	if err != nil {
@@ -272,7 +305,18 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	var bulkSubscriptions []*serializer.SubscriptionResponse
 	var recordSubscriptions []*serializer.SubscriptionResponse
 	wg := sync.WaitGroup{}
+	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
+		hasPermission, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
+		if permissionErr != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+			return
+		}
+
+		if !hasPermission {
+			continue
+		}
+
 		if subscription.Type == constants.SubscriptionTypeBulk {
 			bulkSubscriptions = append(bulkSubscriptions, subscription)
 			continue
@@ -309,21 +353,32 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	subscriptionID := pathParams[constants.PathParamSubscriptionID]
-	subcription, err := serializer.SubscriptionFromJSON(r.Body)
+	subscription, err := serializer.SubscriptionFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
-	if err = subcription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
+	if err = subscription.IsValidForUpdation(p.getConfiguration().MattermostSiteURL); err != nil {
 		p.API.LogError(constants.ErrorValidatingRequestBody, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorValidatingRequestBody, err.Error())})
 		return
 	}
 
+	hasPermission, permissionErr := p.HasChannelPermissions(*subscription.UserID, *subscription.ChannelID)
+	if permissionErr != nil {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+		return
+	}
+
+	if !hasPermission {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInsufficientPermission})
+		return
+	}
+
 	client := p.GetClientFromRequest(r)
-	if statusCode, err := client.EditSubscription(subscriptionID, subcription); err != nil {
+	if statusCode, err := client.EditSubscription(subscriptionID, subscription); err != nil {
 		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
@@ -456,24 +511,49 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	record, err := serializer.ServiceNowRecordFromJSON(r.Body)
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	user, userErr := p.API.GetUser(userID)
+	if userErr != nil {
+		p.API.LogError(constants.ErrorGetUser, "UserID", userID, "Error", userErr.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGeneric})
+		return
+	}
+
+	hasPermission, permissionErr := p.HasChannelPermissions(userID, channelID)
+	if permissionErr != nil {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+		return
+	}
+
+	if !hasPermission {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInsufficientPermission})
+		return
+	}
+
+	shareRecordData, err := serializer.ServiceNowRecordFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorUnmarshallingRequestBody, err.Error())})
 		return
 	}
 
-	if !constants.ValidRecordTypesForSearching[record.RecordType] {
-		p.API.LogError("Invalid record type while trying to share record", "Record type", record.RecordType)
+	if !constants.ValidRecordTypesForSearching[shareRecordData.RecordType] {
+		p.API.LogError("Invalid record type while trying to share record", "Record type", shareRecordData.RecordType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidRecordType})
 		return
 	}
 
-	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	user, userErr := p.API.GetUser(userID)
-	if userErr != nil {
-		p.API.LogError(constants.ErrorGetUser, "UserID", userID, "Error", userErr.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGeneric})
+	client := p.GetClientFromRequest(r)
+	record, statusCode, err := client.GetRecordFromServiceNow(shareRecordData.RecordType, shareRecordData.SysID)
+	if err != nil {
+		p.API.LogError(constants.ErrorGetRecord, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetRecord, err.Error()))
+		return
+	}
+
+	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
+		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
 	}
 

@@ -6,7 +6,6 @@ type UserList struct {
 
 type ServiceNowUser struct {
 	UserID   string `json:"sys_id"`
-	Email    string `json:"email"`
 	Username string `json:"user_name"`
 }
 

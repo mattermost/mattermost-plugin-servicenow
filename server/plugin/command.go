@@ -261,6 +261,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		channelID = ""
 	}
 
+	var subscriptionList []*serializer.SubscriptionResponse
 	go func() {
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
@@ -274,8 +275,19 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 			return
 		}
 
-		wg := sync.WaitGroup{}
 		for _, subscription := range subscriptions {
+			hasPermission, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			if permissionErr != nil {
+				return
+			}
+
+			if hasPermission {
+				subscriptionList = append(subscriptionList, subscription)
+			}
+		}
+
+		wg := sync.WaitGroup{}
+		for _, subscription := range subscriptionList {
 			wg.Add(1)
 			go func(subscription *serializer.SubscriptionResponse) {
 				defer wg.Done()
@@ -304,7 +316,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		wg.Wait()
-		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptions))
+		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptionList))
 	}()
 
 	return listSubscriptionsWaitMessage

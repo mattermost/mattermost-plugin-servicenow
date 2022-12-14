@@ -165,6 +165,9 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorUserMismatch                     = "User ID does not match with the request user."
+	ErrorInsufficientPermission           = "User have insufficient permissions for the current channel"
+	ErrorChannelForUser                   = "Unable to get the channel for a user"
 )
 
 // kv store keys prefix

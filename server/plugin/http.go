@@ -69,7 +69,16 @@ func (c *client) Call(method, path, contentType string, inBody io.Reader, out in
 		if strings.Contains(err.Error(), "invalid character '<'") {
 			return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
 		}
-		return nil, http.StatusInternalServerError, err
+
+		updatedError := strings.ReplaceAll(err.Error(), c.plugin.getConfiguration().MattermostSiteURL, "")
+		if strings.Contains(err.Error(), "dial tcp") {
+			errorData := strings.Split(c.plugin.getConfiguration().MattermostSiteURL, ":")
+			if len(errorData) == 3 {
+				updatedError = strings.ReplaceAll(updatedError, errorData[2], "")
+			}
+		}
+
+		return nil, http.StatusInternalServerError, errors.New(updatedError)
 	}
 
 	if resp.Body == nil {
