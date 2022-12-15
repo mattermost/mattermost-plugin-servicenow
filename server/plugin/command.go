@@ -271,7 +271,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		if len(subscriptions) == 0 {
-			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
 			return
 		}
 
@@ -284,6 +284,11 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 			if hasPermission {
 				subscriptionList = append(subscriptionList, subscription)
 			}
+		}
+
+		if len(subscriptionList) == 0 {
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
+			return
 		}
 
 		wg := sync.WaitGroup{}

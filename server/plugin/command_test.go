@@ -489,6 +489,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		params           []string
 		setupAPI         func(*plugintest.API)
 		setupClient      func(client *mock_plugin.Client)
+		setupPlugin      func(p *Plugin)
 		isResponse       bool
 		expectedResponse string
 		expectedError    string
@@ -498,6 +499,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			params:        []string{"invalid"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
+			setupPlugin:   func(p *Plugin) {},
 			expectedError: "Unknown filter invalid",
 		},
 		{
@@ -505,6 +507,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			params:        []string{"me", "invalid"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
+			setupPlugin:   func(p *Plugin) {},
 			expectedError: "Unknown filter invalid",
 		},
 		{
@@ -518,6 +521,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 					nil, 0, errors.New("unable to get the subscriptions"),
 				)
 			},
+			setupPlugin:      func(p *Plugin) {},
 			isResponse:       true,
 			expectedResponse: genericErrorMessage,
 			expectedError:    listSubscriptionsWaitMessage,
@@ -533,8 +537,9 @@ func TestHandleListSubscriptions(t *testing.T) {
 					testutils.GetSubscriptions(0), 0, nil,
 				)
 			},
+			setupPlugin:      func(p *Plugin) {},
 			isResponse:       true,
-			expectedResponse: "You don't have any active subscriptions for this channel.",
+			expectedResponse: constants.ErrorNoActiveSubscriptions,
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
@@ -557,8 +562,55 @@ func TestHandleListSubscriptions(t *testing.T) {
 					testutils.GetServiceNowRecord(), 0, nil,
 				)
 			},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
+					return true, nil
+				})
+			},
 			isResponse:       true,
 			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
+			expectedError:    listSubscriptionsWaitMessage,
+		},
+		{
+			description: "HandleListSubscriptions: Unable to get permissions for channel",
+			params:      []string{"me", "all_channels"},
+			setupAPI:    func(a *plugintest.API) {},
+			setupClient: func(client *mock_plugin.Client) {
+				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
+					testutils.GetSubscriptions(2), 0, nil,
+				)
+			},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
+					return false, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				})
+			},
+			expectedError: listSubscriptionsWaitMessage,
+		},
+		{
+			description: "HandleListSubscriptions: User do not have permissions for the subscriptions channel",
+			params:      []string{"me", "all_channels"},
+			setupAPI: func(a *plugintest.API) {
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				a.On("GetUser", mock.AnythingOfType("string")).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
+				a.On("GetChannel", mock.AnythingOfType("string")).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
+			},
+			setupClient: func(client *mock_plugin.Client) {
+				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
+					testutils.GetSubscriptions(2), 0, nil,
+				)
+			},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
+					return false, nil
+				})
+			},
+			isResponse:       true,
+			expectedResponse: constants.ErrorNoActiveSubscriptions,
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
@@ -580,6 +632,11 @@ func TestHandleListSubscriptions(t *testing.T) {
 					testutils.GetServiceNowRecord(), 0, nil,
 				)
 			},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
+					return true, nil
+				})
+			},
 			isResponse:       true,
 			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
@@ -591,6 +648,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			c := mock_plugin.NewClient(t)
 			testCase.setupAPI(mockAPI)
 			testCase.setupClient(c)
+			testCase.setupPlugin(&p)
 			p.SetAPI(mockAPI)
 
 			if testCase.isResponse {

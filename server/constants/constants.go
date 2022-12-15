@@ -167,7 +167,8 @@ const (
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
 	ErrorUserMismatch                     = "User ID does not match with the request user."
 	ErrorInsufficientPermission           = "User have insufficient permissions for the current channel"
-	ErrorChannelForUser                   = "Unable to get the channel for a user"
+	ErrorChannelPermissionsForUser        = "Unable to get the channel permissions for a user"
+	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
 )
 
 // kv store keys prefix

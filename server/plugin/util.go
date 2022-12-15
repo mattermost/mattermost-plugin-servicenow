@@ -311,7 +311,7 @@ func decodeKey(key string) (string, error) {
 func (p *Plugin) HasChannelPermissions(userID, channelID string) (bool, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
-		p.API.LogError(constants.ErrorChannelForUser, "Error", channelErr.Error())
+		p.API.LogError(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
 		return false, channelErr
 	}
 
@@ -322,7 +322,7 @@ func (p *Plugin) HasChannelPermissions(userID, channelID string) (bool, error) {
 
 	// Check if a user is a part of the channel
 	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
-		p.API.LogDebug(constants.ErrorChannelForUser, "Error", channelErr.Error())
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
 		return false, nil
 	}
 
