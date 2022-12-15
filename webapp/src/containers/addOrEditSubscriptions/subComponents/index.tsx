@@ -316,7 +316,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
             is_active: true,
-            user_id: Cookies.get(Constants.MMUSERID) ?? '',
+            user_id: subscriptionData?.userId ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
             record_id: recordId || '',
