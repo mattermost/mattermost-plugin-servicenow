@@ -70,9 +70,9 @@ func (c *client) Call(method, path, contentType string, inBody io.Reader, out in
 			return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
 		}
 
-		updatedError := strings.ReplaceAll(err.Error(), c.plugin.getConfiguration().MattermostSiteURL, "")
+		updatedError := strings.ReplaceAll(err.Error(), c.plugin.getConfiguration().ServiceNowBaseURL, "")
 		if strings.Contains(err.Error(), "dial tcp") {
-			errorData := strings.Split(c.plugin.getConfiguration().MattermostSiteURL, ":")
+			errorData := strings.Split(c.plugin.getConfiguration().ServiceNowBaseURL, ":")
 			if len(errorData) == 3 {
 				updatedError = strings.ReplaceAll(updatedError, errorData[2], "")
 			}

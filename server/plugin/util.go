@@ -308,23 +308,23 @@ func decodeKey(key string) (string, error) {
 	return string(decodedKey), nil
 }
 
-func (p *Plugin) HasChannelPermissions(userID, channelID string) (bool, error) {
+func (p *Plugin) HasChannelPermissions(userID, channelID string) (bool, int, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
-		p.API.LogError(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return false, channelErr
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
+		return false, channelErr.StatusCode, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 	}
 
 	// Check if a channel is direct message or group channel
 	if channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
-		return false, nil
+		return false, http.StatusBadRequest, fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 
 	// Check if a user is a part of the channel
 	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return false, nil
+		return false, channelErr.StatusCode, nil
 	}
 
-	return true, nil
+	return true, http.StatusOK, nil
 }

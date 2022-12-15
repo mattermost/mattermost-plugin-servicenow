@@ -3,6 +3,7 @@ package plugin
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -563,8 +564,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
-					return true, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, int, error) {
+					return true, http.StatusOK, nil
 				})
 			},
 			isResponse:       true,
@@ -581,8 +582,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
-					return false, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, int, error) {
+					return false, http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			expectedError: listSubscriptionsWaitMessage,
@@ -605,8 +606,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
-					return false, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, int, error) {
+					return false, http.StatusBadRequest, nil
 				})
 			},
 			isResponse:       true,
@@ -633,8 +634,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, error) {
-					return true, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (bool, int, error) {
+					return true, http.StatusOK, nil
 				})
 			},
 			isResponse:       true,

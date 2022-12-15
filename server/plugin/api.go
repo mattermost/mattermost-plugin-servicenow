@@ -234,14 +234,14 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasPermission, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	hasPermission, permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
 	}
 
 	if !hasPermission {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInsufficientPermission})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: constants.ErrorInsufficientPermissions})
 		return
 	}
 
@@ -307,9 +307,9 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg := sync.WaitGroup{}
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
-		hasPermission, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
+		hasPermission, permissionStatusCode, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
 		if permissionErr != nil {
-			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+			p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 			return
 		}
 
@@ -366,14 +366,15 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasPermission, permissionErr := p.HasChannelPermissions(*subscription.UserID, *subscription.ChannelID)
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	hasPermission, permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
 	}
 
 	if !hasPermission {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInsufficientPermission})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: constants.ErrorInsufficientPermissions})
 		return
 	}
 
@@ -519,14 +520,14 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasPermission, permissionErr := p.HasChannelPermissions(userID, channelID)
+	hasPermission, permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, channelID)
 	if permissionErr != nil {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: permissionErr.Error()})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
 	}
 
 	if !hasPermission {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInsufficientPermission})
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: constants.ErrorInsufficientPermissions})
 		return
 	}
 
@@ -551,7 +552,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
+	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
 		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
@@ -763,7 +764,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		AssignmentGroup:  response.AssignmentGroup,
 	}
 
-	if err := record.HandleNestedFields(p.configuration.ServiceNowBaseURL); err != nil {
+	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
 		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
 		return
