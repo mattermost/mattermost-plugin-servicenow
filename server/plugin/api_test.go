@@ -1394,7 +1394,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 			ExpectedCount:        -1,
 		},
-		"user do not have the permissions for the subscriptions channel": {
+		"user does not have permission for the subscriptions channel": {
 			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", "", "", "", limit, offset).Return(
@@ -1596,7 +1596,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedStatusCode:   http.StatusInternalServerError,
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
-		"user do not have the permission to set subscription for this channel": {
+		"user does not have permission to set the subscription for this channel": {
 			RequestBody: fmt.Sprintf(`{
 				"user_id": "%s",
 				"channel_id": "%s"

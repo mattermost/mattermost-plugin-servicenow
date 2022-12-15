@@ -504,7 +504,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description:   "HandleListSubscriptions: Invalid filter for channel subscriptions",
-			params:        []string{"me", "invalid"},
+			params:        []string{constants.FilterCreatedByMe, "invalid"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
 			setupPlugin:   func(p *Plugin) {},
@@ -512,7 +512,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description: "HandleListSubscriptions: Unable to get the subscriptions",
-			params:      []string{"me", "all_channels"},
+			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -528,7 +528,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description: "HandleListSubscriptions: No subscriptions present",
-			params:      []string{"me", "all_channels"},
+			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -544,7 +544,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description: "HandleListSubscriptions: Unable to get user and channel",
-			params:      []string{"me", "all_channels"},
+			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
@@ -573,7 +573,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description: "HandleListSubscriptions: Unable to get permissions for channel",
-			params:      []string{"me", "all_channels"},
+			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI:    func(a *plugintest.API) {},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
@@ -589,7 +589,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description: "HandleListSubscriptions: User do not have permissions for the subscriptions channel",
-			params:      []string{"me", "all_channels"},
+			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
@@ -615,7 +615,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 		},
 		{
 			description: "HandleListSubscriptions: Success",
-			params:      []string{"me", "all_channels"},
+			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
 					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
@@ -837,40 +837,40 @@ func TestParseCommand(t *testing.T) {
 			description:        "ParseCommand: subscriptions list command",
 			input:              " /servicenow subscriptions   list  me  all_channels ",
 			expectedAction:     "subscriptions",
-			expectedParameters: []string{"list", "me", "all_channels"},
+			expectedParameters: []string{constants.SubCommandList, constants.FilterCreatedByMe, constants.FilterAllChannels},
 		},
 		{
 			description:        "ParseCommand: subscriptions add command",
 			input:              "/servicenow subscriptions add",
 			expectedAction:     "subscriptions",
-			expectedParameters: []string{"add"},
+			expectedParameters: []string{constants.SubCommandAdd},
 		},
 		{
 			description:        "ParseCommand: subscriptions edit command",
 			input:              "/servicenow subscriptions edit mockID",
 			expectedAction:     "subscriptions",
-			expectedParameters: []string{"edit", "mockID"},
+			expectedParameters: []string{constants.SubCommandEdit, "mockID"},
 		},
 		{
 			description:        "ParseCommand: subscriptions delete command",
 			input:              "     /servicenow       subscriptions      delete     mockID    ",
 			expectedAction:     "subscriptions",
-			expectedParameters: []string{"delete", "mockID"},
+			expectedParameters: []string{constants.SubCommandDelete, "mockID"},
 		},
 		{
 			description:    "ParseCommand: share command",
 			input:          "/servicenow share",
-			expectedAction: "share",
+			expectedAction: constants.CommandSearchAndShare,
 		},
 		{
 			description:    "ParseCommand: connect command",
 			input:          "/servicenow connect",
-			expectedAction: "connect",
+			expectedAction: constants.CommandConnect,
 		},
 		{
 			description:    "ParseCommand: disconnect command",
 			input:          "/servicenow disconnect",
-			expectedAction: "disconnect",
+			expectedAction: constants.CommandDisconnect,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
