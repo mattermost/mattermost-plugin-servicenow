@@ -209,85 +209,87 @@ const Rhs = (): JSX.Element => {
     const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
     const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
-        <div className='rhs-content position-relative padding-top-15 padding-bottom-12 padding-h-12'>
-            {subscriptionsLoading && !paginationQueryParams.page && <CircularLoader/>}
-            {connected && (
-                <Header
-                    showFilterIcon={subscriptionsEnabled && subscriptionsAuthorized}
-                    showAllSubscriptions={showAllSubscriptions}
-                    setShowAllSubscriptions={setShowAllSubscriptions}
-                    filter={filter}
-                    setFilter={setFilter}
-                    setResetFilter={setResetFilter}
-                />
-            )}
-            {connected && subscriptionsEnabled && subscriptionsAuthorized && (
-                <>
-                    <RhsData
+        <div className='servicenow-rhs'>
+            <div className='rhs-content position-relative padding-top-15 padding-bottom-12 padding-h-12'>
+                {subscriptionsLoading && !paginationQueryParams.page && <CircularLoader/>}
+                {connected && (
+                    <Header
+                        showFilterIcon={subscriptionsEnabled && subscriptionsAuthorized}
                         showAllSubscriptions={showAllSubscriptions}
                         setShowAllSubscriptions={setShowAllSubscriptions}
-                        totalSubscriptions={totalSubscriptions}
-                        loadingSubscriptions={subscriptionsLoading}
-                        handleEditSubscription={handleEditSubscription}
-                        handleDeleteClick={handleDeleteClick}
-                        error={getSubscriptionsState().error?.message}
-                        isCurrentUserSysAdmin={isCurrentUserSysAdmin}
-                        paginationQueryParams={paginationQueryParams}
-                        handlePagination={handlePagination}
                         filter={filter}
                         setFilter={handleSetFilter}
                         setResetFilter={setResetFilter}
                     />
-                    {toBeDeleted && (
-                        <ConfirmationDialog
-                            title={Constants.DeleteSubscriptionHeading}
-                            confirmationMsg={Constants.DeleteSubscriptionMsg}
-                            show={isDeleteConfirmationOpen}
-                            onHide={hideDeleteConfirmation}
-                            loading={!deleteApiResponseInvalid && deletingSubscription}
-                            onConfirm={handleDeleteConfirmation}
-                            error={deleteApiResponseInvalid || deletingSubscription || !errorInDeletingSubscription ? '' : deleteSubscriptionError?.message}
+                )}
+                {connected && subscriptionsEnabled && subscriptionsAuthorized && (
+                    <>
+                        <RhsData
+                            showAllSubscriptions={showAllSubscriptions}
+                            setShowAllSubscriptions={setShowAllSubscriptions}
+                            totalSubscriptions={totalSubscriptions}
+                            loadingSubscriptions={subscriptionsLoading}
+                            handleEditSubscription={handleEditSubscription}
+                            handleDeleteClick={handleDeleteClick}
+                            error={getSubscriptionsState().error?.message}
+                            isCurrentUserSysAdmin={isCurrentUserSysAdmin}
+                            paginationQueryParams={paginationQueryParams}
+                            handlePagination={handlePagination}
+                            filter={filter}
+                            setFilter={handleSetFilter}
+                            setResetFilter={setResetFilter}
                         />
-                    )}
-                </>
-            )}
-            {connected && !subscriptionsLoading && (
-                <>
-                    {!subscriptionsEnabled && (
-                        <EmptyState
-                            title={Constants.SubscriptionsConfigErrorTitle}
-                            subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
-                            buttonConfig={isCurrentUserSysAdmin ? ({
-                                text: 'Download update set',
-                                link: Utils.getBaseUrls().publicFilesUrl + UPLOAD_SET_FILENAME,
-                                download: true,
-                            }) : null
-                            }
-                            className='configuration-not-enabled-err-state'
-                            icon={<UnlinkIcon/>}
-                        />
-                    )}
-                    {!subscriptionsAuthorized && (
-                        <EmptyState
-                            title={Constants.SubscriptionsUnauthorizedErrorTitle}
-                            subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsUnauthorizedErrorSubtitleForAdmin : Constants.SubscriptionsUnauthorizedErrorSubtitleForUser}
-                            className='configuration-err-state'
-                            icon={<UnlinkIcon/>}
-                        />
-                    )}
-                </>
-            )}
-            {!connected && !subscriptionsLoading && (
-                <EmptyState
-                    title='No Account Connected'
-                    buttonConfig={{
-                        text: 'Connect your account',
-                        link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
-                    }}
-                    className='configuration-err-state'
-                    icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon'/>}
-                />
-            )}
+                        {toBeDeleted && (
+                            <ConfirmationDialog
+                                title={Constants.DeleteSubscriptionHeading}
+                                confirmationMsg={Constants.DeleteSubscriptionMsg}
+                                show={isDeleteConfirmationOpen}
+                                onHide={hideDeleteConfirmation}
+                                loading={!deleteApiResponseInvalid && deletingSubscription}
+                                onConfirm={handleDeleteConfirmation}
+                                error={deleteApiResponseInvalid || deletingSubscription || !errorInDeletingSubscription ? '' : deleteSubscriptionError?.message}
+                            />
+                        )}
+                    </>
+                )}
+                {connected && !subscriptionsLoading && (
+                    <>
+                        {!subscriptionsEnabled && (
+                            <EmptyState
+                                title={Constants.SubscriptionsConfigErrorTitle}
+                                subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
+                                buttonConfig={isCurrentUserSysAdmin ? ({
+                                    text: 'Download update set',
+                                    link: Utils.getBaseUrls().publicFilesUrl + UPLOAD_SET_FILENAME,
+                                    download: true,
+                                }) : null
+                                }
+                                className='configuration-not-enabled-err-state'
+                                icon={<UnlinkIcon/>}
+                            />
+                        )}
+                        {!subscriptionsAuthorized && (
+                            <EmptyState
+                                title={Constants.SubscriptionsUnauthorizedErrorTitle}
+                                subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsUnauthorizedErrorSubtitleForAdmin : Constants.SubscriptionsUnauthorizedErrorSubtitleForUser}
+                                className='configuration-err-state'
+                                icon={<UnlinkIcon/>}
+                            />
+                        )}
+                    </>
+                )}
+                {!connected && !subscriptionsLoading && (
+                    <EmptyState
+                        title='No Account Connected'
+                        buttonConfig={{
+                            text: 'Connect your account',
+                            link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
+                        }}
+                        className='configuration-err-state'
+                        icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon'/>}
+                    />
+                )}
+            </div>
         </div>
     );
 };
