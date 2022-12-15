@@ -1,23 +1,13 @@
-export const getGlobalModalState = (state: PluginState): GlobalModalState => {
-    return state.globalModalReducer;
-};
+export const getGlobalModalState = (state: PluginState): GlobalModalState => state.globalModalReducer;
 
-export const isAddSubscriptionModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'addSubscription';
-};
+export const getCurrentModalState = (state: PluginState): GlobalModalState => state.currentModalReducer;
 
-export const isEditSubscriptionModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'editSubscription';
-};
+export const isAddSubscriptionModalOpen = (state: PluginState): boolean => state.currentModalReducer.modalId === 'addSubscription';
 
-export const isShareRecordModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'shareRecord';
-};
+export const isEditSubscriptionModalOpen = (state: PluginState): boolean => state.currentModalReducer.modalId === 'editSubscription';
 
-export const isCommentModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'addOrViewComments';
-};
+export const isShareRecordModalOpen = (state: PluginState): boolean => state.currentModalReducer.modalId === 'shareRecord';
 
-export const isUpdateStateModalOpen = (state: PluginState): boolean => {
-    return state.globalModalReducer.modalId === 'updateState';
-};
+export const isCommentModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'addOrViewComments';
+
+export const isUpdateStateModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'updateState';

@@ -86,7 +86,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     const dispatch = useDispatch();
 
-    // Get subscriptions configured state
     const getSubscriptionsConfiguredState = () => {
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
         return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
@@ -104,7 +103,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Get subscription state
     const getSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData as string);
         return {isLoading, isSuccess, isError, data: data as SubscriptionData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
@@ -129,20 +127,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     useEffect(() => {
-        if (open) {
-            makeApiRequest(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
-        }
-
         if (open && currentChannelId) {
             setChannel(currentChannelId);
-        }
-
-        if (open && subscriptionData) {
-            if (typeof (subscriptionData) === 'string') {
-                makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
-            } else {
-                handleSubscriptionData(subscriptionData);
-            }
         }
     }, [open, subscriptionData, currentChannelId]);
 
@@ -195,6 +181,16 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         setShowModalLoader(editSubscriptionState.isLoading);
     }, [getEditSubscriptionState().isLoading, getEditSubscriptionState().isError, getEditSubscriptionState().isSuccess]);
+
+    useEffect(() => {
+        if (open && subscriptionData) {
+            if (typeof (subscriptionData) === 'string') {
+                makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
+            } else {
+                handleSubscriptionData(subscriptionData);
+            }
+        }
+    }, [open, subscriptionData]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
@@ -385,7 +381,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         >
             <>
                 <ModalHeader
-                    title='Edit Subscription'
+                    title={subscriptionData ? 'Edit Subscription' : 'Add Subscription'}
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
@@ -402,7 +398,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         </Modal>
     );
 
-    if (getSubscriptionsConfiguredState().isLoading || (typeof (subscriptionData) === 'string' && !editSubscriptionData)) {
+    if (typeof (subscriptionData) === 'string' && !editSubscriptionData) {
         if (getSubscriptionState().isError) {
             return handleErrorComponent(getSubscriptionState().error);
         }
@@ -411,7 +407,16 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     }
 
     if (getSubscriptionsConfiguredState().isError) {
-        return handleErrorComponent(getSubscriptionsConfiguredState().error);
+        const error = getSubscriptionsConfiguredState().error;
+        if (
+            error?.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
+            error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
+            error?.id !== Constants.ApiErrorIdNotConnected
+        ) {
+            return handleErrorComponent(error);
+        }
+
+        return <></>;
     }
 
     return (

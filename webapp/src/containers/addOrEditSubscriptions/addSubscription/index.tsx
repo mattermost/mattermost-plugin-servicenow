@@ -2,8 +2,7 @@ import React from 'react';
 import {useDispatch} from 'react-redux';
 
 import usePluginApi from 'src/hooks/usePluginApi';
-
-import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {resetCurrentModalState} from 'src/reducers/currentModal';
 import {isAddSubscriptionModalOpen} from 'src/selectors';
 
 import AddOrEditSubscriptionModal from '../subComponents';
@@ -15,7 +14,7 @@ const AddSubscriptions = () => {
     return (
         <AddOrEditSubscriptionModal
             open={isAddSubscriptionModalOpen(pluginState)}
-            close={() => dispatch(resetGlobalModalState())}
+            close={() => dispatch(resetCurrentModalState())}
         />
     );
 };
