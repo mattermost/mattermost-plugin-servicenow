@@ -504,7 +504,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 			ExpectedStatusCode:   http.StatusInternalServerError,
 		},
-		"user do not have the permission to share record in the channel": {
+		"user does not have the permission to share record in the channel": {
 			RequestBody: fmt.Sprintf(`{
 				"sys_id": "mockSysID",
 				"record_type": "%s"
@@ -1085,13 +1085,13 @@ func TestCreateSubscription(t *testing.T) {
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					http.StatusCreated, nil,
 				)
-
+			},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
@@ -1113,13 +1113,13 @@ func TestCreateSubscription(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return fmt.Errorf("new error")
 				})
 			},
-			SetupPlugin:          func(p *Plugin) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedErrorMessage: "new error",
 		},
@@ -1131,13 +1131,13 @@ func TestCreateSubscription(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", constants.ErrorUserMismatch).Return()
 			},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
@@ -1150,14 +1150,14 @@ func TestCreateSubscription(t *testing.T) {
 				"user_id": "%s",
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupAPI:    func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
@@ -1165,19 +1165,19 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedStatusCode:   http.StatusInternalServerError,
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
-		"user do not have the permission to create subscription for this channel": {
+		"user does not have the permission to create a subscription for this channel": {
 			RequestBody: fmt.Sprintf(`{
 				"user_id": "%s",
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupAPI:    func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
@@ -1197,13 +1197,13 @@ func TestCreateSubscription(t *testing.T) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusForbidden, fmt.Errorf("duplicate subscription error"),
 				)
-
+			},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
@@ -1221,13 +1221,13 @@ func TestCreateSubscription(t *testing.T) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					true, http.StatusOK, nil,
 				)
-
+			},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
@@ -1251,13 +1251,13 @@ func TestCreateSubscription(t *testing.T) {
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					http.StatusForbidden, fmt.Errorf("create subscription error"),
 				)
-
+			},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
@@ -1534,16 +1534,16 @@ func TestEditSubscription(t *testing.T) {
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
 			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
-				var s *serializer.SubscriptionPayload
-				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
-					return nil
-				})
-
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					http.StatusOK, nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
@@ -1565,13 +1565,13 @@ func TestEditSubscription(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Error", "new error").Return()
 			},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return fmt.Errorf("new error")
 				})
 			},
-			SetupPlugin:          func(p *Plugin) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedErrorMessage: "new error",
 		},
@@ -1580,14 +1580,14 @@ func TestEditSubscription(t *testing.T) {
 				"user_id": "%s",
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupAPI:    func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
@@ -1595,19 +1595,19 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedStatusCode:   http.StatusInternalServerError,
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
-		"user does not have permission to set the subscription for this channel": {
+		"user does not have permission to edit the subscription for this channel": {
 			RequestBody: fmt.Sprintf(`{
 				"user_id": "%s",
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
-			SetupClient: func(client *mock_plugin.Client) {
+			SetupAPI:    func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func(p *Plugin) {
 				var s *serializer.SubscriptionPayload
 				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
 					return nil
 				})
-			},
-			SetupPlugin: func(p *Plugin) {
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
@@ -1624,15 +1624,16 @@ func TestEditSubscription(t *testing.T) {
 				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				var s *serializer.SubscriptionPayload
-				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
-					return nil
-				})
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					http.StatusForbidden, fmt.Errorf("edit subscription error"),
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})

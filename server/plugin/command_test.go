@@ -598,7 +598,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
-			description: "HandleListSubscriptions: User do not have permissions for the subscriptions channel",
+			description: "HandleListSubscriptions: User does not have permissions for the subscriptions in the channel",
 			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
