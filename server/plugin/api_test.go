@@ -518,7 +518,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, nil
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
@@ -1179,7 +1179,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, nil
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1390,9 +1390,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
-			ExpectedStatusCode:   http.StatusInternalServerError,
-			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
-			ExpectedCount:        -1,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      0,
 		},
 		"user does not have permission for the subscriptions channel": {
 			SetupAPI: func(api *plugintest.API) {},
@@ -1403,7 +1402,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 			},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, nil
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedStatusCode: http.StatusOK,
@@ -1610,7 +1609,7 @@ func TestEditSubscription(t *testing.T) {
 			},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, nil
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,

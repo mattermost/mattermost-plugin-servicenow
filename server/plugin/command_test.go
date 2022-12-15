@@ -575,7 +575,14 @@ func TestHandleListSubscriptions(t *testing.T) {
 		{
 			description: "HandleListSubscriptions: Unable to get permissions for channel",
 			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
-			setupAPI:    func(a *plugintest.API) {},
+			setupAPI: func(a *plugintest.API) {
+				a.On("GetUser", mock.AnythingOfType("string")).Return(
+					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+				)
+				a.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_PRIVATE), nil,
+				)
+			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetAllSubscriptions", testutils.GetMockArgumentsWithType("string", 5)...).Return(
 					testutils.GetSubscriptions(2), 0, nil,
@@ -586,7 +593,9 @@ func TestHandleListSubscriptions(t *testing.T) {
 					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
-			expectedError: listSubscriptionsWaitMessage,
+			isResponse:       true,
+			expectedResponse: constants.ErrorNoActiveSubscriptions,
+			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
 			description: "HandleListSubscriptions: User do not have permissions for the subscriptions channel",
@@ -607,7 +616,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, nil
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			isResponse:       true,

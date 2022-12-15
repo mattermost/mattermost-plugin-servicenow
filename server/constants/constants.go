@@ -166,7 +166,7 @@ const (
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
 	ErrorUserMismatch                     = "User ID does not match with the currently logged-in user ID."
-	ErrorInsufficientPermissions          = "User has insufficient permissions for the current channel"
+	ErrorInsufficientPermissions          = "user has insufficient permissions for the current channel"
 	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
 	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
