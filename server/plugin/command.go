@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"sync"
 	"unicode"
@@ -276,12 +277,12 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		for _, subscription := range subscriptions {
-			hasPermission, _, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			permissionStatusCode, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
 			if permissionErr != nil {
 				return
 			}
 
-			if hasPermission {
+			if permissionStatusCode == http.StatusOK {
 				subscriptionList = append(subscriptionList, subscription)
 			}
 		}
