@@ -532,6 +532,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	record.RecordType = shareRecordData.RecordType
 	if err := record.HandleNestedFields(p.getConfiguration().ServiceNowBaseURL); err != nil {
 		p.API.LogError(constants.ErrorHandlingNestedFields, "Error", err.Error())
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: fmt.Sprintf("%s. Error: %s", constants.ErrorHandlingNestedFields, err.Error())})
