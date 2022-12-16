@@ -109,7 +109,7 @@ const UpdateState = () => {
         <Modal
             show={isUpdateStateModalOpen(pluginState)}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader

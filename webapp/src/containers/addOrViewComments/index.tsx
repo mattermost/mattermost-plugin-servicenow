@@ -162,7 +162,7 @@ const AddOrViewComments = () => {
                         iconClass='fa-times-circle-o result-panel-icon--error'
                     />
                 ) : (
-                    <>
+                    <div className='servicenow-comment-modal'>
                         <div
                             className={`comment-body
                                     ${((!commentsData.length || apiError) && !showModalLoader) && 'comment-body__height'}`}
@@ -194,7 +194,7 @@ const AddOrViewComments = () => {
                             cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}
                         />
-                    </>
+                    </div>
                 )}
             </>
         </Modal>

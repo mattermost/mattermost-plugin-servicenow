@@ -143,7 +143,7 @@ const ShareRecords = () => {
         <Modal
             show={open}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
