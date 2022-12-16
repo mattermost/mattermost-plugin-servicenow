@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import {useDispatch} from 'react-redux';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -16,13 +15,13 @@ const GetConfig = (): JSX.Element => {
     const dispatch = useDispatch();
 
     const getConnectedUserState = () => {
-        const {isLoading, isSuccess, isError, data: userData, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
-        return {isLoading, isSuccess, isError, data: userData as ConnectedState, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, data: userData} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
+        return {isLoading, data: userData as ConnectedState};
     };
 
     const getSubscriptionsConfiguredState = () => {
-        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
-        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess} = getApiState(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
+        return {isLoading, isSuccess};
     };
 
     useEffect(() => {

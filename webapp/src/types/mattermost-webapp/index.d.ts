@@ -7,7 +7,7 @@ export interface PluginRegistry {
     registerRightHandSidebarComponent(component: () => JSX.Element, title: string | JSX.Element)
     registerChannelHeaderButtonAction(icon: JSX.Element, action: () => void, dropdownText: string | null, tooltipText: string | null)
     registerAdminConsoleCustomSetting(key: string, component: React.ElementType)
-    registerSlashCommandWillBePostedHook(hook: (message: string, contextArgs: MmHookArgTypes) => Promise<{message: string; args: MmHookArgTypes;}> | {message: string; args: MmHookArgTypes;})
+    registerSlashCommandWillBePostedHook(hook: (message: string, args: MmHookArgTypes) => Promise<{message: string; args: MmHookArgTypes;}> | {message: string; args: MmHookArgTypes;})
     registerWebSocketEventHandler(event: string, handler: (msg: any) => void)
     registerAppBarComponent(iconUrl: string, action: () => void, tooltipText: string)
 

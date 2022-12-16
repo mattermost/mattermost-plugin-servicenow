@@ -43,7 +43,6 @@ const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
 const ServiceNowSysIdRegex = '[0-9a-f]{32}';
-const UserNotConnectedMessage = 'You have not connected your Mattermost account to ServiceNow.';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -367,5 +366,4 @@ export default {
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
     ServiceNowSysIdRegex,
-    UserNotConnectedMessage,
 };
