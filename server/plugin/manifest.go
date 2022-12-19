@@ -7,5 +7,5 @@ var manifest = struct {
 	Version string
 }{
 	ID:      "mattermost-plugin-servicenow",
-	Version: "2.3.2",
+	Version: "3.0.0",
 }

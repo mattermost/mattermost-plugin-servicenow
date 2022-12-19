@@ -13,6 +13,7 @@ import Rhs from 'src/containers/Rhs';
 import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
+import CreateIncident from 'src/containers/createIncident';
 import ShareRecords from 'src/containers/shareRecords';
 import UpdateState from 'src/containers/updateState';
 
@@ -37,6 +38,7 @@ export default class Plugin {
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
         registry.registerRootComponent(AddOrViewComments);
+        registry.registerRootComponent(CreateIncident);
         registry.registerRootComponent(ShareRecords);
         registry.registerRootComponent(UpdateState);
         registry.registerRootComponent(App);

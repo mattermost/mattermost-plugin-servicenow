@@ -137,6 +137,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             const {isSuccess, data} = getSubscriptionState();
             if (isSuccess) {
                 const subscriptionDataFromApi: EditSubscriptionData = ({
+                    userId: data.user_id,
                     channel: data.channel_id,
                     recordId: data.record_id,
                     type: data.type,
@@ -357,7 +358,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
             is_active: true,
-            user_id: Cookies.get(Constants.MMUSERID) ?? '',
+            user_id: (typeof (subscriptionData) === 'string' ? editSubscriptionData?.userId : subscriptionData?.userId) ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
             record_id: recordId || '',
@@ -452,6 +453,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     actionBtnDisabled={showModalLoader}
                     editing={true}
                     showFooter={true}
+                    required={true}
                 />
                 <SubscriptionTypePanel
                     className={`
