@@ -46,22 +46,24 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
     }
 
     return (
-        <li
-            className='MenuItem'
-            role='menuitem'
-        >
-            <button
-                className='style-none'
-                role='presentation'
-                onClick={handleClick}
+        <div className='servicenow-incident'>
+            <li
+                className='MenuItem'
+                role='menuitem'
             >
-                <img
-                    src={`${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
-                    className='incident-menu-icon'
-                />
-                {'Create an Incident'}
-            </button>
-        </li>
+                <button
+                    className='style-none'
+                    role='presentation'
+                    onClick={handleClick}
+                >
+                    <img
+                        src={`${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
+                        className='incident-menu-icon'
+                    />
+                    {'Create an Incident'}
+                </button>
+            </li>
+        </div>
     );
 };
 

@@ -229,7 +229,7 @@ const UpdateState = () => {
         <Modal
             show={open}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -253,7 +253,7 @@ const UpdateState = () => {
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
                 ) : (
-                    <>
+                    <div className='servicenow-incident'>
                         <div className='incident-body'>
                             <Input
                                 placeholder='Short description'
@@ -327,7 +327,7 @@ const UpdateState = () => {
                             cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}
                         />
-                    </>
+                    </div>
                 )}
             </>
         </Modal>
