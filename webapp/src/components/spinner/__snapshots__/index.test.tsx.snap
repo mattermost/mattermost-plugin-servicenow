@@ -2,7 +2,7 @@
 
 exports[`Spinner should match snapshot with correct className 1`] = `
 <div
-  className="text-align-center spinner-wrapper mockClassName"
+  className="text-align-center servicenow-spinner-wrapper mockClassName"
 >
   <svg
     className="spinner"
