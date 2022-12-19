@@ -25,6 +25,7 @@ type IncidentPayload struct {
 	Urgency          int    `json:"urgency"`
 	Impact           int    `json:"impact"`
 	Caller           string `json:"caller_id"`
+	ChannelID        string `json:"channel_id"`
 }
 
 type IncidentResponse struct {
@@ -35,6 +36,16 @@ type IncidentResponse struct {
 	Priority         string      `json:"priority,omitempty"`
 	AssignedTo       interface{} `json:"assigned_to,omitempty"`
 	AssignmentGroup  interface{} `json:"assignment_group,omitempty"`
+}
+
+type ServiceNowIncidentFieldsResult struct {
+	Result []*ServiceNowIncidentFields `json:"result"`
+}
+
+type ServiceNowIncidentFields struct {
+	Label   string `json:"label"`
+	Value   string `json:"value"`
+	Element string `json:"element"`
 }
 
 func IncidentFromJSON(data io.Reader) (*IncidentPayload, error) {

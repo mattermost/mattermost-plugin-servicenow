@@ -49,6 +49,14 @@ export default class Hooks {
             };
         }
 
+        if (commandTrimmed && commandTrimmed.startsWith('/servicenow create incident')) {
+            this.store.dispatch(setGlobalModalState({modalId: 'createIncident'}) as Action);
+            return {
+                message,
+                args: contextArgs,
+            };
+        }
+
         return Promise.resolve({
             message,
             args: contextArgs,

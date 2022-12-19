@@ -3,7 +3,7 @@
 */
 
 // TODO: Create an enum for the below modal Ids
-type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | null
+type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | null
 type SubscriptionType = import('../../plugin_constants').SubscriptionType;
 type RecordType = import('../../plugin_constants').RecordType;
 
@@ -105,6 +105,7 @@ type EditSubscriptionData = {
     recordType: RecordType,
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
+    userId: string;
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
@@ -134,4 +135,22 @@ type RecordAttachments = {
     title_link: string;
     pretext: string;
     fields: RecordFields[];
+}
+
+type ServiceNowUser = {
+    sys_id: string;
+    email: string;
+    user_name: string;
+}
+
+type CallerData = {
+    mattermostUserID: string;
+    username: string;
+    serviceNowUser: ServiceNowUser;
+}
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
 }

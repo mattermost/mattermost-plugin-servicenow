@@ -221,6 +221,21 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	}
 }
 
+func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
+	if len(parameters) == 0 {
+		return "Invalid create command. Available command is 'incident'."
+	}
+
+	command := parameters[0]
+
+	switch command {
+	case constants.SubCommandIncident:
+		return ""
+	default:
+		return fmt.Sprintf("Unknown subcommand %v", command)
+	}
+}
+
 func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	return ""
 }
@@ -245,6 +260,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		channelID = ""
 	}
 
+	var subscriptionList []*serializer.SubscriptionResponse
 	go func() {
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
@@ -254,12 +270,24 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		if len(subscriptions) == 0 {
-			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
+			return
+		}
+
+		for _, subscription := range subscriptions {
+			_, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			if permissionErr == nil {
+				subscriptionList = append(subscriptionList, subscription)
+			}
+		}
+
+		if len(subscriptionList) == 0 {
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
 			return
 		}
 
 		wg := sync.WaitGroup{}
-		for _, subscription := range subscriptions {
+		for _, subscription := range subscriptionList {
 			wg.Add(1)
 			go func(subscription *serializer.SubscriptionResponse) {
 				defer wg.Done()
@@ -288,7 +316,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		wg.Wait()
-		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptions))
+		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptionList))
 	}()
 
 	return listSubscriptionsWaitMessage
@@ -350,7 +378,7 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 }
 
 func getAutocompleteData() *model.AutocompleteData {
-	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandHelp))
+	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandCreate, constants.CommandHelp))
 
 	connect := model.NewAutocompleteData(constants.CommandConnect, "", "Connect your Mattermost account to your ServiceNow account")
 	serviceNow.AddCommand(connect)
@@ -385,6 +413,11 @@ func getAutocompleteData() *model.AutocompleteData {
 
 	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
 	serviceNow.AddCommand(searchRecords)
+
+	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandIncident))
+	createIncident := model.NewAutocompleteData("incident", "", "Create an incident")
+	create.AddCommand(createIncident)
+	serviceNow.AddCommand(create)
 
 	help := model.NewAutocompleteData(constants.CommandHelp, "", "Display slash command help text")
 	serviceNow.AddCommand(help)

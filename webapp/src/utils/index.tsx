@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents, KnowledgeRecordDataLabelConfigLabel, RecordDataLabelConfigLabel} from 'src/plugin_constants';
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents, DefaultIncidentImpactAndUrgencyOptions, KnowledgeRecordDataLabelConfigLabel, RecordDataLabelConfigLabel} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -154,6 +154,17 @@ const getRecordValueForHeader = (key: string, value?: string | LinkData): string
     return null;
 };
 
+const getImpactAndUrgencyOptions = (
+    setImpactOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>,
+    setUrgencyOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>,
+    data: IncidentFieldsData[],
+) => {
+    const impactOptions = data.filter((item) => item.element === 'impact');
+    const urgencyOptions = data.filter((item) => item.element === 'urgency');
+    setImpactOptions(impactOptions.length ? impactOptions : DefaultIncidentImpactAndUrgencyOptions);
+    setUrgencyOptions(urgencyOptions.length ? urgencyOptions : DefaultIncidentImpactAndUrgencyOptions);
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -165,4 +176,5 @@ export default {
     getCommandArgs,
     getSubscriptionEvents,
     getRecordValueForHeader,
+    getImpactAndUrgencyOptions,
 };

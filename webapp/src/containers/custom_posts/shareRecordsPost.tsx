@@ -3,6 +3,7 @@ import {useDispatch} from 'react-redux';
 
 import {Post} from 'mattermost-redux/types/posts';
 
+import {RecordType} from 'src/plugin_constants';
 import {setGlobalModalState} from 'src/reducers/globalModal';
 import Utils from 'src/utils';
 
@@ -37,18 +38,25 @@ const ShareRecordsPost = (props: {post: Post}) => {
                     ))
                 )}
                 <div>
-                    <button
-                        onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
-                        className='shared-posts__modal-button'
-                    >
-                        {'Add and view comments'}
-                    </button>
-                    <button
-                        onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
-                        className='shared-posts__modal-button'
-                    >
-                        {'Update State'}
-                    </button>
+                    {record_type !== RecordType.KNOWLEDGE && (
+                        <button
+                            onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
+                            className='shared-posts__modal-button'
+                        >
+                            {'Add and view comments'}
+                        </button>
+                    )}
+                    {record_type !== RecordType.CHANGE_REQUEST &&
+                    record_type !== RecordType.PROBLEM &&
+                    record_type !== RecordType.KNOWLEDGE &&
+                    (
+                        <button
+                            onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
+                            className='shared-posts__modal-button'
+                        >
+                            {'Update State'}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
