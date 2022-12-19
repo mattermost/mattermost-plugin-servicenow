@@ -38,6 +38,7 @@ const UpdateState = () => {
     const [incidentPayload, setIncidentPayload] = useState<IncidentPayload | null>(null);
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
     const [showChannelPanel, setShowChannelPanel] = useState(false);
+    const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
 
@@ -49,13 +50,13 @@ const UpdateState = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isCreateIncidentModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const dispatch = useDispatch();
-    const open = isCreateIncidentModalOpen(pluginState);
 
     // Reset the field states
     const resetFieldStates = useCallback(() => {
@@ -71,6 +72,7 @@ const UpdateState = () => {
         setIncidentPayload(null);
         setSubscriptionPayload(null);
         setShowChannelPanel(false);
+        setRefetchIncidentFields(true);
     }, []);
 
     // Hide the modal and reset the states
@@ -91,19 +93,16 @@ const UpdateState = () => {
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
-    // Get incident fields state
     const getIncidentFieldsData = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
         return {isLoading, isSuccess, isError, data: data as IncidentFieldsData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Get incident state
     const getIncidentData = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Get subscription state
     const getSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
@@ -220,10 +219,11 @@ const UpdateState = () => {
             setChannel(currentChannelId);
         }
 
-        if (isCreateIncidentModalOpen(pluginState)) {
+        if (open && refetchIncidentFields) {
             makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            setRefetchIncidentFields(false);
         }
-    }, [isCreateIncidentModalOpen(pluginState)]);
+    }, [open, refetchIncidentFields]);
 
     return (
         <Modal
@@ -298,7 +298,7 @@ const UpdateState = () => {
                             />
                             <ToggleSwitch
                                 active={showChannelPanel}
-                                onChange={(active) => setShowChannelPanel(active)}
+                                onChange={setShowChannelPanel}
                                 label={Constants.ChannelPanelToggleLabel}
                                 labelPositioning='right'
                                 className='incident-body__toggle-switch'

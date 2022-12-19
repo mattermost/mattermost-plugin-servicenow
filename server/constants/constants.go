@@ -109,6 +109,7 @@ const (
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
+	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -171,6 +172,11 @@ const (
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
 	ErrorGetIncidentFields                = "Error in getting the incident fields"
+	ErrorUserMismatch                     = "User ID does not match with the currently logged-in user ID."
+	ErrorInsufficientPermissions          = "user has insufficient permissions for the current channel"
+	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
+	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
+	ErrorInvalidChannelType               = "invalid channel type for performing action"
 )
 
 // kv store keys prefix
