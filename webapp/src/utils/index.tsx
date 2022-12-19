@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents} from 'src/plugin_constants';
+import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents, KnowledgeRecordDataLabelConfigLabel, RecordDataLabelConfigLabel} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -77,7 +77,12 @@ export const validateKeysContainingLink = (key: string) => (
     key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
     key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
     key === RecordDataLabelConfigKey.ASSIGNED_TO ||
-    key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
+    key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP ||
+    key === KnowledgeRecordDataLabelConfigLabel.KNOWLEDGE_BASE ||
+    key === KnowledgeRecordDataLabelConfigLabel.AUTHOR ||
+    key === KnowledgeRecordDataLabelConfigLabel.CATEGORY ||
+    key === RecordDataLabelConfigLabel.ASSIGNED_TO ||
+    key === RecordDataLabelConfigLabel.ASSIGNMENT_GROUP
 );
 
 const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
@@ -124,6 +129,31 @@ const getSubscriptionEvents = (subscription_events: string): SubscriptionEvents[
     return events.map((event) => SubscriptionEventsMap[event]);
 };
 
+// Returns value for record data header
+const getRecordValueForHeader = (key: string, value?: string | LinkData): string | JSX.Element | null => {
+    if (!value) {
+        return null;
+    } else if (typeof value === 'string') {
+        if (value === Constants.EmptyFieldsInServiceNow || !validateKeysContainingLink(key)) {
+            return value;
+        }
+
+        const data: LinkData = getLinkData(value);
+        return (
+            <a
+                href={data.link}
+                target='_blank'
+                rel='noreferrer'
+                className='btn btn-link padding-0'
+            >
+                <div className='shared-posts__field-value'>{data.display_value}</div>
+            </a>
+        );
+    }
+
+    return null;
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -134,4 +164,5 @@ export default {
     getResultPanelHeader,
     getCommandArgs,
     getSubscriptionEvents,
+    getRecordValueForHeader,
 };

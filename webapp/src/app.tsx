@@ -49,6 +49,8 @@ const GetConfig = (): JSX.Element => {
                 case 'shareRecord':
                     dispatch(setCurrentModalState({modalId: 'shareRecord'}));
                     break;
+                default:
+                    break;
                 }
             }
             dispatch(resetGlobalModalState());

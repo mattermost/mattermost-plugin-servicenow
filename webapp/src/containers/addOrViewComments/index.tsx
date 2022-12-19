@@ -3,7 +3,7 @@ import {useDispatch} from 'react-redux';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -38,11 +38,14 @@ const AddOrViewComments = () => {
         setApiError(null);
         setValidationError('');
         setRefetch(false);
+        setShowErrorPanel(false);
     }, []);
 
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetFieldStates();
+        setTimeout(() => {
+            resetFieldStates();
+        }, 500);
     }, []);
 
     const getCommentsPayload = (): CommentsPayload => {
@@ -121,8 +124,9 @@ const AddOrViewComments = () => {
         if (error) {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
-                setShowErrorPanel(true);
             }
+
+            setShowErrorPanel(true);
             setApiError(error);
         }
 
@@ -175,7 +179,7 @@ const AddOrViewComments = () => {
                                 disabled={showModalLoader}
                                 error={validationError}
                             />
-                            {!apiError && <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>}
+                            <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>
                             {commentsData ? (
                                 <>
                                     <div className='comment-body__description-text'>{commentsData}</div>
@@ -185,7 +189,6 @@ const AddOrViewComments = () => {
                                 !showModalLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>
                             )}
                         </div>
-                        <ModalSubtitleAndError error={apiError?.message}/>
                         <ModalFooter
                             onConfirm={addComment}
                             confirmBtnText='Submit'

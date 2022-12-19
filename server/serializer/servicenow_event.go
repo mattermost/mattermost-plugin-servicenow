@@ -38,45 +38,11 @@ func ServiceNowEventFromJSON(data io.Reader) (*ServiceNowEvent, error) {
 }
 
 func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginURL string) *model.Post {
-	post := &model.Post{
-		ChannelId: se.ChannelID,
-		UserId:    botID,
-	}
-
 	if se.AssignedTo == "" {
 		se.AssignedTo = "N/A"
 	}
 	if se.AssignmentGroup == "" {
 		se.AssignmentGroup = "N/A"
-	}
-
-	var actions []*model.PostAction
-	if constants.RecordTypesSupportingComments[se.RecordType] {
-		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
-			Name: "Add and view comments",
-			Integration: &model.PostActionIntegration{
-				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
-				Context: map[string]interface{}{
-					constants.ContextNameRecordType: se.RecordType,
-					constants.ContextNameRecordID:   se.RecordID,
-				},
-			},
-		})
-	}
-
-	if constants.RecordTypesSupportingStateUpdation[se.RecordType] {
-		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
-			Name: "Update State",
-			Integration: &model.PostActionIntegration{
-				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),
-				Context: map[string]interface{}{
-					constants.ContextNameRecordType: se.RecordType,
-					constants.ContextNameRecordID:   se.RecordID,
-				},
-			},
-		})
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
@@ -104,17 +70,30 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 				Short: true,
 			},
 			{
-				Title: "Assigned to",
+				Title: "Assigned To",
 				Value: se.AssignedTo,
 				Short: true,
 			},
 			{
-				Title: "Assignment group",
+				Title: "Assignment Group",
 				Value: se.AssignmentGroup,
 				Short: true,
 			},
 		},
-		Actions: actions,
+	}
+
+	post := &model.Post{
+		ChannelId: se.ChannelID,
+		UserId:    botID,
+		Type:      "custom_notification",
+		Props: map[string]interface{}{
+			"attachments":       []*model.SlackAttachment{slackAttachment},
+			"record_id":         se.RecordID,
+			"record_type":       se.RecordType,
+			"title_link":        titleLink,
+			"title":             se.Number,
+			"short_description": se.ShortDescription,
+		},
 	}
 
 	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})

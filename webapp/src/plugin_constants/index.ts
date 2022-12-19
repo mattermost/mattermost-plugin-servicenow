@@ -144,23 +144,31 @@ export enum RecordDataLabelConfigKey {
     ASSIGNMENT_GROUP = 'assignment_group',
 }
 
+export enum RecordDataLabelConfigLabel {
+    SHORT_DESCRIPTION = 'Short Description',
+    STATE = 'State',
+    PRIORITY = 'Priority',
+    ASSIGNED_TO = 'Assigned To',
+    ASSIGNMENT_GROUP = 'Assignment Group',
+}
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
         key: RecordDataLabelConfigKey.SHORT_DESCRIPTION,
-        label: 'Short Description',
+        label: RecordDataLabelConfigLabel.SHORT_DESCRIPTION,
     }, {
         key: RecordDataLabelConfigKey.STATE,
-        label: 'State',
+        label: RecordDataLabelConfigLabel.STATE,
     }, {
         key: RecordDataLabelConfigKey.PRIORITY,
-        label: 'Priority',
+        label: RecordDataLabelConfigLabel.PRIORITY,
     }, {
         key: RecordDataLabelConfigKey.ASSIGNED_TO,
-        label: 'Assigned To',
+        label: RecordDataLabelConfigLabel.ASSIGNED_TO,
     }, {
         key: RecordDataLabelConfigKey.ASSIGNMENT_GROUP,
-        label: 'Assignment Group',
+        label: RecordDataLabelConfigLabel.ASSIGNMENT_GROUP,
     },
 ];
 
@@ -192,22 +200,30 @@ export enum KnowledgeRecordDataLabelConfigKey {
     KNOWLEDGE_BASE = 'kb_knowledge_base',
 }
 
+export enum KnowledgeRecordDataLabelConfigLabel {
+    SHORT_DESCRIPTION = 'Short Description',
+    WORKFLOW_STATE = 'Workflow',
+    AUTHOR = 'Author',
+    CATEGORY = 'Category',
+    KNOWLEDGE_BASE = 'Knowledge Base',
+}
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
         key: KnowledgeRecordDataLabelConfigKey.SHORT_DESCRIPTION,
-        label: 'Short Description',
+        label: KnowledgeRecordDataLabelConfigLabel.SHORT_DESCRIPTION,
     }, {
         key: KnowledgeRecordDataLabelConfigKey.WORKFLOW_STATE,
-        label: 'Workflow',
+        label: KnowledgeRecordDataLabelConfigLabel.WORKFLOW_STATE,
     }, {
         key: KnowledgeRecordDataLabelConfigKey.AUTHOR,
-        label: 'Author',
+        label: KnowledgeRecordDataLabelConfigLabel.AUTHOR,
     }, {
         key: KnowledgeRecordDataLabelConfigKey.CATEGORY,
-        label: 'Category',
+        label: KnowledgeRecordDataLabelConfigLabel.CATEGORY,
     }, {
         key: KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE,
-        label: 'Knowledge Base',
+        label: KnowledgeRecordDataLabelConfigLabel.KNOWLEDGE_BASE,
     },
 ];
 

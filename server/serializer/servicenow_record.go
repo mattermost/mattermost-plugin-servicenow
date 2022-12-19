@@ -64,11 +64,6 @@ func ServiceNowRecordFromJSON(data io.Reader) (*ServiceNowRecord, error) {
 }
 
 func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, pluginURL, sharedByUsername string) *model.Post {
-	post := &model.Post{
-		ChannelId: channelID,
-		UserId:    botID,
-	}
-
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do?sys_id=%s", serviceNowURL, sr.RecordType, sr.SysID)
 	fields := []*model.SlackAttachmentField{
 		{
@@ -107,54 +102,35 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 				Value: sr.Priority,
 			},
 			{
-				Title: "Assigned to",
+				Title: "Assigned To",
 				Value: sr.AssignedTo,
 			},
 			{
-				Title: "Assignment group",
+				Title: "Assignment Group",
 				Value: sr.AssignmentGroup,
 			},
 		}...)
-	}
-
-	var actions []*model.PostAction
-	if constants.RecordTypesSupportingComments[sr.RecordType] {
-		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
-			Name: "Add and view comments",
-			Integration: &model.PostActionIntegration{
-				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
-				Context: map[string]interface{}{
-					constants.ContextNameRecordType: sr.RecordType,
-					constants.ContextNameRecordID:   sr.SysID,
-				},
-			},
-		})
-	}
-
-	if constants.RecordTypesSupportingStateUpdation[sr.RecordType] {
-		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
-			Name: "Update State",
-			Integration: &model.PostActionIntegration{
-				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),
-				Context: map[string]interface{}{
-					constants.ContextNameRecordType: sr.RecordType,
-					constants.ContextNameRecordID:   sr.SysID,
-				},
-			},
-		})
 	}
 
 	slackAttachment := &model.SlackAttachment{
 		Title:     sr.Number,
 		TitleLink: titleLink,
 		Fields:    fields,
-		Actions:   actions,
 	}
 
 	if sharedByUsername != "" {
 		slackAttachment.Pretext = fmt.Sprintf("Shared by @%s", sharedByUsername)
+	}
+
+	post := &model.Post{
+		ChannelId: channelID,
+		UserId:    botID,
+		Type:      "custom_share",
+		Props: map[string]interface{}{
+			"attachments": []*model.SlackAttachment{slackAttachment},
+			"record_id":   sr.SysID,
+			"record_type": sr.RecordType,
+		},
 	}
 
 	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})

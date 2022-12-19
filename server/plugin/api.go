@@ -3,7 +3,6 @@ package plugin
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -45,10 +44,8 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
-	s.HandleFunc(constants.PathOpenCommentModal, p.checkAuth(p.handleOpenCommentModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
-	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
@@ -625,44 +622,6 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	returnStatusOK(w)
 }
 
-func (p *Plugin) handleOpenCommentModal(w http.ResponseWriter, r *http.Request) {
-	response := &model.PostActionIntegrationResponse{}
-	decoder := json.NewDecoder(r.Body)
-	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
-	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
-		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
-		p.returnPostActionIntegrationResponse(w, response)
-		return
-	}
-
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenCommentModal,
-		postActionIntegrationRequest.Context,
-		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
-	)
-
-	p.returnPostActionIntegrationResponse(w, response)
-}
-
-func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
-	response := &model.PostActionIntegrationResponse{}
-	decoder := json.NewDecoder(r.Body)
-	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
-	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
-		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
-		p.returnPostActionIntegrationResponse(w, response)
-		return
-	}
-
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenUpdateStateModal,
-		postActionIntegrationRequest.Context,
-		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
-	)
-
-	p.returnPostActionIntegrationResponse(w, response)
-}
-
 func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := p.store.GetAllUsers()
 	if err != nil {
@@ -754,13 +713,6 @@ func returnStatusOK(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	m[model.STATUS] = model.STATUS_OK
 	_, _ = w.Write([]byte(model.MapToJson(m)))
-}
-
-func (p *Plugin) returnPostActionIntegrationResponse(w http.ResponseWriter, res *model.PostActionIntegrationResponse) {
-	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(res.ToJson()); err != nil {
-		p.API.LogWarn("failed to write PostActionIntegrationResponse", "Error", err.Error())
-	}
 }
 
 // handleStaticFiles handles the static files under the assets directory.

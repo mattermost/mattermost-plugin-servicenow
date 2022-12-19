@@ -13,13 +13,15 @@ import Rhs from 'src/containers/Rhs';
 import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
+import NotificationPost from 'src/containers/custom_posts/notificationPost';
+import ShareRecordsPost from 'src/containers/custom_posts/shareRecordsPost';
 import ShareRecords from 'src/containers/shareRecords';
 import UpdateState from 'src/containers/updateState';
 
 import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleSubscriptionDeleted, handleOpenCommentModal, handleOpenUpdateStateModal} from 'src/websocket';
+import {handleConnect, handleDisconnect, handleSubscriptionDeleted} from 'src/websocket';
 import Utils from 'src/utils';
 
 import App from './app';
@@ -53,8 +55,8 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
-        registry.registerWebSocketEventHandler(`custom_${manifest.id}_comment_modal`, handleOpenCommentModal(store));
-        registry.registerWebSocketEventHandler(`custom_${manifest.id}_update_state`, handleOpenUpdateStateModal(store));
+        registry.registerPostTypeComponent('custom_share', ShareRecordsPost);
+        registry.registerPostTypeComponent('custom_notification', NotificationPost);
     }
 }
 

@@ -31,25 +31,3 @@ export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Recor
         }
     };
 }
-
-export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
-    return (msg: WebsocketEventParams) => {
-        const {data} = msg;
-        const commentModalData: CommentAndStateModalData = {
-            recordType: data.record_type as RecordType,
-            recordId: data.record_id,
-        };
-        store.dispatch(setGlobalModalState({modalId: 'addOrViewComments', data: commentModalData}) as Action);
-    };
-}
-
-export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
-    return (msg: WebsocketEventParams) => {
-        const {data} = msg;
-        const updateStateModalData: CommentAndStateModalData = {
-            recordType: data.record_type as RecordType,
-            recordId: data.record_id,
-        };
-        store.dispatch(setGlobalModalState({modalId: 'updateState', data: updateStateModalData}) as Action);
-    };
-}

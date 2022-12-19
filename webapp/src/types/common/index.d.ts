@@ -123,3 +123,15 @@ type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
     labelValuePairs?: Array<{ label: string, value: string }>,
 }
+
+type RecordFields = {
+    title: string;
+    value: string | LinkData;
+}
+
+type RecordAttachments = {
+    title: string;
+    title_link: string;
+    pretext: string;
+    fields: RecordFields[];
+}

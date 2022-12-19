@@ -38,7 +38,9 @@ const UpdateState = () => {
 
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetStates();
+        setTimeout(() => {
+            resetStates();
+        }, 500);
     }, []);
 
     const getStateForGetStatesAPI = () => {
