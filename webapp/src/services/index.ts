@@ -22,7 +22,7 @@ const pluginApi = createApi({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.searchRecords.path}/${recordType}`,
                 method: Constants.pluginApiServiceConfigs.searchRecords.method,
-                params: {search, perPage: perPage || 10},
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
             }),
         }),
         [Constants.pluginApiServiceConfigs.getRecord.apiServiceName]: builder.query<RecordData, GetRecordParams>({
@@ -113,7 +113,7 @@ const pluginApi = createApi({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: Constants.pluginApiServiceConfigs.searchItems.path,
                 method: Constants.pluginApiServiceConfigs.searchItems.method,
-                params: {search, perPage: perPage || 10},
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
             }),
         }),
         [Constants.pluginApiServiceConfigs.getUsers.apiServiceName]: builder.query<CallerData[], void>({

@@ -48,6 +48,7 @@ const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
 const RequestButtonText = 'Submit Request on ServiceNow';
 const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
+const DefaultPerPageParam = 10;
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -416,4 +417,5 @@ export default {
     EmptyFieldsInServiceNow,
     RequestButtonText,
     RequestButtonRedirectText,
+    DefaultPerPageParam,
 };
