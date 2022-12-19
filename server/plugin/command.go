@@ -300,6 +300,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		channelID = ""
 	}
 
+	var subscriptionList []*serializer.SubscriptionResponse
 	go func() {
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
@@ -309,12 +310,24 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		if len(subscriptions) == 0 {
-			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
+			return
+		}
+
+		for _, subscription := range subscriptions {
+			_, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			if permissionErr == nil {
+				subscriptionList = append(subscriptionList, subscription)
+			}
+		}
+
+		if len(subscriptionList) == 0 {
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
 			return
 		}
 
 		wg := sync.WaitGroup{}
-		for _, subscription := range subscriptions {
+		for _, subscription := range subscriptionList {
 			wg.Add(1)
 			go func(subscription *serializer.SubscriptionResponse) {
 				defer wg.Done()
@@ -343,7 +356,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		wg.Wait()
-		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptions))
+		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptionList))
 	}()
 
 	return listSubscriptionsWaitMessage
