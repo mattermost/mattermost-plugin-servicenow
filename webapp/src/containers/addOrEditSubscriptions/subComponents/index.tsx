@@ -218,20 +218,19 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     }, []);
 
     const hideModal = () => {
+        // Reset modal states
+        resetFieldStates();
+        resetError();
+
+        // Reset payload
+        setCreateSubscriptionPayload(null);
+
         // Close the modal
         close();
 
+        // Resetting opened panel states so that there isn't unnecessary jump from one panel to another while closing the modal
         setTimeout(() => {
-            // Resetting opened panel states so that there isn't unnecessary jump from one panel to another while closing the modal
-
             resetPanelStates();
-
-            // Reset modal states
-            resetFieldStates();
-            resetError();
-
-            // Reset payload
-            setCreateSubscriptionPayload(null);
         }, 500);
     };
 
