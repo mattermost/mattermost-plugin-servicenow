@@ -95,14 +95,14 @@ const CreateRequest = () => {
         category_id: r.category.sys_id,
     }));
 
-    // Set the suggestions when the input value of the auto-suggest changes;
+    // Set the suggestions when the input value of the auto-suggest changes
     useEffect(() => {
         const requestsToSuggest = options?.filter((r) => r.name.toLowerCase().includes(autoSuggestValue.toLowerCase())) || [];
         setSuggestions(mapRequestsToSuggestions(requestsToSuggest));
     }, [autoSuggestValue]);
 
     useEffect(() => {
-        // When the request value is reset, reset the caller auto-suggest input as well;
+        // Reset the caller auto-suggest input when the request value is reset
         if (!request) {
             setAutoSuggestValue('');
             setSuggestionChosen(false);
@@ -129,7 +129,7 @@ const CreateRequest = () => {
         <Modal
             show={isCreateRequestModalOpen(pluginState)}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -169,14 +169,14 @@ const CreateRequest = () => {
                             {serviceNowBaseURL && (
                                 <div>
                                     <a
-                                        className='color--link btn btn-primary request-button'
+                                        className='color--link btn btn-primary servicenow-request-button'
                                         href={`${serviceNowBaseURL}/${Constants.REQUEST_BASE_URL}${request.id}`}
                                         rel='noreferrer'
                                         target='_blank'
                                     >
                                         {Constants.RequestButtonText}
                                     </a>
-                                    <div className='request-button__redirect-text'>
+                                    <div className='servicenow-request-button__redirect-text'>
                                         {Constants.RequestButtonRedirectText}
                                     </div>
                                 </div>

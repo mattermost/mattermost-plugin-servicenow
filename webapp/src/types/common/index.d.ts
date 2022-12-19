@@ -105,6 +105,7 @@ type EditSubscriptionData = {
     recordType: RecordType,
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
+    userId: string;
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
@@ -147,4 +148,10 @@ type RequestData = {
     short_description: string,
     price: string,
     category: RequestCategoryData
+}
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
 }

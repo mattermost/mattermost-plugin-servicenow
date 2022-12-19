@@ -231,14 +231,12 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 
 	switch command {
 	case constants.SubCommandIncident:
-		p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
+		return p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
 	case constants.SubCommandRequest:
-		p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
+		return p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
-
-	return ""
 }
 
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
@@ -262,20 +260,24 @@ func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs
 }
 
 // TODO: remove extra arguments
-func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) {
+func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
+
+	return ""
 }
 
-func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) {
+func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateRequestModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
+
+	return ""
 }
 
 func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
@@ -298,6 +300,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		channelID = ""
 	}
 
+	var subscriptionList []*serializer.SubscriptionResponse
 	go func() {
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
@@ -307,12 +310,24 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		if len(subscriptions) == 0 {
-			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
+			return
+		}
+
+		for _, subscription := range subscriptions {
+			_, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			if permissionErr == nil {
+				subscriptionList = append(subscriptionList, subscription)
+			}
+		}
+
+		if len(subscriptionList) == 0 {
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
 			return
 		}
 
 		wg := sync.WaitGroup{}
-		for _, subscription := range subscriptions {
+		for _, subscription := range subscriptionList {
 			wg.Add(1)
 			go func(subscription *serializer.SubscriptionResponse) {
 				defer wg.Done()
@@ -341,7 +356,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		wg.Wait()
-		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptions))
+		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptionList))
 	}()
 
 	return listSubscriptionsWaitMessage

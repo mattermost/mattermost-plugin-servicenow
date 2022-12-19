@@ -66,16 +66,15 @@ type CommentsPayload = {
 type ShareRecordPayload = {
     record_type: ShareRecordType;
     sys_id: string;
-    number: string;
+    channel_id: string;
+}
+
+type IncidentPayload = {
     short_description: string;
-    state?: string;
-    priority?: string;
-    assigned_to?: string | LinkData;
-    assignment_group?: string | LinkData;
-    author?: string | LinkData;
-    kb_category?: string | LinkData;
-    kb_knowledge_base?: string | LinkData;
-    workflow_state?: string;
+    description: string;
+    urgency: number;
+    impact: number;
+    caller_id: string;
     channel_id: string;
 }
 
