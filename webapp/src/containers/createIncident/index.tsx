@@ -78,7 +78,9 @@ const UpdateState = () => {
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetFieldStates();
+        setTimeout(() => {
+            resetFieldStates();
+        }, 500);
     }, []);
 
     // Opens incident modal
@@ -207,16 +209,14 @@ const UpdateState = () => {
     }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
 
     useEffect(() => {
+        if (currentChannelId) {
+            setChannel(currentChannelId);
+        }
+
         if (open && getGlobalModalState(pluginState).data) {
             const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
             setShortDescription(reduxStateShortDescription);
             setDescription(reduxStateDescription);
-        }
-    }, [open]);
-
-    useEffect(() => {
-        if (currentChannelId) {
-            setChannel(currentChannelId);
         }
 
         if (open && refetchIncidentFields) {
