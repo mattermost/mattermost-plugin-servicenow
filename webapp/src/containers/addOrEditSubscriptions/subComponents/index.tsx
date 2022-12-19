@@ -213,7 +213,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const setHeight = (modalContent: Element) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`);
 
         // Select all the modal-content elements and set the height
-        document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
+        document.querySelectorAll('.servicenow-rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
     };
 
     // Change height of the modal depending on the height of the visible panel
@@ -316,7 +316,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
             is_active: true,
-            user_id: Cookies.get(Constants.MMUSERID) ?? '',
+            user_id: subscriptionData?.userId ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
             record_id: recordId || '',
@@ -338,7 +338,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             onHide={hideModal}
 
             // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-            className='rhs-modal add-edit-subscription-modal wizard'
+            className='servicenow-rhs-modal add-edit-subscription-modal wizard'
         >
             <>
                 <ModalHeader

@@ -43,6 +43,7 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
             id: data.sys_id,
             recordType: data.record_type as RecordType,
             subscriptionEvents,
+            userId: data.user_id,
         };
         store.dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}) as Action);
     };
