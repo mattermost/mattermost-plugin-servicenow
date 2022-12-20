@@ -10,7 +10,7 @@ import './styles.scss';
 const NotificationPost = (props: {post: Post}) => {
     const dispatch = useDispatch();
     const {title_link, title, short_description, attachments, record_id, record_type} = props.post.props;
-    const {fields, pretext} = attachments[0] as RecordAttachments;
+    const {fields} = attachments[0] as RecordAttachments;
     const data: CommentAndStateModalData = {
         recordId: record_id,
         recordType: record_type,
@@ -102,7 +102,6 @@ const NotificationPost = (props: {post: Post}) => {
 
     return (
         <div className='servicenow-posts'>
-            <span className='shared-posts__pretext'>{pretext}</span>
             <div className='shared-posts'>
                 <a
                     target='_blank'

@@ -570,7 +570,16 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), user.Username)
+	if _, postErr := p.API.CreatePost(&model.Post{
+		ChannelId: channelID,
+		UserId:    p.botID,
+		Message:   fmt.Sprintf("Shared by @%s", user.Username),
+	}); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
+		return
+	}
+
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL())
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
@@ -735,7 +744,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(incident.ChannelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	post := record.CreateSharingPost(incident.ChannelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL())
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
