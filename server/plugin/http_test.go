@@ -59,23 +59,13 @@ func TestCall(t *testing.T) {
 		expectedErrorMessage string
 	}{
 		{
-			description: "Call: Do method returns an error",
-			setupClient: func(c *client) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
-					return &http.Response{}, errors.New("invalid character '<'")
-				})
-			},
-			expectedErrorMessage: ErrorContentTypeNotJSON.Error(),
-			expectedStatusCode:   http.StatusInternalServerError,
-		},
-		{
 			description: "Call: Do method returns an error while making the request",
 			setupClient: func(c *client) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
 					return &http.Response{}, errors.New("error while making the request")
 				})
 			},
-			expectedErrorMessage: "error while making the request",
+			expectedErrorMessage: ErrorConnectionRefused.Error(),
 			expectedStatusCode:   http.StatusInternalServerError,
 		},
 		{
