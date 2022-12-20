@@ -116,6 +116,7 @@ const getCommandArgs = (command: string): string[] => {
             myArray.push(match[1] ? match[1] : match[0]);
         }
     } while (match != null);
+
     return myArray.length > 2 ? myArray.slice(2) : [];
 };
 
