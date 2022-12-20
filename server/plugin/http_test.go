@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,15 +47,16 @@ func TestCallJSON(t *testing.T) {
 
 func TestCall(t *testing.T) {
 	defer monkey.UnpatchAll()
-	p := Plugin{}
+	p, api := setupTestPlugin(&plugintest.API{}, nil)
 	c := new(client)
 	mockClient := &client{
-		plugin: &p,
+		plugin: p,
 	}
 
 	for _, testCase := range []struct {
 		description          string
 		setupClient          func(c *client)
+		setupAPI             func(api *plugintest.API)
 		expectedStatusCode   int
 		expectedErrorMessage string
 	}{
@@ -64,6 +66,9 @@ func TestCall(t *testing.T) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(c.httpClient), "Do", func(*http.Client, *http.Request) (*http.Response, error) {
 					return &http.Response{}, errors.New("error while making the request")
 				})
+			},
+			setupAPI: func(api *plugintest.API) {
+				api.On("LogError", ErrorConnectionRefused.Error(), "Error", mock.AnythingOfType("string")).Return()
 			},
 			expectedErrorMessage: ErrorConnectionRefused.Error(),
 			expectedStatusCode:   http.StatusInternalServerError,
@@ -77,6 +82,7 @@ func TestCall(t *testing.T) {
 					}, nil
 				})
 			},
+			setupAPI:           func(api *plugintest.API) {},
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
@@ -89,6 +95,7 @@ func TestCall(t *testing.T) {
 					}, nil
 				})
 			},
+			setupAPI:           func(api *plugintest.API) {},
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
@@ -101,11 +108,13 @@ func TestCall(t *testing.T) {
 					}, nil
 				})
 			},
+			setupAPI:           func(api *plugintest.API) {},
 			expectedStatusCode: http.StatusOK,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			testCase.setupClient(c)
+			testCase.setupAPI(api)
 			_, statusCode, err := mockClient.Call("mockMethod", "mockPath", "mockContentType", nil, nil, url.Values{})
 			if testCase.expectedErrorMessage != "" {
 				assert.EqualError(t, err, testCase.expectedErrorMessage)

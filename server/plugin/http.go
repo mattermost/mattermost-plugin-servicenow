@@ -65,6 +65,7 @@ func (c *client) Call(method, path, contentType string, inBody io.Reader, out in
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		c.plugin.API.LogError(ErrorConnectionRefused.Error(), "Error", err.Error())
 		return nil, http.StatusInternalServerError, ErrorConnectionRefused
 	}
 
