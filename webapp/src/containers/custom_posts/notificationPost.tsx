@@ -73,7 +73,7 @@ const NotificationPost = (props: {post: Post}) => {
             rowPos += 1;
         });
 
-        if (headerCols.length > 0) {
+        if (headerCols.length) {
             fieldTables.push(
                 <table
                     key={nrTables}
