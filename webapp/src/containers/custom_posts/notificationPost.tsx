@@ -21,13 +21,13 @@ const NotificationPost = (props: {post: Post}) => {
         let headerCols = [] as JSX.Element[];
         let bodyCols = [] as JSX.Element[];
         let rowPos = 0;
-        let nrTables = 0;
+        let tableNumber = 0;
 
         fields.forEach((field) => {
             if (rowPos === 2) {
                 fieldTables.push(
                     <table
-                        key={nrTables}
+                        key={tableNumber}
                         className='notification-posts__table'
                     >
                         <thead>
@@ -45,7 +45,7 @@ const NotificationPost = (props: {post: Post}) => {
                 headerCols = [];
                 bodyCols = [];
                 rowPos = 0;
-                nrTables += 1;
+                tableNumber += 1;
             }
 
             headerCols.push(
@@ -76,7 +76,7 @@ const NotificationPost = (props: {post: Post}) => {
         if (headerCols.length) {
             fieldTables.push(
                 <table
-                    key={nrTables}
+                    key={tableNumber}
                     className='notification-posts__table'
                 >
                     <thead>
