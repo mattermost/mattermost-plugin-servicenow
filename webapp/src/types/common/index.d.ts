@@ -133,6 +133,7 @@ type RecordFields = {
 type RecordAttachments = {
     title: string;
     title_link: string;
+    pretext: string;
     fields: RecordFields[];
 }
 

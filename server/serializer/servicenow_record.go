@@ -63,7 +63,7 @@ func ServiceNowRecordFromJSON(data io.Reader) (*ServiceNowRecord, error) {
 	return sr, nil
 }
 
-func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, pluginURL string) *model.Post {
+func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, pluginURL, sharedByUsername string) *model.Post {
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do?sys_id=%s", serviceNowURL, sr.RecordType, sr.SysID)
 	fields := []*model.SlackAttachmentField{
 		{
@@ -116,6 +116,10 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 		Title:     sr.Number,
 		TitleLink: titleLink,
 		Fields:    fields,
+	}
+
+	if sharedByUsername != "" {
+		slackAttachment.Pretext = fmt.Sprintf("Shared by @%s", sharedByUsername)
 	}
 
 	post := &model.Post{
