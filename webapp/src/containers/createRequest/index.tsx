@@ -97,13 +97,15 @@ const CreateRequest = () => {
 
     // Get the suggestions from the API
     const getSuggestions = ({searchFor}: {searchFor?: string}) => {
-        setApiError(null);
-        setRequest(null);
-        setSearchItemsPayload({search: searchFor || ''});
-        makeApiRequest(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor || ''});
+        if (searchFor) {
+            setApiError(null);
+            setRequest(null);
+            setSearchItemsPayload({search: searchFor});
+            makeApiRequest(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor});
+        }
     };
 
-    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, Constants.DebounceFunctionTimeLimit), [getSuggestions]);
 
     // handle input value change
     const handleInputChange = (currentValue: string) => {
