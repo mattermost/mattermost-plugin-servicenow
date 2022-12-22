@@ -80,7 +80,7 @@ const UpdateState = () => {
         dispatch(resetGlobalModalState());
         setTimeout(() => {
             resetFieldStates();
-        }, 500);
+        });
     }, []);
 
     // Opens incident modal
