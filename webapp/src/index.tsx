@@ -65,6 +65,10 @@ export default class Plugin {
 declare global {
     interface Window {
         registerPlugin(id: string, plugin: Plugin): void
+        PostUtils: {
+            formatText(text: string, options: FormatTextOptions): string,
+            messageHtmlToComponent(html: string, isRHS: boolean, option: MessageHtmlToComponentOptions): React.ReactNode,
+        }
     }
 }
 

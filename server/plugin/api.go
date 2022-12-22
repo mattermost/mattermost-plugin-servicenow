@@ -570,7 +570,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), user.Username)	
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), user.Username)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}

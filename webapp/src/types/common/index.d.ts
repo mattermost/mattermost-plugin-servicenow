@@ -154,3 +154,11 @@ type IncidentFieldsData = {
     value: string;
     element: string;
 }
+
+type FormatTextOptions = {
+    atMentions: boolean;
+}
+
+type MessageHtmlToComponentOptions = {
+    mentionHighlight: boolean;
+}

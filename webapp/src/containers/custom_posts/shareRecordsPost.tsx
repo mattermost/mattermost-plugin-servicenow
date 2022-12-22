@@ -18,9 +18,12 @@ const ShareRecordsPost = (props: {post: Post}) => {
         recordType: record_type,
     };
 
+    const {formatText, messageHtmlToComponent} = window.PostUtils;
+    const htmlFormattedText = formatText(pretext, {atMentions: true});
+    const message = messageHtmlToComponent(htmlFormattedText, false, {mentionHighlight: true});
     return (
         <div className='servicenow-posts'>
-            <span className='shared-posts__pretext'>{pretext}</span>
+            {message}
             <div className='shared-posts'>
                 <a
                     target='_blank'
