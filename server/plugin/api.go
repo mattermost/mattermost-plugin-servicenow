@@ -36,9 +36,9 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createSubscription)))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getAllSubscriptions)))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathGetSubscriptionByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getSubscription)))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathDeleteSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
-	s.HandleFunc(constants.PathEditSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.editSubscription)))).Methods(http.MethodPatch)
+	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getSubscription)))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
+	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.editSubscription)))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)

@@ -38,6 +38,7 @@ const GetConfig = (): JSX.Element => {
             case 'addSubscription':
             case 'editSubscription':
                 makeApiRequest(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
+                break;
             }
         }
     }, [modalId]);
