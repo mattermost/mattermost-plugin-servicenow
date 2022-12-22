@@ -58,6 +58,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
                 >
                     <img
                         src={`${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
+                        alt='ServiceNow icon'
                         className='incident-menu-icon'
                     />
                     {'Create an Incident'}
