@@ -223,7 +223,7 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 
 func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
 	if len(parameters) == 0 {
-		return "Invalid create command. Available command is 'incident'."
+		return "Invalid create command. Available commands are 'incident' and 'request'."
 	}
 
 	command := parameters[0]
@@ -232,6 +232,8 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 	switch command {
 	case constants.SubCommandIncident:
 		return p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
+	case constants.SubCommandRequest:
+		return p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
@@ -261,6 +263,16 @@ func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs
 func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
+func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenCreateRequestModal,
 		nil,
 		&model.WebsocketBroadcast{UserId: args.UserId},
 	)
@@ -464,9 +476,11 @@ func getAutocompleteData() *model.AutocompleteData {
 	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
 	serviceNow.AddCommand(searchRecords)
 
-	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandIncident))
+	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available commands: %s, %s", constants.SubCommandIncident, constants.SubCommandRequest))
 	createIncident := model.NewAutocompleteData("incident", "", "Create an incident")
 	create.AddCommand(createIncident)
+	createRequest := model.NewAutocompleteData("request", "", "Create a request")
+	create.AddCommand(createRequest)
 	serviceNow.AddCommand(create)
 
 	help := model.NewAutocompleteData(constants.CommandHelp, "", "Display slash command help text")

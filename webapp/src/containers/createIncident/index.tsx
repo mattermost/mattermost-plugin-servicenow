@@ -26,7 +26,7 @@ import CallerPanel from './callerPanel';
 
 import './styles.scss';
 
-const UpdateState = () => {
+const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [impact, setImpact] = useState<string | null>(null);
@@ -334,4 +334,4 @@ const UpdateState = () => {
     );
 };
 
-export default UpdateState;
+export default CreateIncident;

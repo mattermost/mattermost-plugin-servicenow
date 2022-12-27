@@ -14,6 +14,7 @@ import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
 import CreateIncident from 'src/containers/createIncident';
+import CreateRequest from 'src/containers/createRequest';
 import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
 import UpdateState from 'src/containers/updateState';
@@ -21,7 +22,7 @@ import UpdateState from 'src/containers/updateState';
 import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal, handleOpenIncidentModal} from 'src/websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal, handleOpenIncidentModal, handleOpenRequestModal} from 'src/websocket';
 import Utils from 'src/utils';
 
 import App from './app';
@@ -41,6 +42,7 @@ export default class Plugin {
         registry.registerRootComponent(CreateIncident);
         registry.registerRootComponent(ShareRecords);
         registry.registerRootComponent(UpdateState);
+        registry.registerRootComponent(CreateRequest);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon className='servicenow-icon'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
@@ -60,6 +62,7 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_comment_modal`, handleOpenCommentModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_update_state`, handleOpenUpdateStateModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_create_incident`, handleOpenIncidentModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_create_request`, handleOpenRequestModal(store));
     }
 }
 
