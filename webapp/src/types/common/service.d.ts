@@ -17,6 +17,7 @@ type ApiServiceName =
     'searchItems' |
     'getUsers' |
     'createIncident' |
+    'getConnectedUser'|
     'getIncidentFeilds';
 
 type PluginApiService = {

@@ -15,6 +15,7 @@ import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscripti
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
 import CreateIncident from 'src/containers/createIncident';
 import CreateRequest from 'src/containers/createRequest';
+import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
 import UpdateState from 'src/containers/updateState';
 
@@ -51,6 +52,7 @@ export default class Plugin {
             registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
         }
 
+        registry.registerPostDropdownMenuComponent(CreateIncidentPostMenuAction);
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
