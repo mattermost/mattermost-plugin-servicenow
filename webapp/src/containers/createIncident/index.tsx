@@ -16,7 +16,7 @@ import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/p
 import {setConnected} from 'src/reducers/connectedState';
 import {resetCurrentModalState} from 'src/reducers/currentModal';
 import {refetch} from 'src/reducers/refetchState';
-import {isCreateIncidentModalOpen} from 'src/selectors';
+import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
 
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
@@ -26,7 +26,7 @@ import CallerPanel from './callerPanel';
 
 import './styles.scss';
 
-const UpdateState = () => {
+const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [impact, setImpact] = useState<string | null>(null);
@@ -78,7 +78,9 @@ const UpdateState = () => {
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
         dispatch(resetCurrentModalState());
-        resetFieldStates();
+        setTimeout(() => {
+            resetFieldStates();
+        });
     }, []);
 
     // Opens incident modal
@@ -211,6 +213,12 @@ const UpdateState = () => {
             setChannel(currentChannelId);
         }
 
+        if (open && getGlobalModalState(pluginState).data) {
+            const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
+            setShortDescription(reduxStateShortDescription);
+            setDescription(reduxStateDescription);
+        }
+
         if (open && refetchIncidentFields) {
             makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
             setRefetchIncidentFields(false);
@@ -221,7 +229,7 @@ const UpdateState = () => {
         <Modal
             show={open}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -245,7 +253,7 @@ const UpdateState = () => {
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
                 ) : (
-                    <>
+                    <div className='servicenow-incident'>
                         <div className='incident-body'>
                             <Input
                                 placeholder='Short description'
@@ -319,11 +327,11 @@ const UpdateState = () => {
                             cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}
                         />
-                    </>
+                    </div>
                 )}
             </>
         </Modal>
     );
 };
 
-export default UpdateState;
+export default CreateIncident;

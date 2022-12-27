@@ -130,6 +130,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         if (open && currentChannelId) {
             setChannel(currentChannelId);
         }
+
+        if (open && subscriptionData) {
+            if (typeof (subscriptionData) === 'string') {
+                makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
+            } else {
+                handleSubscriptionData(subscriptionData);
+            }
+        }
     }, [open, subscriptionData, currentChannelId]);
 
     useEffect(() => {
@@ -182,16 +190,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         setShowModalLoader(editSubscriptionState.isLoading);
     }, [getEditSubscriptionState().isLoading, getEditSubscriptionState().isError, getEditSubscriptionState().isSuccess]);
-
-    useEffect(() => {
-        if (open && subscriptionData) {
-            if (typeof (subscriptionData) === 'string') {
-                makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
-            } else {
-                handleSubscriptionData(subscriptionData);
-            }
-        }
-    }, [open, subscriptionData]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {

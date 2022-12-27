@@ -17,6 +17,7 @@ type ApiServiceName =
     'addComments' |
     'getStates' |
     'updateState' |
+    'searchItems' |
     'getUsers' |
     'createIncident' |
     'getIncidentFeilds';

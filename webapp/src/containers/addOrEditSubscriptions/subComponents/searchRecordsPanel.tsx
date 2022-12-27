@@ -102,7 +102,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         setSuggestions([]);
     }, []);
 
-    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, Constants.DebounceFunctionTimeLimit), [getSuggestions]);
 
     // If "recordId" is provided when the component is mounted, then the subscription is being edited, hence fetch the record data from the API
     useEffect(() => {

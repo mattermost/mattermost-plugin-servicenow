@@ -6,9 +6,7 @@ const (
 	PathOAuth2Complete               = "/oauth2/complete"
 	PathCreateSubscription           = "/subscriptions"
 	PathGetAllSubscriptions          = PathCreateSubscription
-	PathDeleteSubscription           = PathCreateSubscription + "/{subscription_id:" + ServiceNowSysIDRegex + "}"
-	PathEditSubscription             = PathDeleteSubscription
-	PathGetSubscriptionByID          = PathDeleteSubscription
+	PathSubscriptionOperationsByID   = PathCreateSubscription + "/{subscription_id:" + ServiceNowSysIDRegex + "}"
 	PathGetUserChannelsForTeam       = "/channels/{team_id:[A-Za-z0-9]+}"
 	PathSearchRecords                = "/records/{record_type}"
 	PathGetSingleRecord              = "/records/{record_type}/{record_id:" + ServiceNowSysIDRegex + "}"

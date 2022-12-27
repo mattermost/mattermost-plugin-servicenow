@@ -120,6 +120,7 @@ const (
 	CommandSearchAndShare = "share"
 	CommandCreate         = "create"
 	SubCommandIncident    = "incident"
+	SubCommandRequest     = "request"
 	SubCommandList        = "list"
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"

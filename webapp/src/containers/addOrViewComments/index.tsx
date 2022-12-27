@@ -49,12 +49,22 @@ const AddOrViewComments = () => {
     }, []);
 
     const getCommentsPayload = (): CommentsPayload => {
-        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
-        return {
-            record_type: data?.recordType,
-            record_id: data?.recordId,
-            comments,
+        const {data} = getGlobalModalState(pluginState);
+        let payload: CommentsPayload = {
+            record_type: '',
+            record_id: '',
         };
+
+        if (data) {
+            const {recordId, recordType} = getGlobalModalState(pluginState).data as CommentAndStateModalData;
+            payload = {
+                record_type: recordType,
+                record_id: recordId,
+                comments,
+            };
+        }
+
+        return payload;
     };
 
     const getCommentsState = () => {

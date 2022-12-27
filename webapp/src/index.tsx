@@ -16,6 +16,8 @@ import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscrip
 import CreateIncident from 'src/containers/createIncident';
 import NotificationPost from 'src/containers/custom_posts/notificationPost';
 import ShareRecordsPost from 'src/containers/custom_posts/shareRecordsPost';
+import CreateRequest from 'src/containers/createRequest';
+import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
 import UpdateState from 'src/containers/updateState';
 
@@ -43,6 +45,7 @@ export default class Plugin {
         registry.registerRootComponent(CreateIncident);
         registry.registerRootComponent(ShareRecords);
         registry.registerRootComponent(UpdateState);
+        registry.registerRootComponent(CreateRequest);
         registry.registerRootComponent(App);
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon className='servicenow-icon'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
@@ -54,6 +57,7 @@ export default class Plugin {
 
         const hooks = new Hooks(store);
         registry.registerSlashCommandWillBePostedHook(hooks.slashCommandWillBePostedHook);
+        registry.registerPostDropdownMenuComponent(CreateIncidentPostMenuAction);
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
