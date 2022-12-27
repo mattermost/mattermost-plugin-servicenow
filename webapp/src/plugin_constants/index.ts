@@ -337,6 +337,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createIncident',
     },
+    getConnectedUser: {
+        path: '/connected',
+        method: 'GET',
+        apiServiceName: 'getConnectedUser',
+    },
     getIncidentFeilds: {
         path: '/incident-fields',
         method: 'GET',
