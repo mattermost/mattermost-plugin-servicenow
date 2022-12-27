@@ -13,3 +13,5 @@ export const isCommentModalOpen = (state: PluginState): boolean => state.globalM
 export const isUpdateStateModalOpen = (state: PluginState): boolean => state.globalModalReducer.modalId === 'updateState';
 
 export const isCreateIncidentModalOpen = (state: PluginState): boolean => state.currentModalReducer.modalId === 'createIncident';
+
+export const isCreateRequestModalOpen = (state: PluginState): boolean => state.currentModalReducer.modalId === 'createRequest';

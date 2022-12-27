@@ -132,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare {
+		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare && action != constants.CommandCreate {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}
@@ -223,13 +223,13 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 
 func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
 	if len(parameters) == 0 {
-		return "Invalid create command. Available command is 'incident'."
+		return "Invalid create command. Available commands are 'incident' and 'request'."
 	}
 
 	command := parameters[0]
 
 	switch command {
-	case constants.SubCommandIncident:
+	case constants.SubCommandIncident, constants.SubCommandRequest:
 		return ""
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
@@ -414,9 +414,11 @@ func getAutocompleteData() *model.AutocompleteData {
 	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
 	serviceNow.AddCommand(searchRecords)
 
-	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandIncident))
+	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available commands: %s, %s", constants.SubCommandIncident, constants.SubCommandRequest))
 	createIncident := model.NewAutocompleteData("incident", "", "Create an incident")
 	create.AddCommand(createIncident)
+	createRequest := model.NewAutocompleteData("request", "", "Create a request")
+	create.AddCommand(createRequest)
 	serviceNow.AddCommand(create)
 
 	help := model.NewAutocompleteData(constants.CommandHelp, "", "Display slash command help text")

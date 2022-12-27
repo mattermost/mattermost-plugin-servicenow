@@ -33,6 +33,7 @@ const GetConfig = (): JSX.Element => {
             switch (modalId) {
             case 'shareRecord':
             case 'createIncident':
+            case 'createRequest':
                 makeApiRequest(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
                 break;
             case 'addSubscription':
@@ -53,6 +54,9 @@ const GetConfig = (): JSX.Element => {
                     break;
                 case 'createIncident':
                     dispatch(setCurrentModalState({modalId: 'createIncident'}));
+                    break;
+                case 'createRequest':
+                    dispatch(setCurrentModalState({modalId: 'createRequest'}));
                     break;
                 }
             }

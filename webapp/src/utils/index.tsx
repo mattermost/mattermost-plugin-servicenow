@@ -113,7 +113,7 @@ const getCommandArgs = (command: string): string[] => {
     do {
         match = myRegexp.exec(command);
         if (match != null) {
-            myArray.push(match[1] ? match[1] : match[0]);
+            myArray.push(match[1] || match[0]);
         }
     } while (match != null);
 

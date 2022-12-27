@@ -20,7 +20,7 @@ export default class Hooks {
             commandTrimmed = message.trim();
         }
 
-        if (commandTrimmed && commandTrimmed.startsWith('/servicenow subscriptions add')) {
+        if (commandTrimmed?.startsWith('/servicenow subscriptions add')) {
             this.store.dispatch(setGlobalModalState({modalId: 'addSubscription'}) as Action);
             return Promise.resolve({
                 message,
@@ -28,7 +28,7 @@ export default class Hooks {
             });
         }
 
-        if (commandTrimmed && commandTrimmed.startsWith('/servicenow subscriptions edit')) {
+        if (commandTrimmed?.startsWith('/servicenow subscriptions edit')) {
             const commandArgs = Utils.getCommandArgs(commandTrimmed);
             const regex = new RegExp(Constants.ServiceNowSysIdRegex);
             if (commandArgs.length >= 2 && regex.test(commandArgs[1])) {
@@ -41,7 +41,7 @@ export default class Hooks {
             });
         }
 
-        if (commandTrimmed && commandTrimmed.startsWith('/servicenow share')) {
+        if (commandTrimmed?.startsWith('/servicenow share')) {
             this.store.dispatch(setGlobalModalState({modalId: 'shareRecord'}) as Action);
             return {
                 message,
@@ -49,8 +49,16 @@ export default class Hooks {
             };
         }
 
-        if (commandTrimmed && commandTrimmed.startsWith('/servicenow create incident')) {
+        if (commandTrimmed?.startsWith('/servicenow create incident')) {
             this.store.dispatch(setGlobalModalState({modalId: 'createIncident'}) as Action);
+            return {
+                message,
+                args: contextArgs,
+            };
+        }
+
+        if (commandTrimmed?.startsWith('/servicenow create request')) {
+            this.store.dispatch(setGlobalModalState({modalId: 'createRequest'}) as Action);
             return {
                 message,
                 args: contextArgs,

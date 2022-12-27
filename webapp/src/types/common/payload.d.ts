@@ -86,3 +86,8 @@ interface PaginationQueryParams {
 type SubscriptionFilters = {
     createdBy: string,
 }
+
+type SearchItemsParams = {
+    search: string;
+    perPage?: number;
+}
