@@ -6,82 +6,37 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import Constants from 'src/plugin_constants';
 
 import {getGlobalModalState} from './selectors';
-import {setCurrentModalState} from './reducers/currentModal';
-import {resetGlobalModalState} from './reducers/globalModal';
+import {setConnected} from './reducers/connectedState';
 
 const GetConfig = (): JSX.Element => {
     const {makeApiRequest, pluginState, getApiState} = usePluginApi();
-    const {modalId, data} = getGlobalModalState(pluginState);
+    const {modalId} = getGlobalModalState(pluginState);
     const dispatch = useDispatch();
 
     const getConnectedUserState = () => {
-        const {isLoading, data: userData} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
-        return {isLoading, data: userData as ConnectedState};
-    };
-
-    const getSubscriptionsConfiguredState = () => {
-        const {isLoading, isSuccess} = getApiState(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
-        return {isLoading, isSuccess};
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
+        return {isLoading, data: data as ConnectedState};
     };
 
     useEffect(() => {
         makeApiRequest(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
+        makeApiRequest(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
     }, []);
 
     useEffect(() => {
-        if (modalId) {
-            switch (modalId) {
-            case 'shareRecord':
-            case 'createIncident':
-            case 'createRequest':
-                makeApiRequest(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
-                break;
-            case 'addSubscription':
-            case 'editSubscription':
-                makeApiRequest(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
-                break;
-            }
+        if (modalId === 'addSubscription' || modalId === 'editSubscription') {
+            makeApiRequest(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
         }
     }, [modalId]);
 
     useEffect(() => {
-        const {data: userData, isLoading} = getConnectedUserState();
-        if (!isLoading && modalId) {
-            if (userData?.connected) {
-                switch (modalId) {
-                case 'shareRecord':
-                    dispatch(setCurrentModalState({modalId: 'shareRecord'}));
-                    break;
-                case 'createIncident':
-                    dispatch(setCurrentModalState({modalId: 'createIncident'}));
-                    break;
-                case 'createRequest':
-                    dispatch(setCurrentModalState({modalId: 'createRequest'}));
-                    break;
-                }
-            }
-            dispatch(resetGlobalModalState());
+        const {data, isLoading} = getConnectedUserState();
+        if (!isLoading && data) {
+            dispatch(setConnected(data.connected));
         }
     }, [getConnectedUserState().isLoading, getConnectedUserState().data]);
 
-    useEffect(() => {
-        const {isLoading, isSuccess} = getSubscriptionsConfiguredState();
-        if (!isLoading && modalId) {
-            if (isSuccess) {
-                switch (modalId) {
-                case 'addSubscription':
-                    dispatch(setCurrentModalState({modalId: 'addSubscription'}));
-                    break;
-                case 'editSubscription':
-                    dispatch(setCurrentModalState({modalId: 'editSubscription', data}));
-                    break;
-                }
-            }
-            dispatch(resetGlobalModalState());
-        }
-    }, [getSubscriptionsConfiguredState().isLoading, getSubscriptionsConfiguredState().isSuccess]);
-
-    // This container is used just for making the API call for fetching the config, it doesn't render anything.
+    // This container is used just for making the API calls, it doesn't render anything.
     return <></>;
 };
 

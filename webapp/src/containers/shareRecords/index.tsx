@@ -16,7 +16,7 @@ import SearchRecordsPanel from 'src/containers/addOrEditSubscriptions/subCompone
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
 import {setConnected} from 'src/reducers/connectedState';
-import {resetCurrentModalState} from 'src/reducers/currentModal';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {isShareRecordModalOpen} from 'src/selectors';
 
 import Utils from 'src/utils';
@@ -35,6 +35,7 @@ const ShareRecords = () => {
     const [recordData, setRecordData] = useState<RecordData | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
+    const [showModal, setShowModal] = useState(false);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -65,7 +66,8 @@ const ShareRecords = () => {
 
     const hideModal = useCallback(() => {
         resetFieldStates();
-        dispatch(resetCurrentModalState());
+        setShowModal(false);
+        dispatch(resetGlobalModalState());
     }, []);
 
     // Opens share record modal
@@ -119,6 +121,12 @@ const ShareRecords = () => {
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
+
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
     }, [open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
@@ -131,7 +139,7 @@ const ShareRecords = () => {
 
     return (
         <Modal
-            show={open}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >
