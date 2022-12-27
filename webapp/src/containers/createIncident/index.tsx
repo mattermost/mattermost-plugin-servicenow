@@ -14,7 +14,7 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
-import {resetGlobalModalState} from 'src/reducers/globalModal';
+import {resetCurrentModalState} from 'src/reducers/currentModal';
 import {refetch} from 'src/reducers/refetchState';
 import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
 
@@ -77,7 +77,7 @@ const CreateIncident = () => {
 
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
-        dispatch(resetGlobalModalState());
+        dispatch(resetCurrentModalState());
         setTimeout(() => {
             resetFieldStates();
         });
