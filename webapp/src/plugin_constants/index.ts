@@ -48,6 +48,8 @@ const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
 const RequestButtonText = 'Submit Request on ServiceNow';
 const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
+const DefaultPerPageParam = 10;
+const DebounceFunctionTimeLimit = 500;
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -327,6 +329,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    searchItems: {
+        path: '/catalog',
+        method: 'GET',
+        apiServiceName: 'searchItems',
+    },
     getUsers: {
         path: '/users',
         method: 'GET',
@@ -416,4 +423,6 @@ export default {
     EmptyFieldsInServiceNow,
     RequestButtonText,
     RequestButtonRedirectText,
+    DefaultPerPageParam,
+    DebounceFunctionTimeLimit,
 };

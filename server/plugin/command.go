@@ -476,7 +476,7 @@ func getAutocompleteData() *model.AutocompleteData {
 	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
 	serviceNow.AddCommand(searchRecords)
 
-	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandIncident))
+	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available commands: %s, %s", constants.SubCommandIncident, constants.SubCommandRequest))
 	createIncident := model.NewAutocompleteData("incident", "", "Create an incident")
 	create.AddCommand(createIncident)
 	createRequest := model.NewAutocompleteData("request", "", "Create a request")
