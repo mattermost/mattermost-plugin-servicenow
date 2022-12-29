@@ -30,7 +30,7 @@ exports[`RHSHeader should match snapshot 1`] = `
         </SVGWrapper>
       </IconButton>
       <IconButton
-        extraClass="false"
+        extraClass=""
         onClick={[Function]}
         tooltipText="Actions"
       >
@@ -81,7 +81,7 @@ exports[`RHSHeader should match snapshot 2`] = `
         </SVGWrapper>
       </IconButton>
       <IconButton
-        extraClass="false"
+        extraClass=""
         onClick={[Function]}
         tooltipText="Actions"
       >

@@ -63,7 +63,7 @@ const Header = ({
                     <IconButton
                         tooltipText='Actions'
                         onClick={() => setShowMenu(!showMenu)}
-                        extraClass={`${!showFilterIcon && 'margin-left-auto'}`}
+                        extraClass={showFilterIcon ? '' : 'margin-left-auto'}
                     >
                         <SvgWrapper
                             width={16}
