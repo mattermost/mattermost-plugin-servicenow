@@ -88,13 +88,13 @@ This plugin contains the following features:
 - Ability to open the incident modal through UI or slash command and create an incident in ServiceNow.
 - Ability to auto-subscribe to the newly created incident using a toggle switch present inside the incident modal.
 
-    ![image](https://user-images.githubusercontent.com/100013900/208842954-13c8ed4a-2d33-406c-add0-b363a1b10616.png)
+    ![image](https://user-images.githubusercontent.com/100013900/209933247-ff39a3f8-7f77-47b2-a97b-0329d56ad031.png)
 
 - Ability to open the incident modal from post menu actions and auto-fill the "Short description" and "Description" fields with the post data.
 
     ![image](https://user-images.githubusercontent.com/100013900/205903818-2b5b40ca-10a1-486c-bed1-c0c766bc0eff.png)
 
-- Ability to open the request modal through UI or slash command and begin catalog request in ServiceNow.
+- Ability to open the request modal through UI or slash command and begin a catalog request in ServiceNow.
 
     ![image](https://user-images.githubusercontent.com/100013900/208844538-a74ded9c-435f-40c5-bab4-8e03e4bef984.png)
 
