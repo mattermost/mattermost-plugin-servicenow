@@ -14,7 +14,7 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
-import {resetCurrentModalState} from 'src/reducers/currentModal';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
 import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
 
@@ -41,6 +41,7 @@ const CreateIncident = () => {
     const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
+    const [showModal, setShowModal] = useState(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -77,7 +78,8 @@ const CreateIncident = () => {
 
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
-        dispatch(resetCurrentModalState());
+        dispatch(resetGlobalModalState());
+        setShowModal(false);
         setTimeout(() => {
             resetFieldStates();
         });
@@ -213,6 +215,13 @@ const CreateIncident = () => {
             setChannel(currentChannelId);
         }
 
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+            return;
+        }
+
         if (open && getGlobalModalState(pluginState).data) {
             const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
             setShortDescription(reduxStateShortDescription);
@@ -227,7 +236,7 @@ const CreateIncident = () => {
 
     return (
         <Modal
-            show={open}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >

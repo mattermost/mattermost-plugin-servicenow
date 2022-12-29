@@ -131,14 +131,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setChannel(currentChannelId);
         }
 
-        if (open && subscriptionData) {
+        if (open && subscriptionData && getSubscriptionsConfiguredState().isSuccess) {
             if (typeof (subscriptionData) === 'string') {
                 makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
             } else {
                 handleSubscriptionData(subscriptionData);
             }
         }
-    }, [open, subscriptionData, currentChannelId]);
+    }, [open, subscriptionData, currentChannelId, getSubscriptionsConfiguredState().isSuccess]);
 
     useEffect(() => {
         if (typeof (subscriptionData) === 'string') {
@@ -396,6 +396,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             </>
         </Modal>
     );
+
+    if (getSubscriptionsConfiguredState().isLoading) {
+        return <></>;
+    }
 
     if (typeof (subscriptionData) === 'string' && !editSubscriptionData) {
         if (getSubscriptionState().isError) {

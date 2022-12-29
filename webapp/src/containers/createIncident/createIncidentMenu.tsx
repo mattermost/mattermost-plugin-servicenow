@@ -18,14 +18,13 @@ type PropTypes = {
 }
 
 const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
-    const {makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState} = usePluginApi();
     const dispatch = useDispatch();
     const post = useSelector((state: GlobalState) => getPost(state, postId));
-    const {data} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
 
     // Check if the current post is a system post or not a valid post
     const systemMessage = Boolean(!post || isSystemMessage(post));
-    const show = (data as ConnectedState)?.connected && !systemMessage;
+    const show = pluginState.connectedReducer.connected && !systemMessage;
 
     const handleClick = useCallback((e: MouseEvent<HTMLButtonElement> | Event) => {
         e.preventDefault();
@@ -35,11 +34,6 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
         };
         dispatch(setGlobalModalState({modalId: 'createIncident', data: incidentModalData}) as Action);
     }, [postId]);
-
-    // Make request to get connected user
-    useEffect(() => {
-        makeApiRequest(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
-    }, []);
 
     if (!show) {
         return null;

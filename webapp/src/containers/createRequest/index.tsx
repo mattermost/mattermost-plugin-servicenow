@@ -10,7 +10,7 @@ import usePluginApi from 'src/hooks/usePluginApi';
 import Constants from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
-import {resetCurrentModalState} from 'src/reducers/currentModal';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {isCreateRequestModalOpen} from 'src/selectors';
 
 import Utils from 'src/utils';
@@ -25,12 +25,14 @@ const CreateRequest = () => {
     const [request, setRequest] = useState<Record<string, string> | null>(null);
     const [showErrorPanel, setShowErrorPanel] = useState(false);
     const [searchItemsPayload, setSearchItemsPayload] = useState<SearchItemsParams | null>(null);
+    const [showModal, setShowModal] = useState(false);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
 
     // usePluginApi hook
     const {getApiState, makeApiRequest, pluginState} = usePluginApi();
+    const open = isCreateRequestModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -47,10 +49,11 @@ const CreateRequest = () => {
         setRequest(null);
         setShowErrorPanel(false);
         setSearchItemsPayload(null);
+        setShowModal(false);
     }, []);
 
     const hideModal = useCallback(() => {
-        dispatch(resetCurrentModalState());
+        dispatch(resetGlobalModalState());
         resetFieldStates();
     }, []);
 
@@ -136,10 +139,18 @@ const CreateRequest = () => {
         }
     }, [getItemsSuggestions().isLoading, getItemsSuggestions().isError, getItemsSuggestions().isSuccess]);
 
+    useEffect(() => {
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
+    }, [open]);
+
     const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
     return (
         <Modal
-            show={isCreateRequestModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >
