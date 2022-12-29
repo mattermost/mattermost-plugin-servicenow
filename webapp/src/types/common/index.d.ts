@@ -169,7 +169,8 @@ type IncidentFieldsData = {
 }
 
 type FormatTextOptions = {
-    atMentions: boolean;
+    atMentions?: boolean;
+    markdown?: boolean;
 }
 
 type MessageHtmlToComponentOptions = {

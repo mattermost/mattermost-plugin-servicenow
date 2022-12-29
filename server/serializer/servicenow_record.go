@@ -113,9 +113,8 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	}
 
 	slackAttachment := &model.SlackAttachment{
-		Title:     sr.Number,
-		TitleLink: titleLink,
-		Fields:    fields,
+		Title:  fmt.Sprintf("[%s](%s)", sr.Number, titleLink),
+		Fields: fields,
 	}
 
 	if sharedByUsername != "" {
@@ -125,9 +124,8 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	post := &model.Post{
 		ChannelId: channelID,
 		UserId:    botID,
-		Type:      "custom_share",
+		Type:      constants.CustomSharePost,
 		Props: map[string]interface{}{
-			"attachments": []*model.SlackAttachment{slackAttachment},
 			"record_id":   sr.SysID,
 			"record_type": sr.RecordType,
 		},

@@ -103,7 +103,6 @@ export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
-    [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.KNOWLEDGE]: 'Knowledge',
     [RecordType.TASK]: 'Task',
     [RecordType.CHANGE_TASK]: 'Change Task',
@@ -144,7 +143,7 @@ const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
     },
 ]);
 
-export enum RecordDataLabelConfigKey {
+export enum RecordDataConfigKeys {
     SHORT_DESCRIPTION = 'short_description',
     STATE = 'state',
     PRIORITY = 'priority',
@@ -152,7 +151,7 @@ export enum RecordDataLabelConfigKey {
     ASSIGNMENT_GROUP = 'assignment_group',
 }
 
-export enum RecordDataLabelConfigLabel {
+export enum RecordDataConfigLabels {
     SHORT_DESCRIPTION = 'Short Description',
     STATE = 'State',
     PRIORITY = 'Priority',
@@ -163,20 +162,20 @@ export enum RecordDataLabelConfigLabel {
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: RecordDataLabelConfigKey.SHORT_DESCRIPTION,
-        label: RecordDataLabelConfigLabel.SHORT_DESCRIPTION,
+        key: RecordDataConfigKeys.SHORT_DESCRIPTION,
+        label: RecordDataConfigLabels.SHORT_DESCRIPTION,
     }, {
-        key: RecordDataLabelConfigKey.STATE,
-        label: RecordDataLabelConfigLabel.STATE,
+        key: RecordDataConfigKeys.STATE,
+        label: RecordDataConfigLabels.STATE,
     }, {
-        key: RecordDataLabelConfigKey.PRIORITY,
-        label: RecordDataLabelConfigLabel.PRIORITY,
+        key: RecordDataConfigKeys.PRIORITY,
+        label: RecordDataConfigLabels.PRIORITY,
     }, {
-        key: RecordDataLabelConfigKey.ASSIGNED_TO,
-        label: RecordDataLabelConfigLabel.ASSIGNED_TO,
+        key: RecordDataConfigKeys.ASSIGNED_TO,
+        label: RecordDataConfigLabels.ASSIGNED_TO,
     }, {
-        key: RecordDataLabelConfigKey.ASSIGNMENT_GROUP,
-        label: RecordDataLabelConfigLabel.ASSIGNMENT_GROUP,
+        key: RecordDataConfigKeys.ASSIGNMENT_GROUP,
+        label: RecordDataConfigLabels.ASSIGNMENT_GROUP,
     },
 ];
 
@@ -200,7 +199,7 @@ export const SubscriptionFilterCreatedByOptions = [
     },
 ];
 
-export enum KnowledgeRecordDataLabelConfigKey {
+export enum KnowledgeRecordDataConfigKeys {
     SHORT_DESCRIPTION = 'short_description',
     WORKFLOW_STATE = 'workflow_state',
     AUTHOR = 'author',
@@ -208,7 +207,7 @@ export enum KnowledgeRecordDataLabelConfigKey {
     KNOWLEDGE_BASE = 'kb_knowledge_base',
 }
 
-export enum KnowledgeRecordDataLabelConfigLabel {
+export enum KnowledgeRecordDataConfigLabels {
     SHORT_DESCRIPTION = 'Short Description',
     WORKFLOW_STATE = 'Workflow',
     AUTHOR = 'Author',
@@ -218,20 +217,20 @@ export enum KnowledgeRecordDataLabelConfigLabel {
 
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: KnowledgeRecordDataLabelConfigKey.SHORT_DESCRIPTION,
-        label: KnowledgeRecordDataLabelConfigLabel.SHORT_DESCRIPTION,
+        key: KnowledgeRecordDataConfigKeys.SHORT_DESCRIPTION,
+        label: KnowledgeRecordDataConfigLabels.SHORT_DESCRIPTION,
     }, {
-        key: KnowledgeRecordDataLabelConfigKey.WORKFLOW_STATE,
-        label: KnowledgeRecordDataLabelConfigLabel.WORKFLOW_STATE,
+        key: KnowledgeRecordDataConfigKeys.WORKFLOW_STATE,
+        label: KnowledgeRecordDataConfigLabels.WORKFLOW_STATE,
     }, {
-        key: KnowledgeRecordDataLabelConfigKey.AUTHOR,
-        label: KnowledgeRecordDataLabelConfigLabel.AUTHOR,
+        key: KnowledgeRecordDataConfigKeys.AUTHOR,
+        label: KnowledgeRecordDataConfigLabels.AUTHOR,
     }, {
-        key: KnowledgeRecordDataLabelConfigKey.CATEGORY,
-        label: KnowledgeRecordDataLabelConfigLabel.CATEGORY,
+        key: KnowledgeRecordDataConfigKeys.CATEGORY,
+        label: KnowledgeRecordDataConfigLabels.CATEGORY,
     }, {
-        key: KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE,
-        label: KnowledgeRecordDataLabelConfigLabel.KNOWLEDGE_BASE,
+        key: KnowledgeRecordDataConfigKeys.KNOWLEDGE_BASE,
+        label: KnowledgeRecordDataConfigLabels.KNOWLEDGE_BASE,
     },
 ];
 
@@ -278,6 +277,37 @@ export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
         label: 'Low',
     },
 ];
+
+export const RecordTypesSupportingComments = new Set([
+    RecordType.INCIDENT,
+    RecordType.PROBLEM,
+    RecordType.CHANGE_REQUEST,
+    RecordType.TASK,
+    RecordType.CHANGE_TASK,
+    RecordType.FOLLOW_ON_TASK,
+]);
+
+export const RecordTypesSupportingStateUpdation = new Set([
+    RecordType.INCIDENT,
+    RecordType.TASK,
+    RecordType.CHANGE_TASK,
+    RecordType.FOLLOW_ON_TASK,
+]);
+
+export const KeysContainingLink = new Set([
+    KnowledgeRecordDataConfigKeys.KNOWLEDGE_BASE,
+    KnowledgeRecordDataConfigKeys.AUTHOR,
+    KnowledgeRecordDataConfigKeys.CATEGORY,
+    RecordDataConfigKeys.ASSIGNED_TO,
+    RecordDataConfigKeys.ASSIGNMENT_GROUP,
+    KnowledgeRecordDataConfigLabels.KNOWLEDGE_BASE,
+    KnowledgeRecordDataConfigLabels.AUTHOR,
+    KnowledgeRecordDataConfigLabels.CATEGORY,
+    RecordDataConfigLabels.ASSIGNED_TO,
+    RecordDataConfigLabels.ASSIGNMENT_GROUP,
+]);
+
+export type TypesContainingLink = KnowledgeRecordDataConfigKeys | RecordDataConfigKeys | KnowledgeRecordDataConfigLabels | RecordDataConfigLabels;
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {

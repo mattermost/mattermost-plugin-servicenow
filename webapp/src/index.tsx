@@ -14,8 +14,8 @@ import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
 import CreateIncident from 'src/containers/createIncident';
-import NotificationPost from 'src/containers/custom_posts/notificationPost';
-import ShareRecordsPost from 'src/containers/custom_posts/shareRecordsPost';
+import NotificationPost from 'src/containers/custom_post/notificationPost';
+import ShareRecordPost from 'src/containers/custom_post/shareRecordPost';
 import CreateRequest from 'src/containers/createRequest';
 import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
@@ -61,8 +61,8 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
-        registry.registerPostTypeComponent('custom_share', ShareRecordsPost);
-        registry.registerPostTypeComponent('custom_notification', NotificationPost);
+        registry.registerPostTypeComponent('custom_sn_share', ShareRecordPost);
+        registry.registerPostTypeComponent('custom_sn_notification', NotificationPost);
     }
 }
 
@@ -70,8 +70,8 @@ declare global {
     interface Window {
         registerPlugin(id: string, plugin: Plugin): void
         PostUtils: {
-            formatText(text: string, options: FormatTextOptions): string,
-            messageHtmlToComponent(html: string, isRHS: boolean, option: MessageHtmlToComponentOptions): React.ReactNode,
+            formatText(text: string, options?: FormatTextOptions): string,
+            messageHtmlToComponent(html: string, isRHS: boolean, option?: MessageHtmlToComponentOptions): React.ReactNode,
         }
     }
 }

@@ -45,7 +45,7 @@ const AddOrViewComments = () => {
         dispatch(resetGlobalModalState());
         setTimeout(() => {
             resetFieldStates();
-        }, 500);
+        });
     }, []);
 
     const getCommentsPayload = (): CommentsPayload => {

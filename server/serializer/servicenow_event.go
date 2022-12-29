@@ -85,14 +85,10 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 	post := &model.Post{
 		ChannelId: se.ChannelID,
 		UserId:    botID,
-		Type:      "custom_notification",
+		Type:      constants.CustomNotifictationPost,
 		Props: map[string]interface{}{
-			"attachments":       []*model.SlackAttachment{slackAttachment},
-			"record_id":         se.RecordID,
-			"record_type":       se.RecordType,
-			"title_link":        titleLink,
-			"title":             se.Number,
-			"short_description": se.ShortDescription,
+			"record_id":   se.RecordID,
+			"record_type": se.RecordType,
 		},
 	}
 

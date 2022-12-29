@@ -6,16 +6,24 @@ import {Post} from 'mattermost-redux/types/posts';
 import {setGlobalModalState} from 'src/reducers/globalModal';
 
 import './styles.scss';
+import {RecordTypesSupportingComments, RecordTypesSupportingStateUpdation} from 'src/plugin_constants';
 
-const NotificationPost = (props: {post: Post}) => {
+type NotificationPostProps = {
+    post: Post,
+}
+
+const NotificationPost = ({post}: NotificationPostProps) => {
     const dispatch = useDispatch();
-    const {title_link, title, short_description, attachments, record_id, record_type} = props.post.props;
-    const {fields} = attachments[0] as RecordAttachments;
+    const {attachments, record_id, record_type} = post.props;
+    const {fields, title} = attachments[0] as RecordAttachments;
     const data: CommentAndStateModalData = {
         recordId: record_id,
         recordType: record_type,
     };
 
+    const {formatText, messageHtmlToComponent} = window.PostUtils;
+    const postTitleText = formatText(title);
+    const postTitle = messageHtmlToComponent(postTitleText, false);
     const getNotificationBody = (): JSX.Element => {
         const fieldTables = [] as JSX.Element[];
         let headerCols = [] as JSX.Element[];
@@ -28,7 +36,7 @@ const NotificationPost = (props: {post: Post}) => {
                 fieldTables.push(
                     <table
                         key={tableNumber}
-                        className='notification-posts__table'
+                        className='notification-post__table'
                     >
                         <thead>
                             <tr>
@@ -45,13 +53,13 @@ const NotificationPost = (props: {post: Post}) => {
                 headerCols = [];
                 bodyCols = [];
                 rowPos = 0;
-                tableNumber += 1;
+                tableNumber++;
             }
 
             headerCols.push(
                 <th
                     key={field.title}
-                    className='shared-posts__field-title'
+                    className='shared-post__field-title'
                 >
                     <span>
                         {field.title}
@@ -62,7 +70,7 @@ const NotificationPost = (props: {post: Post}) => {
             bodyCols.push(
                 <td
                     key={field.title}
-                    className='shared-posts__field-value'
+                    className='shared-post__field-value'
                 >
                     <span>
                         {field.value}
@@ -70,14 +78,14 @@ const NotificationPost = (props: {post: Post}) => {
                 </td>,
             );
 
-            rowPos += 1;
+            rowPos++;
         });
 
         if (headerCols.length) {
             fieldTables.push(
                 <table
                     key={tableNumber}
-                    className='notification-posts__table'
+                    className='notification-post__table'
                 >
                     <thead>
                         <tr>
@@ -101,30 +109,27 @@ const NotificationPost = (props: {post: Post}) => {
     };
 
     return (
-        <div className='servicenow-posts'>
-            <div className='shared-posts'>
-                <a
-                    target='_blank'
-                    rel='noreferrer'
-                    href={`${title_link}`}
-                >
-                    <span className='shared-posts__title'>{title}</span>
-                </a>
-                <span className='shared-posts__title'>{`: ${short_description}`}</span>
+        <div className='servicenow-post'>
+            <div className='shared-post'>
+                <div className='shared-post__title'>{postTitle}</div>
                 {getNotificationBody()}
                 <div>
-                    <button
-                        onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
-                        className='shared-posts__modal-button'
-                    >
-                        {'Add and view comments'}
-                    </button>
-                    <button
-                        onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
-                        className='shared-posts__modal-button'
-                    >
-                        {'Update State'}
-                    </button>
+                    {RecordTypesSupportingComments.has(record_type) && (
+                        <button
+                            onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
+                            className='shared-post__modal-button'
+                        >
+                            {'Add and view comments'}
+                        </button>
+                    )}
+                    {RecordTypesSupportingStateUpdation.has(record_type) && (
+                        <button
+                            onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
+                            className='shared-post__modal-button'
+                        >
+                            {'Update State'}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

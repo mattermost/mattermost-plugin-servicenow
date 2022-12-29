@@ -230,7 +230,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         // Resetting opened panel states so that there isn't unnecessary jump from one panel to another while closing the modal
         setTimeout(() => {
             resetPanelStates();
-        }, 500);
+        });
     };
 
     // Handle action when add another subscription button is clicked

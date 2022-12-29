@@ -3,9 +3,9 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'src/plugin_constants';
+import Constants, {RecordType, TypesContainingLink} from 'src/plugin_constants';
 
-import Utils, {getLinkData, validateKeysContainingLink} from 'src/utils';
+import Utils from 'src/utils';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -247,7 +247,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key as TypesContainingLink, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
                                 </li>
                             ))
                         ) : (
@@ -257,7 +257,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key as TypesContainingLink, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
                                 </li>
                             ))
                         )}

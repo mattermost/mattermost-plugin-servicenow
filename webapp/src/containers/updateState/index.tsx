@@ -40,7 +40,7 @@ const UpdateState = () => {
         dispatch(resetGlobalModalState());
         setTimeout(() => {
             resetStates();
-        }, 500);
+        });
     }, []);
 
     const getStateForGetStatesAPI = () => {

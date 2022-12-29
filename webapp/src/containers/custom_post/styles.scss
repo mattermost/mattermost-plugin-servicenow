@@ -1,5 +1,5 @@
-.servicenow-posts {
-    .shared-posts {
+.servicenow-post {
+    .shared-post {
         border: 1px solid var(--center-channel-color-40);
         border-left-style: solid;
         border-left-width: 4px;
@@ -44,7 +44,7 @@
         }
     }
 
-    .notification-posts {
+    .notification-post {
         &__table {
             width: 100%;
             table-layout: fixed;
