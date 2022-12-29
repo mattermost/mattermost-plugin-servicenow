@@ -1457,7 +1457,7 @@ func TestGetAllSubscriptions(t *testing.T) {
 }
 
 func TestDeleteSubscription(t *testing.T) {
-	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathDeleteSubscription)
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSubscriptionOperationsByID)
 	for name, test := range map[string]struct {
 		SetupAPI             func(*plugintest.API)
 		SetupClient          func(client *mock_plugin.Client)
@@ -1518,7 +1518,7 @@ func TestDeleteSubscription(t *testing.T) {
 }
 
 func TestEditSubscription(t *testing.T) {
-	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathEditSubscription)
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSubscriptionOperationsByID)
 	for name, test := range map[string]struct {
 		RequestBody          string
 		SetupAPI             func(*plugintest.API)

@@ -125,6 +125,18 @@ type SubscriptionCardBody = {
     labelValuePairs?: Array<{ label: string, value: string }>,
 }
 
+type RecordFields = {
+    title: string;
+    value: string | LinkData;
+}
+
+type RecordAttachments = {
+    title: string;
+    title_link: string;
+    pretext: string;
+    fields: RecordFields[];
+}
+
 type ServiceNowUser = {
     sys_id: string;
     email: string;
@@ -154,4 +166,13 @@ type IncidentFieldsData = {
     label: string;
     value: string;
     element: string;
+}
+
+type FormatTextOptions = {
+    atMentions?: boolean;
+    markdown?: boolean;
+}
+
+type MessageHtmlToComponentOptions = {
+    mentionHighlight: boolean;
 }

@@ -84,16 +84,15 @@ const (
 	FieldImpact               = "impact"
 
 	// Websocket events
-	WSEventConnect                        = "connect"
-	WSEventDisconnect                     = "disconnect"
-	WSEventOpenAddSubscriptionModal       = "add_subscription"
-	WSEventOpenEditSubscriptionModal      = "edit_subscription"
-	WSEventSubscriptionDeleted            = "subscription_deleted"
-	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
-	WSEventOpenCommentModal               = "comment_modal"
-	WSEventOpenUpdateStateModal           = "update_state"
-	WSEventOpenCreateIncidentModal        = "create_incident"
-	WSEventOpenCreateRequestModal         = "create_request"
+	WSEventConnect              = "connect"
+	WSEventDisconnect           = "disconnect"
+	WSEventSubscriptionDeleted  = "subscription_deleted"
+	WSEventOpenCommentModal     = "comment_modal"
+	WSEventOpenUpdateStateModal = "update_state"
+
+	// Custom posts type
+	CustomNotifictationPost = "custom_sn_notification"
+	CustomSharePost         = "custom_sn_share"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -164,6 +163,7 @@ const (
 	ErrorGetSubscriptions                 = "Error in getting all subscriptions"
 	ErrorEditingSubscription              = "Error in editing the subscription"
 	ErrorDeleteSubscription               = "Error in deleting the subscription"
+	ErrorGetSubscription                  = "Error in getting the subscription"
 	ErrorGetComments                      = "Error in getting all comments"
 	ErrorCreateComment                    = "Error in creating the comment"
 	ErrorSearchingRecord                  = "Error in searching for records in ServiceNow"
@@ -173,6 +173,7 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorSubscriptionsNotConfigured       = "Unable to check or activate subscriptions in ServiceNow."
 	ErrorGetIncidentFields                = "Error in getting the incident fields"
 	ErrorUserMismatch                     = "User ID does not match with the currently logged-in user ID."
 	ErrorInsufficientPermissions          = "user has insufficient permissions for the current channel"
