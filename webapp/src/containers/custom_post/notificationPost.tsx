@@ -59,7 +59,7 @@ const NotificationPost = ({post}: NotificationPostProps) => {
             headerCols.push(
                 <th
                     key={field.title}
-                    className='shared-post__field-title'
+                    className='shared-post__field-title wt-600'
                 >
                     <span>
                         {field.title}
@@ -111,13 +111,13 @@ const NotificationPost = ({post}: NotificationPostProps) => {
     return (
         <div className='servicenow-post'>
             <div className='shared-post'>
-                <div className='shared-post__title'>{postTitle}</div>
+                <div className='wt-600'>{postTitle}</div>
                 {getNotificationBody()}
                 <div>
                     {RecordTypesSupportingComments.has(record_type) && (
                         <button
                             onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
-                            className='shared-post__modal-button'
+                            className='shared-post__modal-button wt-700'
                         >
                             {'Add and view comments'}
                         </button>
@@ -125,7 +125,7 @@ const NotificationPost = ({post}: NotificationPostProps) => {
                     {RecordTypesSupportingStateUpdation.has(record_type) && (
                         <button
                             onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
-                            className='shared-post__modal-button'
+                            className='shared-post__modal-button wt-700'
                         >
                             {'Update State'}
                         </button>

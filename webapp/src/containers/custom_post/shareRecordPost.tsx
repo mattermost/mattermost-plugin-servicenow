@@ -31,11 +31,11 @@ const ShareRecordPost = ({post}: ShareRecordPostProps) => {
         <div className='servicenow-post'>
             {atMention}
             <div className='shared-post'>
-                <span className='shared-post__title'>{postTitle}</span>
+                <span className='wt-600'>{postTitle}</span>
                 {(
                     fields.map((field) => (
                         <div key={field.title}>
-                            <div className='shared-post__field-title'>{field.title}</div>
+                            <div className='shared-post__field-title wt-600'>{field.title}</div>
                             <div className='shared-post__field-value'>{Utils.getRecordValueForHeader(field.title as TypesContainingLink, field.value)}</div>
                         </div>
                     ))
@@ -44,7 +44,7 @@ const ShareRecordPost = ({post}: ShareRecordPostProps) => {
                     {RecordTypesSupportingComments.has(record_type) && (
                         <button
                             onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
-                            className='shared-post__modal-button'
+                            className='shared-post__modal-button wt-700'
                         >
                             {'Add and view comments'}
                         </button>
@@ -52,7 +52,7 @@ const ShareRecordPost = ({post}: ShareRecordPostProps) => {
                     {RecordTypesSupportingStateUpdation.has(record_type) && (
                         <button
                             onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
-                            className='shared-post__modal-button'
+                            className='shared-post__modal-button wt-700'
                         >
                             {'Update State'}
                         </button>
