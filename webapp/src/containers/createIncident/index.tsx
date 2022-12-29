@@ -41,6 +41,7 @@ const CreateIncident = () => {
     const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
+    const [showModal, setShowModal] = useState(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -78,6 +79,7 @@ const CreateIncident = () => {
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
+        setShowModal(false);
         setTimeout(() => {
             resetFieldStates();
         });
@@ -213,6 +215,13 @@ const CreateIncident = () => {
             setChannel(currentChannelId);
         }
 
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+            return;
+        }
+
         if (open && getGlobalModalState(pluginState).data) {
             const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
             setShortDescription(reduxStateShortDescription);
@@ -227,7 +236,7 @@ const CreateIncident = () => {
 
     return (
         <Modal
-            show={open}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >

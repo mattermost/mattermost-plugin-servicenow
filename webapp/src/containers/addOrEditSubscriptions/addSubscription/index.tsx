@@ -2,7 +2,6 @@ import React from 'react';
 import {useDispatch} from 'react-redux';
 
 import usePluginApi from 'src/hooks/usePluginApi';
-
 import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {isAddSubscriptionModalOpen} from 'src/selectors';
 

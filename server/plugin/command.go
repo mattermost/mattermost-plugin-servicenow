@@ -211,7 +211,7 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	case constants.SubCommandList:
 		return p.handleListSubscriptions(c, args, parameters, client, isSysAdmin)
 	case constants.SubCommandAdd:
-		return p.handleSubscribe(c, args, parameters, client, isSysAdmin)
+		return ""
 	case constants.SubCommandEdit:
 		return p.handleEditSubscription(c, args, parameters, client, isSysAdmin)
 	case constants.SubCommandDelete:
@@ -227,56 +227,16 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 	}
 
 	command := parameters[0]
-	parameters = parameters[1:]
 
 	switch command {
-	case constants.SubCommandIncident:
-		return p.handleCreateIncident(c, args, parameters, client, isSysAdmin)
-	case constants.SubCommandRequest:
-		return p.handleCreateRequest(c, args, parameters, client, isSysAdmin)
+	case constants.SubCommandIncident, constants.SubCommandRequest:
+		return ""
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
 }
 
-func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenAddSubscriptionModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
-	return ""
-}
-
 func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenSearchAndShareRecordsModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
-	return ""
-}
-
-// TODO: remove extra arguments
-func (p *Plugin) handleCreateIncident(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenCreateIncidentModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
-	return ""
-}
-
-func (p *Plugin) handleCreateRequest(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenCreateRequestModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
 	return ""
 }
 
@@ -413,28 +373,6 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 	if !valid {
 		return invalidSubscriptionIDMessage
 	}
-
-	subscription, _, err := client.GetSubscription(subscriptionID)
-	if err != nil {
-		p.API.LogError("Unable to get subscription", "Error", err.Error())
-		return p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, "")
-	}
-
-	if subscription.Type == constants.SubscriptionTypeRecord {
-		p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
-	}
-
-	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
-	if err != nil {
-		p.API.LogError("Unable to convert subscription to map", "Error", err.Error())
-		return genericErrorMessage
-	}
-
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenEditSubscriptionModal,
-		subscriptionMap,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
 
 	return ""
 }

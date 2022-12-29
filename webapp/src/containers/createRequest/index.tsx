@@ -25,12 +25,14 @@ const CreateRequest = () => {
     const [request, setRequest] = useState<Record<string, string> | null>(null);
     const [showErrorPanel, setShowErrorPanel] = useState(false);
     const [searchItemsPayload, setSearchItemsPayload] = useState<SearchItemsParams | null>(null);
+    const [showModal, setShowModal] = useState(false);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
 
     // usePluginApi hook
     const {getApiState, makeApiRequest, pluginState} = usePluginApi();
+    const open = isCreateRequestModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -47,6 +49,7 @@ const CreateRequest = () => {
         setRequest(null);
         setShowErrorPanel(false);
         setSearchItemsPayload(null);
+        setShowModal(false);
     }, []);
 
     const hideModal = useCallback(() => {
@@ -136,10 +139,18 @@ const CreateRequest = () => {
         }
     }, [getItemsSuggestions().isLoading, getItemsSuggestions().isError, getItemsSuggestions().isSuccess]);
 
+    useEffect(() => {
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
+    }, [open]);
+
     const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
     return (
         <Modal
-            show={isCreateRequestModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >
