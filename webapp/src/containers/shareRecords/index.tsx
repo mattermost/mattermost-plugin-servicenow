@@ -35,6 +35,7 @@ const ShareRecords = () => {
     const [recordData, setRecordData] = useState<RecordData | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
+    const [showModal, setShowModal] = useState(false);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -44,6 +45,7 @@ const ShareRecords = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isShareRecordModalOpen(pluginState);
 
     const dispatch = useDispatch();
 
@@ -63,8 +65,9 @@ const ShareRecords = () => {
     }, []);
 
     const hideModal = useCallback(() => {
-        resetFieldStates();
         dispatch(resetGlobalModalState());
+        resetFieldStates();
+        setShowModal(false);
     }, []);
 
     // Opens share record modal
@@ -78,16 +81,16 @@ const ShareRecords = () => {
     };
 
     useEffect(() => {
-        const shareRecordState = getShareRecordState();
-        if (shareRecordState.isError && shareRecordState.error) {
-            setApiError(shareRecordState.error);
+        const {error, isError, isLoading, isSuccess} = getShareRecordState();
+        if (isError && error) {
+            setApiError(error);
         }
 
-        if (shareRecordState.isSuccess) {
+        if (isSuccess) {
             setShowResultPanel(true);
         }
 
-        setShowModalLoader(shareRecordState.isLoading);
+        setShowModalLoader(isLoading);
     }, [getShareRecordState().isLoading, getShareRecordState().isError, getShareRecordState().isSuccess]);
 
     const shareRecord = () => {
@@ -113,12 +116,18 @@ const ShareRecords = () => {
         }
     }, [channel, suggestionChosen]);
 
-    // Set the channel when button is clicked
     useEffect(() => {
+        // Set the channel when button is clicked
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-    }, [currentChannelId, isShareRecordModalOpen(pluginState)]);
+
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
+    }, [open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
         if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
@@ -130,7 +139,7 @@ const ShareRecords = () => {
 
     return (
         <Modal
-            show={isShareRecordModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >

@@ -22,6 +22,7 @@ const UpdateState = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isUpdateStateModalOpen(pluginState);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -38,7 +39,9 @@ const UpdateState = () => {
 
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetStates();
+        setTimeout(() => {
+            resetStates();
+        });
     }, []);
 
     const getStateForGetStatesAPI = () => {
@@ -52,18 +55,21 @@ const UpdateState = () => {
     };
 
     useEffect(() => {
-        const {data} = getGlobalModalState(pluginState);
-        if (isUpdateStateModalOpen(pluginState) && data?.recordType && data?.recordId) {
-            const params: GetStatesParams = {recordType: data.recordType};
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
+        const record_type: RecordType = data?.recordType || '';
+        const record_id = data?.recordId || '';
+
+        if (open && record_type && record_id) {
+            const params: GetStatesParams = {recordType: record_type as RecordType};
             setGetStatesParams(params);
             makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
         }
-    }, [isUpdateStateModalOpen(pluginState)]);
+    }, [open]);
 
     const updateState = () => {
-        const {data} = getGlobalModalState(pluginState);
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
         if (data) {
-            const {recordType, recordId} = data;
+            const {recordType, recordId} = data as CommentAndStateModalData;
             const payload: UpdateStatePayload = {recordType, recordId, state: selectedState ?? ''};
             setUpdateStatePayload(payload);
             makeApiRequest(Constants.pluginApiServiceConfigs.updateState.apiServiceName, payload);
@@ -107,7 +113,7 @@ const UpdateState = () => {
     const showLoader = statesLoading || stateUpdating;
     return (
         <Modal
-            show={isUpdateStateModalOpen(pluginState)}
+            show={open}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >

@@ -1,11 +1,14 @@
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 type ApiServiceName =
+    'getConnectedUser' |
+    'checkSubscriptionsConfigured' |
     'getChannels' |
     'searchRecords' |
     'getRecord' |
     'createSubscription' |
     'fetchSubscriptions' |
+    'fetchSubscription' |
     'editSubscription' |
     'deleteSubscription' |
     'getConfig' |
@@ -14,6 +17,7 @@ type ApiServiceName =
     'addComments' |
     'getStates' |
     'updateState' |
+    'searchItems' |
     'getUsers' |
     'createIncident' |
     'getIncidentFeilds';

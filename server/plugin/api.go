@@ -3,7 +3,6 @@ package plugin
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -36,23 +35,23 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createSubscription)))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getAllSubscriptions)))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathDeleteSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
-	s.HandleFunc(constants.PathEditSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.editSubscription)))).Methods(http.MethodPatch)
+	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getSubscription)))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
+	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.editSubscription)))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchRecords, p.checkAuth(p.checkOAuth(p.searchRecordsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetSingleRecord, p.checkAuth(p.checkOAuth(p.getRecordFromServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathShareRecord, p.checkAuth(p.checkOAuth(p.shareRecordInChannel))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.getCommentsForRecord))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCommentsForRecord, p.checkAuth(p.checkOAuth(p.addCommentsOnRecord))).Methods(http.MethodPost)
-	s.HandleFunc(constants.PathOpenCommentModal, p.checkAuth(p.handleOpenCommentModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetStatesForRecordType, p.checkAuth(p.checkOAuth(p.getStatesForRecordType))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathUpdateStateOfRecord, p.checkAuth(p.checkOAuth(p.updateStateOfRecord))).Methods(http.MethodPatch)
-	s.HandleFunc(constants.PathOpenStateModal, p.checkAuth(p.handleOpenStateModal)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathProcessNotification, p.checkAuthBySecret(p.handleNotification)).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetConfig, p.checkAuth(p.getConfig)).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathCheckSubscriptionsConfigured, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfiguredAPI))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
 
 	// 404 handler
@@ -104,12 +103,23 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 		client := p.GetClientFromRequest(r)
 		if _, err := client.ActivateSubscriptions(); err != nil {
 			_ = p.handleClientError(w, r, err, false, 0, "", "")
-			p.API.LogError("Unable to check or activate subscriptions in ServiceNow.", "Error", err.Error())
+			p.API.LogError(constants.ErrorSubscriptionsNotConfigured, "Error", err.Error())
 			return
 		}
 
 		handler(w, r)
 	}
+}
+
+func (p *Plugin) checkSubscriptionsConfiguredAPI(w http.ResponseWriter, r *http.Request) {
+	client := p.GetClientFromRequest(r)
+	if _, err := client.ActivateSubscriptions(); err != nil {
+		_ = p.handleClientError(w, r, err, false, 0, "", "")
+		p.API.LogError(constants.ErrorSubscriptionsNotConfigured, "Error", err.Error())
+		return
+	}
+
+	returnStatusOK(w)
 }
 
 func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
@@ -376,6 +386,26 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w)
+}
+
+func (p *Plugin) getSubscription(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	subscriptionID := pathParams[constants.PathParamSubscriptionID]
+	client := p.GetClientFromRequest(r)
+	subscription, statusCode, err := client.GetSubscription(subscriptionID)
+	if err != nil {
+		p.API.LogError(constants.ErrorGetSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
+		responseMessage := "No record found"
+		if statusCode != http.StatusNotFound {
+			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorGetSubscription, err.Error())
+		}
+
+		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
+		return
+	}
+
+	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
+	p.writeJSON(w, 0, subscription)
 }
 
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
@@ -655,44 +685,6 @@ func (p *Plugin) updateStateOfRecord(w http.ResponseWriter, r *http.Request) {
 	returnStatusOK(w)
 }
 
-func (p *Plugin) handleOpenCommentModal(w http.ResponseWriter, r *http.Request) {
-	response := &model.PostActionIntegrationResponse{}
-	decoder := json.NewDecoder(r.Body)
-	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
-	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
-		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
-		p.returnPostActionIntegrationResponse(w, response)
-		return
-	}
-
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenCommentModal,
-		postActionIntegrationRequest.Context,
-		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
-	)
-
-	p.returnPostActionIntegrationResponse(w, response)
-}
-
-func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
-	response := &model.PostActionIntegrationResponse{}
-	decoder := json.NewDecoder(r.Body)
-	postActionIntegrationRequest := &model.PostActionIntegrationRequest{}
-	if err := decoder.Decode(&postActionIntegrationRequest); err != nil {
-		p.API.LogError("Error decoding PostActionIntegrationRequest params: ", err.Error())
-		p.returnPostActionIntegrationResponse(w, response)
-		return
-	}
-
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenUpdateStateModal,
-		postActionIntegrationRequest.Context,
-		&model.WebsocketBroadcast{UserId: postActionIntegrationRequest.UserId},
-	)
-
-	p.returnPostActionIntegrationResponse(w, response)
-}
-
 func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := p.store.GetAllUsers()
 	if err != nil {
@@ -787,13 +779,6 @@ func returnStatusOK(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	m[model.STATUS] = model.STATUS_OK
 	_, _ = w.Write([]byte(model.MapToJson(m)))
-}
-
-func (p *Plugin) returnPostActionIntegrationResponse(w http.ResponseWriter, res *model.PostActionIntegrationResponse) {
-	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(res.ToJson()); err != nil {
-		p.API.LogWarn("failed to write PostActionIntegrationResponse", "Error", err.Error())
-	}
 }
 
 // handleStaticFiles handles the static files under the assets directory.

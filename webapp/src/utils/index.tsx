@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK, DefaultIncidentImpactAndUrgencyOptions} from 'src/plugin_constants';
+import Constants, {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents, DefaultIncidentImpactAndUrgencyOptions, KeysContainingLink, TypesContainingLink} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -72,14 +72,6 @@ export const getLinkData = (value: string): LinkData => {
     });
 };
 
-export const validateKeysContainingLink = (key: string) => (
-    key === KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE ||
-    key === KnowledgeRecordDataLabelConfigKey.AUTHOR ||
-    key === KnowledgeRecordDataLabelConfigKey.CATEGORY ||
-    key === RecordDataLabelConfigKey.ASSIGNED_TO ||
-    key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
-);
-
 const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
     <>
         <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
@@ -106,6 +98,50 @@ const getResultPanelHeader = (error: APIError | null, onClick: () => void, succe
     return successMessage;
 };
 
+const getCommandArgs = (command: string): string[] => {
+    const myRegexp = /[^\s"]+|"([^"]*)"/gi;
+    const myArray = [];
+    let match;
+    do {
+        match = myRegexp.exec(command);
+        if (match != null) {
+            myArray.push(match[1] || match[0]);
+        }
+    } while (match != null);
+
+    return myArray.length > 2 ? myArray.slice(2) : [];
+};
+
+const getSubscriptionEvents = (subscription_events: string): SubscriptionEvents[] => {
+    const events = subscription_events.split(',');
+    return events.map((event) => SubscriptionEventsMap[event]);
+};
+
+// Returns value for record data header
+const getRecordValueForHeader = (key: TypesContainingLink, value?: string | LinkData): string | JSX.Element | null => {
+    if (!value) {
+        return null;
+    } else if (typeof value === 'string') {
+        if (value === Constants.EmptyFieldsInServiceNow || !KeysContainingLink.has(key)) {
+            return value;
+        }
+
+        const data: LinkData = getLinkData(value);
+        return (
+            <a
+                href={data.link}
+                target='_blank'
+                rel='noreferrer'
+                className='btn btn-link padding-0'
+            >
+                <div className='shared-posts__field-value'>{data.display_value}</div>
+            </a>
+        );
+    }
+
+    return null;
+};
+
 const getImpactAndUrgencyOptions = (
     setImpactOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>,
     setUrgencyOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>,
@@ -123,7 +159,9 @@ export default {
     getSubscriptionHeaderLink,
     onPressingEnterKey,
     getLinkData,
-    validateKeysContainingLink,
     getResultPanelHeader,
+    getCommandArgs,
+    getSubscriptionEvents,
+    getRecordValueForHeader,
     getImpactAndUrgencyOptions,
 };

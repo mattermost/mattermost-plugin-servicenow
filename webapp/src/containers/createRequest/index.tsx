@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {AutoSuggest, CustomModal as Modal, ModalFooter, ModalHeader, SkeletonLoader} from '@brightscout/mattermost-ui-library';
+import {AutoSuggest, CustomModal as Modal, ModalFooter, ModalHeader, ResultPanel, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
@@ -9,81 +9,52 @@ import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
 
+import {setConnected} from 'src/reducers/connectedState';
 import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {isCreateRequestModalOpen} from 'src/selectors';
 
+import Utils from 'src/utils';
+
 import './styles.scss';
 
-// TODO: remove later after integration with the APIs
-const requestOptions: RequestData[] = [
-    {
-        sys_id: 'sys_id 1',
-        name: 'name 1',
-        short_description: 'desc 1',
-        price: 'price 1',
-        category: {
-            sys_id: 'category 1 sys_id',
-            title: 'category 1',
-        },
-    },
-    {
-        sys_id: 'sys_id 2',
-        name: 'name 2',
-        short_description: 'desc 2',
-        price: 'price 2',
-        category: {
-            sys_id: 'category 2 sys_id',
-            title: 'category 2',
-        },
-    },
-    {
-        sys_id: 'sys_id 3',
-        name: 'item 1',
-        short_description: 'desc 3',
-        price: 'price 3',
-        category: {
-            sys_id: 'category 3 sys_id',
-            title: '',
-        },
-    },
-    {
-        sys_id: 'sys_id 4',
-        name: 'itme 2',
-        short_description: 'desc 4',
-        price: 'price 4',
-        category: {
-            sys_id: 'category 4 sys_id',
-            title: '',
-        },
-    },
-];
-
 const CreateRequest = () => {
-    const [options, setOptions] = useState<RequestData[]>(requestOptions);
+    const [options, setOptions] = useState<RequestData[]>([]);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [autoSuggestValue, setAutoSuggestValue] = useState('');
     const [suggestionChosen, setSuggestionChosen] = useState(false);
     const [request, setRequest] = useState<Record<string, string> | null>(null);
+    const [showErrorPanel, setShowErrorPanel] = useState(false);
+    const [searchItemsPayload, setSearchItemsPayload] = useState<SearchItemsParams | null>(null);
+    const [showModal, setShowModal] = useState(false);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
 
     // usePluginApi hook
-    const {getApiState, pluginState} = usePluginApi();
+    const {getApiState, makeApiRequest, pluginState} = usePluginApi();
+    const open = isCreateRequestModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
 
     const dispatch = useDispatch();
 
-    const hideModal = useCallback(() => {
+    // Reset the field states
+    const resetFieldStates = useCallback(() => {
         setOptions([]);
         setSuggestions([]);
         setAutoSuggestValue('');
         setApiError(null);
         setSuggestionChosen(false);
         setRequest(null);
+        setShowErrorPanel(false);
+        setSearchItemsPayload(null);
+        setShowModal(false);
+    }, []);
+
+    const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
+        resetFieldStates();
     }, []);
 
     const mapRequestsToSuggestions = (requests: RequestData[]): Array<Record<string, string>> => requests.map((r) => ({
@@ -97,9 +68,8 @@ const CreateRequest = () => {
 
     // Set the suggestions when the input value of the auto-suggest changes
     useEffect(() => {
-        const requestsToSuggest = options?.filter((r) => r.name.toLowerCase().includes(autoSuggestValue.toLowerCase())) || [];
-        setSuggestions(mapRequestsToSuggestions(requestsToSuggest));
-    }, [autoSuggestValue]);
+        setSuggestions(mapRequestsToSuggestions(options));
+    }, [options]);
 
     useEffect(() => {
         // Reset the caller auto-suggest input when the request value is reset
@@ -123,11 +93,64 @@ const CreateRequest = () => {
         return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
+    const getItemsSuggestions = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, searchItemsPayload);
+        return {isLoading, isSuccess, isError, data: data as RequestData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
 
+    // Get the suggestions from the API
+    const getSuggestions = ({searchFor}: {searchFor?: string}) => {
+        if (searchFor) {
+            setApiError(null);
+            setRequest(null);
+            setSearchItemsPayload({search: searchFor});
+            makeApiRequest(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor});
+        }
+    };
+
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, Constants.DebounceFunctionTimeLimit), [getSuggestions]);
+
+    // handle input value change
+    const handleInputChange = (currentValue: string) => {
+        setAutoSuggestValue(currentValue);
+        setSuggestionChosen(false);
+        if (currentValue) {
+            if (currentValue.length >= Constants.CharThresholdToSuggestRequest) {
+                debouncedGetSuggestions({searchFor: currentValue});
+            }
+        }
+    };
+
+    // Handle API state updates in the suggestions
+    useEffect(() => {
+        const {isLoading, isSuccess, isError, data, error} = getItemsSuggestions();
+        setShowModalLoader(isLoading);
+        if (isError && error) {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
+
+            setShowErrorPanel(true);
+            setApiError(error);
+        }
+
+        if (isSuccess && data) {
+            setOptions(data);
+        }
+    }, [getItemsSuggestions().isLoading, getItemsSuggestions().isError, getItemsSuggestions().isSuccess]);
+
+    useEffect(() => {
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
+    }, [open]);
+
+    const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
     return (
         <Modal
-            show={isCreateRequestModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >
@@ -137,58 +160,71 @@ const CreateRequest = () => {
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <div
-                    className={`padding-h-12 padding-top-25 
-                    ${suggestionChosen ? 'height-290' : 'height-120'}`}
-                >
-                    <AutoSuggest
-                        placeholder='Search catalog items'
-                        inputValue={autoSuggestValue}
-                        onInputValueChange={setAutoSuggestValue}
-                        onChangeSelectedSuggestion={handleRequestSelection}
-                        disabled={showModalLoader}
-                        suggestionConfig={{
-                            suggestions,
-                            renderValue: (suggestion) => suggestion.name,
+                {(showErrorPanel && apiError) ? (
+                    <ResultPanel
+                        header={Utils.getResultPanelHeader(apiError, hideModal)}
+                        className='wizard__secondary-panel--slide-in result-panel'
+                        primaryBtn={{
+                            text: 'Close',
+                            onClick: hideModal,
                         }}
-                        charThresholdToShowSuggestions={Constants.CharThresholdToSuggestRequest}
+                        iconClass='fa-times-circle-o result-panel-icon--error'
                     />
-                    {suggestionChosen && request && (
-                        <>
-                            <ul className='search-panel__description margin-top-25 padding-left-15 font-14'>
-                                {Constants.RequestDataLabelConfig.map((header) => (
-                                    <li
-                                        key={header.key}
-                                        className='d-flex align-items-center search-panel__description-item margin-bottom-10'
-                                    >
-                                        <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                        <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{showModalLoader ? <SkeletonLoader/> : request[header.key] || 'N/A'}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            {serviceNowBaseURL && (
-                                <div>
-                                    <a
-                                        className='color--link btn btn-primary servicenow-request-button'
-                                        href={`${serviceNowBaseURL}/${Constants.REQUEST_BASE_URL}${request.id}`}
-                                        rel='noreferrer'
-                                        target='_blank'
-                                    >
-                                        {Constants.RequestButtonText}
-                                    </a>
-                                    <div className='servicenow-request-button__redirect-text'>
-                                        {Constants.RequestButtonRedirectText}
-                                    </div>
-                                </div>
+                ) : (
+                    <>
+                        <div
+                            className={`padding-h-12 padding-top-25 padding-bottom-30
+                            ${suggestionChosen ? 'height-auto' : 'height-120'}`}
+                        >
+                            <AutoSuggest
+                                placeholder='Search catalog items'
+                                inputValue={autoSuggestValue}
+                                onInputValueChange={handleInputChange}
+                                onChangeSelectedSuggestion={handleRequestSelection}
+                                suggestionConfig={{
+                                    suggestions,
+                                    renderValue: (suggestion) => suggestion.name,
+                                }}
+                                charThresholdToShowSuggestions={Constants.CharThresholdToSuggestRequest}
+                            />
+                            {suggestionChosen && request && (
+                                <>
+                                    <ul className='search-panel__description margin-top-25 padding-left-15 font-14'>
+                                        {Constants.RequestDataLabelConfig.map((header) => (
+                                            <li
+                                                key={header.key}
+                                                className='d-flex align-items-center search-panel__description-item margin-bottom-10'
+                                            >
+                                                <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
+                                                <span className='search-panel__description-text channel-text wt-500 text-ellipsis white-space-inherit'>{showModalLoader ? <SkeletonLoader/> : request[header.key] || 'N/A'}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {serviceNowBaseURL && (
+                                        <div>
+                                            <a
+                                                className='color--link btn btn-primary servicenow-request-button'
+                                                href={`${serviceNowBaseURL}/${Constants.REQUEST_BASE_URL}${request.id}`}
+                                                rel='noreferrer'
+                                                target='_blank'
+                                            >
+                                                {Constants.RequestButtonText}
+                                            </a>
+                                            <div className='servicenow-request-button__redirect-text'>
+                                                {Constants.RequestButtonRedirectText}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
-                        </>
-                    )}
-                </div>
-                <ModalFooter
-                    onConfirm={hideModal}
-                    confirmBtnText='Close'
-                    confirmDisabled={showModalLoader}
-                />
+                        </div>
+                        <ModalFooter
+                            onConfirm={hideModal}
+                            confirmBtnText='Close'
+                            confirmDisabled={showModalLoader}
+                        />
+                    </>
+                )}
             </>
         </Modal>
     );
