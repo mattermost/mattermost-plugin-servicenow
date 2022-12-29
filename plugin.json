@@ -2,17 +2,21 @@
     "id": "mattermost-plugin-servicenow",
     "name": "Servicenow Plugin",
     "description": "This plugin serves as an integration between Mattermost and ServiceNow.",
-    "icon_path": "assets/starter-template-icon.svg",
+    "icon_path": "assets/icon.svg",
     "version": "3.0.0",
+    "homepage_url": "https://github.com/mattermost/mattermost-plugin-servicenow",
+    "support_url": "https://github.com/mattermost/mattermost-plugin-servicenow/issues",
+    "release_notes_url": "https://github.com/mattermost/mattermost-plugin-servicenow/releases/tag/v2.3.4",
     "min_server_version": "5.37.0",
     "server": {
         "executables": {
-            "linux-amd64": "server/dist/plugin-linux-amd64",
-            "linux-arm64": "server/dist/plugin-linux-arm64",
             "darwin-amd64": "server/dist/plugin-darwin-amd64",
             "darwin-arm64": "server/dist/plugin-darwin-arm64",
+            "linux-amd64": "server/dist/plugin-linux-amd64",
+            "linux-arm64": "server/dist/plugin-linux-arm64",
             "windows-amd64": "server/dist/plugin-windows-amd64.exe"
-        }
+        },
+        "executable": ""
     },
     "webapp": {
         "bundle_path": "webapp/dist/main.js"
@@ -35,6 +39,7 @@
                 "type": "generated",
                 "help_text": "The webhook secret used by the ServiceNow API calls to Mattermost for sending notifications.",
                 "regenerate_help_text": "Regenerates the secret for ServiceNow Plugin. Regenerating this key invalidates any existing token.",
+                "placeholder": "",
                 "default": null
             },
             {
@@ -58,6 +63,7 @@
                 "display_name": "Encryption Secret:",
                 "type": "generated",
                 "help_text": "The secret key used to encrypt and decrpyt OAuth token.",
+                "placeholder": "",
                 "default": null
             },
             {
@@ -65,6 +71,7 @@
                 "display_name": "Download ServiceNow Update Set:",
                 "type": "custom",
                 "help_text": "The update set XML file that needs to be uploaded in ServiceNow for enabling subscriptions.",
+                "placeholder": "",
                 "default": ""
             }
         ]
