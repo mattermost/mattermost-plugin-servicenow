@@ -30,10 +30,8 @@ describe('RHSHeader', () => {
 
         expect(wrapper).toMatchSnapshot();
         expect(wrapper.find('ToggleSwitch').exists()).toBeFalsy();
-        wrapper.find('button').simulate('click');
-        expect(mockDispatch).toBeCalled();
 
-        wrapper.find('IconButton').simulate('click');
+        wrapper.find('IconButton').first().simulate('click');
         expect(wrapper).toMatchSnapshot();
         expect(wrapper.find('ToggleSwitch').exists()).toBeTruthy();
 
