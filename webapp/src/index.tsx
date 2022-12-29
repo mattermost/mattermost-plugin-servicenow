@@ -14,6 +14,8 @@ import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
 import CreateIncident from 'src/containers/createIncident';
+import NotificationPost from 'src/containers/custom_post/notificationPost';
+import ShareRecordPost from 'src/containers/custom_post/shareRecordPost';
 import CreateRequest from 'src/containers/createRequest';
 import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
@@ -22,7 +24,7 @@ import UpdateState from 'src/containers/updateState';
 import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleSubscriptionDeleted, handleOpenCommentModal, handleOpenUpdateStateModal} from 'src/websocket';
+import {handleConnect, handleDisconnect, handleSubscriptionDeleted} from 'src/websocket';
 import Utils from 'src/utils';
 
 import App from './app';
@@ -59,14 +61,18 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
-        registry.registerWebSocketEventHandler(`custom_${manifest.id}_comment_modal`, handleOpenCommentModal(store));
-        registry.registerWebSocketEventHandler(`custom_${manifest.id}_update_state`, handleOpenUpdateStateModal(store));
+        registry.registerPostTypeComponent('custom_sn_share', ShareRecordPost);
+        registry.registerPostTypeComponent('custom_sn_notification', NotificationPost);
     }
 }
 
 declare global {
     interface Window {
         registerPlugin(id: string, plugin: Plugin): void
+        PostUtils: {
+            formatText(text: string, options?: FormatTextOptions): string,
+            messageHtmlToComponent(html: string, isRHS: boolean, option?: MessageHtmlToComponentOptions): React.ReactNode,
+        }
     }
 }
 

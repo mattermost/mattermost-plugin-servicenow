@@ -65,9 +65,9 @@ const ShareRecords = () => {
     }, []);
 
     const hideModal = useCallback(() => {
+        dispatch(resetGlobalModalState());
         resetFieldStates();
         setShowModal(false);
-        dispatch(resetGlobalModalState());
     }, []);
 
     // Opens share record modal

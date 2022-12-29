@@ -90,6 +90,10 @@ const (
 	WSEventOpenCommentModal     = "comment_modal"
 	WSEventOpenUpdateStateModal = "update_state"
 
+	// Custom posts type
+	CustomNotifictationPost = "custom_sn_notification"
+	CustomSharePost         = "custom_sn_share"
+
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
 	APIErrorNotConnected                 = "You have not connected your Mattermost account to ServiceNow."
