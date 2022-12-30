@@ -376,3 +376,77 @@ func TestDecodeKey(t *testing.T) {
 		})
 	}
 }
+
+func TestHasChannelPermissions(t *testing.T) {
+	for _, testCase := range []struct {
+		description  string
+		setupAPI     func(api *plugintest.API)
+		statusCode   int
+		errorMessage string
+	}{
+		{
+			description: "HasChannelPermissions: user has channel permissions",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_OPEN), nil,
+				)
+				api.On("GetChannelMember", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					nil, nil,
+				)
+			},
+			statusCode: http.StatusOK,
+		},
+		{
+			description: "HasChannelPermissions: unable to get channel",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					nil, testutils.GetInternalServerAppError("unable to get channel"),
+				)
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			statusCode:   http.StatusInternalServerError,
+			errorMessage: constants.ErrorChannelPermissionsForUser,
+		},
+		{
+			description: "HasChannelPermissions: channel is a direct channel",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_DIRECT), nil,
+				)
+			},
+			statusCode:   http.StatusBadRequest,
+			errorMessage: constants.ErrorInvalidChannelType,
+		},
+		{
+			description: "HasChannelPermissions: unable to check if a user is part of the channel",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_OPEN), nil,
+				)
+				api.On("GetChannelMember", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					nil, testutils.GetInternalServerAppError("unable to check if a user is part of the channel"),
+				)
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			statusCode:   http.StatusInternalServerError,
+			errorMessage: constants.ErrorInsufficientPermissions,
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			testCase.setupAPI(api)
+			defer api.AssertExpectations(t)
+
+			statusCode, err := p.HasChannelPermissions(testutils.GetID(), testutils.GetChannelID())
+			if testCase.errorMessage != "" {
+				assert.EqualError(err, testCase.errorMessage)
+			} else {
+				assert.Nil(err)
+			}
+
+			assert.EqualValues(testCase.statusCode, statusCode)
+		})
+	}
+}
