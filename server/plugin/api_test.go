@@ -3,6 +3,7 @@ package plugin
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -107,7 +108,6 @@ func TestGetConnected(t *testing.T) {
 			var cr *serializer.ConnectedResponse
 			err := json.NewDecoder(result.Body).Decode(&cr)
 			require.Nil(t, err)
-
 			assert.Equal(test.ExpectedValue, cr.Connected)
 		})
 	}
@@ -187,7 +187,6 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 				var channels []*model.Channel
 				err := json.NewDecoder(result.Body).Decode(&channels)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(channels))
 			}
 
@@ -195,7 +194,6 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
@@ -216,10 +214,10 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 	}{
 		"success": {
 			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(true),
+			SearchTerm: testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords),
 			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords), limit, offset).Return(
 					testutils.GetServiceNowPartialRecords(3), http.StatusOK, nil,
 				)
 			},
@@ -238,7 +236,7 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		},
 		"invalid search term": {
 			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(false),
+			SearchTerm: testutils.GetSearchTerm(false, constants.CharacterThresholdForSearchingRecords),
 			SetupAPI: func(api *plugintest.API) {
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
@@ -248,12 +246,12 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		},
 		"failed to get records": {
 			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(true),
+			SearchTerm: testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords), limit, offset).Return(
 					nil, http.StatusForbidden, fmt.Errorf("new error"),
 				)
 			},
@@ -290,7 +288,6 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 				var channels []*model.Channel
 				err := json.NewDecoder(result.Body).Decode(&channels)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(channels))
 			}
 
@@ -298,7 +295,6 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
@@ -372,7 +368,6 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -605,7 +600,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -695,7 +689,6 @@ func TestGetCommentsForRecord(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -785,7 +778,6 @@ func TestAddCommentsOnRecord(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -891,7 +883,6 @@ func TestGetStatesForRecordType(t *testing.T) {
 				var states []*serializer.ServiceNowState
 				err := json.NewDecoder(result.Body).Decode(&states)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(states))
 			}
 
@@ -899,7 +890,6 @@ func TestGetStatesForRecordType(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
@@ -1000,7 +990,6 @@ func TestUpdateStateOfRecord(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1291,7 +1280,6 @@ func TestCreateSubscription(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1441,7 +1429,6 @@ func TestGetAllSubscriptions(t *testing.T) {
 				var subscripitons []*serializer.SubscriptionResponse
 				err := json.NewDecoder(result.Body).Decode(&subscripitons)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(subscripitons))
 			}
 
@@ -1449,7 +1436,81 @@ func TestGetAllSubscriptions(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
 
+func TestGetSubscriptionAPI(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSubscriptionOperationsByID)
+	for name, test := range map[string]struct {
+		SetupAPI             func(*plugintest.API)
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			SetupAPI: func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
+				)
+				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					testutils.GetServiceNowRecord(), http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"failed to get the subscription": {
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					nil, http.StatusInternalServerError, fmt.Errorf("failed to get the subscription"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "Error in getting the subscription. Error: failed to get the subscription",
+		},
+		"subscription not found": {
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					nil, http.StatusNotFound, fmt.Errorf("failed to get the subscription"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusNotFound,
+			ExpectedErrorMessage: "No record found",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			defer monkey.UnpatchAll()
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForSubscriptionsConfiguredMiddleware(p, t)
+			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1510,7 +1571,6 @@ func TestDeleteSubscription(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1667,7 +1727,6 @@ func TestEditSubscription(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1766,7 +1825,6 @@ func TestCheckOAuth(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1836,8 +1894,295 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
+func TestAPICreateIncident(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateIncident)
+	for name, test := range map[string]struct {
+		RequestBody          string
+		SetupAPI             func(*plugintest.API)
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
+					nil, nil,
+				)
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(
+					testutils.GetServiceNowIncidentResponse(), http.StatusOK, nil,
+				)
+
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"invalid request body": {
+			RequestBody: "",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"invalid incident": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return fmt.Errorf("invalid payload")
+				})
+			},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedErrorMessage: "invalid payload",
+		},
+		"failed to create the incident": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(
+					nil, http.StatusForbidden, fmt.Errorf("create incident error"),
+				)
+
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+			},
+			ExpectedStatusCode:   http.StatusForbidden,
+			ExpectedErrorMessage: "create incident error",
+		},
+		"failed to create the post": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
+					nil, testutils.GetInternalServerAppError(),
+				)
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(
+					testutils.GetServiceNowIncidentResponse(), http.StatusOK, nil,
+				)
+
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			defer monkey.UnpatchAll()
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPost, requestURL, bytes.NewBufferString(test.RequestBody))
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
+func TestAPISearchCatalogItemsInServiceNow(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSearchCatalogItems)
+	limit, offset := testutils.GetLimitAndOffset()
+	for name, test := range map[string]struct {
+		SearchTerm           string
+		SetupAPI             func(*plugintest.API)
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedCount        int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			SearchTerm: testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingCatalogItems),
+			SetupAPI:   func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("SearchCatalogItemsInServiceNow", testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingCatalogItems), limit, offset).Return(
+					testutils.GetServiceNowCatalogItems(3), http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      3,
+		},
+		"invalid search term": {
+			SearchTerm:           testutils.GetSearchTerm(false, constants.CharacterThresholdForSearchingCatalogItems),
+			SetupAPI:             func(api *plugintest.API) {},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedCount:        -1,
+			ExpectedErrorMessage: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.CharacterThresholdForSearchingCatalogItems),
+		},
+		"failed to get the catalog items": {
+			SearchTerm: testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingCatalogItems),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("SearchCatalogItemsInServiceNow", testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingCatalogItems), limit, offset).Return(
+					nil, http.StatusForbidden, fmt.Errorf("failed to get the catalog items"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusForbidden,
+			ExpectedCount:        -1,
+			ExpectedErrorMessage: fmt.Sprintf("%s. Error: %s", constants.APIErrorSearchingCatalogItems, "failed to get the catalog items"),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			defer monkey.UnpatchAll()
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
+			w := httptest.NewRecorder()
+			queryParams := url.Values{
+				constants.QueryParamSearchTerm: {test.SearchTerm},
+			}
+			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
+			r.URL.RawQuery = queryParams.Encode()
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+
+			if test.ExpectedCount != -1 {
+				var items []*serializer.ServiceNowCatalogItem
+				err := json.NewDecoder(result.Body).Decode(&items)
+				require.Nil(t, err)
+
+				assert.Equal(test.ExpectedCount, len(items))
+			}
+
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+				assert.Equal(test.ExpectedErrorMessage, resp.Message)
+			}
+		})
+	}
+}
+
+func TestAPIGetIncidentFields(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathGetIncidentFields)
+	for name, test := range map[string]struct {
+		SetupAPI             func(*plugintest.API)
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedCount        int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			SetupAPI: func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetIncidentFieldsFromServiceNow").Return(
+					testutils.GetServiceNowIncidentFields(3), http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      3,
+		},
+		"failed to get the incident fields": {
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...)
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetIncidentFieldsFromServiceNow").Return(
+					nil, http.StatusInternalServerError, errors.New("unable to get the incident fields"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: fmt.Sprintf("%s. Error: unable to get the incident fields", constants.ErrorGetIncidentFields),
+			ExpectedCount:        -1,
+		},
+		"no fields fetched from ServiceNow": {
+			SetupAPI: func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetIncidentFieldsFromServiceNow").Return(
+					nil, http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedCount:      0,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			defer monkey.UnpatchAll()
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+
+			if test.ExpectedCount != -1 {
+				var fields []*serializer.ServiceNowIncidentFields
+				err := json.NewDecoder(result.Body).Decode(&fields)
+				require.Nil(t, err)
+				assert.Equal(test.ExpectedCount, len(fields))
+			}
+
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
 	}
