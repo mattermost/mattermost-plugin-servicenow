@@ -20,6 +20,10 @@
     text-align: right;
 }
 
+.white-space-inherit {
+    white-space: inherit;
+}
+
 // Margins
 .margin-left-auto {
     margin-left: auto;
@@ -38,6 +42,11 @@
     height: 120px;
 }
 
-.height-290 {
-    height: 290px;
+.height-auto {
+    height: auto;
+}
+
+// Padding
+.padding-left-6 {
+    padding-left: 6px;
 }

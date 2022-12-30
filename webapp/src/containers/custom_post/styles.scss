@@ -1,0 +1,45 @@
+.servicenow-post {
+    .shared-post {
+        border: 1px solid var(--center-channel-color-40);
+        border-left: 4px solid rgba(35, 137, 215, 0.5);
+        border-radius: 0 4px 4px 0;
+        margin: 5px 0;
+        padding: 12px;
+        background: rgb(var(--center-channel-bg-rgb));
+
+        &__pretext {
+            font-size: 13.5px;
+        }
+
+        &__field-title {
+            font-size: 14px;
+            padding-top: 11px;
+        }
+
+        &__field-value {
+            font-size: 13.5px;
+        }
+
+        &__modal-button {
+            border-radius: 3px;
+            outline: 0;
+            margin: 8px 8px 0 0;
+            border: 1px solid var(--center-channel-color-40);
+            font-size: 13px;
+            padding: 6px 12px;
+            background: rgb(var(--center-channel-bg-rgb));
+
+            &:hover {
+                border-color: var(--center-channel-color-48);
+                background: var(--center-channel-color-04);
+            }
+        }
+    }
+
+    .notification-post {
+        &__table {
+            width: 100%;
+            table-layout: fixed;
+        }
+    }
+}

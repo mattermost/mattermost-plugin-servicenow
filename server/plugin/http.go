@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -22,7 +21,7 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-var ErrorContentTypeNotJSON = fmt.Errorf("content type of the response is not JSON")
+var ErrorConnectionRefused = fmt.Errorf("unable to make a connection to the specified ServiceNow instance")
 
 func (c *client) CallJSON(method, path string, in, out interface{}, params url.Values) (responseData []byte, statusCode int, err error) {
 	contentType := "application/json"
@@ -66,10 +65,8 @@ func (c *client) Call(method, path, contentType string, inBody io.Reader, out in
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "invalid character '<'") {
-			return nil, http.StatusInternalServerError, ErrorContentTypeNotJSON
-		}
-		return nil, http.StatusInternalServerError, err
+		c.plugin.API.LogError(ErrorConnectionRefused.Error(), "Error", err.Error())
+		return nil, http.StatusInternalServerError, ErrorConnectionRefused
 	}
 
 	if resp.Body == nil {
