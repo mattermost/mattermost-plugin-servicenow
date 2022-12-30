@@ -67,7 +67,6 @@ describe('RHSHeader', () => {
 
         wrapper.find('IconButton').first().simulate('click');
         expect(wrapper).toMatchSnapshot();
-        expect(wrapper).toMatchSnapshot();
         expect(wrapper.find('div').last().hasClass('rhs-filter-popover rhs-menu-popover'));
         expect(wrapper.find('MenuButtons').exists()).toBeTruthy();
         expect(wrapper.find('ToggleSwitch').exists()).toBeFalsy();
