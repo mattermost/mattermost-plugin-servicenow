@@ -5,7 +5,7 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
 
-import {CustomModal as Modal, ModalFooter, ModalHeader, ResultPanel} from '@brightscout/mattermost-ui-library';
+import {CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -35,6 +35,7 @@ const ShareRecords = () => {
     const [recordData, setRecordData] = useState<RecordData | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
+    const [showModal, setShowModal] = useState(false);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -44,6 +45,7 @@ const ShareRecords = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isShareRecordModalOpen(pluginState);
 
     const dispatch = useDispatch();
 
@@ -63,8 +65,9 @@ const ShareRecords = () => {
     }, []);
 
     const hideModal = useCallback(() => {
-        resetFieldStates();
         dispatch(resetGlobalModalState());
+        resetFieldStates();
+        setShowModal(false);
     }, []);
 
     // Opens share record modal
@@ -78,16 +81,16 @@ const ShareRecords = () => {
     };
 
     useEffect(() => {
-        const shareRecordState = getShareRecordState();
-        if (shareRecordState.isError && shareRecordState.error) {
-            setApiError(shareRecordState.error);
+        const {error, isError, isLoading, isSuccess} = getShareRecordState();
+        if (isError && error) {
+            setApiError(error);
         }
 
-        if (shareRecordState.isSuccess) {
+        if (isSuccess) {
             setShowResultPanel(true);
         }
 
-        setShowModalLoader(shareRecordState.isLoading);
+        setShowModalLoader(isLoading);
     }, [getShareRecordState().isLoading, getShareRecordState().isError, getShareRecordState().isSuccess]);
 
     const shareRecord = () => {
@@ -98,18 +101,8 @@ const ShareRecords = () => {
 
         const payload: ShareRecordPayload = {
             channel_id: channel,
-            number: recordData?.number || '',
             record_type: recordType as RecordType,
             sys_id: recordId || '',
-            assigned_to: recordData?.assigned_to || '',
-            assignment_group: recordData?.assignment_group || '',
-            priority: recordData?.priority || '',
-            short_description: recordData?.short_description || '',
-            state: recordData?.state || '',
-            author: recordData?.author || '',
-            kb_category: recordData?.kb_category || '',
-            kb_knowledge_base: recordData?.kb_knowledge_base || '',
-            workflow_state: recordData?.workflow_state || '',
         };
 
         setShareRecordPayload(payload);
@@ -123,12 +116,18 @@ const ShareRecords = () => {
         }
     }, [channel, suggestionChosen]);
 
-    // Set the channel when button is clicked
     useEffect(() => {
+        // Set the channel when button is clicked
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-    }, [currentChannelId, isShareRecordModalOpen(pluginState)]);
+
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
+    }, [open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
         if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
@@ -140,9 +139,9 @@ const ShareRecords = () => {
 
     return (
         <Modal
-            show={isShareRecordModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -150,6 +149,7 @@ const ShareRecords = () => {
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
+                <ModalLoader loading={getShareRecordState().isLoading}/>
                 {showResultPanel || apiError ? (
                     <ResultPanel
                         header={Utils.getResultPanelHeader(apiError, hideModal, Constants.RecordSharedMsg)}

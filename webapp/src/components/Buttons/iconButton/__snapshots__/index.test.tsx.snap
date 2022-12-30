@@ -7,7 +7,7 @@ exports[`IconButton should match snapshot with all the props 1`] = `
   <Button
     active={false}
     aria-label="mockTooltip"
-    className="plugin-btn button-wrapper btn-icon mockExtraClass"
+    className="plugin-btn servicenow-button-wrapper btn-icon mockExtraClass"
     disabled={false}
     onClick={[MockFunction]}
     onKeyDown={[Function]}
@@ -29,7 +29,7 @@ exports[`IconButton should match snapshot with only tooltip text provided 1`] = 
   <Button
     active={false}
     aria-label="mockTooltip"
-    className="plugin-btn button-wrapper btn-icon "
+    className="plugin-btn servicenow-button-wrapper btn-icon "
     disabled={false}
     onKeyDown={[Function]}
     tabIndex={0}
