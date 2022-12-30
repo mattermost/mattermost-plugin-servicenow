@@ -26,7 +26,7 @@ import './styles.scss';
 type AddOrEditSubscriptionProps = {
     open: boolean;
     close: () => void;
-    subscriptionData?: EditSubscriptionData;
+    subscriptionData?: EditSubscriptionData | string;
 };
 
 const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscriptionProps) => {
@@ -37,6 +37,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Subscription type panel values
     const [subscriptionType, setSubscriptionType] = useState<SubscriptionType | null>(null);
+    const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
 
     // Record panel values
     const [recordValue, setRecordValue] = useState('');
@@ -85,6 +86,11 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     const dispatch = useDispatch();
 
+    const getSubscriptionsConfiguredState = () => {
+        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
+        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
+
     // Get create subscription state
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
@@ -97,29 +103,62 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
+    const getSubscriptionState = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData as string);
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
+
+    const handleSubscriptionData = (data: EditSubscriptionData) => {
+        // Set values for channel panel
+        setChannel(data.channel);
+
+        // Set initial values for subscription-type panel
+        setSubscriptionType(data.type);
+
+        // Set initial values for record-type panel
+        setRecordType(data.recordType);
+
+        // Set initial values for search-record panel
+        setRecordId(data.recordId);
+        setSuggestionChosen(true);
+
+        // Set initial value for events panel
+        setSubscriptionEvents(data.subscriptionEvents);
+    };
+
     useEffect(() => {
         if (open && currentChannelId) {
             setChannel(currentChannelId);
         }
 
-        if (open && subscriptionData) {
-            // Set values for channel panel
-            setChannel(subscriptionData.channel);
-
-            // Set initial values for subscription-type panel
-            setSubscriptionType(subscriptionData.type);
-
-            // Set initial values for record-type panel
-            setRecordType(subscriptionData.recordType);
-
-            // Set initial values for search-record panel
-            setRecordId(subscriptionData.recordId);
-            setSuggestionChosen(true);
-
-            // Set initial value for events panel
-            setSubscriptionEvents(subscriptionData.subscriptionEvents);
+        if (open && subscriptionData && getSubscriptionsConfiguredState().isSuccess) {
+            if (typeof (subscriptionData) === 'string') {
+                makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
+            } else {
+                handleSubscriptionData(subscriptionData);
+            }
         }
-    }, [open, subscriptionData, currentChannelId]);
+    }, [open, subscriptionData, currentChannelId, getSubscriptionsConfiguredState().isSuccess]);
+
+    useEffect(() => {
+        if (typeof (subscriptionData) === 'string') {
+            const {isSuccess, data} = getSubscriptionState();
+            if (isSuccess) {
+                const subscriptionDataFromApi: EditSubscriptionData = ({
+                    userId: data.user_id,
+                    channel: data.channel_id,
+                    recordId: data.record_id,
+                    type: data.type,
+                    recordType: data.record_type,
+                    subscriptionEvents: Utils.getSubscriptionEvents(data.subscription_events),
+                    id: data.sys_id,
+                });
+
+                handleSubscriptionData(subscriptionDataFromApi);
+                setEditSubscriptionData(subscriptionDataFromApi);
+            }
+        }
+    }, [getSubscriptionState().isLoading, getSubscriptionState().isError, getSubscriptionState().isSuccess]);
 
     useEffect(() => {
         const createSubscriptionState = getCreateSubscriptionState();
@@ -159,6 +198,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setSuggestionChosen(false);
         setRecordType(null);
         setSubscriptionEvents([]);
+        setEditSubscriptionData(null);
     }, []);
 
     // Reset panel states
@@ -190,7 +230,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         // Resetting opened panel states so that there isn't unnecessary jump from one panel to another while closing the modal
         setTimeout(() => {
             resetPanelStates();
-        }, 500);
+        });
     };
 
     // Handle action when add another subscription button is clicked
@@ -213,7 +253,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const setHeight = (modalContent: Element) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`);
 
         // Select all the modal-content elements and set the height
-        document.querySelectorAll('.rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
+        document.querySelectorAll('.servicenow-rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
     };
 
     // Change height of the modal depending on the height of the visible panel
@@ -316,13 +356,13 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
             is_active: true,
-            user_id: Cookies.get(Constants.MMUSERID) ?? '',
+            user_id: (typeof (subscriptionData) === 'string' ? editSubscriptionData?.userId : subscriptionData?.userId) ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
             record_id: recordId || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
-            sys_id: subscriptionData?.id as string,
+            sys_id: (typeof (subscriptionData) === 'string' ? subscriptionData : subscriptionData?.id) as string,
         };
 
         // Set payload
@@ -332,13 +372,63 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         makeApiRequest(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, payload);
     };
 
+    const handleErrorComponent = (error?: APIError): JSX.Element => (
+        <Modal
+            show={open}
+            onHide={hideModal}
+            className='rhs-modal add-edit-subscription-modal wizard'
+        >
+            <>
+                <ModalHeader
+                    title={subscriptionData ? 'Edit Subscription' : 'Add Subscription'}
+                    onHide={hideModal}
+                    showCloseIconInHeader={true}
+                />
+                <ResultPanel
+                    header={Utils.getResultPanelHeader(error ?? null, hideModal)}
+                    className='wizard__secondary-panel--slide-in result-panel'
+                    primaryBtn={{
+                        text: 'Close',
+                        onClick: hideModal,
+                    }}
+                    iconClass='fa-times-circle-o result-panel-icon--error'
+                />
+            </>
+        </Modal>
+    );
+
+    if (getSubscriptionsConfiguredState().isLoading) {
+        return <></>;
+    }
+
+    if (typeof (subscriptionData) === 'string' && !editSubscriptionData) {
+        if (getSubscriptionState().isError) {
+            return handleErrorComponent(getSubscriptionState().error);
+        }
+
+        return <></>;
+    }
+
+    if (getSubscriptionsConfiguredState().isError) {
+        const error = getSubscriptionsConfiguredState().error;
+        if (
+            error?.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
+            error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
+            error?.id !== Constants.ApiErrorIdNotConnected
+        ) {
+            return handleErrorComponent(error);
+        }
+
+        return <></>;
+    }
+
     return (
         <Modal
             show={open}
             onHide={hideModal}
 
             // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-            className='rhs-modal add-edit-subscription-modal wizard'
+            className='servicenow-rhs-modal add-edit-subscription-modal wizard'
         >
             <>
                 <ModalHeader
@@ -365,6 +455,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     actionBtnDisabled={showModalLoader}
                     editing={true}
                     showFooter={true}
+                    required={true}
                 />
                 <SubscriptionTypePanel
                     className={`

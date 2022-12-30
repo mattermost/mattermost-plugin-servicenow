@@ -26,7 +26,7 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.1"
+	UpdateSetVersion            = "v2.2"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
@@ -80,16 +80,19 @@ const (
 	FieldAssignmentGroup      = "assignment_group"
 	FieldKnowledgeBase        = "knowledge_base"
 	FieldCategory             = "category"
+	FieldUrgency              = "urgency"
+	FieldImpact               = "impact"
 
 	// Websocket events
-	WSEventConnect                        = "connect"
-	WSEventDisconnect                     = "disconnect"
-	WSEventOpenAddSubscriptionModal       = "add_subscription"
-	WSEventOpenEditSubscriptionModal      = "edit_subscription"
-	WSEventSubscriptionDeleted            = "subscription_deleted"
-	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
-	WSEventOpenCommentModal               = "comment_modal"
-	WSEventOpenUpdateStateModal           = "update_state"
+	WSEventConnect              = "connect"
+	WSEventDisconnect           = "disconnect"
+	WSEventSubscriptionDeleted  = "subscription_deleted"
+	WSEventOpenCommentModal     = "comment_modal"
+	WSEventOpenUpdateStateModal = "update_state"
+
+	// Custom posts type
+	CustomNotifictationPost = "custom_sn_notification"
+	CustomSharePost         = "custom_sn_share"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -106,6 +109,7 @@ const (
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
+	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -118,6 +122,9 @@ const (
 	CommandSubscriptions  = "subscriptions"
 	CommandUnsubscribe    = "unsubscribe"
 	CommandSearchAndShare = "share"
+	CommandCreate         = "create"
+	SubCommandIncident    = "incident"
+	SubCommandRequest     = "request"
 	SubCommandList        = "list"
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"
@@ -156,6 +163,7 @@ const (
 	ErrorGetSubscriptions                 = "Error in getting all subscriptions"
 	ErrorEditingSubscription              = "Error in editing the subscription"
 	ErrorDeleteSubscription               = "Error in deleting the subscription"
+	ErrorGetSubscription                  = "Error in getting the subscription"
 	ErrorGetComments                      = "Error in getting all comments"
 	ErrorCreateComment                    = "Error in creating the comment"
 	ErrorSearchingRecord                  = "Error in searching for records in ServiceNow"
@@ -165,6 +173,13 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorSubscriptionsNotConfigured       = "Unable to check or activate subscriptions in ServiceNow."
+	ErrorGetIncidentFields                = "Error in getting the incident fields"
+	ErrorUserMismatch                     = "User ID does not match with the currently logged-in user ID."
+	ErrorInsufficientPermissions          = "user has insufficient permissions for the current channel"
+	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
+	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
+	ErrorInvalidChannelType               = "invalid channel type for performing action"
 )
 
 // kv store keys prefix

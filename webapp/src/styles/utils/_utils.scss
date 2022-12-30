@@ -20,6 +20,10 @@
     text-align: right;
 }
 
+.white-space-inherit {
+    white-space: inherit;
+}
+
 // Margins
 .margin-left-auto {
     margin-left: auto;
@@ -31,4 +35,18 @@
 
 .margin-right-8 {
     margin-right: 8px;
+}
+
+// Heights
+.height-120 {
+    height: 120px;
+}
+
+.height-auto {
+    height: auto;
+}
+
+// Padding
+.padding-left-6 {
+    padding-left: 6px;
 }

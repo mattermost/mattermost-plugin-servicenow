@@ -1,11 +1,14 @@
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 type ApiServiceName =
+    'getConnectedUser' |
+    'checkSubscriptionsConfigured' |
     'getChannels' |
     'searchRecords' |
     'getRecord' |
     'createSubscription' |
     'fetchSubscriptions' |
+    'fetchSubscription' |
     'editSubscription' |
     'deleteSubscription' |
     'getConfig' |
@@ -13,7 +16,11 @@ type ApiServiceName =
     'getComments' |
     'addComments' |
     'getStates' |
-    'updateState';
+    'updateState' |
+    'searchItems' |
+    'getUsers' |
+    'createIncident' |
+    'getIncidentFeilds';
 
 type PluginApiService = {
     path: string,
@@ -37,4 +44,5 @@ type APIPayloadType =
     CommentsPayload |
     GetStatesParams |
     UpdateStateParams |
+    IncidentPayload |
     string;
