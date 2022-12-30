@@ -9,11 +9,12 @@ import (
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/store/kvstore"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 )
 
 func Test_LoadUser(t *testing.T) {
