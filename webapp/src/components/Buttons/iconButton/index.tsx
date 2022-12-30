@@ -19,7 +19,7 @@ const IconButton = ({tooltipText, iconClassName, children, extraClass = '', onCl
     <Tooltip tooltipContent={tooltipText}>
         <Button
             variant='outline-danger'
-            className={`plugin-btn button-wrapper btn-icon ${extraClass}`}
+            className={`plugin-btn servicenow-button-wrapper btn-icon ${extraClass}`}
             onClick={onClick}
             aria-label={tooltipText}
             tabIndex={0}

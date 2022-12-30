@@ -105,6 +105,7 @@ type EditSubscriptionData = {
     recordType: RecordType,
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
+    userId: string;
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
@@ -122,6 +123,18 @@ type WebsocketEventParams = {
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
     labelValuePairs?: Array<{ label: string, value: string }>,
+}
+
+type RecordFields = {
+    title: string;
+    value: string | LinkData;
+}
+
+type RecordAttachments = {
+    title: string;
+    title_link: string;
+    pretext: string;
+    fields: RecordFields[];
 }
 
 type ServiceNowUser = {
@@ -147,4 +160,19 @@ type RequestData = {
     short_description: string,
     price: string,
     category: RequestCategoryData
+}
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
+}
+
+type FormatTextOptions = {
+    atMentions?: boolean;
+    markdown?: boolean;
+}
+
+type MessageHtmlToComponentOptions = {
+    mentionHighlight: boolean;
 }
