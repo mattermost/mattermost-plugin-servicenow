@@ -66,16 +66,6 @@ type CommentsPayload = {
 type ShareRecordPayload = {
     record_type: ShareRecordType;
     sys_id: string;
-    number: string;
-    short_description: string;
-    state?: string;
-    priority?: string;
-    assigned_to?: string | LinkData;
-    assignment_group?: string | LinkData;
-    author?: string | LinkData;
-    kb_category?: string | LinkData;
-    kb_knowledge_base?: string | LinkData;
-    workflow_state?: string;
     channel_id: string;
 }
 
@@ -95,4 +85,9 @@ interface PaginationQueryParams {
 
 type SubscriptionFilters = {
     createdBy: string,
+}
+
+type SearchItemsParams = {
+    search: string;
+    perPage?: number;
 }

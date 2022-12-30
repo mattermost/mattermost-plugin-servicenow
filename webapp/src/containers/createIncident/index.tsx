@@ -16,7 +16,7 @@ import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/p
 import {setConnected} from 'src/reducers/connectedState';
 import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
-import {isCreateIncidentModalOpen} from 'src/selectors';
+import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
 
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
@@ -26,7 +26,7 @@ import CallerPanel from './callerPanel';
 
 import './styles.scss';
 
-const UpdateState = () => {
+const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [impact, setImpact] = useState<string | null>(null);
@@ -38,8 +38,10 @@ const UpdateState = () => {
     const [incidentPayload, setIncidentPayload] = useState<IncidentPayload | null>(null);
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
     const [showChannelPanel, setShowChannelPanel] = useState(false);
+    const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
+    const [showModal, setShowModal] = useState(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -49,6 +51,7 @@ const UpdateState = () => {
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const open = isCreateIncidentModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -70,12 +73,16 @@ const UpdateState = () => {
         setIncidentPayload(null);
         setSubscriptionPayload(null);
         setShowChannelPanel(false);
+        setRefetchIncidentFields(true);
     }, []);
 
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetFieldStates();
+        setShowModal(false);
+        setTimeout(() => {
+            resetFieldStates();
+        });
     }, []);
 
     // Opens incident modal
@@ -90,19 +97,16 @@ const UpdateState = () => {
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
-    // Get incident fields state
     const getIncidentFieldsData = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
         return {isLoading, isSuccess, isError, data: data as IncidentFieldsData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Get incident state
     const getIncidentData = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
-    // Get subscription state
     const getSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
@@ -211,16 +215,30 @@ const UpdateState = () => {
             setChannel(currentChannelId);
         }
 
-        if (isCreateIncidentModalOpen(pluginState)) {
-            makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+            return;
         }
-    }, [isCreateIncidentModalOpen(pluginState)]);
+
+        if (open && getGlobalModalState(pluginState).data) {
+            const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
+            setShortDescription(reduxStateShortDescription);
+            setDescription(reduxStateDescription);
+        }
+
+        if (open && refetchIncidentFields) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            setRefetchIncidentFields(false);
+        }
+    }, [open, refetchIncidentFields]);
 
     return (
         <Modal
-            show={isCreateIncidentModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -244,7 +262,7 @@ const UpdateState = () => {
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
                 ) : (
-                    <>
+                    <div className='servicenow-incident'>
                         <div className='incident-body'>
                             <Input
                                 placeholder='Short description'
@@ -289,7 +307,7 @@ const UpdateState = () => {
                             />
                             <ToggleSwitch
                                 active={showChannelPanel}
-                                onChange={(active) => setShowChannelPanel(active)}
+                                onChange={setShowChannelPanel}
                                 label={Constants.ChannelPanelToggleLabel}
                                 labelPositioning='right'
                                 className='incident-body__toggle-switch'
@@ -318,11 +336,11 @@ const UpdateState = () => {
                             cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}
                         />
-                    </>
+                    </div>
                 )}
             </>
         </Modal>
     );
 };
 
-export default UpdateState;
+export default CreateIncident;
