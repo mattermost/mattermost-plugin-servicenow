@@ -108,7 +108,6 @@ func TestGetConnected(t *testing.T) {
 			var cr *serializer.ConnectedResponse
 			err := json.NewDecoder(result.Body).Decode(&cr)
 			require.Nil(t, err)
-
 			assert.Equal(test.ExpectedValue, cr.Connected)
 		})
 	}
@@ -188,7 +187,6 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 				var channels []*model.Channel
 				err := json.NewDecoder(result.Body).Decode(&channels)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(channels))
 			}
 
@@ -196,7 +194,6 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
@@ -291,7 +288,6 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 				var channels []*model.Channel
 				err := json.NewDecoder(result.Body).Decode(&channels)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(channels))
 			}
 
@@ -299,7 +295,6 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
@@ -373,7 +368,6 @@ func TestGetRecordFromServiceNow(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -606,7 +600,6 @@ func TestShareRecordInChannel(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -696,7 +689,6 @@ func TestGetCommentsForRecord(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -786,7 +778,6 @@ func TestAddCommentsOnRecord(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -892,7 +883,6 @@ func TestGetStatesForRecordType(t *testing.T) {
 				var states []*serializer.ServiceNowState
 				err := json.NewDecoder(result.Body).Decode(&states)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(states))
 			}
 
@@ -900,7 +890,6 @@ func TestGetStatesForRecordType(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
@@ -1001,7 +990,6 @@ func TestUpdateStateOfRecord(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1292,7 +1280,6 @@ func TestCreateSubscription(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1442,7 +1429,6 @@ func TestGetAllSubscriptions(t *testing.T) {
 				var subscripitons []*serializer.SubscriptionResponse
 				err := json.NewDecoder(result.Body).Decode(&subscripitons)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedCount, len(subscripitons))
 			}
 
@@ -1450,7 +1436,81 @@ func TestGetAllSubscriptions(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
 
+func TestGetSubscriptionAPI(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathSubscriptionOperationsByID)
+	for name, test := range map[string]struct {
+		SetupAPI             func(*plugintest.API)
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"success": {
+			SetupAPI: func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
+				)
+				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					testutils.GetServiceNowRecord(), http.StatusOK, nil,
+				)
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"failed to get the subscription": {
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					nil, http.StatusInternalServerError, fmt.Errorf("failed to get the subscription"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "Error in getting the subscription. Error: failed to get the subscription",
+		},
+		"subscription not found": {
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					nil, http.StatusNotFound, fmt.Errorf("failed to get the subscription"),
+				)
+			},
+			ExpectedStatusCode:   http.StatusNotFound,
+			ExpectedErrorMessage: "No record found",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			defer monkey.UnpatchAll()
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForSubscriptionsConfiguredMiddleware(p, t)
+			test.SetupClient(client)
+			test.SetupAPI(api)
+			defer api.AssertExpectations(t)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{subscription_id:[0-9a-f]{32}}", testutils.GetServiceNowSysID(), 1), nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1511,7 +1571,6 @@ func TestDeleteSubscription(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1668,7 +1727,6 @@ func TestEditSubscription(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1767,7 +1825,6 @@ func TestCheckOAuth(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1837,7 +1894,6 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -1957,7 +2013,6 @@ func TestAPICreateIncident(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Contains(resp.Message, test.ExpectedErrorMessage)
 			}
 		})
@@ -2046,7 +2101,6 @@ func TestAPISearchCatalogItemsInServiceNow(t *testing.T) {
 				var resp *serializer.APIErrorResponse
 				err := json.NewDecoder(result.Body).Decode(&resp)
 				require.Nil(t, err)
-
 				assert.Equal(test.ExpectedErrorMessage, resp.Message)
 			}
 		})
