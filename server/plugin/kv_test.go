@@ -179,10 +179,10 @@ func TestGetAllUsers(t *testing.T) {
 			setupTest:   func() {},
 			setupAPI: func(a *plugintest.API) {
 				a.On("KVList", testutils.GetMockArgumentsWithType("int", 2)...).Return(
-					nil, testutils.GetInternalServerAppError("error in loading the KVList"),
+					nil, testutils.GetInternalServerAppError("error in loading the user list"),
 				)
 			},
-			expectedError: "error in loading the KVList",
+			expectedError: "error in loading the user list",
 		},
 		{
 			description: "GetAllUsers: unable to decode the key",
