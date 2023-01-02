@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -78,7 +79,7 @@ func TestCreateSubscriptionClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "CreateSubscription: with error",
+			description:  "CreateSubscription: failed to create subscription",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("mockError"),
 			expectedErr:  "failed to create subscription in ServiceNow: mockError",
@@ -115,7 +116,7 @@ func TestGetAllSubscriptionsClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "GetAllSubscriptions: with error",
+			description:  "GetAllSubscriptions: failed to get subscriptions",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("mockError"),
 			expectedErr:  "failed to get subscriptions from ServiceNow: mockError",
@@ -151,7 +152,7 @@ func TestGetSubscription(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "GetSubscription: with error",
+			description:  "GetSubscription: failed to get subscription",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("mockError"),
 			expectedErr:  "failed to get subscription from ServiceNow: mockError",
@@ -187,7 +188,7 @@ func TestDeleteSubscriptionClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "DeleteSubscription: with error",
+			description:  "DeleteSubscription: failed to delete subscription",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("mockError"),
 			expectedErr:  "failed to delete subscription from ServiceNow: mockError",
@@ -223,7 +224,7 @@ func TestEditSubscriptionClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "EditSubscription: with error",
+			description:  "EditSubscription: failed to update subscription",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("mockError"),
 			expectedErr:  "failed to update subscription from ServiceNow: mockError",
@@ -259,7 +260,7 @@ func TestCheckForDuplicateSubscription(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "CheckForDuplicateSubscription: with error",
+			description:  "CheckForDuplicateSubscription: failed to check for duplication subscriptions",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("mockError"),
 			expectedErr:  "failed to get subscriptions from ServiceNow: mockError",
@@ -306,7 +307,7 @@ func TestSearchRecordsInServiceNow(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "SearchRecordsInServiceNow: with error",
+			description:  "SearchRecordsInServiceNow: error in searching the records",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in searching the records"),
 			expectedErr:  "error in searching the records",
@@ -342,7 +343,7 @@ func TestGetRecordFromServiceNowClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "GetRecordFromServiceNow: with error",
+			description:  "GetRecordFromServiceNow: error in getting the records",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in getting the records"),
 			expectedErr:  "error in getting the records",
@@ -378,7 +379,7 @@ func TestGetAllCommentsClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "GetAllComments: with error",
+			description:  "GetAllComments: error in getting the comments",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in getting the comments"),
 			expectedErr:  "error in getting the comments",
@@ -414,7 +415,7 @@ func TestAddCommentClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "AddComment: with error",
+			description:  "AddComment: error in adding the comment",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in adding the comment"),
 			expectedErr:  "error in adding the comment",
@@ -459,7 +460,7 @@ func TestGetStatesFromServiceNowClient(t *testing.T) {
 			expectedErr:  constants.APIErrorIDLatestUpdateSetNotUploaded,
 		},
 		{
-			description:  "GetStatesFromServiceNow: with error",
+			description:  "GetStatesFromServiceNow: error in getting the state",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in getting the state"),
 			expectedErr:  "error in getting the state",
@@ -496,7 +497,7 @@ func TestUpdateStateOfRecordInServiceNowClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "UpdateStateOfRecordInServiceNow: with error",
+			description:  "UpdateStateOfRecordInServiceNow: error in updating the state",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in updating the state"),
 			expectedErr:  "error in updating the state",
@@ -535,12 +536,12 @@ func TestGetMeClient(t *testing.T) {
 		expectedErr  string
 	}{
 		{
-			description: "GetMe: user don't exist on ServiceNow",
+			description: "GetMe: user doesn't exist on ServiceNow",
 			statusCode:  http.StatusNotFound,
 			expectedErr: "user doesn't exist on ServiceNow instance mockServiceNowBaseURL with email mockEmail",
 		},
 		{
-			description:  "GetMe: with error",
+			description:  "GetMe: error in getting the user details",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in getting the user details"),
 			expectedErr:  "failed to get the user details: error in getting the user details",
@@ -577,7 +578,7 @@ func TestCreateIncidentClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "CreateIncident: with error",
+			description:  "CreateIncident: error in creating the incident",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in creating the incident"),
 			expectedErr:  "failed to create the incident in ServiceNow: error in creating the incident",
@@ -619,7 +620,7 @@ func TestSearchCatalogItemsInServiceNowClient(t *testing.T) {
 			statusCode:  http.StatusOK,
 		},
 		{
-			description:  "SearchCatalogItemsInServiceNow: with error",
+			description:  "SearchCatalogItemsInServiceNow: error in searching the catalog items",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in searching the catalog items"),
 			expectedErr:  "error in searching the catalog items",
@@ -659,11 +660,11 @@ func TestGetIncidentFieldsFromServiceNowClient(t *testing.T) {
 		{
 			description:  "GetIncidentFieldsFromServiceNow: with latest update set not uploaded",
 			statusCode:   http.StatusBadRequest,
-			errorMessage: errors.New("mockError: Requested URI does not represent any resource"),
+			errorMessage: fmt.Errorf("mockError: %s", constants.ServiceNowAPIErrorURINotPresent),
 			expectedErr:  constants.APIErrorIDLatestUpdateSetNotUploaded,
 		},
 		{
-			description:  "GetIncidentFieldsFromServiceNow: with error",
+			description:  "GetIncidentFieldsFromServiceNow: error in getting the incident fields",
 			statusCode:   http.StatusInternalServerError,
 			errorMessage: errors.New("error in getting the incident fields"),
 			expectedErr:  "error in getting the incident fields",
