@@ -35,7 +35,6 @@ const CallerPanel = (({
         userName: c.username,
     }));
 
-    // Get users state
     const getUsersState = () => {
         const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
         return {isLoading, data: data as CallerData[]};
@@ -76,24 +75,20 @@ const CallerPanel = (({
 
     const {isLoading, data} = getUsersState();
     return (
-        <div
-            className={className}
-        >
-            <div className='padding-h-12 padding-top-10'>
-                <AutoSuggest
-                    placeholder={placeholder || 'Select caller'}
-                    inputValue={autoSuggestValue}
-                    onInputValueChange={setAutoSuggestValue}
-                    onChangeSelectedSuggestion={handleCallerSelection}
-                    disabled={isLoading || showModalLoader}
-                    loadingSuggestions={isLoading}
-                    suggestionConfig={{
-                        suggestions,
-                        renderValue: (suggestion) => suggestion.userName,
-                    }}
-                    charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
-                />
-            </div>
+        <div className={`padding-h-12 padding-top-10 ${className}`}>
+            <AutoSuggest
+                placeholder={placeholder || 'Select caller'}
+                inputValue={autoSuggestValue}
+                onInputValueChange={setAutoSuggestValue}
+                onChangeSelectedSuggestion={handleCallerSelection}
+                disabled={isLoading || showModalLoader}
+                loadingSuggestions={isLoading}
+                suggestionConfig={{
+                    suggestions,
+                    renderValue: (suggestion) => suggestion.userName,
+                }}
+                charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
+            />
         </div>
     );
 });

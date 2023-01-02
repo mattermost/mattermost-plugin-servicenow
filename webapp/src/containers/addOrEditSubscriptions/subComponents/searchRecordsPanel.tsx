@@ -2,9 +2,9 @@ import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 
 import {ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'src/plugin_constants';
+import Constants, {RecordType, TypesContainingLink} from 'src/plugin_constants';
 
-import Utils, {getLinkData, validateKeysContainingLink} from 'src/utils';
+import Utils from 'src/utils';
 
 import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
@@ -97,7 +97,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         setSuggestions([]);
     }, []);
 
-    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, Constants.DebounceFunctionTimeLimit), [getSuggestions]);
 
     // If "recordId" is provided when the component is mounted, then the subscription is being edited, hence fetch the record data from the API
     useEffect(() => {
@@ -197,33 +197,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     };
 
-    // Returns value for record data header
-    const getRecordValueForHeader = (key: RecordDataKeys): string | JSX.Element | null => {
-        const value = getRecordDataState().data?.[key];
-
-        if (!value) {
-            return null;
-        } else if (typeof value === 'string') {
-            if (value === Constants.EmptyFieldsInServiceNow || !validateKeysContainingLink(key)) {
-                return value;
-            }
-
-            const data: LinkData = getLinkData(value);
-            return (
-                <a
-                    href={data.link}
-                    target='_blank'
-                    rel='noreferrer'
-                    className='btn btn-link padding-0'
-                >
-                    {data.display_value}
-                </a>
-            );
-        }
-
-        return null;
-    };
-
     return (
         <div
             className={className}
@@ -255,7 +228,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{recordDataLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key as TypesContainingLink, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
                                 </li>
                             ))
                         ) : (
@@ -265,7 +238,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{recordDataLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key as TypesContainingLink, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
                                 </li>
                             ))
                         )}

@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
 
 import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
@@ -35,18 +35,24 @@ const AddOrViewComments = () => {
         setApiError(null);
         setValidationError('');
         setRefetch(false);
+        setShowErrorPanel(false);
     }, []);
 
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetFieldStates();
+        setTimeout(() => {
+            resetFieldStates();
+        });
     }, []);
 
-    const getCommentsPayload = (): CommentsPayload => ({
-        record_type: getGlobalModalState(pluginState).data?.recordType as RecordType,
-        record_id: getGlobalModalState(pluginState).data?.recordId as string,
-        comments,
-    });
+    const getCommentsPayload = (): CommentsPayload => {
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
+        return {
+            record_type: data?.recordType || '',
+            record_id: data?.recordId || '',
+            comments,
+        };
+    };
 
     const getCommentsState = () => {
         const payload = getCommentsPayload();
@@ -147,7 +153,7 @@ const AddOrViewComments = () => {
                         iconClass='fa-times-circle-o result-panel-icon--error'
                     />
                 ) : (
-                    <>
+                    <div className='servicenow-comment-modal'>
                         <div
                             className={`comment-body
                                     ${((!commentsData.length || apiError) && !showLoader) && 'comment-body__height'}`}
@@ -160,7 +166,7 @@ const AddOrViewComments = () => {
                                 disabled={showLoader}
                                 error={validationError}
                             />
-                            {!apiError && <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>}
+                            <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>
                             {commentsData ? (
                                 <>
                                     <div className='comment-body__description-text'>{commentsData}</div>
@@ -170,7 +176,6 @@ const AddOrViewComments = () => {
                                 !showLoader && <p className='comment-body__footer'>{Constants.CommentsNotFound}</p>
                             )}
                         </div>
-                        <ModalSubtitleAndError error={apiError?.message}/>
                         <ModalFooter
                             onConfirm={addComment}
                             confirmBtnText='Submit'
@@ -179,7 +184,7 @@ const AddOrViewComments = () => {
                             cancelBtnText='Cancel'
                             cancelDisabled={showLoader}
                         />
-                    </>
+                    </div>
                 )}
             </>
         </Modal>

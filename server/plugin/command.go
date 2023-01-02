@@ -132,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare {
+		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare && action != constants.CommandCreate {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}
@@ -211,7 +211,7 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	case constants.SubCommandList:
 		return p.handleListSubscriptions(args, parameters, client, isSysAdmin)
 	case constants.SubCommandAdd:
-		return p.handleSubscribe(args)
+		return ""
 	case constants.SubCommandEdit:
 		return p.handleEditSubscription(args, parameters, client, isSysAdmin)
 	case constants.SubCommandDelete:
@@ -229,52 +229,14 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 	command := parameters[0]
 
 	switch command {
-	case constants.SubCommandIncident:
-		return p.handleCreateIncident(args)
-	case constants.SubCommandRequest:
-		return p.handleCreateRequest(args)
+	case constants.SubCommandIncident, constants.SubCommandRequest:
+		return ""
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
 }
 
-func (p *Plugin) handleSubscribe(args *model.CommandArgs) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenAddSubscriptionModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
-	return ""
-}
-
 func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenSearchAndShareRecordsModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
-	return ""
-}
-
-func (p *Plugin) handleCreateIncident(args *model.CommandArgs) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenCreateIncidentModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
-	return ""
-}
-
-func (p *Plugin) handleCreateRequest(args *model.CommandArgs) string {
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenCreateRequestModal,
-		nil,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
-
 	return ""
 }
 
@@ -298,6 +260,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 		channelID = ""
 	}
 
+	var subscriptionList []*serializer.SubscriptionResponse
 	go func() {
 		subscriptions, _, err := client.GetAllSubscriptions(channelID, userID, "", fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage))
 		if err != nil {
@@ -307,12 +270,24 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 		}
 
 		if len(subscriptions) == 0 {
-			p.postCommandResponse(args, "You don't have any active subscriptions for this channel.")
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
+			return
+		}
+
+		for _, subscription := range subscriptions {
+			_, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			if permissionErr == nil {
+				subscriptionList = append(subscriptionList, subscription)
+			}
+		}
+
+		if len(subscriptionList) == 0 {
+			p.postCommandResponse(args, constants.ErrorNoActiveSubscriptions)
 			return
 		}
 
 		wg := sync.WaitGroup{}
-		for _, subscription := range subscriptions {
+		for _, subscription := range subscriptionList {
 			wg.Add(1)
 			go func(subscription *serializer.SubscriptionResponse) {
 				defer wg.Done()
@@ -341,7 +316,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 		}
 
 		wg.Wait()
-		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptions))
+		p.postCommandResponse(args, ParseSubscriptionsToCommandResponse(subscriptionList))
 	}()
 
 	return listSubscriptionsWaitMessage
@@ -398,28 +373,6 @@ func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string
 	if !valid {
 		return invalidSubscriptionIDMessage
 	}
-
-	subscription, _, err := client.GetSubscription(subscriptionID)
-	if err != nil {
-		p.API.LogError("Unable to get subscription", "Error", err.Error())
-		return p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, "")
-	}
-
-	if subscription.Type == constants.SubscriptionTypeRecord {
-		p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
-	}
-
-	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
-	if err != nil {
-		p.API.LogError("Unable to convert subscription to map", "Error", err.Error())
-		return genericErrorMessage
-	}
-
-	p.API.PublishWebSocketEvent(
-		constants.WSEventOpenEditSubscriptionModal,
-		subscriptionMap,
-		&model.WebsocketBroadcast{UserId: args.UserId},
-	)
 
 	return ""
 }

@@ -3,8 +3,6 @@ import {useDispatch} from 'react-redux';
 
 import {AutoSuggest, CustomModal as Modal, ModalFooter, ModalHeader, ResultPanel, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
 import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -26,9 +24,11 @@ const CreateRequest = () => {
     const [request, setRequest] = useState<Record<string, string> | null>(null);
     const [showErrorPanel, setShowErrorPanel] = useState(false);
     const [searchItemsPayload, setSearchItemsPayload] = useState<SearchItemsParams | null>(null);
+    const [showModal, setShowModal] = useState(false);
 
     // usePluginApi hook
     const {getApiState, makeApiRequestWithCompletionStatus, pluginState} = usePluginApi();
+    const open = isCreateRequestModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -45,6 +45,7 @@ const CreateRequest = () => {
         setRequest(null);
         setShowErrorPanel(false);
         setSearchItemsPayload(null);
+        setShowModal(false);
     }, []);
 
     const hideModal = useCallback(() => {
@@ -61,13 +62,13 @@ const CreateRequest = () => {
         category_id: r.category.sys_id,
     }));
 
-    // Set the suggestions when the input value of the auto-suggest changes;
+    // Set the suggestions when the input value of the auto-suggest changes
     useEffect(() => {
         setSuggestions(mapRequestsToSuggestions(options));
     }, [options]);
 
     useEffect(() => {
-        // When the request value is reset, reset the caller auto-suggest input as well;
+        // Reset the caller auto-suggest input when the request value is reset
         if (!request) {
             setAutoSuggestValue('');
             setSuggestionChosen(false);
@@ -84,8 +85,8 @@ const CreateRequest = () => {
 
     // Get config state
     const getConfigState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {data} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
+        return {data: data as ConfigData | undefined};
     };
 
     const getItemsSuggestions = () => {
@@ -95,13 +96,15 @@ const CreateRequest = () => {
 
     // Get the suggestions from the API
     const getSuggestions = ({searchFor}: {searchFor?: string}) => {
-        setApiError(null);
-        setRequest(null);
-        setSearchItemsPayload({search: searchFor || ''});
-        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor || ''});
+        if (searchFor) {
+            setApiError(null);
+            setRequest(null);
+            setSearchItemsPayload({search: searchFor});
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor});
+        }
     };
 
-    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, Constants.DebounceFunctionTimeLimit), [getSuggestions]);
 
     // handle input value change
     const handleInputChange = (currentValue: string) => {
@@ -128,13 +131,21 @@ const CreateRequest = () => {
         },
     });
 
-    const {isLoading, data} = getItemsSuggestions();
+    useEffect(() => {
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+        }
+    }, [open]);
+
     const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
+    const {isLoading, data} = getItemsSuggestions();
     return (
         <Modal
-            show={isCreateRequestModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -185,14 +196,14 @@ const CreateRequest = () => {
                                     {serviceNowBaseURL && (
                                         <div>
                                             <a
-                                                className='color--link btn btn-primary request-button'
+                                                className='color--link btn btn-primary servicenow-request-button'
                                                 href={`${serviceNowBaseURL}/${Constants.REQUEST_BASE_URL}${request.id}`}
                                                 rel='noreferrer'
                                                 target='_blank'
                                             >
                                                 {Constants.RequestButtonText}
                                             </a>
-                                            <div className='request-button__redirect-text'>
+                                            <div className='servicenow-request-button__redirect-text'>
                                                 {Constants.RequestButtonRedirectText}
                                             </div>
                                         </div>

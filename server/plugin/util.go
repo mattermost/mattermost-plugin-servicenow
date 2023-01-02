@@ -146,6 +146,8 @@ func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer
 	record, _, err := client.GetRecordFromServiceNow(subscription.RecordType, subscription.RecordID)
 	if err != nil {
 		p.API.LogError("Error in getting record from ServiceNow", "Record type", subscription.RecordType, "Record ID", subscription.RecordID, "Error", err.Error())
+		subscription.Number = "N/A"
+		subscription.ShortDescription = "N/A"
 		return
 	}
 	subscription.Number = record.Number
@@ -304,4 +306,25 @@ func decodeKey(key string) (string, error) {
 	}
 
 	return string(decodedKey), nil
+}
+
+func (p *Plugin) HasChannelPermissions(userID, channelID string) (int, error) {
+	channel, channelErr := p.API.GetChannel(channelID)
+	if channelErr != nil {
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
+		return channelErr.StatusCode, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+	}
+
+	// Check if a channel is direct message or group channel
+	if channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
+		return http.StatusBadRequest, fmt.Errorf(constants.ErrorInvalidChannelType)
+	}
+
+	// Check if a user is a part of the channel
+	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
+		return channelErr.StatusCode, fmt.Errorf(constants.ErrorInsufficientPermissions)
+	}
+
+	return http.StatusOK, nil
 }

@@ -15,7 +15,7 @@ import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/p
 import {setConnected} from 'src/reducers/connectedState';
 import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
-import {isCreateIncidentModalOpen} from 'src/selectors';
+import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
 
 import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
@@ -37,14 +37,17 @@ const CreateIncident = () => {
     const [incidentPayload, setIncidentPayload] = useState<IncidentPayload | null>(null);
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
     const [showChannelPanel, setShowChannelPanel] = useState(false);
+    const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
+    const [showModal, setShowModal] = useState(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
 
     // usePluginApi hook
     const {pluginState, makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
+    const open = isCreateIncidentModalOpen(pluginState);
 
     // Errors
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -66,12 +69,16 @@ const CreateIncident = () => {
         setIncidentPayload(null);
         setSubscriptionPayload(null);
         setShowChannelPanel(false);
+        setRefetchIncidentFields(true);
     }, []);
 
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        resetFieldStates();
+        setShowModal(false);
+        setTimeout(() => {
+            resetFieldStates();
+        });
     }, []);
 
     // Opens incident modal
@@ -86,19 +93,16 @@ const CreateIncident = () => {
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
-    // Get incident fields state
     const getIncidentFieldsState = () => {
         const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
         return {isLoading, data: data as IncidentFieldsData[]};
     };
 
-    // Get incident state
     const getIncidentState = () => {
         const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
         return {isLoading, data: data as RecordData};
     };
 
-    // Get subscription state
     const getSubscriptionState = () => {
         const {isLoading} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
         return {isLoading};
@@ -195,10 +199,24 @@ const CreateIncident = () => {
             setChannel(currentChannelId);
         }
 
-        if (isCreateIncidentModalOpen(pluginState)) {
-            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        if (open && pluginState.connectedReducer.connected) {
+            setShowModal(true);
+        } else {
+            dispatch(resetGlobalModalState());
+            return;
         }
-    }, [isCreateIncidentModalOpen(pluginState)]);
+
+        if (open && getGlobalModalState(pluginState).data) {
+            const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
+            setShortDescription(reduxStateShortDescription);
+            setDescription(reduxStateDescription);
+        }
+
+        if (open && refetchIncidentFields) {
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            setRefetchIncidentFields(false);
+        }
+    }, [open, refetchIncidentFields]);
 
     // Get services data
     const {isLoading: incidentFieldsLoading, data: incidentFieldsData} = getIncidentFieldsState();
@@ -207,9 +225,9 @@ const CreateIncident = () => {
     const showLoader = incidentFieldsLoading || createIncidentLoading || createSubscriptionLoading;
     return (
         <Modal
-            show={isCreateIncidentModalOpen(pluginState)}
+            show={showModal}
             onHide={hideModal}
-            className='rhs-modal'
+            className='servicenow-rhs-modal'
         >
             <>
                 <ModalHeader
@@ -233,7 +251,7 @@ const CreateIncident = () => {
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
                 ) : (
-                    <>
+                    <div className='servicenow-incident'>
                         <div className='incident-body'>
                             <Input
                                 placeholder='Short description'
@@ -278,7 +296,7 @@ const CreateIncident = () => {
                             />
                             <ToggleSwitch
                                 active={showChannelPanel}
-                                onChange={(active) => setShowChannelPanel(active)}
+                                onChange={setShowChannelPanel}
                                 label={Constants.ChannelPanelToggleLabel}
                                 labelPositioning='right'
                                 className='incident-body__toggle-switch'
@@ -306,7 +324,7 @@ const CreateIncident = () => {
                             cancelBtnText='Cancel'
                             cancelDisabled={showLoader}
                         />
-                    </>
+                    </div>
                 )}
             </>
         </Modal>
