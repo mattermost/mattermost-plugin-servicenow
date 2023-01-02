@@ -416,6 +416,34 @@ func TestHandleSubscriptions(t *testing.T) {
 	}
 }
 
+func TestHandleCreate(t *testing.T) {
+	p := Plugin{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+	for _, testCase := range []struct {
+		description      string
+		params           []string
+		expectedResponse string
+	}{
+		{
+			description:      "HandleCreate: Invalid number of params",
+			expectedResponse: "Invalid create command. Available commands are 'incident' and 'request'.",
+		},
+		{
+			description:      "HandleCreate: Unknown command",
+			params:           []string{"invalidCommand"},
+			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp := p.handleCreate(&plugin.Context{}, args, testCase.params, mock_plugin.NewClient(t), true)
+			assert.EqualValues(testCase.expectedResponse, resp)
+		})
+	}
+}
+
 func TestHandleListSubscriptions(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
