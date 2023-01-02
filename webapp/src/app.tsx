@@ -3,7 +3,7 @@ import {useDispatch} from 'react-redux';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants from 'src/plugin_constants';
+import Constants, {ModalId} from 'src/plugin_constants';
 
 import {getGlobalModalState} from './selectors';
 import {setConnected} from './reducers/connectedState';
@@ -24,7 +24,7 @@ const GetConfig = (): JSX.Element => {
     }, []);
 
     useEffect(() => {
-        if (modalId === 'addSubscription' || modalId === 'editSubscription') {
+        if (modalId === ModalId.ADD_SUBSCRIPTION || modalId === ModalId.EDIT_SUBSCRIPTION) {
             makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName);
         }
     }, [modalId]);
