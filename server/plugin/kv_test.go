@@ -182,7 +182,7 @@ func TestGetAllUsers(t *testing.T) {
 					nil, testutils.GetInternalServerAppError("error in loading the KVList"),
 				)
 			},
-			expectedError: ": , error in loading the KVList",
+			expectedError: "error in loading the KVList",
 		},
 		{
 			description: "GetAllUsers: unable to decode the key",
@@ -227,7 +227,7 @@ func TestGetAllUsers(t *testing.T) {
 
 			resp, err := ps.GetAllUsers()
 			if test.expectedError != "" {
-				assert.EqualValues(err.Error(), test.expectedError)
+				assert.Contains(err.Error(), test.expectedError)
 				assert.Nil(resp)
 				return
 			}

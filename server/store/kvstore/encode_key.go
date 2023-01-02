@@ -10,7 +10,6 @@ func encodeKey(prefix, key string) string {
 		return prefix
 	}
 
-	encodedKey := base64.StdEncoding.EncodeToString([]byte(key))
-	encodedKey = fmt.Sprintf("%s%s", prefix, encodedKey)
+	encodedKey := fmt.Sprintf("%s%s", prefix, base64.StdEncoding.EncodeToString([]byte(key)))
 	return encodedKey
 }

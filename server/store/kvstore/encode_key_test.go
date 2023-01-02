@@ -17,7 +17,7 @@ func Test_encodeKey(t *testing.T) {
 		want string
 	}{
 		{"empty", args{"", ""}, ""},
-		{"value", args{"", "https://mmtest.mattermost.com"}, "aHR0cHM6Ly9tbXRlc3QubWF0dGVybW9zdC5jb20="},
+		{"value", args{"", "https://mmtest.com"}, "aHR0cHM6Ly9tbXRlc3QuY29t"},
 		{"prefix", args{"abc_", ""}, "abc_"},
 		{"prefix value", args{"abc_", "123"}, "abc_MTIz"},
 	}
