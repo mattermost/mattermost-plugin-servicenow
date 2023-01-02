@@ -31,7 +31,7 @@ func TestDM(t *testing.T) {
 			description: "DM: channel is not found",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
-				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), testutils.GetInternalServerAppError())
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), testutils.GetInternalServerAppError(""))
 			},
 			expectedError: "channel not found",
 		},
@@ -41,7 +41,7 @@ func TestDM(t *testing.T) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), nil)
-				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), testutils.GetInternalServerAppError())
+				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), testutils.GetInternalServerAppError(""))
 			},
 			expectedError: "error in creating the post",
 		},
