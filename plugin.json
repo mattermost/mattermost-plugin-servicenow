@@ -1,6 +1,6 @@
 {
     "id": "mattermost-plugin-servicenow",
-    "name": "ServiceNow Plugin",
+    "name": "ServiceNow",
     "description": "This plugin serves as an integration between Mattermost and ServiceNow.",
     "homepage_url": "https://github.com/mattermost/mattermost-plugin-servicenow",
     "support_url": "https://github.com/mattermost/mattermost-plugin-servicenow/issues",
