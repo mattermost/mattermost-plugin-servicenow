@@ -5,7 +5,7 @@ type ReduxState = {
 }
 
 type GlobalModalState = {
-    modalId: ModalId;
+    modalId: ModalIds;
     data?: EditSubscriptionData | CommentAndStateModalData | string | IncidentModalData | null;
 }
 
@@ -39,6 +39,10 @@ type UpdateStateModalReduxState = {
 type CommentAndStateModalData = {
     recordType: RecordType;
     recordId: string;
+}
+
+type ApiRequestCompletionState = {
+    requests: ApiServiceName[]
 }
 
 type IncidentModalData = {

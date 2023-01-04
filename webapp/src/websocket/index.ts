@@ -3,7 +3,7 @@ import {Store, Action} from 'redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 
 import {setConnected} from 'src/reducers/connectedState';
-import {setGlobalModalState, resetGlobalModalState} from 'src/reducers/globalModal';
+import {resetGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {

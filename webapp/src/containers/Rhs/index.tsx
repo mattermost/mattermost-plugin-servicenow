@@ -7,9 +7,10 @@ import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from '@brightscout/mattermost-ui-library';
 
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILENAME} from 'src/plugin_constants';
+import Constants, {CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILENAME, ModalIds} from 'src/plugin_constants';
 
 import {refetch, resetRefetch} from 'src/reducers/refetchState';
 
@@ -24,7 +25,7 @@ import Header from './rhsHeader';
 import './rhs.scss';
 
 const Rhs = (): JSX.Element => {
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
     const isCurrentUserSysAdmin = useSelector((state: GlobalState) => getCurrentUser(state).roles.includes(MMConstants.SYSTEM_ADMIN_ROLE));
     const dispatch = useDispatch();
     const connected = pluginState.connectedReducer.connected;
@@ -37,7 +38,6 @@ const Rhs = (): JSX.Element => {
     const {currentUserId} = useSelector((state: GlobalState) => state.entities.users);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
-    const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
     const [paginationQueryParams, setPaginationQueryParams] = useState<PaginationQueryParams>({
         page: Constants.DefaultPage,
         per_page: Constants.DefaultPageSize,
@@ -48,13 +48,13 @@ const Rhs = (): JSX.Element => {
     const [resetFilter, setResetFilter] = useState(false);
 
     const getSubscriptionsState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams);
+        return {isLoading, isSuccess, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     const getDeleteSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted);
+        return {isLoading, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
     // Reset the pagination params and empty the subscription list
@@ -87,7 +87,7 @@ const Rhs = (): JSX.Element => {
 
         setRender(false);
         setFetchSubscriptionParams(subscriptionParams);
-        makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, subscriptionParams);
     }, [paginationQueryParams]);
 
     // Reset states on changing channel or using toggle switch
@@ -111,19 +111,15 @@ const Rhs = (): JSX.Element => {
         dispatch(resetRefetch());
     }, [refetchSubscriptions]);
 
-    useEffect(() => {
-        if (getDeleteSubscriptionState().isSuccess && !deleteApiResponseInvalid) {
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName,
+        payload: toBeDeleted,
+        handleSuccess: () => {
             setDeleteConfirmationOpen(false);
             dispatch(refetch());
-            setDeleteApiResponseInvalid(true);
             setToBeDeleted(null);
-        }
-
-        // When a new API request is made, reset the flag set for invalid delete api response
-        if (getDeleteSubscriptionState().isLoading) {
-            setDeleteApiResponseInvalid(false);
-        }
-    }, [getDeleteSubscriptionState().isSuccess, getDeleteSubscriptionState().isLoading, deleteApiResponseInvalid]);
+        },
+    });
 
     // Handles action when edit button is clicked for a subscription
     const handleEditSubscription = useCallback((subscription: SubscriptionData) => {
@@ -136,7 +132,7 @@ const Rhs = (): JSX.Element => {
             id: subscription.sys_id,
             userId: subscription.user_id,
         };
-        dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}));
+        dispatch(setGlobalModalState({modalId: ModalIds.EDIT_SUBSCRIPTION, data: subscriptionData}));
     }, [dispatch]);
 
     // Handles action when the delete button is clicked
@@ -147,20 +143,33 @@ const Rhs = (): JSX.Element => {
 
     // Handles action when the delete confirmation button is clicked
     const handleDeleteConfirmation = () => {
-        makeApiRequest(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
     };
 
     // Handles action when the delete confirmation modal is closed
     const hideDeleteConfirmation = () => {
         setDeleteConfirmationOpen(false);
-        setDeleteApiResponseInvalid(true);
         setToBeDeleted(null);
     };
 
-    useEffect(() => {
-        const {isError, error, isSuccess} = getSubscriptionsState();
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName,
+        payload: fetchSubscriptionParams,
+        handleSuccess: () => {
+            setTotalSubscriptions([...totalSubscriptions, ...subscriptions]);
+            if (!connected) {
+                dispatch(setConnected(true));
+            }
 
-        if (isError) {
+            if (!subscriptionsEnabled) {
+                setSubscriptionsEnabled(true);
+            }
+
+            if (!subscriptionsAuthorized) {
+                setSubscriptionsAuthorized(true);
+            }
+        },
+        handleError: (error) => {
             if (error?.id === Constants.ApiErrorIdNotConnected || error?.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 if (connected) {
                     dispatch(setConnected(false));
@@ -186,25 +195,10 @@ const Rhs = (): JSX.Element => {
             if (!connected) {
                 dispatch(setConnected(true));
             }
-        }
+        },
+    });
 
-        if (isSuccess) {
-            setTotalSubscriptions([...totalSubscriptions, ...subscriptions]);
-            if (!connected) {
-                dispatch(setConnected(true));
-            }
-
-            if (!subscriptionsEnabled) {
-                setSubscriptionsEnabled(true);
-            }
-
-            if (!subscriptionsAuthorized) {
-                setSubscriptionsAuthorized(true);
-            }
-        }
-    }, [getSubscriptionsState().isError, getSubscriptionsState().isSuccess, getSubscriptionsState().isLoading]);
-
-    const {isLoading: subscriptionsLoading, data: subscriptions} = getSubscriptionsState();
+    const {isLoading: subscriptionsLoading, isSuccess, data: subscriptions, error: getSubscriptionsError} = getSubscriptionsState();
     const {isLoading: deletingSubscription, isError: errorInDeletingSubscription, error: deleteSubscriptionError} = getDeleteSubscriptionState();
     return (
         <div className='servicenow-rhs'>
@@ -224,18 +218,14 @@ const Rhs = (): JSX.Element => {
                     <>
                         <RhsData
                             showAllSubscriptions={showAllSubscriptions}
-                            setShowAllSubscriptions={setShowAllSubscriptions}
                             totalSubscriptions={totalSubscriptions}
                             loadingSubscriptions={subscriptionsLoading}
                             handleEditSubscription={handleEditSubscription}
                             handleDeleteClick={handleDeleteClick}
-                            error={getSubscriptionsState().error?.message}
+                            error={getSubscriptionsError?.message}
                             isCurrentUserSysAdmin={isCurrentUserSysAdmin}
                             paginationQueryParams={paginationQueryParams}
                             handlePagination={handlePagination}
-                            filter={filter}
-                            setFilter={handleSetFilter}
-                            setResetFilter={setResetFilter}
                         />
                         {toBeDeleted && (
                             <ConfirmationDialog
@@ -243,14 +233,14 @@ const Rhs = (): JSX.Element => {
                                 confirmationMsg={Constants.DeleteSubscriptionMsg}
                                 show={isDeleteConfirmationOpen}
                                 onHide={hideDeleteConfirmation}
-                                loading={!deleteApiResponseInvalid && deletingSubscription}
+                                loading={deletingSubscription}
                                 onConfirm={handleDeleteConfirmation}
-                                error={deleteApiResponseInvalid || deletingSubscription || !errorInDeletingSubscription ? '' : deleteSubscriptionError?.message}
+                                error={deletingSubscription || !errorInDeletingSubscription ? '' : deleteSubscriptionError?.message}
                             />
                         )}
                     </>
                 )}
-                {connected && !subscriptionsLoading && (
+                {connected && !isSuccess && !subscriptionsLoading && (
                     <>
                         {!subscriptionsEnabled && (
                             <EmptyState

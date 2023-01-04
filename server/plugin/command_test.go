@@ -22,19 +22,19 @@ import (
 	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
 
-func (p *Plugin) mockHandleDisconnect(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleDisconnect(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleDisconnect"
 }
 
-func (p *Plugin) mockHandleSubscriptions(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleSubscriptions(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleSubscriptions"
 }
 
-func (p *Plugin) mockHandleDeleteSubscription(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleDeleteSubscription(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleDeleteSubscription"
 }
 
-func (p *Plugin) mockHandleSearchAndShare(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleSearchAndShare(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleSearchAndShare"
 }
 
@@ -381,7 +381,7 @@ func TestHandleDisconnect(t *testing.T) {
 				return testCase.errorMessage
 			})
 
-			resp := p.handleDisconnect(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
+			resp := p.handleDisconnect(args, []string{}, mock_plugin.NewClient(t), true)
 
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
@@ -410,7 +410,7 @@ func TestHandleSubscriptions(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-			resp := p.handleSubscriptions(&plugin.Context{}, args, testCase.params, mock_plugin.NewClient(t), true)
+			resp := p.handleSubscriptions(args, testCase.params, mock_plugin.NewClient(t), true)
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
 	}
@@ -438,7 +438,7 @@ func TestHandleCreate(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-			resp := p.handleCreate(&plugin.Context{}, args, testCase.params, mock_plugin.NewClient(t), true)
+			resp := p.handleCreate(args, testCase.params, mock_plugin.NewClient(t), true)
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
 	}
@@ -634,7 +634,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleListSubscriptions(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.handleListSubscriptions(args, testCase.params, c, true)
 
 			// This is used to wait for goroutine to finish.
 			time.Sleep(100 * time.Millisecond)
@@ -719,7 +719,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleDeleteSubscription(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.handleDeleteSubscription(args, testCase.params, c, true)
 			assert.EqualValues(testCase.expectedError, resp)
 			time.Sleep(100 * time.Millisecond)
 		})
@@ -728,9 +728,6 @@ func TestHandleDeleteSubscription(t *testing.T) {
 
 func TestHandleEditSubscription(t *testing.T) {
 	p := Plugin{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
 	for _, testCase := range []struct {
 		description   string
 		params        []string
@@ -752,9 +749,8 @@ func TestHandleEditSubscription(t *testing.T) {
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-			c := mock_plugin.NewClient(t)
 
-			resp := p.handleEditSubscription(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.handleEditSubscription(testCase.params)
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}

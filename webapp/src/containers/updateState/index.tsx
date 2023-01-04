@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CircularLoader, CustomModal as Modal, Dropdown, ModalFooter, ModalHeader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
@@ -21,7 +21,7 @@ const UpdateState = () => {
     const [showResultPanel, setShowResultPanel] = useState(false);
 
     // usePluginApi hook
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
     const open = isUpdateStateModalOpen(pluginState);
 
     // API error
@@ -45,13 +45,13 @@ const UpdateState = () => {
     }, []);
 
     const getStateForGetStatesAPI = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getStates.apiServiceName, getStatesParams as GetStatesParams);
-        return {isLoading, isSuccess, isError, data: data as StateData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getStates.apiServiceName, getStatesParams as GetStatesParams);
+        return {isLoading, data: data as StateData[]};
     };
 
     const getStateForUpdateStateAPI = () => {
-        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.updateState.apiServiceName, updateStatePayload as UpdateStatePayload);
-        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading} = getApiState(Constants.pluginApiServiceConfigs.updateState.apiServiceName, updateStatePayload as UpdateStatePayload);
+        return {isLoading};
     };
 
     useEffect(() => {
@@ -62,7 +62,7 @@ const UpdateState = () => {
         if (open && record_type && record_id) {
             const params: GetStatesParams = {recordType: record_type as RecordType};
             setGetStatesParams(params);
-            makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
         }
     }, [open]);
 
@@ -72,41 +72,35 @@ const UpdateState = () => {
             const {recordType, recordId} = data as CommentAndStateModalData;
             const payload: UpdateStatePayload = {recordType, recordId, state: selectedState ?? ''};
             setUpdateStatePayload(payload);
-            makeApiRequest(Constants.pluginApiServiceConfigs.updateState.apiServiceName, payload);
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.updateState.apiServiceName, payload);
         }
     };
 
-    useEffect(() => {
-        // TODO: Add the use of "useApiRequestCompletionState" by taking reference from Azure DevOps plugin
-        const {isError, isSuccess, error} = getStateForUpdateStateAPI();
-        if (isError && error) {
-            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
-                dispatch(setConnected(false));
-            }
-            setApiError(error);
-            setShowResultPanel(true);
+    const handleError = (error: APIError) => {
+        if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+            dispatch(setConnected(false));
         }
 
-        if (isSuccess) {
+        setApiError(error);
+        setShowResultPanel(true);
+    };
+
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.getStates.apiServiceName,
+        payload: getStatesParams,
+        handleSuccess: () => setApiError(null),
+        handleError,
+    });
+
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.updateState.apiServiceName,
+        payload: updateStatePayload,
+        handleSuccess: () => {
             setApiError(null);
             setShowResultPanel(true);
-        }
-    }, [getStateForUpdateStateAPI().isError, getStateForUpdateStateAPI().isSuccess]);
-
-    useEffect(() => {
-        const {isError, isSuccess, error} = getStateForGetStatesAPI();
-        if (isError && error) {
-            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
-                dispatch(setConnected(false));
-            }
-            setApiError(error);
-            setShowResultPanel(true);
-        }
-
-        if (isSuccess) {
-            setApiError(null);
-        }
-    }, [getStateForGetStatesAPI().isError, getStateForGetStatesAPI().isSuccess]);
+        },
+        handleError,
+    });
 
     const {isLoading: statesLoading, data: stateOptions} = getStateForGetStatesAPI();
     const {isLoading: stateUpdating} = getStateForUpdateStateAPI();

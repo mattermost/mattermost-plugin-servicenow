@@ -3,7 +3,7 @@ import {useDispatch} from 'react-redux';
 
 import {Post} from 'mattermost-redux/types/posts';
 
-import {RecordTypesSupportingComments, RecordTypesSupportingStateUpdation, TypesContainingLink} from 'src/plugin_constants';
+import {ModalIds, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation, TypesContainingLink} from 'src/plugin_constants';
 import {setGlobalModalState} from 'src/reducers/globalModal';
 import Utils from 'src/utils';
 
@@ -43,7 +43,7 @@ const ShareRecordPost = ({post}: ShareRecordPostProps) => {
                 <div>
                     {RecordTypesSupportingComments.has(record_type) && (
                         <button
-                            onClick={() => dispatch(setGlobalModalState({modalId: 'addOrViewComments', data}))}
+                            onClick={() => dispatch(setGlobalModalState({modalId: ModalIds.ADD_OR_VIEW_COMMENTS, data}))}
                             className='shared-post__modal-button wt-700'
                         >
                             {'Add and view comments'}
@@ -51,7 +51,7 @@ const ShareRecordPost = ({post}: ShareRecordPostProps) => {
                     )}
                     {RecordTypesSupportingStateUpdation.has(record_type) && (
                         <button
-                            onClick={() => dispatch(setGlobalModalState({modalId: 'updateState', data}))}
+                            onClick={() => dispatch(setGlobalModalState({modalId: ModalIds.UPDATE_STATE, data}))}
                             className='shared-post__modal-button wt-700'
                         >
                             {'Update State'}

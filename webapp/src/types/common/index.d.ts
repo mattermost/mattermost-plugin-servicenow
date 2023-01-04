@@ -2,8 +2,6 @@
  * Keep all common types here which are to be used throughout the project
 */
 
-// TODO: Create an enum for the below modal Ids
-type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | 'createRequest' | null
 type SubscriptionType = import('../../plugin_constants').SubscriptionType;
 type RecordType = import('../../plugin_constants').RecordType;
 

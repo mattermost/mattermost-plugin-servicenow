@@ -52,6 +52,16 @@ const RequestButtonRedirectText = 'You will be redirected to ServiceNow to compl
 const DefaultPerPageParam = 10;
 const DebounceFunctionTimeLimit = 500;
 
+export enum ModalIds {
+    ADD_SUBSCRIPTION = 'addSubscription',
+    EDIT_SUBSCRIPTION = 'editSubscription',
+    SHARE_RECORD = 'shareRecord',
+    ADD_OR_VIEW_COMMENTS = 'addOrViewComments',
+    UPDATE_STATE = 'updateState',
+    CREATE_INCIDENT = 'createIncident',
+    CREATE_REQUEST = 'createRequest',
+}
+
 export enum SubscriptionEvents {
     CREATED = 'created',
     STATE = 'state',

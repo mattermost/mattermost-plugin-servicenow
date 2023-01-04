@@ -1,4 +1,4 @@
-import React, {MouseEvent, useCallback, useEffect} from 'react';
+import React, {MouseEvent, useCallback} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Action} from 'redux';
 
@@ -7,7 +7,7 @@ import {isSystemMessage} from 'mattermost-redux/utils/post_utils';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
 
-import Constants from 'src/plugin_constants';
+import Constants, {ModalIds} from 'src/plugin_constants';
 
 import {setGlobalModalState} from 'src/reducers/globalModal';
 import usePluginApi from 'src/hooks/usePluginApi';
@@ -32,7 +32,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
             description: post.message,
             shortDescription: post.message,
         };
-        dispatch(setGlobalModalState({modalId: 'createIncident', data: incidentModalData}) as Action);
+        dispatch(setGlobalModalState({modalId: ModalIds.CREATE_INCIDENT, data: incidentModalData}) as Action);
     }, [postId]);
 
     if (!show) {

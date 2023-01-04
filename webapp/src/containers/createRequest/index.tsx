@@ -3,8 +3,7 @@ import {useDispatch} from 'react-redux';
 
 import {AutoSuggest, CustomModal as Modal, ModalFooter, ModalHeader, ResultPanel, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
@@ -27,11 +26,8 @@ const CreateRequest = () => {
     const [searchItemsPayload, setSearchItemsPayload] = useState<SearchItemsParams | null>(null);
     const [showModal, setShowModal] = useState(false);
 
-    // Loaders
-    const [showModalLoader, setShowModalLoader] = useState(false);
-
     // usePluginApi hook
-    const {getApiState, makeApiRequest, pluginState} = usePluginApi();
+    const {getApiState, makeApiRequestWithCompletionStatus, pluginState} = usePluginApi();
     const open = isCreateRequestModalOpen(pluginState);
 
     // Errors
@@ -89,13 +85,13 @@ const CreateRequest = () => {
 
     // Get config state
     const getConfigState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {data} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
+        return {data: data as ConfigData | undefined};
     };
 
     const getItemsSuggestions = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, searchItemsPayload);
-        return {isLoading, isSuccess, isError, data: data as RequestData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, searchItemsPayload);
+        return {isLoading, data: data as RequestData[]};
     };
 
     // Get the suggestions from the API
@@ -104,7 +100,7 @@ const CreateRequest = () => {
             setApiError(null);
             setRequest(null);
             setSearchItemsPayload({search: searchFor});
-            makeApiRequest(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor});
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.searchItems.apiServiceName, {search: searchFor});
         }
     };
 
@@ -121,23 +117,19 @@ const CreateRequest = () => {
         }
     };
 
-    // Handle API state updates in the suggestions
-    useEffect(() => {
-        const {isLoading, isSuccess, isError, data, error} = getItemsSuggestions();
-        setShowModalLoader(isLoading);
-        if (isError && error) {
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.searchItems.apiServiceName,
+        payload: searchItemsPayload,
+        handleSuccess: () => setOptions(data),
+        handleError: (error) => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
 
             setShowErrorPanel(true);
             setApiError(error);
-        }
-
-        if (isSuccess && data) {
-            setOptions(data);
-        }
-    }, [getItemsSuggestions().isLoading, getItemsSuggestions().isError, getItemsSuggestions().isSuccess]);
+        },
+    });
 
     useEffect(() => {
         if (open && pluginState.connectedReducer.connected) {
@@ -148,6 +140,7 @@ const CreateRequest = () => {
     }, [open]);
 
     const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;
+    const {isLoading, data} = getItemsSuggestions();
     return (
         <Modal
             show={showModal}
@@ -196,7 +189,7 @@ const CreateRequest = () => {
                                                 className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                             >
                                                 <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                                <span className='search-panel__description-text channel-text wt-500 text-ellipsis white-space-inherit'>{showModalLoader ? <SkeletonLoader/> : request[header.key] || 'N/A'}</span>
+                                                <span className='search-panel__description-text channel-text wt-500 text-ellipsis white-space-inherit'>{isLoading ? <SkeletonLoader/> : request[header.key] || 'N/A'}</span>
                                             </li>
                                         ))}
                                     </ul>
@@ -221,7 +214,7 @@ const CreateRequest = () => {
                         <ModalFooter
                             onConfirm={hideModal}
                             confirmBtnText='Close'
-                            confirmDisabled={showModalLoader}
+                            confirmDisabled={isLoading}
                         />
                     </>
                 )}

@@ -1,4 +1,4 @@
-import {RecordType} from 'src/plugin_constants';
+import {ModalIds, RecordType} from 'src/plugin_constants';
 import reducer, {setGlobalModalState, resetGlobalModalState} from 'src/reducers/globalModal';
 
 const previousState: GlobalModalState = {
@@ -12,8 +12,8 @@ test('setGlobalModalState: should change the value of modalId and data equal to 
         recordType: RecordType.INCIDENT,
     };
 
-    expect(reducer(previousState, setGlobalModalState({modalId: 'updateState', data}))).toEqual(
-        {modalId: 'updateState', data},
+    expect(reducer(previousState, setGlobalModalState({modalId: ModalIds.UPDATE_STATE, data}))).toEqual(
+        {modalId: ModalIds.UPDATE_STATE, data},
     );
 });
 
