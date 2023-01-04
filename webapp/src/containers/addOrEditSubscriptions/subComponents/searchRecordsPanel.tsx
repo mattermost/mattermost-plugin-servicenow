@@ -125,7 +125,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         serviceName: Constants.pluginApiServiceConfigs.searchRecords.apiServiceName,
         payload: searchRecordsPayload,
         handleSuccess: () => setSuggestions(recordSuggestionsData),
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     useApiRequestCompletionState({
@@ -141,7 +141,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                 setDisabledInput(false);
             }
         },
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     const {isLoading: recordSuggestionsLoading, data: recordSuggestionsData} = getRecordsSuggestions();

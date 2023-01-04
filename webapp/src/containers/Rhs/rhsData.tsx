@@ -7,7 +7,7 @@ import {EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui
 
 import Spinner from 'src/components/spinner';
 
-import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels, ModalId} from 'src/plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels, ModalIds} from 'src/plugin_constants';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -144,7 +144,7 @@ const RhsData = ({
                             <div className='rhs-btn-container padding-12 channel-bg'>
                                 <button
                                     className='btn btn-primary rhs-btn plugin-btn'
-                                    onClick={() => dispatch(setGlobalModalState({modalId: ModalId.ADD_SUBSCRIPTION}))}
+                                    onClick={() => dispatch(setGlobalModalState({modalId: ModalIds.ADD_SUBSCRIPTION}))}
                                 >
                                     {'Add Subscription'}
                                 </button>
@@ -157,7 +157,7 @@ const RhsData = ({
                         title='No Subscriptions Found'
                         buttonConfig={{
                             text: 'Add new Subscription',
-                            action: () => dispatch(setGlobalModalState({modalId: ModalId.ADD_SUBSCRIPTION})),
+                            action: () => dispatch(setGlobalModalState({modalId: ModalIds.ADD_SUBSCRIPTION})),
                         }}
                         icon={<BellIcon/>}
                     />

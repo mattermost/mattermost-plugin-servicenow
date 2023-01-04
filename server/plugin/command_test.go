@@ -755,7 +755,6 @@ func TestHandleEditSubscription(t *testing.T) {
 			c := mock_plugin.NewClient(t)
 
 			resp := p.handleEditSubscription(args, testCase.params, c, true)
-
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}

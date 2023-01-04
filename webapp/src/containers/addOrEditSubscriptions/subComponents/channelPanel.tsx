@@ -85,7 +85,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
             ),
             value: ch.id,
         }))),
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     // Hide error state once the value is valid

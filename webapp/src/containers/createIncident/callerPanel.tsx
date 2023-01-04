@@ -58,7 +58,7 @@ const CallerPanel = (({
             setApiError(null);
             setOptions(data);
         },
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     useEffect(() => {

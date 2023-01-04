@@ -145,7 +145,7 @@ const CreateIncident = () => {
     useApiRequestCompletionState({
         serviceName: Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName,
         handleSuccess: () => Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, incidentFieldsData),
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     useApiRequestCompletionState({
@@ -180,7 +180,7 @@ const CreateIncident = () => {
             setSubscriptionPayload(payload);
             makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, payload);
         },
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     useApiRequestCompletionState({
@@ -191,7 +191,7 @@ const CreateIncident = () => {
             dispatch(refetch());
             setShowResultPanel(true);
         },
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     useEffect(() => {

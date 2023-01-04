@@ -152,7 +152,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setSuccessPanelOpen(true);
             dispatch(refetch());
         },
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     useApiRequestCompletionState({
@@ -162,7 +162,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setSuccessPanelOpen(true);
             dispatch(refetch());
         },
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     useApiRequestCompletionState({

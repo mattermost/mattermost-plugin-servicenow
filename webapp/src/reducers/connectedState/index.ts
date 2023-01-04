@@ -1,7 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 const initialState: ConnectedState = {
-    connected: true,
+    connected: false,
 };
 
 export const connectedSlice = createSlice({

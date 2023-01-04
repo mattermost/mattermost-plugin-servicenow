@@ -5,7 +5,7 @@ import {Dropdown, Button, SvgWrapper, ToggleSwitch, MenuButtons} from '@brightsc
 
 import useOutsideClick from 'src/hooks/useClickOutside';
 
-import Constants, {ModalId} from 'src/plugin_constants';
+import Constants, {ModalIds} from 'src/plugin_constants';
 import SVGIcons from 'src/plugin_constants/icons';
 import IconButton from 'src/components/Buttons/iconButton';
 import {setGlobalModalState} from 'src/reducers/globalModal';
@@ -141,7 +141,7 @@ const Header = ({
                                             {SVGIcons.catalog}
                                         </SvgWrapper>
                                     ),
-                                    onClick: (() => dispatch(setGlobalModalState({modalId: ModalId.CREATE_REQUEST}))),
+                                    onClick: (() => dispatch(setGlobalModalState({modalId: ModalIds.CREATE_REQUEST}))),
                                     text: 'Begin catalog request',
                                 },
                                 {
@@ -154,7 +154,7 @@ const Header = ({
                                             {SVGIcons.incident}
                                         </SvgWrapper>
                                     ),
-                                    onClick: (() => dispatch(setGlobalModalState({modalId: ModalId.CREATE_INCIDENT}))),
+                                    onClick: (() => dispatch(setGlobalModalState({modalId: ModalIds.CREATE_INCIDENT}))),
                                     text: 'Create an incident',
                                 },
                                 {
@@ -167,7 +167,7 @@ const Header = ({
                                             {SVGIcons.share}
                                         </SvgWrapper>
                                     ),
-                                    onClick: (() => dispatch(setGlobalModalState({modalId: ModalId.SHARE_RECORD}))),
+                                    onClick: (() => dispatch(setGlobalModalState({modalId: ModalIds.SHARE_RECORD}))),
                                     text: 'Share a record',
                                 },
                             ]}

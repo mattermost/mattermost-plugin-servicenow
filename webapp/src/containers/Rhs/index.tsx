@@ -10,7 +10,7 @@ import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDial
 import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants, {CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILENAME, ModalId} from 'src/plugin_constants';
+import Constants, {CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILENAME, ModalIds} from 'src/plugin_constants';
 
 import {refetch, resetRefetch} from 'src/reducers/refetchState';
 
@@ -132,7 +132,7 @@ const Rhs = (): JSX.Element => {
             id: subscription.sys_id,
             userId: subscription.user_id,
         };
-        dispatch(setGlobalModalState({modalId: ModalId.EDIT_SUBSCRIPTION, data: subscriptionData}));
+        dispatch(setGlobalModalState({modalId: ModalIds.EDIT_SUBSCRIPTION, data: subscriptionData}));
     }, [dispatch]);
 
     // Handles action when the delete button is clicked

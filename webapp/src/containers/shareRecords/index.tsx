@@ -79,7 +79,7 @@ const ShareRecords = () => {
         serviceName: Constants.pluginApiServiceConfigs.shareRecord.apiServiceName,
         payload: shareRecordPayload,
         handleSuccess: () => setShowResultPanel(true),
-        handleError: (error) => setApiError(error),
+        handleError: setApiError,
     });
 
     const shareRecord = () => {

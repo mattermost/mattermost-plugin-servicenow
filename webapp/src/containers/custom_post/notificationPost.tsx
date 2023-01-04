@@ -6,7 +6,7 @@ import {Post} from 'mattermost-redux/types/posts';
 import {setGlobalModalState} from 'src/reducers/globalModal';
 
 import './styles.scss';
-import {ModalId, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation} from 'src/plugin_constants';
+import {ModalIds, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation} from 'src/plugin_constants';
 
 type NotificationPostProps = {
     post: Post,
@@ -116,7 +116,7 @@ const NotificationPost = ({post}: NotificationPostProps) => {
                 <div>
                     {RecordTypesSupportingComments.has(record_type) && (
                         <button
-                            onClick={() => dispatch(setGlobalModalState({modalId: ModalId.ADD_OR_VIEW_COMMENTS, data}))}
+                            onClick={() => dispatch(setGlobalModalState({modalId: ModalIds.ADD_OR_VIEW_COMMENTS, data}))}
                             className='shared-post__modal-button wt-700'
                         >
                             {'Add and view comments'}
@@ -124,7 +124,7 @@ const NotificationPost = ({post}: NotificationPostProps) => {
                     )}
                     {RecordTypesSupportingStateUpdation.has(record_type) && (
                         <button
-                            onClick={() => dispatch(setGlobalModalState({modalId: ModalId.UPDATE_STATE, data}))}
+                            onClick={() => dispatch(setGlobalModalState({modalId: ModalIds.UPDATE_STATE, data}))}
                             className='shared-post__modal-button wt-700'
                         >
                             {'Update State'}

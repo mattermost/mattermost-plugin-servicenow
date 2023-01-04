@@ -89,7 +89,7 @@ const UpdateState = () => {
         serviceName: Constants.pluginApiServiceConfigs.getStates.apiServiceName,
         payload: getStatesParams,
         handleSuccess: () => setApiError(null),
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     useApiRequestCompletionState({
@@ -99,7 +99,7 @@ const UpdateState = () => {
             setApiError(null);
             setShowResultPanel(true);
         },
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     const {isLoading: statesLoading, data: stateOptions} = getStateForGetStatesAPI();

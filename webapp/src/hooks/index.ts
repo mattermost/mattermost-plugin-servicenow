@@ -3,7 +3,7 @@ import {Store, Action} from 'redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 
 import {setGlobalModalState} from 'src/reducers/globalModal';
-import Constants, {ModalId} from 'src/plugin_constants';
+import Constants, {ModalIds} from 'src/plugin_constants';
 import Utils from 'src/utils';
 
 export default class Hooks {
@@ -21,7 +21,7 @@ export default class Hooks {
         }
 
         if (commandTrimmed?.startsWith('/servicenow subscriptions add')) {
-            this.store.dispatch(setGlobalModalState({modalId: ModalId.ADD_SUBSCRIPTION}) as Action);
+            this.store.dispatch(setGlobalModalState({modalId: ModalIds.ADD_SUBSCRIPTION}) as Action);
             return Promise.resolve({
                 message,
                 args: contextArgs,
@@ -32,7 +32,7 @@ export default class Hooks {
             const commandArgs = Utils.getCommandArgs(commandTrimmed);
             const regex = new RegExp(Constants.ServiceNowSysIdRegex);
             if (commandArgs.length >= 2 && regex.test(commandArgs[1])) {
-                this.store.dispatch(setGlobalModalState({modalId: ModalId.EDIT_SUBSCRIPTION, data: commandArgs[1]}) as Action);
+                this.store.dispatch(setGlobalModalState({modalId: ModalIds.EDIT_SUBSCRIPTION, data: commandArgs[1]}) as Action);
             }
 
             return Promise.resolve({
@@ -42,7 +42,7 @@ export default class Hooks {
         }
 
         if (commandTrimmed?.startsWith('/servicenow share')) {
-            this.store.dispatch(setGlobalModalState({modalId: ModalId.SHARE_RECORD}) as Action);
+            this.store.dispatch(setGlobalModalState({modalId: ModalIds.SHARE_RECORD}) as Action);
             return {
                 message,
                 args: contextArgs,
@@ -50,7 +50,7 @@ export default class Hooks {
         }
 
         if (commandTrimmed?.startsWith('/servicenow create incident')) {
-            this.store.dispatch(setGlobalModalState({modalId: ModalId.CREATE_INCIDENT}) as Action);
+            this.store.dispatch(setGlobalModalState({modalId: ModalIds.CREATE_INCIDENT}) as Action);
             return {
                 message,
                 args: contextArgs,
@@ -58,7 +58,7 @@ export default class Hooks {
         }
 
         if (commandTrimmed?.startsWith('/servicenow create request')) {
-            this.store.dispatch(setGlobalModalState({modalId: ModalId.CREATE_REQUEST}) as Action);
+            this.store.dispatch(setGlobalModalState({modalId: ModalIds.CREATE_REQUEST}) as Action);
             return {
                 message,
                 args: contextArgs,

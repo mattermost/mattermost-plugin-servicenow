@@ -113,7 +113,7 @@ const AddOrViewComments = () => {
             setShowErrorPanel(false);
             setCommentsData(data);
         },
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     useApiRequestCompletionState({
@@ -123,7 +123,7 @@ const AddOrViewComments = () => {
             setComments('');
             setRefetch(true);
         },
-        handleError: (error) => handleError(error),
+        handleError,
     });
 
     const {isLoading: getCommentsLoading, data} = getCommentsState();

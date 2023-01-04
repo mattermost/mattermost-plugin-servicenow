@@ -26,14 +26,12 @@ function useApiRequestCompletionState({handleSuccess, handleError, serviceName, 
         ) {
             const {isError, isSuccess, isUninitialized, error} = getApiState(serviceName, payload);
             const apiErr = (error as FetchBaseQueryError)?.data as APIError | undefined;
-            if (isSuccess && !isError) {
-                // eslint-disable-next-line no-unused-expressions
-                handleSuccess?.();
+            if (isSuccess && !isError && handleSuccess) {
+                handleSuccess();
             }
 
-            if (!isSuccess && isError && apiErr) {
-                // eslint-disable-next-line no-unused-expressions
-                handleError?.(apiErr);
+            if (!isSuccess && isError && apiErr && handleError) {
+                handleError(apiErr);
             }
 
             if (!isUninitialized) {
