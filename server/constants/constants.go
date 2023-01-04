@@ -57,7 +57,7 @@ const (
 	DefaultPage                                = 0
 	DefaultPerPage                             = 20
 	MaxPerPage                                 = 100
-	CharacterThresholdForSearchingRecords      = 3
+	DefaultCharacterThresholdForSearching      = 3
 	CharacterThresholdForSearchingCatalogItems = 4
 	QueryParamPage                             = "page"
 	QueryParamPerPage                          = "per_page"
@@ -82,6 +82,8 @@ const (
 	FieldCategory             = "category"
 	FieldUrgency              = "urgency"
 	FieldImpact               = "impact"
+	FieldName                 = "name"
+	FieldDescription          = "description"
 
 	// Websocket events
 	WSEventConnect              = "connect"
@@ -180,6 +182,7 @@ const (
 	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
 	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
+	ErrorSearchingAssignmentGroup         = "Error in searching for assignment groups in ServiceNow"
 )
 
 // kv store keys prefix
