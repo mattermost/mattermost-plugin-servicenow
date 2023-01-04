@@ -53,7 +53,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCheckSubscriptionsConfigured, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfiguredAPI))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathSearchAssignmentGroups, p.checkAuth(p.checkOAuth(p.searchAssignmentGroupsInServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSearchFilterValues, p.checkAuth(p.checkOAuth(p.searchFilterValuesInServiceNow))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -775,23 +775,39 @@ func (p *Plugin) getIncidentFields(w http.ResponseWriter, r *http.Request) {
 	p.writeJSONArray(w, statusCode, fields)
 }
 
-func (p *Plugin) searchAssignmentGroupsInServiceNow(w http.ResponseWriter, r *http.Request) {
+func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	filterType := pathParams[constants.PathParamFilterType]
+	if !constants.ValidFiltersForSearching[filterType] {
+		p.API.LogError("Invalid filter type while searching", "Filter type", filterType)
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidFilterType})
+		return
+	}
+
 	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
 	if len(searchTerm) < constants.DefaultCharacterThresholdForSearching {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.DefaultCharacterThresholdForSearching)})
 		return
 	}
 
+	var requestURL string
+	switch filterType {
+	case constants.FilterAssignmentGroup:
+		requestURL = constants.PathGetAssignmentGroupsFromServiceNow
+	case constants.FilterService:
+		requestURL = constants.PathGetServicesFromServiceNow
+	}
+
 	page, perPage := GetPageAndPerPage(r)
 	client := p.GetClientFromRequest(r)
-	assignmentGroups, statusCode, err := client.SearchAssignmentGroupsInServiceNow(searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	filterValues, statusCode, err := client.SearchFilterValuesInServiceNow(searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage), requestURL)
 	if err != nil {
-		p.API.LogError(constants.ErrorSearchingAssignmentGroup, "Error", err.Error())
-		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorSearchingAssignmentGroup, err.Error()))
+		p.API.LogError(constants.ErrorSearchingFilterValues, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorSearchingFilterValues, err.Error()))
 		return
 	}
 
-	p.writeJSONArray(w, statusCode, assignmentGroups)
+	p.writeJSONArray(w, statusCode, filterValues)
 }
 
 func returnStatusOK(w http.ResponseWriter) {

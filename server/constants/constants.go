@@ -49,6 +49,8 @@ const (
 	FilterCreatedByMe     = "me"
 	FilterCreatedByAnyone = "anyone"
 	FilterAllChannels     = "all_channels"
+	FilterAssignmentGroup = "assignment-group"
+	FilterService         = "service"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -69,6 +71,7 @@ const (
 	PathParamTeamID                            = "team_id"
 	PathParamRecordType                        = "record_type"
 	PathParamRecordID                          = "record_id"
+	PathParamFilterType                        = "filter_type"
 
 	// ServiceNow table fields
 	FieldSysID                = "sys_id"
@@ -182,7 +185,8 @@ const (
 	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
 	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
-	ErrorSearchingAssignmentGroup         = "Error in searching for assignment groups in ServiceNow"
+	ErrorSearchingFilterValues            = "Error in searching for filter values in ServiceNow"
+	ErrorInvalidFilterType                = "Invalid filter type"
 )
 
 // kv store keys prefix
@@ -251,6 +255,11 @@ var (
 		RecordTypeTask:         true,
 		RecordTypeChangeTask:   true,
 		RecordTypeFollowOnTask: true,
+	}
+
+	ValidFiltersForSearching = map[string]bool{
+		FilterAssignmentGroup: true,
+		FilterService:         true,
 	}
 )
 
