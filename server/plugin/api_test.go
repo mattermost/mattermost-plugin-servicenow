@@ -469,7 +469,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
@@ -557,7 +557,7 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
@@ -1973,7 +1973,7 @@ func TestAPICreateIncident(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError("unable to create the post"),
 				)
 			},
 			SetupClient: func(client *mock_plugin.Client) {

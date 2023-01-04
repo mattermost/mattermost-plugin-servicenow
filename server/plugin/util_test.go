@@ -95,7 +95,7 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 			description: "IsAuthorizedSysAdmin: error while getting user",
 			setupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 			},
 			expectedErr: true,
@@ -307,6 +307,146 @@ func TestHandleClientError(t *testing.T) {
 
 			assert.EqualValues(testCase.expectedResponse, response)
 			assert.EqualValues(testCase.expectedStatusCode, w.Result().StatusCode)
+		})
+	}
+}
+
+func TestIsValidUserKey(t *testing.T) {
+	defer monkey.UnpatchAll()
+	for _, testCase := range []struct {
+		description      string
+		testKey          string
+		expectedKey      string
+		expectedResponse bool
+	}{
+		{
+			description:      "IsValidUserKey: valid key",
+			testKey:          "user_mockKey",
+			expectedKey:      "mockKey",
+			expectedResponse: true,
+		},
+		{
+			description: "IsValidUserKey: invalid key",
+			testKey:     "mockKey",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp, isValid := IsValidUserKey(testCase.testKey)
+
+			assert.EqualValues(testCase.expectedKey, resp)
+			assert.EqualValues(testCase.expectedResponse, isValid)
+		})
+	}
+}
+
+func TestDecodeKey(t *testing.T) {
+	defer monkey.UnpatchAll()
+	for _, testCase := range []struct {
+		description string
+		testKey     string
+		expectedKey string
+		expectedErr error
+	}{
+		{
+			description: "DecodeKey: success",
+			testKey:     "bW9ja0tleQ==",
+			expectedKey: "mockKey",
+		},
+		{
+			description: "DecodeKey: empty key",
+		},
+		{
+			description: "DecodeKey: error in decoding",
+			testKey:     "invalidKey",
+			expectedErr: errors.New("illegal base64 data at input byte 8"),
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp, err := decodeKey(testCase.testKey)
+
+			if testCase.expectedErr != nil {
+				assert.Error(err, testCase.expectedErr)
+			} else {
+				assert.Nil(err)
+			}
+
+			assert.EqualValues(testCase.expectedKey, resp)
+		})
+	}
+}
+
+func TestHasChannelPermissions(t *testing.T) {
+	for _, testCase := range []struct {
+		description  string
+		setupAPI     func(api *plugintest.API)
+		statusCode   int
+		errorMessage string
+	}{
+		{
+			description: "HasChannelPermissions: user has channel permissions",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_OPEN), nil,
+				)
+				api.On("GetChannelMember", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					nil, nil,
+				)
+			},
+			statusCode: http.StatusOK,
+		},
+		{
+			description: "HasChannelPermissions: unable to get channel",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					nil, testutils.GetInternalServerAppError("unable to get channel"),
+				)
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			statusCode:   http.StatusInternalServerError,
+			errorMessage: constants.ErrorChannelPermissionsForUser,
+		},
+		{
+			description: "HasChannelPermissions: channel is a direct channel",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_DIRECT), nil,
+				)
+			},
+			statusCode:   http.StatusBadRequest,
+			errorMessage: constants.ErrorInvalidChannelType,
+		},
+		{
+			description: "HasChannelPermissions: unable to check if a user is part of the channel",
+			setupAPI: func(api *plugintest.API) {
+				api.On("GetChannel", mock.AnythingOfType("string")).Return(
+					testutils.GetChannel(model.CHANNEL_OPEN), nil,
+				)
+				api.On("GetChannelMember", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					nil, testutils.GetInternalServerAppError("unable to check if a user is part of the channel"),
+				)
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			statusCode:   http.StatusInternalServerError,
+			errorMessage: constants.ErrorInsufficientPermissions,
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			testCase.setupAPI(api)
+			defer api.AssertExpectations(t)
+
+			statusCode, err := p.HasChannelPermissions(testutils.GetID(), testutils.GetChannelID())
+			if testCase.errorMessage != "" {
+				assert.EqualError(err, testCase.errorMessage)
+			} else {
+				assert.Nil(err)
+			}
+
+			assert.EqualValues(testCase.statusCode, statusCode)
 		})
 	}
 }

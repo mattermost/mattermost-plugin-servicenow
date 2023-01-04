@@ -68,9 +68,10 @@ func GetBadRequestAppError() *model.AppError {
 	}
 }
 
-func GetInternalServerAppError() *model.AppError {
+func GetInternalServerAppError(errorMsg string) *model.AppError {
 	return &model.AppError{
-		StatusCode: http.StatusInternalServerError,
+		StatusCode:    http.StatusInternalServerError,
+		DetailedError: errorMsg,
 	}
 }
 
@@ -210,6 +211,14 @@ func GetSearchTerm(valid bool, threshold int) string {
 	}
 
 	return sb.String()
+}
+
+func GetUserKey(valid bool) string {
+	if valid {
+		return "user_bW9ja0tleQ=="
+	}
+
+	return "user_invalidKey"
 }
 
 func GetServiceNowIncidentResponse() *serializer.IncidentResponse {
