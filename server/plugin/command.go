@@ -64,7 +64,7 @@ After that, this user will have the permission to add or manage subscriptions fr
 	subscriptionsNotAuthorizedErrorForAdmin = subscriptionsNotAuthorizedError + " Please follow the instructions for setting up user permissions available in the plugin's documentation. The instructions can also be viewed by running the \"/servicenow help\" command."
 )
 
-type CommandHandleFunc func(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string
+type CommandHandleFunc func(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string
 
 func (p *Plugin) getCommand() (*model.Command, error) {
 	iconData, err := command.GetIconData(p.API, "assets/icon.svg")
@@ -144,7 +144,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			}
 		}
 
-		message := f(c, args, parameters, client, isSysAdmin)
+		message := f(args, parameters, client, isSysAdmin)
 		if message != "" {
 			p.postCommandResponse(args, message)
 		}
@@ -185,7 +185,7 @@ func (p *Plugin) handleHelp(args *model.CommandArgs, isSysAdmin bool) {
 	p.postCommandResponse(args, p.getHelpMessage(helpCommandHeader, isSysAdmin))
 }
 
-func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client, _ bool) string {
+func (p *Plugin) handleDisconnect(args *model.CommandArgs, _ []string, _ Client, _ bool) string {
 	if err := p.DisconnectUser(args.UserId); err != nil {
 		p.API.LogError("Unable to disconnect user", "Error", err.Error())
 		return disconnectErrorMessage
@@ -199,7 +199,7 @@ func (p *Plugin) handleDisconnect(_ *plugin.Context, args *model.CommandArgs, _ 
 	return disconnectSuccessMessage
 }
 
-func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleSubscriptions(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
 	if len(parameters) == 0 {
 		return "Invalid subscribe command. Available commands are 'list', 'add', 'edit' and 'delete'."
 	}
@@ -213,15 +213,15 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	case constants.SubCommandAdd:
 		return ""
 	case constants.SubCommandEdit:
-		return p.handleEditSubscription(args, parameters, client, isSysAdmin)
+		return p.handleEditSubscription(parameters)
 	case constants.SubCommandDelete:
-		return p.handleDeleteSubscription(c, args, parameters, client, isSysAdmin)
+		return p.handleDeleteSubscription(args, parameters, client, isSysAdmin)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
 }
 
-func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
 	if len(parameters) == 0 {
 		return "Invalid create command. Available commands are 'incident' and 'request'."
 	}
@@ -236,7 +236,7 @@ func (p *Plugin) handleCreate(c *plugin.Context, args *model.CommandArgs, parame
 	}
 }
 
-func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleSearchAndShare(args *model.CommandArgs, params []string, client Client, _ bool) string {
 	return ""
 }
 
@@ -322,7 +322,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 	return listSubscriptionsWaitMessage
 }
 
-func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleDeleteSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
 		return constants.ErrorCommandInvalidNumberOfParams
 	}
@@ -359,7 +359,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 	return genericWaitMessage
 }
 
-func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleEditSubscription(params []string) string {
 	if len(params) < 1 {
 		return constants.ErrorCommandInvalidNumberOfParams
 	}
