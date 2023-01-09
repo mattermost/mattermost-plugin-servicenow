@@ -38,6 +38,7 @@
                 min-height: 37px;
                 border-width: 1px;
                 padding-left: 12px;
+                background: var(--center-channel-bg);
                 border-color: rgba(var(--center-channel-color-rgb), 0.1);
                 &::placeholder {
                     color: rgba(var(--center-channel-color-rgb), 0.7);

@@ -200,6 +200,7 @@ const CreateRequest = () => {
                                                 href={`${serviceNowBaseURL}/${Constants.REQUEST_BASE_URL}${request.id}`}
                                                 rel='noreferrer'
                                                 target='_blank'
+                                                onClick={hideModal}
                                             >
                                                 {Constants.RequestButtonText}
                                             </a>
