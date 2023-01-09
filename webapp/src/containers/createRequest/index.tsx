@@ -178,6 +178,7 @@ const CreateRequest = () => {
                                     suggestions,
                                     renderValue: (suggestion) => suggestion.name,
                                 }}
+                                loadingSuggestions={isLoading}
                                 charThresholdToShowSuggestions={Constants.CharThresholdToSuggestRequest}
                             />
                             {suggestionChosen && request && (
