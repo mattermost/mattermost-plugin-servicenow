@@ -46,7 +46,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
                 role='menuitem'
             >
                 <button
-                    className='style-none'
+                    className='incident-menu'
                     role='presentation'
                     onClick={handleClick}
                 >

@@ -74,6 +74,15 @@
         }
     }
 
+    .incident-menu {
+        background: var(--center-channel-bg);
+        border: none;
+
+        :hover {
+            background: rgba(var(--center-channel-color-rgb), 0.08);
+        }
+    }
+
     .incident-menu-icon {
         height: 16px;
         width: 16px;
