@@ -220,8 +220,7 @@ const CreateIncident = () => {
         }
 
         if (open && getGlobalModalState(pluginState).data) {
-            const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
-            setShortDescription(reduxStateShortDescription);
+            const {description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
             setDescription(reduxStateDescription);
         }
 
