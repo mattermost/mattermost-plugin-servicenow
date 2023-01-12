@@ -275,7 +275,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 		}
 
 		for _, subscription := range subscriptions {
-			_, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			_, _, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID, true)
 			if permissionErr == nil {
 				subscriptionList = append(subscriptionList, subscription)
 			}
