@@ -316,7 +316,7 @@ func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool)
 	}
 
 	// Check if a channel is direct message or group channel
-	if checkType && channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
+	if checkType && (channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP) {
 		return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 
