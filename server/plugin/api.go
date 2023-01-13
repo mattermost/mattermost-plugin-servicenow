@@ -743,7 +743,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	}
 
 	channelID := incident.ChannelID
-	if channelType == model.CHANNEL_DIRECT {
+	if channelType == model.CHANNEL_DIRECT || channelType == model.CHANNEL_GROUP {
 		channel, err := p.API.GetDirectChannel(userID, p.botID)
 		if err != nil {
 			p.API.LogError("Couldn't get bot's DM channel", "user_id", userID, "error", err.Error())
