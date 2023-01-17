@@ -180,6 +180,7 @@ const (
 	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
 	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
+	ErrorConnectionRefused                = "Unable to make a connection to the specified ServiceNow instance"
 )
 
 // kv store keys prefix
