@@ -377,8 +377,11 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             record_id: recordId as string || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
-            filters: formattedFilters,
         };
+
+        if (formattedFilters) {
+            payload.filters = formattedFilters;
+        }
 
         // Set payload
         setCreateSubscriptionPayload(payload);
