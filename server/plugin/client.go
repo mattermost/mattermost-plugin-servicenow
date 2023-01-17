@@ -33,6 +33,7 @@ type Client interface {
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 	GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowIncidentFields, int, error)
 	SearchFilterValuesInServiceNow(searchTerm, limit, offset, requestURL string) ([]*serializer.ServiceNowFilter, int, error)
+	GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error)
 }
 
 type client struct {
@@ -158,6 +159,10 @@ func (c *client) EditSubscription(subscriptionID string, subscription *serialize
 // The boolean return type value should be checked only if the error being returned is nil
 func (c *client) CheckForDuplicateSubscription(subscription *serializer.SubscriptionPayload) (bool, int, error) {
 	query := fmt.Sprintf("channel_id=%s^is_active=true^type=%s^record_type=%s^record_id=%s^server_url=%s", *subscription.ChannelID, *subscription.Type, *subscription.RecordType, *subscription.RecordID, *subscription.ServerURL)
+	if *subscription.Type == constants.SubscriptionTypeBulk && subscription.Filters != nil {
+		query = fmt.Sprintf("%s^filters=%s", query, *subscription.Filters)
+	}
+
 	queryParams := url.Values{
 		constants.SysQueryParam:      {query},
 		constants.SysQueryParamLimit: {fmt.Sprint(constants.DefaultPerPage)},
@@ -328,4 +333,22 @@ func (c *client) SearchFilterValuesInServiceNow(searchTerm, limit, offset, reque
 	}
 
 	return assignmentGroups.Result, statusCode, nil
+}
+
+func (c *client) GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error) {
+	fields := &serializer.ServiceNowTableFieldsResult{}
+	queryParams := url.Values{
+		constants.QueryParamTableTerm: {table},
+	}
+
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetTableFieldsFromServiceNow, nil, fields, queryParams)
+	if err != nil {
+		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), constants.ServiceNowAPIErrorURINotPresent) {
+			return nil, statusCode, errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded)
+		}
+
+		return nil, statusCode, err
+	}
+
+	return fields.Result, statusCode, nil
 }

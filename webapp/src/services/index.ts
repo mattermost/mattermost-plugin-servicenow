@@ -159,6 +159,22 @@ const pluginApi = createApi({
                 method: Constants.pluginApiServiceConfigs.getIncidentFeilds.method,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.getFilterData.apiServiceName]: builder.query<FieldsFilterData[], SearchFilterItemsParams>({
+            query: ({search, filter, perPage}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getFilterData.path}/${filter}`,
+                method: Constants.pluginApiServiceConfigs.getFilterData.method,
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName]: builder.query<void, string>({
+            query: (table) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getTableFeilds.path,
+                method: Constants.pluginApiServiceConfigs.getTableFeilds.method,
+                params: {table},
+            }),
+        }),
     }),
 });
 

@@ -17,6 +17,7 @@ const (
 	InvalidConfigAdminMessage   = "Before using this plugin, you'll need to configure it in the System Console`"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
+	ServiceNowSubscriptionsTableName          = "x_830655_mm_std_servicenow_for_mattermost_subscriptions"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
 	SysQueryParam                             = "sysparm_query"
 	SysQueryParamLimit                        = "sysparm_limit"
@@ -49,8 +50,8 @@ const (
 	FilterCreatedByMe     = "me"
 	FilterCreatedByAnyone = "anyone"
 	FilterAllChannels     = "all_channels"
-	FilterAssignmentGroup = "assignment-group"
-	FilterService         = "service"
+	FilterAssignmentGroup = "assignment_group"
+	FilterService         = "business_service"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -72,6 +73,7 @@ const (
 	PathParamRecordType                        = "record_type"
 	PathParamRecordID                          = "record_id"
 	PathParamFilterType                        = "filter_type"
+	QueryParamTableTerm                        = "table"
 
 	// ServiceNow table fields
 	FieldSysID                = "sys_id"
@@ -87,6 +89,7 @@ const (
 	FieldImpact               = "impact"
 	FieldName                 = "name"
 	FieldDescription          = "description"
+	FieldService              = "service"
 
 	// Websocket events
 	WSEventConnect              = "connect"
@@ -115,6 +118,8 @@ const (
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
 	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
+	APIErrorIDAccessTable                = "unauthorized_to_access_table"
+	APIErrorAccessTable                  = "unauthorized to access table"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -187,6 +192,7 @@ const (
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
 	ErrorSearchingFilterValues            = "Error in searching for filter values in ServiceNow"
 	ErrorInvalidFilterType                = "Invalid filter type"
+	ErrorGetTableFields                   = "Error in getting the table fields"
 )
 
 // kv store keys prefix

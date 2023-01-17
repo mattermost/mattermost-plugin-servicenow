@@ -6,10 +6,11 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.2.xml';
+export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.3.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
 export const REQUEST_BASE_URL = 'com.glideapp.servicecatalog_cat_item_view.do?v=1&sysparm_id=';
+export const SERVICENOW_SUBSCRIPTIONS_TABLE = 'x_830655_mm_std_servicenow_for_mattermost_subscriptions';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
@@ -86,6 +87,16 @@ export enum RecordType {
     FOLLOW_ON_TASK = 'cert_follow_on_task',
 }
 
+export enum SupportedFilters {
+    ASSIGNMENT_GROUP = 'assignment_group',
+    SERVICE = 'business_service',
+}
+
+export const SupportedFiltersMap: Record<SupportedFilters, string> = {
+    [SupportedFilters.ASSIGNMENT_GROUP]: '"assignment_group"',
+    [SupportedFilters.SERVICE]: '"business_service"',
+};
+
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
     created: SubscriptionEvents.CREATED,
     state: SubscriptionEvents.STATE,
@@ -159,6 +170,7 @@ export enum RecordDataConfigKeys {
     PRIORITY = 'priority',
     ASSIGNED_TO = 'assigned_to',
     ASSIGNMENT_GROUP = 'assignment_group',
+    SERVICE = 'business_service',
 }
 
 export enum RecordDataConfigLabels {
@@ -167,6 +179,7 @@ export enum RecordDataConfigLabels {
     PRIORITY = 'Priority',
     ASSIGNED_TO = 'Assigned To',
     ASSIGNMENT_GROUP = 'Assignment Group',
+    SERVICE = 'Service',
 }
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
@@ -186,6 +199,9 @@ const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     }, {
         key: RecordDataConfigKeys.ASSIGNMENT_GROUP,
         label: RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    }, {
+        key: RecordDataConfigKeys.SERVICE,
+        label: RecordDataConfigLabels.SERVICE,
     },
 ];
 
@@ -310,11 +326,13 @@ export const KeysContainingLink = new Set([
     KnowledgeRecordDataConfigKeys.CATEGORY,
     RecordDataConfigKeys.ASSIGNED_TO,
     RecordDataConfigKeys.ASSIGNMENT_GROUP,
+    RecordDataConfigKeys.SERVICE,
     KnowledgeRecordDataConfigLabels.KNOWLEDGE_BASE,
     KnowledgeRecordDataConfigLabels.AUTHOR,
     KnowledgeRecordDataConfigLabels.CATEGORY,
     RecordDataConfigLabels.ASSIGNED_TO,
     RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    RecordDataConfigLabels.SERVICE,
 ]);
 
 export type TypesContainingLink = KnowledgeRecordDataConfigKeys | RecordDataConfigKeys | KnowledgeRecordDataConfigLabels | RecordDataConfigLabels;
@@ -421,6 +439,16 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getIncidentFeilds',
     },
+    getFilterData: {
+        path: '/filter',
+        method: 'GET',
+        apiServiceName: 'getFilterData',
+    },
+    getTableFeilds: {
+        path: '/fields',
+        method: 'GET',
+        apiServiceName: 'getTableFeilds',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -428,6 +456,7 @@ export const PanelDefaultHeights = {
     subscriptionTypePanel: 195,
     recordTypePanel: 210,
     searchRecordPanel: 210,
+    filtersPanel: 375,
     searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
@@ -441,6 +470,7 @@ export default {
     UPLOAD_SET_FILENAME,
     SERVICENOW_ICON_URL,
     REQUEST_BASE_URL,
+    SERVICENOW_SUBSCRIPTIONS_TABLE,
     pluginApiServiceConfigs,
     MMCSRF,
     HeaderCSRFToken,

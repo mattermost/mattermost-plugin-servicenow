@@ -36,6 +36,7 @@ type CreateSubscriptionPayload = {
     record_id: string;
     subscription_events: string;
     channel_id: string;
+    filters?: string;
 }
 
 type FetchSubscriptionsParams = {
@@ -89,5 +90,11 @@ type SubscriptionFilters = {
 
 type SearchItemsParams = {
     search: string;
+    perPage?: number;
+}
+
+type SearchFilterItemsParams = {
+    search: string;
+    filter?: string;
     perPage?: number;
 }

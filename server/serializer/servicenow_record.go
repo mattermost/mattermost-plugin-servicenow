@@ -27,6 +27,7 @@ type ServiceNowRecord struct {
 	Workflow         string      `json:"workflow_state,omitempty"`
 	AssignedTo       interface{} `json:"assigned_to,omitempty"`
 	AssignmentGroup  interface{} `json:"assignment_group,omitempty"`
+	Service          interface{} `json:"business_service,omitempty"`
 	KnowledgeBase    interface{} `json:"kb_knowledge_base,omitempty"`
 	Category         interface{} `json:"kb_category,omitempty"`
 	Author           interface{} `json:"author,omitempty"`
@@ -109,6 +110,10 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 				Title: "Assignment Group",
 				Value: sr.AssignmentGroup,
 			},
+			{
+				Title: "Service",
+				Value: sr.Service,
+			},
 		}...)
 	}
 
@@ -159,6 +164,10 @@ func (sr *ServiceNowRecord) HandleNestedFields(serviceNowURL string) error {
 		if err != nil {
 			return fmt.Errorf("%w : assignment_group", err)
 		}
+		sr.Service, err = GetNestedFieldValue(sr.Service, constants.FieldService, serviceNowURL)
+		if err != nil {
+			return fmt.Errorf("%w : service", err)
+		}
 	}
 
 	return err
@@ -190,6 +199,8 @@ func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (st
 		url += fmt.Sprintf(constants.PathKnowledgeBase, sysID)
 	case constants.FieldCategory:
 		url += fmt.Sprintf(constants.PathCategory, sysID)
+	case constants.FieldService:
+		url += fmt.Sprintf(constants.PathService, sysID)
 	}
 
 	return fmt.Sprintf("[%s](%s)", nf.DisplayValue, url), nil

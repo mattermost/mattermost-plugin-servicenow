@@ -25,6 +25,7 @@ type ServiceNowEvent struct {
 	Priority         string `json:"priority"`
 	AssignedTo       string `json:"assigned_to"`
 	AssignmentGroup  string `json:"assignment_group"`
+	Service          string `json:"service"`
 	EventOccurred    string `json:"event_occurred"`
 }
 
@@ -43,6 +44,9 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 	}
 	if se.AssignmentGroup == "" {
 		se.AssignmentGroup = "N/A"
+	}
+	if se.Service == "" {
+		se.Service = "N/A"
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
@@ -77,6 +81,11 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 			{
 				Title: "Assignment Group",
 				Value: se.AssignmentGroup,
+				Short: true,
+			},
+			{
+				Title: "Service",
+				Value: se.Service,
 				Short: true,
 			},
 		},
