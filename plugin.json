@@ -1,6 +1,6 @@
 {
     "id": "mattermost-plugin-servicenow",
-    "name": "Servicenow Plugin",
+    "name": "ServiceNow",
     "description": "This plugin serves as an integration between Mattermost and ServiceNow.",
     "icon_path": "assets/icon.svg",
     "version": "3.2.0",
