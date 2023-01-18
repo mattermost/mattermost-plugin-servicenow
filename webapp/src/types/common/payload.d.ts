@@ -56,6 +56,7 @@ type EditSubscriptionPayload = {
     subscription_events: string;
     channel_id: string;
     sys_id: string;
+    filters?: string;
 }
 
 type CommentsPayload = {

@@ -53,6 +53,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [resetFiltersPanelStates, setResetFiltersPanelStates] = useState(false);
     const [getTableFeilds, setGetTableFields] = useState(false);
     const [filters, setFilters] = useState<FiltersData[]>([]);
+    const [editing, setEditing] = useState(false);
 
     // Record type panel
     const [recordType, setRecordType] = useState<RecordType | null>(null);
@@ -134,6 +135,9 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setRecordId(data.recordId);
         setSuggestionChosen(true);
 
+        // Set initial value for filters panel
+        setFilters(Utils.getFiltersList(data.filters));
+
         // Set initial value for events panel
         setSubscriptionEvents(data.subscriptionEvents);
     };
@@ -150,13 +154,15 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     recordType: data.record_type,
                     subscriptionEvents: Utils.getSubscriptionEvents(data.subscription_events),
                     id: data.sys_id,
+                    filters: data.filters,
                 });
 
                 handleSubscriptionData(subscriptionDataFromApi);
                 setEditSubscriptionData(subscriptionDataFromApi);
+                setEditing(true);
             }
         }
-    }, [getSubscriptionState().isLoading, getSubscriptionState().isError, getSubscriptionState().isSuccess]);
+    }, [getSubscriptionState().isSuccess]);
 
     useApiRequestCompletionState({
         serviceName: Constants.pluginApiServiceConfigs.createSubscription.apiServiceName,
@@ -202,12 +208,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const showLoader = createSubscriptionLoading || editSubscriptionLoading;
 
     useEffect(() => {
-        if (open && currentChannelId) {
+        if (open && currentChannelId && !subscriptionData) {
             setChannel(currentChannelId);
-        }
-
-        if (open && getTableFeilds) {
-            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
         }
 
         if (open && subscriptionData && subscriptionsConfiguredStateSuccess) {
@@ -215,9 +217,16 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 makeApiRequest(Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName, subscriptionData);
             } else {
                 handleSubscriptionData(subscriptionData);
+                setEditing(true);
             }
         }
-    }, [open, subscriptionData, currentChannelId, subscriptionsConfiguredStateSuccess, getTableFeilds]);
+    }, [open, subscriptionData, subscriptionsConfiguredStateSuccess]);
+
+    useEffect(() => {
+        if (open && getTableFeilds) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        }
+    }, [getTableFeilds]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
@@ -230,6 +239,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setFilters([]);
         setResetFiltersPanelStates(true);
         setGetTableFields(false);
+        setEditing(false);
     }, []);
 
     // Reset panel states
@@ -394,6 +404,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const editSubscription = () => {
         setApiError(null);
 
+        const formattedFilters = Utils.getFormattedFilters(filters);
+
         // Edit subscription payload
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
@@ -406,6 +418,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             channel_id: channel as string,
             sys_id: (typeof (subscriptionData) === 'string' ? subscriptionData : subscriptionData?.id) as string,
         };
+
+        if (formattedFilters) {
+            payload.filters = formattedFilters;
+        }
 
         // Set payload
         setEditSubscriptionPayload(payload);
@@ -561,6 +577,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setFilters={setFilters}
                     resetStates={resetFiltersPanelStates}
                     setResetStates={setResetFiltersPanelStates}
+                    editing={editing}
+                    setEditing={setEditing}
                 />
                 <EventsPanel
                     className={`
