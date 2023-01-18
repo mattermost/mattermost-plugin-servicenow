@@ -238,7 +238,7 @@ func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, clie
 
 func (p *Plugin) handleRecords(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
 	if len(parameters) == 0 {
-		return "Invalid create command. Available commands are 'share' and 'view'."
+		return "Invalid record command. Available command is 'share'."
 	}
 
 	command := parameters[0]
