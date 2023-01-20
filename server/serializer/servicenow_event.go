@@ -21,6 +21,7 @@ type ServiceNowEvent struct {
 	Events           string `json:"subscription_events"`
 	Number           string `json:"number"`
 	ShortDescription string `json:"short_description"`
+	Description      string `json:"description"`
 	State            string `json:"state"`
 	Priority         string `json:"priority"`
 	AssignedTo       string `json:"assigned_to"`
@@ -50,9 +51,22 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
+
+	if se.Description == "" {
+		se.Description = "N/A"
+	}
+
+	if len(se.Description) > constants.MaxDescriptionChars {
+		se.Description = fmt.Sprintf("%s ...[see more](%s)", se.Description[:constants.MaxDescriptionChars], titleLink)
+	}
+
 	slackAttachment := &model.SlackAttachment{
 		Title: fmt.Sprintf("[%s](%s): %s", se.Number, titleLink, se.ShortDescription),
 		Fields: []*model.SlackAttachmentField{
+			{
+				Title: "Description",
+				Value: se.Description,
+			},
 			{
 				Title: "Event",
 				Value: constants.FormattedEventNames[se.EventOccurred],
