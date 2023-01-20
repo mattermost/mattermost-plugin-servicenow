@@ -221,7 +221,7 @@ func (p *Plugin) handleSubscriptions(args *model.CommandArgs, parameters []strin
 	}
 }
 
-func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleCreate(_ *model.CommandArgs, parameters []string, _ Client, _ bool) string {
 	if len(parameters) == 0 {
 		return "Invalid create command. Available commands are 'incident' and 'request'."
 	}
@@ -236,7 +236,7 @@ func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, clie
 	}
 }
 
-func (p *Plugin) handleRecords(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleRecords(_ *model.CommandArgs, parameters []string, _ Client, _ bool) string {
 	if len(parameters) == 0 {
 		return "Invalid record command. Available command is 'share'."
 	}
@@ -423,8 +423,8 @@ func getAutocompleteData() *model.AutocompleteData {
 
 	records := model.NewAutocompleteData(constants.CommandRecords, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandSearchAndShare))
 
-	searchRecords := model.NewAutocompleteData(constants.SubCommandSearchAndShare, "", "Search and share a ServiceNow record")
-	records.AddCommand(searchRecords)
+	shareRecords := model.NewAutocompleteData(constants.SubCommandSearchAndShare, "", "Search and share a ServiceNow record")
+	records.AddCommand(shareRecords)
 	serviceNow.AddCommand(records)
 
 	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available commands: %s, %s", constants.SubCommandIncident, constants.SubCommandRequest))
