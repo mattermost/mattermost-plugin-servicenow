@@ -34,8 +34,8 @@ func (p *Plugin) mockHandleDeleteSubscription(*model.CommandArgs, []string, Clie
 	return "mockHandleDeleteSubscription"
 }
 
-func (p *Plugin) mockHandleSearchAndShare(*model.CommandArgs, []string, Client, bool) string {
-	return "mockHandleSearchAndShare"
+func (p *Plugin) mockHandleRecords(*model.CommandArgs, []string, Client, bool) string {
+	return "mockHandleRecords"
 }
 
 func setMockConfigurations(p *Plugin) {
@@ -53,10 +53,10 @@ func TestExecuteCommand(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	p.CommandHandlers = map[string]CommandHandleFunc{
-		constants.CommandDisconnect:     p.mockHandleDisconnect,
-		constants.CommandSubscriptions:  p.mockHandleSubscriptions,
-		constants.CommandUnsubscribe:    p.mockHandleDeleteSubscription,
-		constants.CommandSearchAndShare: p.mockHandleSearchAndShare,
+		constants.CommandDisconnect:    p.mockHandleDisconnect,
+		constants.CommandSubscriptions: p.mockHandleSubscriptions,
+		constants.CommandUnsubscribe:   p.mockHandleDeleteSubscription,
+		constants.CommandRecords:       p.mockHandleRecords,
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -775,31 +775,32 @@ func TestParseCommand(t *testing.T) {
 		{
 			description:        "ParseCommand: subscriptions list command",
 			input:              " /servicenow subscriptions   list  me  all_channels ",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandList, constants.FilterCreatedByMe, constants.FilterAllChannels},
 		},
 		{
 			description:        "ParseCommand: subscriptions add command",
 			input:              "/servicenow subscriptions add",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandAdd},
 		},
 		{
 			description:        "ParseCommand: subscriptions edit command",
 			input:              "/servicenow subscriptions edit mockID",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandEdit, "mockID"},
 		},
 		{
 			description:        "ParseCommand: subscriptions delete command",
 			input:              "     /servicenow       subscriptions      delete     mockID    ",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandDelete, "mockID"},
 		},
 		{
-			description:    "ParseCommand: share command",
-			input:          "/servicenow share",
-			expectedAction: constants.CommandSearchAndShare,
+			description:        "ParseCommand: records command",
+			input:              "/servicenow records share",
+			expectedAction:     constants.CommandRecords,
+			expectedParameters: []string{constants.SubCommandSearchAndShare},
 		},
 		{
 			description:    "ParseCommand: connect command",

@@ -21,7 +21,7 @@ const (
 * |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
 * |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
-* |/servicenow search| - Search a record in ServiceNow and share it in a channel
+* |/servicenow records| - Search a record in ServiceNow and share it in a channel
 * |/servicenow help| - Know about the features of this plugin
 `
 
@@ -75,7 +75,7 @@ func (p *Plugin) getCommand() (*model.Command, error) {
 	return &model.Command{
 		Trigger:              constants.CommandTrigger,
 		AutoComplete:         true,
-		AutoCompleteDesc:     fmt.Sprintf("Available commands: %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandHelp),
+		AutoCompleteDesc:     fmt.Sprintf("Available commands: %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandRecords, constants.CommandHelp),
 		AutoCompleteHint:     "[command]",
 		AutocompleteData:     getAutocompleteData(),
 		AutocompleteIconData: iconData,
@@ -132,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare && action != constants.CommandCreate {
+		if action != constants.CommandDisconnect && action != constants.CommandRecords && action != constants.CommandCreate {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}
@@ -221,7 +221,7 @@ func (p *Plugin) handleSubscriptions(args *model.CommandArgs, parameters []strin
 	}
 }
 
-func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) handleCreate(_ *model.CommandArgs, parameters []string, _ Client, _ bool) string {
 	if len(parameters) == 0 {
 		return "Invalid create command. Available commands are 'incident' and 'request'."
 	}
@@ -236,8 +236,18 @@ func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, clie
 	}
 }
 
-func (p *Plugin) handleSearchAndShare(args *model.CommandArgs, params []string, client Client, _ bool) string {
-	return ""
+func (p *Plugin) handleRecords(_ *model.CommandArgs, parameters []string, _ Client, _ bool) string {
+	if len(parameters) == 0 {
+		return "Invalid record command. Available command is 'share'."
+	}
+
+	command := parameters[0]
+	switch command {
+	case constants.SubCommandSearchAndShare:
+		return ""
+	default:
+		return fmt.Sprintf("Unknown subcommand %v", command)
+	}
 }
 
 func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
@@ -378,7 +388,7 @@ func (p *Plugin) handleEditSubscription(params []string) string {
 }
 
 func getAutocompleteData() *model.AutocompleteData {
-	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandCreate, constants.CommandHelp))
+	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandRecords, constants.CommandCreate, constants.CommandHelp))
 
 	connect := model.NewAutocompleteData(constants.CommandConnect, "", "Connect your Mattermost account to your ServiceNow account")
 	serviceNow.AddCommand(connect)
@@ -411,8 +421,11 @@ func getAutocompleteData() *model.AutocompleteData {
 
 	serviceNow.AddCommand(subscriptions)
 
-	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
-	serviceNow.AddCommand(searchRecords)
+	records := model.NewAutocompleteData(constants.CommandRecords, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandSearchAndShare))
+
+	shareRecords := model.NewAutocompleteData(constants.SubCommandSearchAndShare, "", "Search and share a ServiceNow record")
+	records.AddCommand(shareRecords)
+	serviceNow.AddCommand(records)
 
 	create := model.NewAutocompleteData(constants.CommandCreate, "[command]", fmt.Sprintf("Available commands: %s, %s", constants.SubCommandIncident, constants.SubCommandRequest))
 	createIncident := model.NewAutocompleteData("incident", "", "Create an incident")
