@@ -3,8 +3,9 @@ import {useDispatch} from 'react-redux';
 
 import {Post} from 'mattermost-redux/types/posts';
 
-import {ModalIds, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation} from 'src/plugin_constants';
+import {ModalIds, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation, TypesContainingLink} from 'src/plugin_constants';
 import {setGlobalModalState} from 'src/reducers/globalModal';
+import Utils from 'src/utils';
 
 import './styles.scss';
 
@@ -13,7 +14,8 @@ type ShareRecordPostProps = {
 }
 
 const ServiceNowPost = ({post}: ShareRecordPostProps) => {
-    const {attachments, record_id, record_type} = post.props;
+    const {type, props} = post;
+    const {attachments, record_id, record_type} = props;
     const {fields, pretext, title} = attachments[0] as RecordAttachments;
 
     const dispatch = useDispatch();
@@ -84,7 +86,7 @@ const ServiceNowPost = ({post}: ShareRecordPostProps) => {
                         </span>
                     ) : (
                         <span>
-                            {field.value}
+                            {(type as string) === 'custom_sn_share' ? Utils.getRecordValueForHeader(field.title as TypesContainingLink, field.value) : (field.value)}
                         </span>
                     )}
                 </td>,
