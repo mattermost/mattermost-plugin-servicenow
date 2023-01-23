@@ -688,3 +688,85 @@ func TestGetIncidentFieldsFromServiceNowClient(t *testing.T) {
 		})
 	}
 }
+
+func TestSearchFilterValuesInServiceNowClient(t *testing.T) {
+	defer monkey.UnpatchAll()
+	c := new(client)
+	c.plugin = &Plugin{}
+	for _, testCase := range []struct {
+		description  string
+		statusCode   int
+		errorMessage error
+		expectedErr  string
+	}{
+		{
+			description: "SearchFilterValuesInServiceNow: valid",
+			statusCode:  http.StatusOK,
+		},
+		{
+			description:  "SearchFilterValuesInServiceNow: error in getting the filter values",
+			statusCode:   http.StatusInternalServerError,
+			errorMessage: errors.New("error in getting the filter values"),
+			expectedErr:  "error in getting the filter values",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
+
+			_, statusCode, err := c.SearchFilterValuesInServiceNow("mockSearchItem", "mockLimit", "mockOffset", "mockURL")
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.EqualValues(t, testCase.statusCode, statusCode)
+		})
+	}
+}
+
+func TestGetTableFieldsFromServiceNowClient(t *testing.T) {
+	defer monkey.UnpatchAll()
+	c := new(client)
+	c.plugin = &Plugin{}
+	for _, testCase := range []struct {
+		description  string
+		statusCode   int
+		errorMessage error
+		expectedErr  string
+	}{
+		{
+			description: "GetTableFieldsFromServiceNow: valid",
+			statusCode:  http.StatusOK,
+		},
+		{
+			description:  "GetTableFieldsFromServiceNow: with latest update set not uploaded",
+			statusCode:   http.StatusBadRequest,
+			errorMessage: fmt.Errorf("mockError: %s", constants.ServiceNowAPIErrorURINotPresent),
+			expectedErr:  constants.APIErrorIDLatestUpdateSetNotUploaded,
+		},
+		{
+			description:  "GetTableFieldsFromServiceNow: error in getting the table fields",
+			statusCode:   http.StatusInternalServerError,
+			errorMessage: errors.New("error in getting the table fields"),
+			expectedErr:  "error in getting the table fields",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
+				return nil, testCase.statusCode, testCase.errorMessage
+			})
+
+			_, statusCode, err := c.GetTableFieldsFromServiceNow("mockTable")
+			if testCase.expectedErr != "" {
+				assert.EqualError(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.EqualValues(t, testCase.statusCode, statusCode)
+		})
+	}
+}

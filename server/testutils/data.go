@@ -247,6 +247,26 @@ func GetServiceNowCatalogItems(count int) []*serializer.ServiceNowCatalogItem {
 	return items
 }
 
+func GetServiceNowFilterValue() *serializer.ServiceNowFilter {
+	return &serializer.ServiceNowFilter{
+		SysID: GetServiceNowSysID(),
+		Name:  "mockName",
+	}
+}
+
+func GetServiceNowFilterValues(count int) []*serializer.ServiceNowFilter {
+	if count == 0 {
+		return nil
+	}
+
+	items := make([]*serializer.ServiceNowFilter, count)
+	for i := 0; i < count; i++ {
+		items[i] = GetServiceNowFilterValue()
+	}
+
+	return items
+}
+
 func GetServiceNowIncidentCaller() *serializer.IncidentCaller {
 	return &serializer.IncidentCaller{
 		ServiceNowUser: GetServiceNowUser(),
@@ -277,6 +297,22 @@ func GetServiceNowIncidentFields(count int) []*serializer.ServiceNowIncidentFiel
 			Label:   "mockLabel",
 			Value:   "mockValue",
 			Element: "mockElement",
+		}
+	}
+
+	return fields
+}
+
+func GetServiceNowTableFields(count int) []*serializer.ServiceNowTableFields {
+	if count == 0 {
+		return nil
+	}
+
+	fields := make([]*serializer.ServiceNowTableFields, count)
+	for i := 0; i < count; i++ {
+		fields[i] = &serializer.ServiceNowTableFields{
+			Label: "mockLabel",
+			Name:  "mockName",
 		}
 	}
 
