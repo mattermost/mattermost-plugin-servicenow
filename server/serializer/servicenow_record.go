@@ -68,7 +68,7 @@ func ServiceNowRecordFromJSON(data io.Reader) (*ServiceNowRecord, error) {
 func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, pluginURL, sharedByUsername string) *model.Post {
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do?sys_id=%s", serviceNowURL, sr.RecordType, sr.SysID)
 	if sr.Description == "" {
-		sr.Description = "N/A"
+		sr.Description = constants.DefaultEmptyValue
 	}
 
 	if len(sr.Description) > constants.MaxDescriptionChars {
@@ -193,7 +193,7 @@ func (sr *ServiceNowRecord) HandleNestedFields(serviceNowURL string) error {
 
 func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (string, error) {
 	if _, ok := field.(string); ok || field == nil {
-		return "N/A", nil
+		return constants.DefaultEmptyValue, nil
 	}
 
 	jsonObject, ok := field.(map[string]interface{})

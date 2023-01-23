@@ -41,19 +41,19 @@ func ServiceNowEventFromJSON(data io.Reader) (*ServiceNowEvent, error) {
 
 func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginURL string) *model.Post {
 	if se.AssignedTo == "" {
-		se.AssignedTo = "N/A"
+		se.AssignedTo = constants.DefaultEmptyValue
 	}
 	if se.AssignmentGroup == "" {
-		se.AssignmentGroup = "N/A"
+		se.AssignmentGroup = constants.DefaultEmptyValue
 	}
 	if se.Service == "" {
-		se.Service = "N/A"
+		se.Service = constants.DefaultEmptyValue
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
 
 	if se.Description == "" {
-		se.Description = "N/A"
+		se.Description = constants.DefaultEmptyValue
 	}
 
 	if len(se.Description) > constants.MaxDescriptionChars {

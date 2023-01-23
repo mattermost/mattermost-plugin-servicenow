@@ -294,7 +294,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 				user, err := p.API.GetUser(subscription.UserID)
 				if err != nil {
 					p.API.LogError("Error in getting user", "UserID", subscription.UserID)
-					subscription.UserName = "N/A"
+					subscription.UserName = constants.DefaultEmptyValue
 				} else {
 					subscription.UserName = user.Username
 				}
@@ -302,7 +302,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 				channel, err := p.API.GetChannel(subscription.ChannelID)
 				if err != nil {
 					p.API.LogError("Error in getting channel", "ChannelID", subscription.ChannelID)
-					subscription.ChannelName = "N/A"
+					subscription.ChannelName = constants.DefaultEmptyValue
 				} else {
 					subscription.ChannelName = channel.DisplayName
 				}
