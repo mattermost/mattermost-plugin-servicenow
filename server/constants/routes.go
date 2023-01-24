@@ -22,7 +22,7 @@ const (
 	PathCreateIncident               = "/incident"
 	PathGetIncidentFields            = "/incident-fields"
 	PathCheckSubscriptionsConfigured = "/subscriptions-configured"
-	PathSearchAssignmentGroups       = "/assignment-group"
+	PathSearchFilterValues           = "/filter/{filter_type}"
 
 	// ServiceNow API paths
 	PathActivateSubscriptions             = "api/now/table/" + ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_notifications_auth"
@@ -33,6 +33,7 @@ const (
 	PathGetUserFromServiceNow             = "/api/now/table/sys_user"
 	PathGetIncidentFieldsFromServiceNow   = "api/" + ServiceNowForMattermostNotificationsAppID + "/getincidentfields"
 	PathGetAssignmentGroupsFromServiceNow = "api/now/table/sys_user_group"
+	PathGetServicesFromServiceNow         = "api/now/table/cmdb_ci_service"
 
 	// ServiceNow URLs
 	PathServiceNowURL = "/now/nav/ui/classic/params/target"
