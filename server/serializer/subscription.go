@@ -183,14 +183,14 @@ func SubscriptionFromJSON(data io.Reader) (*SubscriptionPayload, error) {
 	return sp, nil
 }
 
-func (sr *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL string) *model.Post {
+func (s *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL string) *model.Post {
 	post := &model.Post{
-		ChannelId: sr.ChannelID,
+		ChannelId: s.ChannelID,
 		UserId:    botID,
 	}
 
 	subscriptionEvents := ""
-	events := strings.Split(sr.SubscriptionEvents, ",")
+	events := strings.Split(s.SubscriptionEvents, ",")
 	for index, event := range events {
 		subscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
 		if index != len(events)-1 {
@@ -198,12 +198,12 @@ func (sr *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL stri
 		}
 	}
 
-	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, sr.RecordType)
-	recordType := cases.Title(language.Und).String(sr.RecordType)
+	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType)
+	recordType := cases.Title(language.Und).String(s.RecordType)
 	postTitle := fmt.Sprintf("%s subscription created for [%s](%s)", constants.BulkSubscription, recordType, titleLink)
-	if sr.Type == constants.RecordSubscription {
-		titleLink = fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, sr.RecordType, sr.RecordID, sr.RecordType)
-		postTitle = fmt.Sprintf("%s subscription created for %s [%s](%s)", cases.Title(language.Und).String(sr.Type), recordType, sr.Number, titleLink)
+	if s.Type == constants.RecordSubscription {
+		titleLink = fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
+		postTitle = fmt.Sprintf("%s subscription created for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, titleLink)
 	}
 
 	slackAttachment := &model.SlackAttachment{
@@ -211,7 +211,7 @@ func (sr *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL stri
 		Fields: []*model.SlackAttachmentField{
 			{
 				Title: "Subscription ID",
-				Value: sr.SysID,
+				Value: s.SysID,
 			},
 			{
 				Title: "Event(s)",
