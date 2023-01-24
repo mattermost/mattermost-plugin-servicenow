@@ -214,10 +214,10 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 	}{
 		"success": {
 			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords),
+			SearchTerm: testutils.GetSearchTerm(true, constants.DefaultCharacterThresholdForSearching),
 			SetupAPI:   func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true, constants.DefaultCharacterThresholdForSearching), limit, offset).Return(
 					testutils.GetServiceNowPartialRecords(3), http.StatusOK, nil,
 				)
 			},
@@ -236,22 +236,22 @@ func TestAPISearchRecordsInServiceNow(t *testing.T) {
 		},
 		"invalid search term": {
 			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(false, constants.CharacterThresholdForSearchingRecords),
+			SearchTerm: testutils.GetSearchTerm(false, constants.DefaultCharacterThresholdForSearching),
 			SetupAPI: func(api *plugintest.API) {
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedCount:        -1,
-			ExpectedErrorMessage: fmt.Sprintf("The search term must be at least %d characters long.", constants.CharacterThresholdForSearchingRecords),
+			ExpectedErrorMessage: fmt.Sprintf("The search term must be at least %d characters long.", constants.DefaultCharacterThresholdForSearching),
 		},
 		"failed to get records": {
 			RecordType: constants.RecordTypeIncident,
-			SearchTerm: testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords),
+			SearchTerm: testutils.GetSearchTerm(true, constants.DefaultCharacterThresholdForSearching),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
 			},
 			SetupClient: func(client *mock_plugin.Client) {
-				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true, constants.CharacterThresholdForSearchingRecords), limit, offset).Return(
+				client.On("SearchRecordsInServiceNow", constants.RecordTypeIncident, testutils.GetSearchTerm(true, constants.DefaultCharacterThresholdForSearching), limit, offset).Return(
 					nil, http.StatusForbidden, fmt.Errorf("new error"),
 				)
 			},

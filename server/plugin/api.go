@@ -53,6 +53,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCheckSubscriptionsConfigured, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfiguredAPI))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathSearchAssignmentGroups, p.checkAuth(p.checkOAuth(p.searchAssignmentGroupsInServiceNow))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -456,8 +457,8 @@ func (p *Plugin) searchRecordsInServiceNow(w http.ResponseWriter, r *http.Reques
 	}
 
 	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
-	if len(searchTerm) < constants.CharacterThresholdForSearchingRecords {
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.CharacterThresholdForSearchingRecords)})
+	if len(searchTerm) < constants.DefaultCharacterThresholdForSearching {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.DefaultCharacterThresholdForSearching)})
 		return
 	}
 
@@ -790,6 +791,25 @@ func (p *Plugin) getIncidentFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.writeJSONArray(w, statusCode, fields)
+}
+
+func (p *Plugin) searchAssignmentGroupsInServiceNow(w http.ResponseWriter, r *http.Request) {
+	searchTerm := r.URL.Query().Get(constants.QueryParamSearchTerm)
+	if len(searchTerm) < constants.DefaultCharacterThresholdForSearching {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: fmt.Sprintf(constants.ErrorSearchTermThreshold, constants.DefaultCharacterThresholdForSearching)})
+		return
+	}
+
+	page, perPage := GetPageAndPerPage(r)
+	client := p.GetClientFromRequest(r)
+	assignmentGroups, statusCode, err := client.SearchAssignmentGroupsInServiceNow(searchTerm, fmt.Sprint(perPage), fmt.Sprint(page*perPage))
+	if err != nil {
+		p.API.LogError(constants.ErrorSearchingAssignmentGroup, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorSearchingAssignmentGroup, err.Error()))
+		return
+	}
+
+	p.writeJSONArray(w, statusCode, assignmentGroups)
 }
 
 func returnStatusOK(w http.ResponseWriter) {

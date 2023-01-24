@@ -32,6 +32,7 @@ type Client interface {
 	CreateIncident(*serializer.IncidentPayload) (*serializer.IncidentResponse, int, error)
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 	GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowIncidentFields, int, error)
+	SearchAssignmentGroupsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowAssignmentGroup, int, error)
 }
 
 type client struct {
@@ -313,4 +314,22 @@ func (c *client) GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowInci
 	}
 
 	return fields.Result, statusCode, nil
+}
+
+func (c *client) SearchAssignmentGroupsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowAssignmentGroup, int, error) {
+	query := fmt.Sprintf("%s LIKE%s", constants.FieldName, searchTerm)
+	queryParams := url.Values{
+		constants.SysQueryParam:       {query},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+		constants.SysQueryParamFields: {fmt.Sprintf("%s,%s,%s", constants.FieldSysID, constants.FieldName, constants.FieldDescription)},
+	}
+
+	assignmentGroups := &serializer.ServiceNowAssignmentGroupResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetAssignmentGroupsFromServiceNow, nil, assignmentGroups, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return assignmentGroups.Result, statusCode, nil
 }
