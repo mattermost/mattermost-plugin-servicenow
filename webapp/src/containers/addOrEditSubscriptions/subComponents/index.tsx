@@ -174,7 +174,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     dispatch(setConnected(false));
                 }
 
-                // Create an ephemeral posts for these errors, instead of showing the error on the modal
+                // We are not showing errors on the modal in case of these errors because we are creating an ephemeral post
                 if (
                     error.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
                     error.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
