@@ -278,9 +278,15 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		if statusCode == 0 {
 			statusCode = http.StatusInternalServerError
 		}
+
+		if strings.Contains(err.Error(), constants.ErrorConnectionRefused) {
+			response = constants.ErrorConnectionRefused
+		}
+
 		if response == "" {
 			response = err.Error()
 		}
+
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: response})
 	}
 

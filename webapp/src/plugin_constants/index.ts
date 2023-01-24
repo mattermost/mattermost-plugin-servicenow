@@ -431,6 +431,7 @@ export const PanelDefaultHeights = {
     searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
+    errorPanel: 267,
     panelHeader: 65,
 };
 

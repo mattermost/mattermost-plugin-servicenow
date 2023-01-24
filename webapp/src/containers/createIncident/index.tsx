@@ -111,8 +111,7 @@ const CreateIncident = () => {
     };
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
-            dispatch(setConnected(false));
+        if (apiError) {
             return action ? hideModal : 'Close';
         }
 
@@ -151,6 +150,10 @@ const CreateIncident = () => {
     };
 
     const handleError = (error: APIError) => {
+        if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+            dispatch(setConnected(false));
+        }
+
         setApiError(error);
         setShowResultPanel(true);
     };
@@ -264,7 +267,7 @@ const CreateIncident = () => {
                         }}
                         secondaryBtn={{
                             text: 'Close',
-                            onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
+                            onClick: apiError ? null : hideModal,
                         }}
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
