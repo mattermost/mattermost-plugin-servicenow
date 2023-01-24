@@ -170,17 +170,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         serviceName: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName,
         handleError: (error) => {
             if (error) {
-                if (error?.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                if (error.id === Constants.ApiErrorIdRefreshTokenExpired || error.id === Constants.ApiErrorIdNotConnected) {
                     dispatch(setConnected(false));
-                    setShowErrorComponent(true);
-                    setApiError(error);
-                    return;
                 }
 
                 if (
-                    error?.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
-                    error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
-                    error?.id !== Constants.ApiErrorIdNotConnected
+                    error.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
+                    error.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
+                    error.id !== Constants.ApiErrorIdNotConnected
                 ) {
                     setShowErrorComponent(true);
                     setApiError(error);
