@@ -253,10 +253,20 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if statusCode, err = client.CreateSubscription(subscription); err != nil {
+	resp, statusCode, err := client.CreateSubscription(subscription)
+	if err != nil {
 		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
 		p.API.LogError("Error in creating subscription", "Error", err.Error())
 		return
+	}
+
+	if subscription != nil && subscription.SubscriptionNumber != nil {
+		resp.Number = *subscription.SubscriptionNumber
+	}
+
+	post := resp.CreateSubscriptionPost(p.botID, p.configuration.ServiceNowBaseURL)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
 	// Here, we are setting the Content-Type header even when it is being set in the "returnStatusOK" function
@@ -372,6 +382,22 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		}
 		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
 		return
+	}
+
+	resp, statusCode, err := client.GetSubscription(subscriptionID)
+	if err != nil {
+		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
+		p.API.LogError("Error in editing subscription", "Error", err.Error())
+		return
+	}
+
+	if subscription != nil && subscription.SubscriptionNumber != nil {
+		resp.Number = *subscription.SubscriptionNumber
+	}
+
+	post := resp.EditSubscriptionPost(p.botID, p.configuration.ServiceNowBaseURL)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
 	returnStatusOK(w)

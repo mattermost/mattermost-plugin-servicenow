@@ -1076,14 +1076,16 @@ func TestCreateSubscription(t *testing.T) {
 				"user_id": "%s",
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusOK, nil,
 				)
 
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusCreated, nil,
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusCreated, nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1249,7 +1251,7 @@ func TestCreateSubscription(t *testing.T) {
 				)
 
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusForbidden, fmt.Errorf("create subscription error"),
+					nil, http.StatusForbidden, fmt.Errorf("create subscription error"),
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1264,6 +1266,36 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "create subscription error",
+		},
+		"failed to create the post": {
+			RequestBody: fmt.Sprintf(`{
+				"user_id": "%s",
+				"channel_id": "%s"
+			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetInternalServerAppError())
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					false, http.StatusOK, nil,
+				)
+
+				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusCreated, nil,
+				)
+			},
+			SetupPlugin: func(p *Plugin) {
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			ExpectedStatusCode: http.StatusCreated,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -1532,10 +1564,15 @@ func TestEditSubscription(t *testing.T) {
 				"user_id": "%s",
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					http.StatusOK, nil,
+				)
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1640,6 +1677,35 @@ func TestEditSubscription(t *testing.T) {
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "edit subscription error",
+		},
+		"failed to create edit subscription post": {
+			RequestBody: fmt.Sprintf(`{
+				"user_id": "%s",
+				"channel_id": "%s"
+			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetInternalServerAppError())
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					http.StatusOK, nil,
+				)
+				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
+				)
+			},
+			SetupPlugin: func(p *Plugin) {
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

@@ -285,6 +285,13 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         return Constants.SubscriptionAddedMsg;
     }, [apiError, apiResponseValid, subscriptionData]);
 
+    const [subscriptionNumber, setSubscriptionNumber]=useState("")
+    const getSubscriptionNumber = (subscriptionNumber: string) => {
+        if (subscriptionNumber) {
+            setSubscriptionNumber(subscriptionNumber);
+        }
+    };
+
     // Handles create subscription
     const createSubscription = () => {
         setApiError(null);
@@ -299,6 +306,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             record_id: recordId as string || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
+            subscription_number: subscriptionNumber,
         };
 
         // Set payload
@@ -323,6 +331,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
             sys_id: subscriptionData?.id as string,
+            subscription_number: subscriptionNumber,
         };
 
         // Set payload
@@ -417,6 +426,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     resetStates={resetRecordPanelStates}
                     setResetStates={setResetRecordPanelStates}
                     showFooter={true}
+                    getSubscriptionNumber={getSubscriptionNumber}
                 />
                 <EventsPanel
                     className={`

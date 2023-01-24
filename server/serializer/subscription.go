@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/mattermost/mattermost-server/v5/model"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
@@ -20,6 +22,7 @@ type SubscriptionPayload struct {
 	RecordID           *string `json:"record_id"`
 	IsActive           *bool   `json:"is_active"`
 	SubscriptionEvents *string `json:"subscription_events"`
+	SubscriptionNumber *string `json:"subscription_number"`
 	ServerURL          *string `json:"server_url"`
 }
 
@@ -178,4 +181,89 @@ func SubscriptionFromJSON(data io.Reader) (*SubscriptionPayload, error) {
 	}
 
 	return sp, nil
+}
+
+func (sr *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL string) *model.Post {
+	post := &model.Post{
+		ChannelId: sr.ChannelID,
+		UserId:    botID,
+	}
+
+	subscriptionEvents := ""
+	events := strings.Split(sr.SubscriptionEvents, ",")
+	for index, event := range events {
+		subscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
+		if index != len(events)-1 {
+			subscriptionEvents += ", "
+		}
+	}
+
+	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, sr.RecordType)
+	recordType := cases.Title(language.Und).String(sr.RecordType)
+	postTitle := fmt.Sprintf("%s subscription created for [%s](%s)", constants.BulkSubscription, recordType, titleLink)
+	if sr.Type == constants.RecordSubscription {
+		titleLink = fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, sr.RecordType, sr.RecordID, sr.RecordType)
+		postTitle = fmt.Sprintf("%s subscription created for %s [%s](%s)", cases.Title(language.Und).String(sr.Type), recordType, sr.Number, titleLink)
+	}
+
+	slackAttachment := &model.SlackAttachment{
+		Title: postTitle,
+		Fields: []*model.SlackAttachmentField{
+			{
+				Title: "Subscription ID",
+				Value: sr.SysID,
+			},
+			{
+				Title: "Event(s)",
+				Value: subscriptionEvents,
+			},
+		},
+	}
+
+	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})
+	return post
+}
+
+func (sr *SubscriptionResponse) EditSubscriptionPost(botID, serviceNowURL string) *model.Post {
+	post := &model.Post{
+		ChannelId: sr.ChannelID,
+		UserId:    botID,
+	}
+
+	subscriptionEvents := ""
+	events := strings.Split(sr.SubscriptionEvents, ",")
+	for index, event := range events {
+		subscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
+		if index != len(events)-1 {
+			subscriptionEvents += ", "
+		}
+	}
+
+	recordType := cases.Title(language.Und).String(sr.RecordType)
+	textLink := fmt.Sprintf("%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, sr.RecordType)
+	postText := fmt.Sprintf("%s subscription for [%s](%s)", constants.BulkSubscription, recordType, textLink)
+	if sr.Type == constants.RecordSubscription {
+		textLink = fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, sr.RecordType, sr.RecordID, sr.RecordType)
+		postText = fmt.Sprintf("%s subscription for %s [%s](%s)", cases.Title(language.Und).String(sr.Type), recordType, sr.Number, textLink)
+	}
+
+	slackAttachment := &model.SlackAttachment{
+		Fields: []*model.SlackAttachmentField{
+			{
+				Title: "Subscription Updated",
+				Value: postText,
+			},
+			{
+				Title: "Subscription ID",
+				Value: sr.SysID,
+			},
+			{
+				Title: "Event(s)",
+				Value: subscriptionEvents,
+			},
+		},
+	}
+
+	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})
+	return post
 }

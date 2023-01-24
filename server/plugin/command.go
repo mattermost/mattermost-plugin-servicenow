@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"sync"
 	"unicode"
@@ -342,9 +343,13 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 			return
 		}
 
-		if _, err = client.DeleteSubscription(subscriptionID); err != nil {
+		if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 			p.API.LogError("Unable to delete subscription", "Error", err.Error())
-			p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
+			if statusCode == http.StatusNotFound {
+				p.postCommandResponse(args, "Subscription is already deleted.")
+			} else {
+				p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
+			}
 			return
 		}
 
