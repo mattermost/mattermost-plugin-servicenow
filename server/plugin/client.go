@@ -272,9 +272,13 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 }
 
 func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializer.IncidentResponse, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamDisplayValue: {"true"},
+	}
+
 	response := &serializer.IncidentResult{}
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", constants.RecordTypeIncident, 1)
-	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, nil)
+	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, queryParams)
 	if err != nil {
 		return nil, statusCode, errors.Wrap(err, "failed to create the incident in ServiceNow")
 	}
