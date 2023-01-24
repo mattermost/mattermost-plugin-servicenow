@@ -161,7 +161,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     useEffect(() => {
         const recordDataState = getRecordDataState();
         if (getSubscriptionNumber) {
-            getSubscriptionNumber(recordDataState?.data?.number)
+            getSubscriptionNumber(recordDataState?.data?.number);
         }
         if (recordDataState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);

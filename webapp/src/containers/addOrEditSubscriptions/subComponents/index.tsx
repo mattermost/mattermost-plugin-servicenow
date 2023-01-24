@@ -285,10 +285,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         return Constants.SubscriptionAddedMsg;
     }, [apiError, apiResponseValid, subscriptionData]);
 
-    const [subscriptionNumber, setSubscriptionNumber]=useState("")
-    const getSubscriptionNumber = (subscriptionNumber: string) => {
-        if (subscriptionNumber) {
-            setSubscriptionNumber(subscriptionNumber);
+    const [subscriptionNumber, setSubscriptionNumber] = useState('');
+    const getSubscriptionNumber = (number: string) => {
+        if (number) {
+            setSubscriptionNumber(number);
         }
     };
 
