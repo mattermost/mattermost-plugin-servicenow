@@ -46,6 +46,5 @@ type ApiRequestCompletionState = {
 }
 
 type IncidentModalData = {
-    shortDescription: string;
     description: string;
 }
