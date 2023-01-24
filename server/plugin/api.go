@@ -374,13 +374,13 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := p.GetClientFromRequest(r)
-	if statusCode, err := client.EditSubscription(subscriptionID, subscription); err != nil {
-		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
+	if statusCode, er := client.EditSubscription(subscriptionID, subscription); er != nil {
+		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", er.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, err.Error())
+			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, er.Error())
 		}
-		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
+		_ = p.handleClientError(w, r, er, false, statusCode, "", responseMessage)
 		return
 	}
 
