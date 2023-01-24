@@ -121,19 +121,20 @@ const (
 	ContextNameRecordID   = "record_id"
 
 	// Slash commands
-	CommandHelp           = "help"
-	CommandConnect        = "connect"
-	CommandDisconnect     = "disconnect"
-	CommandSubscriptions  = "subscriptions"
-	CommandUnsubscribe    = "unsubscribe"
-	CommandSearchAndShare = "share"
-	CommandCreate         = "create"
-	SubCommandIncident    = "incident"
-	SubCommandRequest     = "request"
-	SubCommandList        = "list"
-	SubCommandAdd         = "add"
-	SubCommandEdit        = "edit"
-	SubCommandDelete      = "delete"
+	CommandHelp              = "help"
+	CommandConnect           = "connect"
+	CommandDisconnect        = "disconnect"
+	CommandSubscriptions     = "subscriptions"
+	CommandUnsubscribe       = "unsubscribe"
+	CommandRecords           = "records"
+	CommandCreate            = "create"
+	SubCommandIncident       = "incident"
+	SubCommandRequest        = "request"
+	SubCommandList           = "list"
+	SubCommandAdd            = "add"
+	SubCommandEdit           = "edit"
+	SubCommandDelete         = "delete"
+	SubCommandSearchAndShare = "share"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -187,6 +188,7 @@ const (
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
 	ErrorSearchingFilterValues            = "Error in searching for filter values in ServiceNow"
 	ErrorInvalidFilterType                = "Invalid filter type"
+	ErrorConnectionRefused                = "Unable to make a connection to the specified ServiceNow instance"
 )
 
 // kv store keys prefix

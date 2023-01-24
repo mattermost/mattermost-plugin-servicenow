@@ -178,6 +178,7 @@ const CreateRequest = () => {
                                     suggestions,
                                     renderValue: (suggestion) => suggestion.name,
                                 }}
+                                loadingSuggestions={isLoading}
                                 charThresholdToShowSuggestions={Constants.CharThresholdToSuggestRequest}
                             />
                             {suggestionChosen && request && (
@@ -200,6 +201,7 @@ const CreateRequest = () => {
                                                 href={`${serviceNowBaseURL}/${Constants.REQUEST_BASE_URL}${request.id}`}
                                                 rel='noreferrer'
                                                 target='_blank'
+                                                onClick={hideModal}
                                             >
                                                 {Constants.RequestButtonText}
                                             </a>

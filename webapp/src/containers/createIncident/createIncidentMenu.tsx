@@ -30,7 +30,6 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
         e.preventDefault();
         const incidentModalData: IncidentModalData = {
             description: post.message,
-            shortDescription: post.message,
         };
         dispatch(setGlobalModalState({modalId: ModalIds.CREATE_INCIDENT, data: incidentModalData}) as Action);
     }, [postId]);
@@ -46,7 +45,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
                 role='menuitem'
             >
                 <button
-                    className='style-none'
+                    className='incident-menu'
                     role='presentation'
                     onClick={handleClick}
                 >

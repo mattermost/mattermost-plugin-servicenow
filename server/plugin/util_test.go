@@ -439,7 +439,7 @@ func TestHasChannelPermissions(t *testing.T) {
 			testCase.setupAPI(api)
 			defer api.AssertExpectations(t)
 
-			statusCode, err := p.HasChannelPermissions(testutils.GetID(), testutils.GetChannelID())
+			statusCode, _, err := p.HasChannelPermissions(testutils.GetID(), testutils.GetChannelID(), true)
 			if testCase.errorMessage != "" {
 				assert.EqualError(err, testCase.errorMessage)
 			} else {
