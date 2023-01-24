@@ -60,7 +60,7 @@ const (
 	DefaultPage                                = 0
 	DefaultPerPage                             = 20
 	MaxPerPage                                 = 100
-	MaxDescriptionChars                        = 300
+	MaxDescriptionChars                        = 500
 	DefaultCharacterThresholdForSearching      = 3
 	CharacterThresholdForSearchingCatalogItems = 4
 	DefaultEmptyValue                          = "N/A"

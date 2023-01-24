@@ -57,7 +57,7 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 	}
 
 	if len(se.Description) > constants.MaxDescriptionChars {
-		se.Description = fmt.Sprintf("%s ...[see more](%s)", se.Description[:constants.MaxDescriptionChars], titleLink)
+		se.Description = fmt.Sprintf("%s... [see more](%s)", se.Description[:constants.MaxDescriptionChars], titleLink)
 	}
 
 	slackAttachment := &model.SlackAttachment{

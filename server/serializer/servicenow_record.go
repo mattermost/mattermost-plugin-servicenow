@@ -72,7 +72,7 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	}
 
 	if len(sr.Description) > constants.MaxDescriptionChars {
-		sr.Description = fmt.Sprintf("%s ...[see more](%s)", sr.Description[:constants.MaxDescriptionChars], titleLink)
+		sr.Description = fmt.Sprintf("%s... [see more](%s)", sr.Description[:constants.MaxDescriptionChars], titleLink)
 	}
 
 	fields := []*model.SlackAttachmentField{
