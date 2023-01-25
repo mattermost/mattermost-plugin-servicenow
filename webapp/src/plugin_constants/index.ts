@@ -291,16 +291,16 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
 
 export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
     {
-        value: '1 - High',
-        label: 'High',
+        value: '1',
+        label: '1 - High',
     },
     {
-        value: '2 - Medium',
-        label: 'Medium',
+        value: '2',
+        label: '2 - Medium',
     },
     {
-        value: '3 - Low',
-        label: 'Low',
+        value: '3',
+        label: '3 - Low',
     },
 ];
 
@@ -460,6 +460,7 @@ export const PanelDefaultHeights = {
     searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
+    errorPanel: 267,
     panelHeader: 65,
 };
 

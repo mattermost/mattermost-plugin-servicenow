@@ -64,6 +64,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [filtersPanelOpen, setFiltersPanelOpen] = useState(false);
     const [eventsPanelOpen, setEventsPanelOpen] = useState(false);
     const [successPanelOpen, setSuccessPanelOpen] = useState(false);
+    const [showErrorComponent, setShowErrorComponent] = useState(false);
 
     // Events panel values
     const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEvents[]>([]);
@@ -182,15 +183,24 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         serviceName: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName,
         handleSuccess: () => setGetTableFields(true),
         handleError: (error) => {
-            dispatch(resetGlobalModalState());
-            if (
-            error?.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
-            error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
-            error?.id !== Constants.ApiErrorIdNotConnected
-            ) {
-                return handleErrorComponent(error);
+            if (error) {
+                if (error.id === Constants.ApiErrorIdRefreshTokenExpired || error.id === Constants.ApiErrorIdNotConnected) {
+                    dispatch(setConnected(false));
+                }
+
+                // We are not showing errors on the modal in case of these errors because we are creating an ephemeral post
+                if (
+                    error.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
+                    error.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
+                    error.id !== Constants.ApiErrorIdNotConnected
+                ) {
+                    setShowErrorComponent(true);
+                    setApiError(error);
+                    return;
+                }
             }
-            return <></>;
+
+            dispatch(resetGlobalModalState());
         },
     });
 
@@ -240,6 +250,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setFiltersPanelOpen(false);
         setEventsPanelOpen(false);
         setSuccessPanelOpen(false);
+        setShowErrorComponent(false);
     }, []);
 
     // Reset error states
@@ -291,8 +302,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     useEffect(() => {
         let height;
 
-        if (successPanelOpen || apiError) {
+        if (successPanelOpen || apiError || showErrorComponent) {
             height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.successPanel;
+            if (showErrorComponent) {
+                height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.errorPanel;
+            }
+
             setModalDialogHeight(height);
             return;
         }
@@ -456,7 +471,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         return <></>;
     }
 
-    if (typeof (subscriptionData) === 'string' && !editSubscriptionData) {
+    if (typeof (subscriptionData) === 'string' && !editSubscriptionData && subscriptionsConfiguredStateSuccess) {
         if (getSubscriptionState().isError) {
             return handleErrorComponent(getSubscriptionState().error);
         }
@@ -483,7 +498,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     className={`
                         modal__body channel-panel wizard__primary-panel 
                         ${subscriptionTypePanelOpen && 'wizard__primary-panel--fade-out'}
-                        ${(successPanelOpen || apiError) && 'wizard__primary-panel--fade-out'}
+                        ${(successPanelOpen || apiError || showErrorComponent) && 'wizard__primary-panel--fade-out'}
                     `}
                     ref={channelPanelRef}
                     onContinue={() => setSubscriptionTypePanelOpen(true)}
@@ -580,7 +595,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     backBtnDisabled={showLoader}
                 />
                 <ResultPanel
-                    className={`${(successPanelOpen || apiError) && 'wizard__secondary-panel--slide-in'}`}
+                    className={`${(successPanelOpen || apiError || showErrorComponent) && 'wizard__secondary-panel--slide-in'}`}
                     ref={resultPanelRef}
                     iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}

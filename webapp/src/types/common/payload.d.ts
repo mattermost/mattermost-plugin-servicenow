@@ -73,8 +73,8 @@ type ShareRecordPayload = {
 type IncidentPayload = {
     short_description: string;
     description: string;
-    urgency: number;
-    impact: number;
+    urgency?: number;
+    impact?: number;
     caller_id: string;
     channel_id: string;
 }

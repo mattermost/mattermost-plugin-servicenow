@@ -17,6 +17,7 @@
           min-width: 536px;
           max-width: 536px;
           min-height: 37px;
+          background: var(--center-channel-bg);
         }
       }
 
@@ -25,19 +26,18 @@
         margin-top: 20px;
       }
 
-      &__description {
-        list-style-type: none;
-      }
-
       &__description-text {
         padding: 20px 10px 0 0;
         white-space: pre-line;
+        max-width: 533px;
+        overflow-wrap: break-word;
       }
 
       &__footer {
         text-align: center;
         font-weight: bold;
         margin: 0;
+        padding-top: 15px;
       }
   }
 }

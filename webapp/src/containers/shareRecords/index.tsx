@@ -79,7 +79,13 @@ const ShareRecords = () => {
         serviceName: Constants.pluginApiServiceConfigs.shareRecord.apiServiceName,
         payload: shareRecordPayload,
         handleSuccess: () => setShowResultPanel(true),
-        handleError: setApiError,
+        handleError: (error) => {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
+
+            setApiError(error);
+        },
     });
 
     const shareRecord = () => {
@@ -119,10 +125,10 @@ const ShareRecords = () => {
     }, [open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
-            dispatch(setConnected(false));
+        if (apiError) {
             return action ? hideModal : 'Close';
         }
+
         return action ? handleOpenShareRecordModal : 'Share another record';
     }, [apiError]);
 
@@ -150,7 +156,7 @@ const ShareRecords = () => {
                         }}
                         secondaryBtn={{
                             text: 'Close',
-                            onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
+                            onClick: apiError ? null : hideModal,
                         }}
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />

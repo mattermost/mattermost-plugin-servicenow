@@ -3,6 +3,7 @@ package plugin
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +15,8 @@ import (
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 func TestCallJSON(t *testing.T) {
@@ -68,9 +71,9 @@ func TestCall(t *testing.T) {
 				})
 			},
 			setupAPI: func(api *plugintest.API) {
-				api.On("LogError", ErrorConnectionRefused.Error(), "Error", mock.AnythingOfType("string")).Return()
+				api.On("LogError", constants.ErrorConnectionRefused, "Error", mock.AnythingOfType("string")).Return()
 			},
-			expectedErrorMessage: ErrorConnectionRefused.Error(),
+			expectedErrorMessage: fmt.Sprintf("%s Error: %s", constants.ErrorConnectionRefused, "error while making the request"),
 			expectedStatusCode:   http.StatusInternalServerError,
 		},
 		{
