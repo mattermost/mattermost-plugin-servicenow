@@ -341,9 +341,7 @@ func (c *client) SearchFilterValuesInServiceNow(searchTerm, limit, offset, reque
 
 func (c *client) GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error) {
 	fields := &serializer.ServiceNowTableFieldsResult{}
-	queryParams := url.Values{
-		constants.QueryParamTableTerm: {table},
-	}
+	queryParams := url.Values{constants.QueryParamTableTerm: {table}}
 
 	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetTableFieldsFromServiceNow, nil, fields, queryParams)
 	if err != nil {
