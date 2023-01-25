@@ -22,7 +22,7 @@ type SubscriptionPayload struct {
 	RecordID           *string `json:"record_id"`
 	IsActive           *bool   `json:"is_active"`
 	SubscriptionEvents *string `json:"subscription_events"`
-	SubscriptionNumber *string `json:"subscription_number"`
+	RecordNumber       *string `json:"record_number"`
 	ServerURL          *string `json:"server_url"`
 }
 
@@ -183,26 +183,30 @@ func SubscriptionFromJSON(data io.Reader) (*SubscriptionPayload, error) {
 	return sp, nil
 }
 
+func GetFormattedSubscriptionEvents(subscriptionEvents string) string {
+	formattedSubscriptionEvents := ""
+	events := strings.Split(subscriptionEvents, ",")
+	for index, event := range events {
+		formattedSubscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
+		if index != len(events)-1 {
+			formattedSubscriptionEvents += ", "
+		}
+	}
+	return formattedSubscriptionEvents
+}
+
 func (s *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL string) *model.Post {
 	post := &model.Post{
 		ChannelId: s.ChannelID,
 		UserId:    botID,
 	}
 
-	subscriptionEvents := ""
-	events := strings.Split(s.SubscriptionEvents, ",")
-	for index, event := range events {
-		subscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
-		if index != len(events)-1 {
-			subscriptionEvents += ", "
-		}
-	}
-
-	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType)
+	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
+	titleLink := fmt.Sprintf(constants.BulkTypeSubscriptionURL, serviceNowURL, s.RecordType)
 	recordType := cases.Title(language.Und).String(s.RecordType)
 	postTitle := fmt.Sprintf("%s subscription created for [%s](%s)", constants.BulkSubscription, recordType, titleLink)
-	if s.Type == constants.RecordSubscription {
-		titleLink = fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
+	if s.Type == constants.SubscriptionTypeRecord {
+		titleLink = fmt.Sprintf(constants.RecordTypeSubscriptionURL, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
 		postTitle = fmt.Sprintf("%s subscription created for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, titleLink)
 	}
 
@@ -230,20 +234,12 @@ func (s *SubscriptionResponse) EditSubscriptionPost(botID, serviceNowURL string)
 		UserId:    botID,
 	}
 
-	subscriptionEvents := ""
-	events := strings.Split(s.SubscriptionEvents, ",")
-	for index, event := range events {
-		subscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
-		if index != len(events)-1 {
-			subscriptionEvents += ", "
-		}
-	}
-
+	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
 	recordType := cases.Title(language.Und).String(s.RecordType)
-	textLink := fmt.Sprintf("%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType)
+	textLink := fmt.Sprintf(constants.BulkTypeSubscriptionURL, serviceNowURL, s.RecordType)
 	postText := fmt.Sprintf("%s subscription for [%s](%s)", constants.BulkSubscription, recordType, textLink)
-	if s.Type == constants.RecordSubscription {
-		textLink = fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
+	if s.Type == constants.SubscriptionTypeRecord {
+		textLink = fmt.Sprintf(constants.RecordTypeSubscriptionURL, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
 		postText = fmt.Sprintf("%s subscription for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, textLink)
 	}
 

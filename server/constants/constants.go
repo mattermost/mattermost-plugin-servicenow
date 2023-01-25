@@ -44,6 +44,7 @@ const (
 	SubscriptionEventAssignedTo      = "assigned_to"
 	SubscriptionEventAssignmentGroup = "assignment_group"
 	SubscriptionEventCreated         = "created"
+	BulkSubscription                 = "Bulk"
 
 	// Filters
 	FilterCreatedByMe     = "me"
@@ -123,9 +124,9 @@ const (
 	SubCommandEdit        = "edit"
 	SubCommandDelete      = "delete"
 
-	// Subscriptions
-	RecordSubscription = "record"
-	BulkSubscription   = "Bulk"
+	// Subscription type URL
+	BulkTypeSubscriptionURL   = "%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true"
+	RecordTypeSubscriptionURL = "%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential

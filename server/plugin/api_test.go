@@ -1569,9 +1569,6 @@ func TestEditSubscription(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusOK, nil,
-				)
-				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
 					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
 				)
 			},
@@ -1652,7 +1649,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
-		"failed to edit subscription": {
+		"failed to edit the subscription": {
 			RequestBody: fmt.Sprintf(`{
 				"user_id": "%s",
 				"channel_id": "%s"
@@ -1662,7 +1659,7 @@ func TestEditSubscription(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusForbidden, fmt.Errorf("edit subscription error"),
+					nil, http.StatusForbidden, fmt.Errorf("edit subscription error"),
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1678,7 +1675,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "edit subscription error",
 		},
-		"failed to create edit subscription post": {
+		"failed to create the edit subscription post": {
 			RequestBody: fmt.Sprintf(`{
 				"user_id": "%s",
 				"channel_id": "%s"
@@ -1689,9 +1686,6 @@ func TestEditSubscription(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusOK, nil,
-				)
-				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
 					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
 				)
 			},

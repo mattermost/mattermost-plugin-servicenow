@@ -260,11 +260,11 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if subscription != nil && subscription.SubscriptionNumber != nil {
-		resp.Number = *subscription.SubscriptionNumber
+	if subscription != nil && subscription.RecordNumber != nil {
+		resp.Number = *subscription.RecordNumber
 	}
 
-	post := resp.CreateSubscriptionPost(p.botID, p.configuration.ServiceNowBaseURL)
+	post := resp.CreateSubscriptionPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
@@ -374,28 +374,22 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := p.GetClientFromRequest(r)
-	if statusCode, er := client.EditSubscription(subscriptionID, subscription); er != nil {
-		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", er.Error())
+	resp, statusCode, editErr := client.EditSubscription(subscriptionID, subscription)
+	if editErr != nil {
+		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", editErr.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, er.Error())
+			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, editErr.Error())
 		}
-		_ = p.handleClientError(w, r, er, false, statusCode, "", responseMessage)
+		_ = p.handleClientError(w, r, editErr, false, statusCode, "", responseMessage)
 		return
 	}
 
-	resp, statusCode, err := client.GetSubscription(subscriptionID)
-	if err != nil {
-		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
-		p.API.LogError("Error in editing subscription", "Error", err.Error())
-		return
+	if subscription != nil && subscription.RecordNumber != nil {
+		resp.Number = *subscription.RecordNumber
 	}
 
-	if subscription != nil && subscription.SubscriptionNumber != nil {
-		resp.Number = *subscription.SubscriptionNumber
-	}
-
-	post := resp.EditSubscriptionPost(p.botID, p.configuration.ServiceNowBaseURL)
+	post := resp.EditSubscriptionPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
