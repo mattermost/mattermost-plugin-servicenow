@@ -203,11 +203,11 @@ func (s *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL strin
 	}
 
 	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
-	titleLink := fmt.Sprintf(constants.PathRecordListURL, serviceNowURL, s.RecordType)
+	titleLink := fmt.Sprintf(constants.PathRecordList, serviceNowURL, s.RecordType)
 	recordType := cases.Title(language.Und).String(s.RecordType)
 	postTitle := fmt.Sprintf("%s subscription created for [%s](%s)", constants.BulkSubscription, recordType, titleLink)
 	if s.Type == constants.SubscriptionTypeRecord {
-		titleLink = fmt.Sprintf(constants.PathRecordURL, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
+		titleLink = fmt.Sprintf(constants.PathRecord, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
 		postTitle = fmt.Sprintf("%s subscription created for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, titleLink)
 	}
 
@@ -237,10 +237,10 @@ func (s *SubscriptionResponse) EditSubscriptionPost(botID, serviceNowURL string)
 
 	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
 	recordType := cases.Title(language.Und).String(s.RecordType)
-	textLink := fmt.Sprintf(constants.PathRecordListURL, serviceNowURL, s.RecordType)
+	textLink := fmt.Sprintf(constants.PathRecordList, serviceNowURL, s.RecordType)
 	postText := fmt.Sprintf("%s subscription for [%s](%s)", constants.BulkSubscription, recordType, textLink)
 	if s.Type == constants.SubscriptionTypeRecord {
-		textLink = fmt.Sprintf(constants.PathRecordURL, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
+		textLink = fmt.Sprintf(constants.PathRecord, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
 		postText = fmt.Sprintf("%s subscription for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, textLink)
 	}
 

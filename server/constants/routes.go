@@ -38,6 +38,6 @@ const (
 	PathSysUserGroup  = "/sys_user_group.do?sys_id=%s"
 	PathKnowledgeBase = PathServiceNowURL + "/kb_knowledge_base.do%%3Fsys_id=%s"
 	PathCategory      = PathServiceNowURL + "/kb_category.do%%3Fsys_id=%s"
-	PathRecordListURL = "%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true"
-	PathRecordURL     = "%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true"
+	PathRecordList    = "%s/nav_to.do?uri=%s_list.do%%3Fsysparm_query=active=true"
+	PathRecord        = "%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true"
 )

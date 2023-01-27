@@ -260,7 +260,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if subscription != nil && subscription.RecordNumber != nil {
+	if subscription.RecordNumber != nil {
 		resp.Number = *subscription.RecordNumber
 	}
 
@@ -385,7 +385,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if subscription != nil && subscription.RecordNumber != nil {
+	if subscription.RecordNumber != nil {
 		resp.Number = *subscription.RecordNumber
 	}
 
