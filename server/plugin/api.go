@@ -329,13 +329,14 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if subscription.Type == constants.SubscriptionTypeBulk {
-			bulkSubscriptions = append(bulkSubscriptions, subscription)
-			continue
-		}
 		wg.Add(1)
-		go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
-		recordSubscriptions = append(recordSubscriptions, subscription)
+		if subscription.Type == constants.SubscriptionTypeBulk {
+			go p.GetFiltersFromServiceNow(subscription, client, &wg, false)
+			bulkSubscriptions = append(bulkSubscriptions, subscription)
+		} else {
+			go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+			recordSubscriptions = append(recordSubscriptions, subscription)
+		}
 	}
 
 	wg.Wait()
@@ -413,6 +414,10 @@ func (p *Plugin) getSubscription(w http.ResponseWriter, r *http.Request) {
 
 		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
 		return
+	}
+
+	if subscription.Type == constants.SubscriptionTypeBulk {
+		p.GetFiltersFromServiceNow(subscription, client, nil, false)
 	}
 
 	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)

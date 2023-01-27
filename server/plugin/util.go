@@ -99,7 +99,7 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 
 	if bulkSubscriptions.Len() > 0 {
 		sb.WriteString("#### Bulk subscriptions\n")
-		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|")
+		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel | Filters | \n| :----|:--------| :--------|:--------|:--------|:---------|")
 		sb.WriteString(bulkSubscriptions.String())
 	}
 
@@ -152,6 +152,61 @@ func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer
 	}
 	subscription.Number = record.Number
 	subscription.ShortDescription = record.ShortDescription
+}
+
+func (p *Plugin) GetFiltersFromServiceNow(subscription *serializer.SubscriptionResponse, client Client, wg *sync.WaitGroup, getFormatted bool) {
+	if wg != nil {
+		defer wg.Done()
+	}
+
+	if subscription.Filters == "" {
+		return
+	}
+
+	filters := strings.Split(subscription.Filters, ",")
+	for index, filter := range filters {
+		data := strings.Split(filter, ":")
+		filterType, filterValue := data[0], data[1]
+
+		if index == len(filters)-1 {
+			filterValue = filterValue[1 : len(filterValue)-2]
+		} else {
+			filterValue = filterValue[1 : len(filterValue)-1]
+		}
+
+		if index == 0 {
+			filterType = filterType[2 : len(filterType)-1]
+		} else {
+			filterType = filterType[1 : len(filterType)-1]
+		}
+
+		var requestURL string
+		if strings.Contains(filterType, constants.FilterAssignmentGroup) {
+			requestURL = constants.PathGetAssignmentGroupsFromServiceNow
+			if getFormatted {
+				filterType = constants.FormattedFilterTypes[constants.FilterAssignmentGroup]
+			}
+		} else {
+			requestURL = constants.PathGetServicesFromServiceNow
+			if getFormatted {
+				filterType = constants.FormattedFilterTypes[constants.FilterService]
+			}
+		}
+
+		filter, _, err := client.SearchFilterValuesInServiceNow(fmt.Sprint(filterValue), fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage), requestURL)
+		if err != nil || len(filter) == 0 {
+			p.API.LogError("Error in getting filters from ServiceNow", "Error", err.Error())
+			subscription.FiltersData = []*serializer.ServiceNowFilterData{}
+			return
+		}
+
+		subscription.FiltersData = append(subscription.FiltersData, &serializer.ServiceNowFilterData{
+			FilterType:  filterType,
+			FilterValue: filter[0].SysID,
+			FilterName:  filter[0].Name,
+		})
+
+	}
 }
 
 func (p *Plugin) getHelpMessage(header string, isSysAdmin bool) string {

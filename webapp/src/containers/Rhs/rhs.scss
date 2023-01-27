@@ -115,6 +115,20 @@
     .channel-icon {
       position: static;
     }
+
+    &__label {
+      padding-left: 0 !important;
+    }
+
+    &__filter-icon {
+      margin: 1px 5px 0px -7px;
+    }
+
+    &__chip-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    }
   }
 
   .configuration-not-enabled-err-state {

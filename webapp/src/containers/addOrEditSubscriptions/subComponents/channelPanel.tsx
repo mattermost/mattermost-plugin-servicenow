@@ -109,7 +109,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                 setChannel(null);
             }
         }
-    }, [editing, isSuccess]);
+    }, [editing, isSuccess, channel]);
 
     // Handle action when the continue button is clicked
     const handleContinue = () => {

@@ -308,11 +308,12 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 				}
 			}(subscription)
 
-			if subscription.Type == constants.SubscriptionTypeBulk {
-				continue
-			}
 			wg.Add(1)
-			go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+			if subscription.Type == constants.SubscriptionTypeBulk {
+				go p.GetFiltersFromServiceNow(subscription, client, &wg, true)
+			} else {
+				go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+			}
 		}
 
 		wg.Wait()

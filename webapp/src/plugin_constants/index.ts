@@ -182,6 +182,11 @@ export enum RecordDataConfigLabels {
     SERVICE = 'Service',
 }
 
+export const SupportedFiltersLabelsMap: Record<SupportedFilters, string> = {
+    [SupportedFilters.ASSIGNMENT_GROUP]: RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    [SupportedFilters.SERVICE]: RecordDataConfigLabels.SERVICE,
+};
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {

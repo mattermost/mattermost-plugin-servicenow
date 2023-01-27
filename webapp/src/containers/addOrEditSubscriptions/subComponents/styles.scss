@@ -38,6 +38,11 @@
     &__prev-data-header {
       color: rgba(var(--center-channel-color-rgb), 0.4);
     }
+
+    &__container {
+      display: flex;
+      flex-direction: column;
+    }
   }
 
   .search-panel {
