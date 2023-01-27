@@ -338,7 +338,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
-		p.API.LogError(constants.ErrorDeleteSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
+		p.API.LogError(constants.ErrorDeleteSubscription, "SubscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
 			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorDeleteSubscription, err.Error())
@@ -376,7 +376,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	client := p.GetClientFromRequest(r)
 	resp, statusCode, editErr := client.EditSubscription(subscriptionID, subscription)
 	if editErr != nil {
-		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", editErr.Error())
+		p.API.LogError(constants.ErrorEditingSubscription, "SubscriptionID", subscriptionID, "Error", editErr.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
 			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, editErr.Error())

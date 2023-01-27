@@ -79,7 +79,7 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 		})
 	}
 
-	titleLink := fmt.Sprintf(constants.RecordTypeSubscriptionURL, serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
+	titleLink := fmt.Sprintf(constants.PathRecordURL, serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
 	slackAttachment := &model.SlackAttachment{
 		Title: fmt.Sprintf("[%s](%s): %s", se.Number, titleLink, se.ShortDescription),
 		Text:  fmt.Sprintf("**Event: %s**", constants.FormattedEventNames[se.EventOccurred]),

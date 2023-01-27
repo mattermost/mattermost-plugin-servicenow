@@ -43,6 +43,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [recordId, setRecordId] = useState<string | null>(null);
     const [suggestionChosen, setSuggestionChosen] = useState(false);
     const [resetRecordPanelStates, setResetRecordPanelStates] = useState(false);
+    const [recordNumber, setRecordNumber] = useState('');
 
     // Record type panel
     const [recordType, setRecordType] = useState<RecordType | null>(null);
@@ -284,8 +285,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         }
         return Constants.SubscriptionAddedMsg;
     }, [apiError, apiResponseValid, subscriptionData]);
-
-    const [recordNumber, setRecordNumber] = useState('');
 
     // Handles create subscription
     const createSubscription = () => {

@@ -1507,7 +1507,7 @@ func TestDeleteSubscription(t *testing.T) {
 		},
 		"failed to delete subscription": {
 			SetupAPI: func(api *plugintest.API) {
-				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "delete subscription error").Return()
+				api.On("LogError", mock.AnythingOfType("string"), "SubscriptionID", testutils.GetServiceNowSysID(), "Error", "delete subscription error").Return()
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
@@ -1655,7 +1655,7 @@ func TestEditSubscription(t *testing.T) {
 				"channel_id": "%s"
 			  	}`, testutils.GetID(), testutils.GetChannelID()),
 			SetupAPI: func(api *plugintest.API) {
-				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
+				api.On("LogError", mock.AnythingOfType("string"), "SubscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(

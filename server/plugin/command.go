@@ -346,7 +346,7 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 		if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 			p.API.LogError("Unable to delete subscription", "Error", err.Error())
 			if statusCode == http.StatusNotFound {
-				p.postCommandResponse(args, "Subscription is already deleted.")
+				p.postCommandResponse(args, fmt.Sprintf("Subscription with ID %s doesn't exist.", subscriptionID))
 			} else {
 				p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
 			}
