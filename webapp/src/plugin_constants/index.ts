@@ -434,20 +434,20 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createIncident',
     },
-    getIncidentFeilds: {
+    getIncidentFields: {
         path: '/incident-fields',
         method: 'GET',
-        apiServiceName: 'getIncidentFeilds',
+        apiServiceName: 'getIncidentFields',
     },
     getFilterData: {
         path: '/filter',
         method: 'GET',
         apiServiceName: 'getFilterData',
     },
-    getTableFeilds: {
+    getTableFields: {
         path: '/fields',
         method: 'GET',
-        apiServiceName: 'getTableFeilds',
+        apiServiceName: 'getTableFields',
     },
 };
 

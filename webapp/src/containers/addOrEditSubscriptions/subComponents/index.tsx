@@ -51,7 +51,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Filter panel values
     const [resetFiltersPanelStates, setResetFiltersPanelStates] = useState(false);
-    const [getTableFeilds, setGetTableFields] = useState(false);
+    const [getTableFields, setGetTableFields] = useState(false);
     const [filters, setFilters] = useState<FiltersData[]>([]);
 
     // Record type panel
@@ -100,7 +100,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     const getTableFieldsState = () => {
-        const {isLoading, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        const {isLoading, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getTableFields.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
         return {isLoading, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
@@ -208,7 +208,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const {isLoading: editSubscriptionLoading} = getEditSubscriptionState();
     const {isLoading: subscriptionsConfiguredStateLoading,
         isSuccess: subscriptionsConfiguredStateSuccess} = getSubscriptionsConfiguredState();
-    const {isLoading: tableFieldsStateLoading, isError: tableFieldsStateIsError} = getTableFieldsState();
+    const {isLoading: tableFieldsStateLoading, isError: tableFieldsStateError} = getTableFieldsState();
     const showLoader = createSubscriptionLoading || editSubscriptionLoading;
 
     useEffect(() => {
@@ -216,8 +216,8 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setChannel(currentChannelId);
         }
 
-        if (open && getTableFeilds) {
-            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        if (open && getTableFields) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFields.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
         }
 
         if (open && subscriptionData && subscriptionsConfiguredStateSuccess) {
@@ -227,7 +227,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                 handleSubscriptionData(subscriptionData);
             }
         }
-    }, [open, subscriptionData, currentChannelId, subscriptionsConfiguredStateSuccess, getTableFeilds]);
+    }, [open, subscriptionData, currentChannelId, subscriptionsConfiguredStateSuccess, getTableFields]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
@@ -435,7 +435,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             return;
         }
 
-        if (!tableFieldsStateLoading && tableFieldsStateIsError) {
+        if (!tableFieldsStateLoading && tableFieldsStateError) {
             setEventsPanelOpen(true);
         } else {
             setFiltersPanelOpen(true);

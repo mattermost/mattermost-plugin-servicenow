@@ -1065,7 +1065,7 @@ func TestCreateSubscription(t *testing.T) {
 				"user_id": "%s",
 				"type": "%s",
 				"channel_id": "%s"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeRecord, testutils.GetChannelID()),
+			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
 			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
@@ -1180,7 +1180,7 @@ func TestCreateSubscription(t *testing.T) {
 				"user_id": "%s",
 				"type": "%s",
 				"channel_id": "%s"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeRecord, testutils.GetChannelID()),
+			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1207,7 +1207,7 @@ func TestCreateSubscription(t *testing.T) {
 				"user_id": "%s",
 				"type": "%s",
 				"channel_id": "%s"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeRecord, testutils.GetChannelID()),
+			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
 			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
@@ -1232,7 +1232,7 @@ func TestCreateSubscription(t *testing.T) {
 				"user_id": "%s",
 				"type": "%s",
 				"channel_id": "%s"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeRecord, testutils.GetChannelID()),
+			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1458,7 +1458,7 @@ func TestGetSubscriptionAPI(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
+					testutils.GetSubscription(testutils.GetRecordTypeSubscription()), http.StatusOK, nil,
 				)
 				client.On("GetRecordFromServiceNow", testutils.GetMockArgumentsWithType("string", 2)...).Return(
 					testutils.GetServiceNowRecord(), http.StatusOK, nil,

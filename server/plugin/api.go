@@ -839,14 +839,15 @@ func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.R
 }
 
 func (p *Plugin) getTableFields(w http.ResponseWriter, r *http.Request) {
-	table := r.URL.Query().Get(constants.QueryParamTableTerm)
-	if table == "" {
+	pathParams := mux.Vars(r)
+	tableName := pathParams[constants.PathParamTableName]
+	if tableName == "" {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Missing table name"})
 		return
 	}
 
 	client := p.GetClientFromRequest(r)
-	fields, statusCode, err := client.GetTableFieldsFromServiceNow(table)
+	fields, statusCode, err := client.GetTableFieldsFromServiceNow(tableName)
 	if err != nil {
 		p.API.LogError(constants.ErrorGetTableFields, "Error", err.Error())
 		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetTableFields, err.Error()))

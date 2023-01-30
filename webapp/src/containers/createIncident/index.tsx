@@ -96,7 +96,7 @@ const CreateIncident = () => {
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
     const getIncidentFieldsState = () => {
-        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName);
         return {isLoading, data: data as IncidentFieldsData[]};
     };
 
@@ -159,7 +159,7 @@ const CreateIncident = () => {
     };
 
     useApiRequestCompletionState({
-        serviceName: Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName,
+        serviceName: Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName,
         handleSuccess: () => Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, incidentFieldsData),
         handleError,
     });
@@ -229,7 +229,7 @@ const CreateIncident = () => {
         }
 
         if (open && refetchIncidentFields) {
-            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName);
             setRefetchIncidentFields(false);
         }
     }, [open, refetchIncidentFields]);

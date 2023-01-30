@@ -37,7 +37,7 @@ func TestParseSubscriptionsToCommandResponse(t *testing.T) {
 			subscripitons: []*serializer.SubscriptionResponse{
 				{
 					SysID:              mockSysID,
-					Type:               constants.SubscriptionTypeRecord,
+					Type:               testutils.GetRecordTypeSubscription(),
 					Number:             mockNumber,
 					ChannelID:          mockChannelID,
 					UserName:           mockUser,
@@ -47,7 +47,7 @@ func TestParseSubscriptionsToCommandResponse(t *testing.T) {
 				},
 				{
 					SysID:              mockSysID,
-					Type:               constants.SubscriptionTypeBulk,
+					Type:               testutils.GetBulkTypeSubscription(),
 					ChannelID:          mockChannelID,
 					UserName:           mockUser,
 					RecordType:         constants.RecordTypeIncident,
@@ -166,7 +166,7 @@ func TestConvertSubscriptionToMap(t *testing.T) {
 			testCase.setupPlugin()
 
 			resp, err := ConvertSubscriptionToMap(&serializer.SubscriptionResponse{
-				Type: constants.SubscriptionTypeBulk,
+				Type: testutils.GetBulkTypeSubscription(),
 			})
 
 			if testCase.expectedErr != "" {
@@ -191,13 +191,13 @@ func TestFilterSubscriptionsOnRecordData(t *testing.T) {
 			description: "FilterSubscriptionsOnRecordData",
 			subscripitons: []*serializer.SubscriptionResponse{
 				{
-					Type: constants.SubscriptionTypeRecord,
+					Type: testutils.GetRecordTypeSubscription(),
 				},
 				{
-					Type: constants.SubscriptionTypeBulk,
+					Type: testutils.GetBulkTypeSubscription(),
 				},
 				{
-					Type:             constants.SubscriptionTypeRecord,
+					Type:             testutils.GetRecordTypeSubscription(),
 					ShortDescription: "mockDescription",
 					Number:           "mockNumber",
 				},

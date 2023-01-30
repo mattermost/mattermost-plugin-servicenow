@@ -56,20 +56,15 @@ const FiltersPanel = forwardRef<HTMLDivElement, FiltersPanelProps>(({
         if (searchFor) {
             const payload: SearchFilterItemsParams = {
                 search: searchFor,
+                filter: type === SupportedFilters.ASSIGNMENT_GROUP ? SupportedFilters.ASSIGNMENT_GROUP : SupportedFilters.SERVICE,
             };
-
-            if (type === SupportedFilters.ASSIGNMENT_GROUP) {
-                payload.filter = SupportedFilters.ASSIGNMENT_GROUP;
-            } else {
-                payload.filter = SupportedFilters.SERVICE;
-            }
 
             setSearchItemsPayload(payload);
             makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getFilterData.apiServiceName, payload);
         }
     };
 
-    const mapRequestsToSuggestions = (data: FieldsFilterData[]): Array<Record<string, string>> => data.map((d) => ({
+    const mapDataToSuggestions = (data: FieldsFilterData[]): Array<Record<string, string>> => data.map((d) => ({
         id: d.sys_id,
         name: d.name,
     }));
@@ -91,34 +86,28 @@ const FiltersPanel = forwardRef<HTMLDivElement, FiltersPanelProps>(({
     const handleAssignmentGroupInputChange = (currentValue: string) => {
         setAssignmentGroupAutoSuggestValue(currentValue);
         setFiltersValue(SupportedFilters.ASSIGNMENT_GROUP, null);
-        if (currentValue) {
-            if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
-                debouncedGetSuggestions({searchFor: currentValue, type: SupportedFilters.ASSIGNMENT_GROUP});
-            }
+        if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
+            debouncedGetSuggestions({searchFor: currentValue, type: SupportedFilters.ASSIGNMENT_GROUP});
         }
     };
 
     const handleServiceInputChange = (currentValue: string) => {
         setServiceAutoSuggestValue(currentValue);
         setFiltersValue(SupportedFilters.SERVICE, null);
-        if (currentValue) {
-            if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
-                debouncedGetSuggestions({searchFor: currentValue, type: SupportedFilters.SERVICE});
+        if (currentValue.length >= Constants.DefaultCharThresholdToShowSuggestions) {
+            debouncedGetSuggestions({searchFor: currentValue, type: SupportedFilters.SERVICE});
+        }
+    };
+
+    const handleFilterSelection = (suggestion: Record<string, string> | null) => {
+        if (suggestion) {
+            if (searchItemsPayload?.filter === SupportedFilters.ASSIGNMENT_GROUP) {
+                setAssignmentGroupAutoSuggestValue(suggestion.name);
+                setFiltersValue(SupportedFilters.ASSIGNMENT_GROUP, suggestion.id);
+            } else {
+                setServiceAutoSuggestValue(suggestion.name);
+                setFiltersValue(SupportedFilters.SERVICE, suggestion.id);
             }
-        }
-    };
-
-    const handleAssignmentGroupSelection = (suggestion: Record<string, string> | null) => {
-        if (suggestion) {
-            setAssignmentGroupAutoSuggestValue(suggestion.name);
-            setFiltersValue(SupportedFilters.ASSIGNMENT_GROUP, suggestion.id);
-        }
-    };
-
-    const handleServiceSelection = (suggestion: Record<string, string> | null) => {
-        if (suggestion) {
-            setServiceAutoSuggestValue(suggestion.name);
-            setFiltersValue(SupportedFilters.SERVICE, suggestion.id);
         }
     };
 
@@ -130,22 +119,18 @@ const FiltersPanel = forwardRef<HTMLDivElement, FiltersPanelProps>(({
     useApiRequestCompletionState({
         serviceName: Constants.pluginApiServiceConfigs.getFilterData.apiServiceName,
         payload: searchItemsPayload,
-        handleSuccess: () => {
-            if (searchItemsPayload?.filter === SupportedFilters.ASSIGNMENT_GROUP) {
-                setAssignmentGroupOptions(data);
-            } else {
-                setServiceOptions(data);
-            }
-        },
+        handleSuccess: () => (searchItemsPayload?.filter === SupportedFilters.ASSIGNMENT_GROUP ?
+            setAssignmentGroupOptions(data) :
+            setServiceOptions(data)),
     });
 
     useEffect(() => {
         if (assignmentGroupOptions) {
-            setAssignmentGroupSuggestions(mapRequestsToSuggestions(assignmentGroupOptions));
+            setAssignmentGroupSuggestions(mapDataToSuggestions(assignmentGroupOptions));
         }
 
         if (serviceOptions) {
-            setServiceSuggestions(mapRequestsToSuggestions(serviceOptions));
+            setServiceSuggestions(mapDataToSuggestions(serviceOptions));
         }
     }, [assignmentGroupOptions, serviceOptions]);
 
@@ -172,7 +157,7 @@ const FiltersPanel = forwardRef<HTMLDivElement, FiltersPanelProps>(({
                     placeholder='Search Assignment Groups'
                     inputValue={assignmentGroupAutoSuggestValue}
                     onInputValueChange={handleAssignmentGroupInputChange}
-                    onChangeSelectedSuggestion={handleAssignmentGroupSelection}
+                    onChangeSelectedSuggestion={handleFilterSelection}
                     loadingSuggestions={isLoading && searchItemsPayload?.filter === SupportedFilters.ASSIGNMENT_GROUP}
                     suggestionConfig={{
                         suggestions: assignmentGroupSuggestions,
@@ -185,7 +170,7 @@ const FiltersPanel = forwardRef<HTMLDivElement, FiltersPanelProps>(({
                     placeholder='Search Services'
                     inputValue={serviceAutoSuggestValue}
                     onInputValueChange={handleServiceInputChange}
-                    onChangeSelectedSuggestion={handleServiceSelection}
+                    onChangeSelectedSuggestion={handleFilterSelection}
                     loadingSuggestions={isLoading && searchItemsPayload?.filter === SupportedFilters.SERVICE}
                     suggestionConfig={{
                         suggestions: serviceSuggestions,

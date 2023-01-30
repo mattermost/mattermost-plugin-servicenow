@@ -33,7 +33,7 @@ type Client interface {
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 	GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowIncidentFields, int, error)
 	SearchFilterValuesInServiceNow(searchTerm, limit, offset, requestURL string) ([]*serializer.ServiceNowFilter, int, error)
-	GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error)
+	GetTableFieldsFromServiceNow(tableName string) ([]*serializer.ServiceNowTableFields, int, error)
 }
 
 type client struct {
@@ -339,9 +339,9 @@ func (c *client) SearchFilterValuesInServiceNow(searchTerm, limit, offset, reque
 	return assignmentGroups.Result, statusCode, nil
 }
 
-func (c *client) GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error) {
+func (c *client) GetTableFieldsFromServiceNow(tableName string) ([]*serializer.ServiceNowTableFields, int, error) {
 	fields := &serializer.ServiceNowTableFieldsResult{}
-	queryParams := url.Values{constants.QueryParamTableTerm: {table}}
+	queryParams := url.Values{constants.QueryParamTableTerm: {tableName}}
 
 	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetTableFieldsFromServiceNow, nil, fields, queryParams)
 	if err != nil {
