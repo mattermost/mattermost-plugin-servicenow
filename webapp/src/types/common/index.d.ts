@@ -178,7 +178,7 @@ type MessageHtmlToComponentOptions = {
     mentionHighlight: boolean;
 }
 
-type FieldsFilterData = {
+type FilterFieldsData = {
     sys_id: string;
     name: string;
 }

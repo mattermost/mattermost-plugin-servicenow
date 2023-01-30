@@ -247,7 +247,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -324,7 +324,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg := sync.WaitGroup{}
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
-		_, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
+		_, _, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID, true)
 		if permissionErr != nil {
 			continue
 		}
@@ -379,7 +379,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -547,7 +547,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, channelID)
+	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, channelID, true)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -721,6 +721,13 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	permissionStatusCode, channelType, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID, false)
+	if permissionErr != nil {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
+		return
+	}
+
 	client := p.GetClientFromRequest(r)
 	response, statusCode, err := client.CreateIncident(incident)
 	if err != nil {
@@ -746,7 +753,18 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(incident.ChannelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	channelID := incident.ChannelID
+	if channelType == model.CHANNEL_DIRECT || channelType == model.CHANNEL_GROUP {
+		channel, err := p.API.GetDirectChannel(userID, p.botID)
+		if err != nil {
+			p.API.LogError("Couldn't get bot's DM channel", "user_id", userID, "error", err.Error())
+			return
+		}
+
+		channelID = channel.Id
+	}
+
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
@@ -789,7 +807,7 @@ func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.R
 	pathParams := mux.Vars(r)
 	filterType := pathParams[constants.PathParamFilterType]
 	if !constants.ValidFiltersForSearching[filterType] {
-		p.API.LogError("Invalid filter type while searching", "Filter type", filterType)
+		p.API.LogError("Invalid filter type while searching", "FilterType", filterType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidFilterType})
 		return
 	}
@@ -821,14 +839,15 @@ func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.R
 }
 
 func (p *Plugin) getTableFields(w http.ResponseWriter, r *http.Request) {
-	table := r.URL.Query().Get(constants.QueryParamTableTerm)
-	if table == "" {
+	pathParams := mux.Vars(r)
+	tableName := pathParams[constants.PathParamTableName]
+	if tableName == "" {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Missing table name"})
 		return
 	}
 
 	client := p.GetClientFromRequest(r)
-	fields, statusCode, err := client.GetTableFieldsFromServiceNow(table)
+	fields, statusCode, err := client.GetTableFieldsFromServiceNow(tableName)
 	if err != nil {
 		p.API.LogError(constants.ErrorGetTableFields, "Error", err.Error())
 		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetTableFields, err.Error()))

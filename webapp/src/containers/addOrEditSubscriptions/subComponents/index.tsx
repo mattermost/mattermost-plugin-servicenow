@@ -51,7 +51,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Filter panel values
     const [resetFiltersPanelStates, setResetFiltersPanelStates] = useState(false);
-    const [getTableFeilds, setGetTableFields] = useState(false);
+    const [getTableFields, setGetTableFields] = useState(false);
     const [filters, setFilters] = useState<FiltersData[]>([]);
     const [editing, setEditing] = useState(false);
 
@@ -65,6 +65,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [filtersPanelOpen, setFiltersPanelOpen] = useState(false);
     const [eventsPanelOpen, setEventsPanelOpen] = useState(false);
     const [successPanelOpen, setSuccessPanelOpen] = useState(false);
+    const [showErrorComponent, setShowErrorComponent] = useState(false);
 
     // Events panel values
     const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEvents[]>([]);
@@ -100,7 +101,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     };
 
     const getTableFieldsState = () => {
-        const {isLoading, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        const {isLoading, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getTableFields.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
         return {isLoading, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
@@ -188,15 +189,24 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         serviceName: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName,
         handleSuccess: () => setGetTableFields(true),
         handleError: (error) => {
-            dispatch(resetGlobalModalState());
-            if (
-            error?.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
-            error?.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
-            error?.id !== Constants.ApiErrorIdNotConnected
-            ) {
-                return handleErrorComponent(error);
+            if (error) {
+                if (error.id === Constants.ApiErrorIdRefreshTokenExpired || error.id === Constants.ApiErrorIdNotConnected) {
+                    dispatch(setConnected(false));
+                }
+
+                // We are not showing errors on the modal in case of these errors because we are creating an ephemeral post
+                if (
+                    error.id !== Constants.ApiErrorIdSubscriptionsNotConfigured &&
+                    error.id !== Constants.ApiErrorIdSubscriptionsUnauthorized &&
+                    error.id !== Constants.ApiErrorIdNotConnected
+                ) {
+                    setShowErrorComponent(true);
+                    setApiError(error);
+                    return;
+                }
             }
-            return <></>;
+
+            dispatch(resetGlobalModalState());
         },
     });
 
@@ -204,7 +214,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const {isLoading: editSubscriptionLoading} = getEditSubscriptionState();
     const {isLoading: subscriptionsConfiguredStateLoading,
         isSuccess: subscriptionsConfiguredStateSuccess} = getSubscriptionsConfiguredState();
-    const {isLoading: tableFieldsStateLoading, isError: tableFieldsStateIsError} = getTableFieldsState();
+    const {isLoading: tableFieldsStateLoading, isError: tableFieldsStateError} = getTableFieldsState();
     const showLoader = createSubscriptionLoading || editSubscriptionLoading;
 
     useEffect(() => {
@@ -223,10 +233,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     }, [open, subscriptionData, subscriptionsConfiguredStateSuccess]);
 
     useEffect(() => {
-        if (open && getTableFeilds) {
-            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        if (open && getTableFields) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFields.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
         }
-    }, [getTableFeilds]);
+    }, [getTableFields]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
@@ -250,6 +260,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setFiltersPanelOpen(false);
         setEventsPanelOpen(false);
         setSuccessPanelOpen(false);
+        setShowErrorComponent(false);
     }, []);
 
     // Reset error states
@@ -301,8 +312,12 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     useEffect(() => {
         let height;
 
-        if (successPanelOpen || apiError) {
+        if (successPanelOpen || apiError || showErrorComponent) {
             height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.successPanel;
+            if (showErrorComponent) {
+                height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.errorPanel;
+            }
+
             setModalDialogHeight(height);
             return;
         }
@@ -436,7 +451,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             return;
         }
 
-        if (!tableFieldsStateLoading && tableFieldsStateIsError) {
+        if (!tableFieldsStateLoading && tableFieldsStateError) {
             setEventsPanelOpen(true);
         } else {
             setFiltersPanelOpen(true);
@@ -472,7 +487,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         return <></>;
     }
 
-    if (typeof (subscriptionData) === 'string' && !editSubscriptionData) {
+    if (typeof (subscriptionData) === 'string' && !editSubscriptionData && subscriptionsConfiguredStateSuccess) {
         if (getSubscriptionState().isError) {
             return handleErrorComponent(getSubscriptionState().error);
         }
@@ -499,7 +514,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     className={`
                         modal__body channel-panel wizard__primary-panel 
                         ${subscriptionTypePanelOpen && 'wizard__primary-panel--fade-out'}
-                        ${(successPanelOpen || apiError) && 'wizard__primary-panel--fade-out'}
+                        ${(successPanelOpen || apiError || showErrorComponent) && 'wizard__primary-panel--fade-out'}
                     `}
                     ref={channelPanelRef}
                     onContinue={() => setSubscriptionTypePanelOpen(true)}
@@ -598,7 +613,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     backBtnDisabled={showLoader}
                 />
                 <ResultPanel
-                    className={`${(successPanelOpen || apiError) && 'wizard__secondary-panel--slide-in'}`}
+                    className={`${(successPanelOpen || apiError || showErrorComponent) && 'wizard__secondary-panel--slide-in'}`}
                     ref={resultPanelRef}
                     iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}
