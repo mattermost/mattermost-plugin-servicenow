@@ -56,7 +56,7 @@ const FiltersPanel = forwardRef<HTMLDivElement, FiltersPanelProps>(({
         if (searchFor) {
             const payload: SearchFilterItemsParams = {
                 search: searchFor,
-                filter: type === SupportedFilters.ASSIGNMENT_GROUP ? SupportedFilters.ASSIGNMENT_GROUP : SupportedFilters.SERVICE,
+                filter: type,
             };
 
             setSearchItemsPayload(payload);

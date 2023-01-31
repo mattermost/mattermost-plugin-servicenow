@@ -1061,12 +1061,8 @@ func TestCreateSubscription(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.GetSubscriptionBody(),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusOK, nil,
@@ -1176,11 +1172,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
 		"failed to check duplicate subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
+			RequestBody: testutils.GetSubscriptionBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1203,12 +1195,8 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "duplicate subscription error",
 		},
 		"duplicate subscription exists": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.GetSubscriptionBody(),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					true, http.StatusOK, nil,
@@ -1228,11 +1216,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "Subscription already exists",
 		},
 		"failed to create subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetRecordTypeSubscription(), testutils.GetChannelID()),
+			RequestBody: testutils.GetSubscriptionBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
