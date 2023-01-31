@@ -29,6 +29,7 @@ const eventsPanelProps = {
     subscriptionEvents: mockSubscriptionEvents,
     setSubscriptionEvents: mockSetSubscriptionEvents,
     channel: mockChannel,
+    filters: [],
 };
 
 describe('Events Panel', () => {

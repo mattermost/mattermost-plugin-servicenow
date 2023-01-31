@@ -10,62 +10,81 @@ exports[`Events Panel Should render correctly 1`] = `
     <div
       className="events-panel__prev-data border-radius-8 padding-v-10 padding-h-25 margin-bottom-25"
     >
-      <h4
-        className="events-panel__prev-data-header font-14 wt-400 margin-0"
+      <div
+        className="d-flex"
       >
-        Channel
-      </h4>
-      <p
-        className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
-      >
-        mockChannelLabel
-      </p>
-      <h4
-        className="events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header"
-      >
-        Record
-      </h4>
-      <p
-        className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
-      >
-        mockRecord
-      </p>
+        <div>
+          <h4
+            className="events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header"
+          >
+            Channel
+          </h4>
+          <p
+            className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+          >
+            mockChannelLabel
+          </p>
+          <h4
+            className="events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header"
+          >
+            Record
+          </h4>
+          <p
+            className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+          >
+            mockRecord
+          </p>
+        </div>
+        <div
+          className="margin-left-150"
+        />
+      </div>
     </div>
     <label
       className="events-panel__label font-16 margin-bottom-12 wt-400"
     >
       Available events:
     </label>
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="State changed"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="Priority changed"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="New comment"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="Assigned to changed"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="events-panel__checkbox"
-      label="Assignment group changed"
-      onChange={[Function]}
-    />
+    <div
+      className="d-flex"
+    >
+      <div>
+        <Checkbox
+          checked={false}
+          className="margin-bottom-20"
+          label="State changed"
+          onChange={[Function]}
+        />
+        <Checkbox
+          checked={false}
+          className="margin-bottom-20"
+          label="Priority changed"
+          onChange={[Function]}
+        />
+        <Checkbox
+          checked={false}
+          className="margin-bottom-20"
+          label="New comment"
+          onChange={[Function]}
+        />
+      </div>
+      <div
+        className="margin-left-150"
+      >
+        <Checkbox
+          checked={false}
+          className="margin-bottom-20"
+          label="Assigned to changed"
+          onChange={[Function]}
+        />
+        <Checkbox
+          checked={false}
+          className="margin-bottom-20"
+          label="Assignment group changed"
+          onChange={[Function]}
+        />
+      </div>
+    </div>
     <ModalSubtitleAndError
       error="mockError"
     />
