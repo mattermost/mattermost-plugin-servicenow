@@ -90,6 +90,7 @@ func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload
 	if err != nil {
 		return nil, statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
 	}
+
 	return subscriptionResult.Result, statusCode, nil
 }
 
@@ -150,6 +151,7 @@ func (c *client) EditSubscription(subscriptionID string, subscription *serialize
 	if err != nil {
 		return nil, statusCode, errors.Wrap(err, "failed to update subscription from ServiceNow")
 	}
+
 	return subscriptionResult.Result, statusCode, nil
 }
 

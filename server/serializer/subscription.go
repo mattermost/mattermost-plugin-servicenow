@@ -43,20 +43,12 @@ type SubscriptionResponse struct {
 }
 
 func (s *SubscriptionResponse) GetFormattedSubscription() string {
-	var subscriptionEvents strings.Builder
-	events := strings.Split(s.SubscriptionEvents, ",")
-	for index, event := range events {
-		event = constants.FormattedEventNames[strings.TrimSpace(event)]
-		if index != len(events)-1 {
-			event += ", "
-		}
-		subscriptionEvents.WriteString(event)
-	}
+	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
 
 	if s.Type == constants.SubscriptionTypeRecord {
-		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String(), s.UserName, s.ChannelName)
+		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents, s.UserName, s.ChannelName)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), s.UserName, s.ChannelName)
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents, s.UserName, s.ChannelName)
 }
 
 type SubscriptionResult struct {
@@ -184,31 +176,34 @@ func SubscriptionFromJSON(data io.Reader) (*SubscriptionPayload, error) {
 }
 
 func GetFormattedSubscriptionEvents(subscriptionEvents string) string {
-	formattedSubscriptionEvents := ""
+	var formattedSubscriptionEvents strings.Builder
 	events := strings.Split(subscriptionEvents, ",")
 	for index, event := range events {
-		formattedSubscriptionEvents += constants.FormattedEventNames[strings.TrimSpace(event)]
+		event = constants.FormattedEventNames[strings.TrimSpace(event)]
 		if index != len(events)-1 {
-			formattedSubscriptionEvents += ", "
+			event += ", "
 		}
+		formattedSubscriptionEvents.WriteString(event)
 	}
 
-	return formattedSubscriptionEvents
+	return formattedSubscriptionEvents.String()
 }
 
-func (s *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL string) *model.Post {
+func (s *SubscriptionResponse) CreateSubscriptionCreatedPost(botID, serviceNowURL string) *model.Post {
 	post := &model.Post{
 		ChannelId: s.ChannelID,
 		UserId:    botID,
 	}
 
 	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
-	titleLink := fmt.Sprintf(constants.PathRecordList, serviceNowURL, s.RecordType)
+	var titleLink, postTitle string
 	recordType := cases.Title(language.Und).String(s.RecordType)
-	postTitle := fmt.Sprintf("%s subscription created for [%s](%s)", constants.BulkSubscription, recordType, titleLink)
 	if s.Type == constants.SubscriptionTypeRecord {
 		titleLink = fmt.Sprintf(constants.PathRecord, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
 		postTitle = fmt.Sprintf("%s subscription created for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, titleLink)
+	} else {
+		titleLink = fmt.Sprintf(constants.PathRecordList, serviceNowURL, s.RecordType)
+		postTitle = fmt.Sprintf("%s subscription created for [%s](%s)", constants.BulkSubscription, recordType, titleLink)
 	}
 
 	slackAttachment := &model.SlackAttachment{
@@ -229,7 +224,7 @@ func (s *SubscriptionResponse) CreateSubscriptionPost(botID, serviceNowURL strin
 	return post
 }
 
-func (s *SubscriptionResponse) EditSubscriptionPost(botID, serviceNowURL string) *model.Post {
+func (s *SubscriptionResponse) CreateSubscriptionEditedPost(botID, serviceNowURL string) *model.Post {
 	post := &model.Post{
 		ChannelId: s.ChannelID,
 		UserId:    botID,
@@ -237,11 +232,13 @@ func (s *SubscriptionResponse) EditSubscriptionPost(botID, serviceNowURL string)
 
 	subscriptionEvents := GetFormattedSubscriptionEvents(s.SubscriptionEvents)
 	recordType := cases.Title(language.Und).String(s.RecordType)
-	textLink := fmt.Sprintf(constants.PathRecordList, serviceNowURL, s.RecordType)
-	postText := fmt.Sprintf("%s subscription for [%s](%s)", constants.BulkSubscription, recordType, textLink)
+	var textLink, postText string
 	if s.Type == constants.SubscriptionTypeRecord {
 		textLink = fmt.Sprintf(constants.PathRecord, serviceNowURL, s.RecordType, s.RecordID, s.RecordType)
 		postText = fmt.Sprintf("%s subscription for %s [%s](%s)", cases.Title(language.Und).String(s.Type), recordType, s.Number, textLink)
+	} else {
+		textLink = fmt.Sprintf(constants.PathRecordList, serviceNowURL, s.RecordType)
+		postText = fmt.Sprintf("%s subscription for [%s](%s)", constants.BulkSubscription, recordType, textLink)
 	}
 
 	slackAttachment := &model.SlackAttachment{

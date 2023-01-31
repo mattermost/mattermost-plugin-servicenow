@@ -264,7 +264,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		resp.Number = *subscription.RecordNumber
 	}
 
-	post := resp.CreateSubscriptionPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	post := resp.CreateSubscriptionCreatedPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
@@ -389,7 +389,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 		resp.Number = *subscription.RecordNumber
 	}
 
-	post := resp.EditSubscriptionPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	post := resp.CreateSubscriptionEditedPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
