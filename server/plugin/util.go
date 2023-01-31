@@ -205,7 +205,6 @@ func (p *Plugin) GetFiltersFromServiceNow(subscription *serializer.SubscriptionR
 			FilterValue: filter[0].SysID,
 			FilterName:  filter[0].Name,
 		})
-
 	}
 }
 
