@@ -74,7 +74,7 @@ const RhsData = ({
             value: subscription.sys_id,
         }],
         filters: subscription.filters_data && getSubscriptionCardFilters(subscription.filters_data),
-        list: subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]),
+        list: subscription.subscription_events ? subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]) : [],
     }), []);
 
     const getSubscriptionCardFilters = (filters_data: FiltersData[]): JSX.Element => (
