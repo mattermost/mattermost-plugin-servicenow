@@ -341,9 +341,15 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		if statusCode == 0 {
 			statusCode = http.StatusInternalServerError
 		}
+
+		if strings.Contains(err.Error(), constants.ErrorConnectionRefused) {
+			response = constants.ErrorConnectionRefused
+		}
+
 		if response == "" {
 			response = err.Error()
 		}
+
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: response})
 	}
 
@@ -371,23 +377,23 @@ func decodeKey(key string) (string, error) {
 	return string(decodedKey), nil
 }
 
-func (p *Plugin) HasChannelPermissions(userID, channelID string) (int, error) {
+func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool) (int, string, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return channelErr.StatusCode, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+		return channelErr.StatusCode, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 	}
 
 	// Check if a channel is direct message or group channel
-	if channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
-		return http.StatusBadRequest, fmt.Errorf(constants.ErrorInvalidChannelType)
+	if checkType && (channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP) {
+		return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 
 	// Check if a user is a part of the channel
 	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return channelErr.StatusCode, fmt.Errorf(constants.ErrorInsufficientPermissions)
+		return channelErr.StatusCode, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
 	}
 
-	return http.StatusOK, nil
+	return http.StatusOK, channel.Type, nil
 }

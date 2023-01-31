@@ -33,7 +33,7 @@ type Client interface {
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
 	GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowIncidentFields, int, error)
 	SearchFilterValuesInServiceNow(searchTerm, limit, offset, requestURL string) ([]*serializer.ServiceNowFilter, int, error)
-	GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error)
+	GetTableFieldsFromServiceNow(tableName string) ([]*serializer.ServiceNowTableFields, int, error)
 }
 
 type client struct {
@@ -277,9 +277,13 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 }
 
 func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializer.IncidentResponse, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamDisplayValue: {"true"},
+	}
+
 	response := &serializer.IncidentResult{}
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", constants.RecordTypeIncident, 1)
-	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, nil)
+	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, queryParams)
 	if err != nil {
 		return nil, statusCode, errors.Wrap(err, "failed to create the incident in ServiceNow")
 	}
@@ -335,11 +339,9 @@ func (c *client) SearchFilterValuesInServiceNow(searchTerm, limit, offset, reque
 	return assignmentGroups.Result, statusCode, nil
 }
 
-func (c *client) GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error) {
+func (c *client) GetTableFieldsFromServiceNow(tableName string) ([]*serializer.ServiceNowTableFields, int, error) {
 	fields := &serializer.ServiceNowTableFieldsResult{}
-	queryParams := url.Values{
-		constants.QueryParamTableTerm: {table},
-	}
+	queryParams := url.Values{constants.QueryParamTableTerm: {tableName}}
 
 	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetTableFieldsFromServiceNow, nil, fields, queryParams)
 	if err != nil {

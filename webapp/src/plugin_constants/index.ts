@@ -296,16 +296,16 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
 
 export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
     {
-        value: '1 - High',
-        label: 'High',
+        value: '1',
+        label: '1 - High',
     },
     {
-        value: '2 - Medium',
-        label: 'Medium',
+        value: '2',
+        label: '2 - Medium',
     },
     {
-        value: '3 - Low',
-        label: 'Low',
+        value: '3',
+        label: '3 - Low',
     },
 ];
 
@@ -439,20 +439,20 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createIncident',
     },
-    getIncidentFeilds: {
+    getIncidentFields: {
         path: '/incident-fields',
         method: 'GET',
-        apiServiceName: 'getIncidentFeilds',
+        apiServiceName: 'getIncidentFields',
     },
     getFilterData: {
         path: '/filter',
         method: 'GET',
         apiServiceName: 'getFilterData',
     },
-    getTableFeilds: {
+    getTableFields: {
         path: '/fields',
         method: 'GET',
-        apiServiceName: 'getTableFeilds',
+        apiServiceName: 'getTableFields',
     },
 };
 
@@ -465,6 +465,7 @@ export const PanelDefaultHeights = {
     searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
+    errorPanel: 267,
     panelHeader: 65,
 };
 

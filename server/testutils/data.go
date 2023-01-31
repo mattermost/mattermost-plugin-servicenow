@@ -24,6 +24,14 @@ func GetChannelID() string {
 	return "bnqnzipmnir4zkkj95ggba5pde"
 }
 
+func GetRecordTypeSubscription() string {
+	return constants.SubscriptionTypeRecord
+}
+
+func GetBulkTypeSubscription() string {
+	return constants.SubscriptionTypeBulk
+}
+
 func GetChannel(channelType string) *model.Channel {
 	return &model.Channel{
 		Id:   api4.GenerateTestId(),

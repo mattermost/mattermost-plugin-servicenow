@@ -41,7 +41,7 @@ export default class Hooks {
             });
         }
 
-        if (commandTrimmed?.startsWith('/servicenow share')) {
+        if (commandTrimmed?.startsWith('/servicenow records share')) {
             this.store.dispatch(setGlobalModalState({modalId: ModalIds.SHARE_RECORD}) as Action);
             return {
                 message,

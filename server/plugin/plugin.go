@@ -34,11 +34,11 @@ func NewPlugin() *Plugin {
 	p := &Plugin{}
 
 	p.CommandHandlers = map[string]CommandHandleFunc{
-		constants.CommandDisconnect:     p.handleDisconnect,
-		constants.CommandSubscriptions:  p.handleSubscriptions,
-		constants.CommandUnsubscribe:    p.handleDeleteSubscription,
-		constants.CommandSearchAndShare: p.handleSearchAndShare,
-		constants.CommandCreate:         p.handleCreate,
+		constants.CommandDisconnect:    p.handleDisconnect,
+		constants.CommandSubscriptions: p.handleSubscriptions,
+		constants.CommandUnsubscribe:   p.handleDeleteSubscription,
+		constants.CommandRecords:       p.handleRecords,
+		constants.CommandCreate:        p.handleCreate,
 	}
 
 	return p
