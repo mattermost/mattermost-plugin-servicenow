@@ -11,9 +11,9 @@ type ChipProps = {
 
 const Chip = ({text, extraClass = ''}: ChipProps) => (
     <Tooltip tooltipContent={text}>
-        <div
-            className={`servicenow-chip Badge__box ${extraClass}`}
-        >{text}</div>
+        <div className={`servicenow-chip Badge__box ${extraClass}`}>
+            {text}
+        </div>
     </Tooltip>
 );
 

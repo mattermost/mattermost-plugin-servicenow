@@ -166,18 +166,16 @@ func (p *Plugin) GetFiltersFromServiceNow(subscription *serializer.SubscriptionR
 	filters := strings.Split(subscription.Filters, ",")
 	for index, filter := range filters {
 		data := strings.Split(filter, ":")
-		filterType, filterValue := data[0], data[1]
+		filterTypeData, filterValueData := data[0], data[1]
 
+		filterValue := filterValueData[1 : len(filterValueData)-1]
 		if index == len(filters)-1 {
-			filterValue = filterValue[1 : len(filterValue)-2]
-		} else {
-			filterValue = filterValue[1 : len(filterValue)-1]
+			filterValue = filterValueData[1 : len(filterValueData)-2]
 		}
 
+		filterType := filterTypeData[1 : len(filterTypeData)-1]
 		if index == 0 {
-			filterType = filterType[2 : len(filterType)-1]
-		} else {
-			filterType = filterType[1 : len(filterType)-1]
+			filterType = filterTypeData[2 : len(filterTypeData)-1]
 		}
 
 		var requestURL string
