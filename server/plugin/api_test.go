@@ -1072,10 +1072,7 @@ func TestCreateSubscription(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
 			},
@@ -1148,10 +1145,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorUserMismatch,
 		},
 		"unable to get permissions for the channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1168,10 +1162,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
 		"user does not have the permission to create a subscription for this channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1188,10 +1179,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
 		"failed to check duplicate subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1214,11 +1202,8 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "duplicate subscription error",
 		},
 		"duplicate subscription exists": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.RequestBody(),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					true, http.StatusOK, nil,
@@ -1238,10 +1223,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "Subscription already exists",
 		},
 		"failed to create subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1268,10 +1250,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "create subscription error",
 		},
 		"failed to create the post": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetInternalServerAppError())
@@ -1560,10 +1539,7 @@ func TestEditSubscription(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
 			},
@@ -1610,10 +1586,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedErrorMessage: "new error",
 		},
 		"unable to get permissions for the channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1630,10 +1603,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
 		"user does not have permission to edit the subscription for this channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1650,10 +1620,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
 		"failed to edit the subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "SubscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
 			},
@@ -1676,10 +1643,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedErrorMessage: "edit subscription error",
 		},
 		"failed to create the edit subscription post": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.RequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetInternalServerAppError())
