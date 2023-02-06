@@ -41,6 +41,7 @@ type Suggestion = {
 type RecordData = {
     assigned_to: string | LinkData;
     assignment_group: string | LinkData;
+    business_service: string | LinkData;
     number: string;
     priority: string;
     short_description: string;
@@ -106,7 +107,7 @@ type EditSubscriptionData = {
     userId: string;
 }
 
-type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
+type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base' | 'business_service';
 
 type RecordDataLabelConfigType = {
     key: RecordDataKeys;
@@ -173,4 +174,19 @@ type FormatTextOptions = {
 
 type MessageHtmlToComponentOptions = {
     mentionHighlight: boolean;
+}
+
+type FieldsFilterData = {
+    sys_id: string;
+    name: string;
+}
+
+type FilterType = {
+    searchFor: string;
+    filter: string;
+}
+
+type FiltersData = {
+    filterType: string;
+    filterValue: string | null;
 }

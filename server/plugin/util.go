@@ -274,6 +274,14 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		return message
 	}
 
+	if strings.Contains(err.Error(), constants.APIErrorAccessTable) {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDAccessTable, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorAccessTable})
+		}
+
+		return constants.APIErrorAccessTable
+	}
+
 	if w != nil {
 		if statusCode == 0 {
 			statusCode = http.StatusInternalServerError

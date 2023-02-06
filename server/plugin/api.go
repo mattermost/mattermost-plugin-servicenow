@@ -54,6 +54,7 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathCheckSubscriptionsConfigured, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfiguredAPI))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchFilterValues, p.checkAuth(p.checkOAuth(p.searchFilterValuesInServiceNow))).Methods(http.MethodGet)
+	s.HandleFunc(constants.PathGetTableFields, p.checkAuth(p.checkOAuth(p.getTableFields))).Methods(http.MethodGet)
 
 	// 404 handler
 	r.Handle("{anything:.*}", http.NotFoundHandler())
@@ -253,6 +254,15 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := p.GetClientFromRequest(r)
+	if *subscription.Type == constants.SubscriptionTypeBulk && subscription.Filters != nil {
+		_, statusCode, fErr := client.GetTableFieldsFromServiceNow(constants.ServiceNowSubscriptionsTableName)
+		if fErr != nil {
+			p.API.LogError(constants.ErrorGetTableFields, "Error", fErr.Error())
+			_ = p.handleClientError(w, r, fErr, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetTableFields, fErr.Error()))
+			return
+		}
+	}
+
 	exists, statusCode, err := client.CheckForDuplicateSubscription(subscription)
 	if err != nil {
 		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
@@ -826,6 +836,25 @@ func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.R
 	}
 
 	p.writeJSONArray(w, statusCode, filterValues)
+}
+
+func (p *Plugin) getTableFields(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	tableName := pathParams[constants.PathParamTableName]
+	if tableName == "" {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Missing table name"})
+		return
+	}
+
+	client := p.GetClientFromRequest(r)
+	fields, statusCode, err := client.GetTableFieldsFromServiceNow(tableName)
+	if err != nil {
+		p.API.LogError(constants.ErrorGetTableFields, "Error", err.Error())
+		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetTableFields, err.Error()))
+		return
+	}
+
+	p.writeJSONArray(w, statusCode, fields)
 }
 
 func returnStatusOK(w http.ResponseWriter) {

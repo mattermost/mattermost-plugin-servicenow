@@ -36,6 +36,7 @@ type IncidentResponse struct {
 	Priority         string      `json:"priority,omitempty"`
 	AssignedTo       interface{} `json:"assigned_to,omitempty"`
 	AssignmentGroup  interface{} `json:"assignment_group,omitempty"`
+	Service          interface{} `json:"business_service,omitempty"`
 }
 
 type ServiceNowIncidentFieldsResult struct {

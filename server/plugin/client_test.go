@@ -275,12 +275,14 @@ func TestCheckForDuplicateSubscription(t *testing.T) {
 			mockRecordType := "mockRecordType"
 			mockRecordID := "mockRecordID"
 			mockServerURL := "mockServerURL"
+			mockFilters := ""
 			_, statusCode, err := c.CheckForDuplicateSubscription(&serializer.SubscriptionPayload{
 				ChannelID:  &mockChannelID,
 				Type:       &mockType,
 				RecordType: &mockRecordType,
 				RecordID:   &mockRecordID,
 				ServerURL:  &mockServerURL,
+				Filters:    &mockFilters,
 			})
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)

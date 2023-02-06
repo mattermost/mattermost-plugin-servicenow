@@ -390,6 +390,36 @@ func (_m *Client) GetSubscription(subscriptionID string) (*serializer.Subscripti
 	return r0, r1, r2
 }
 
+// GetTableFieldsFromServiceNow provides a mock function with given fields: table
+func (_m *Client) GetTableFieldsFromServiceNow(table string) ([]*serializer.ServiceNowTableFields, int, error) {
+	ret := _m.Called(table)
+
+	var r0 []*serializer.ServiceNowTableFields
+	if rf, ok := ret.Get(0).(func(string) []*serializer.ServiceNowTableFields); ok {
+		r0 = rf(table)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*serializer.ServiceNowTableFields)
+		}
+	}
+
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string) int); ok {
+		r1 = rf(table)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string) error); ok {
+		r2 = rf(table)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // SearchCatalogItemsInServiceNow provides a mock function with given fields: searchTerm, limit, offset
 func (_m *Client) SearchCatalogItemsInServiceNow(searchTerm string, limit string, offset string) ([]*serializer.ServiceNowCatalogItem, int, error) {
 	ret := _m.Called(searchTerm, limit, offset)

@@ -6,7 +6,7 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import Constants, {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents, DefaultIncidentImpactAndUrgencyOptions, KeysContainingLink, TypesContainingLink} from 'src/plugin_constants';
+import Constants, {SubscriptionType, RecordType, CONNECT_ACCOUNT_LINK, SubscriptionEventsMap, SubscriptionEvents, DefaultIncidentImpactAndUrgencyOptions, KeysContainingLink, TypesContainingLink, SupportedFilters, SupportedFiltersMap} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
@@ -31,7 +31,7 @@ const getBaseUrls = (): {
  * @param {number} limit The time limit for debouncing, the minimum pause in function calls required for the function to be actually called
  * @returns {(args: Array<any>) => void} a function with debouncing functionality applied on it
  */
-const debounce: (func: (args: Record<string, string>) => void, limit: number) => (args: Record<string, string>) => void = (
+const debounce: (func: (args: Record<string, string>, type?: string) => void, limit: number) => (args: Record<string, string>) => void = (
     func: (args: Record<string, string>) => void,
     limit: number,
 ): (args: Record<string, string>) => void => {
@@ -153,6 +153,28 @@ const getImpactAndUrgencyOptions = (
     setUrgencyOptions(urgencyOptions.length ? urgencyOptions : DefaultIncidentImpactAndUrgencyOptions);
 };
 
+const getFormattedFilters = (filters: FiltersData[]) => {
+    if (!filters) {
+        return '';
+    }
+
+    let formattedFilters = '';
+    filters.map((filter) => {
+        if (filter.filterValue) {
+            formattedFilters += SupportedFiltersMap[filter.filterType as SupportedFilters] + ':';
+            formattedFilters += '"' + filter.filterValue + '",';
+        }
+
+        return formattedFilters;
+    });
+
+    if (formattedFilters) {
+        formattedFilters = '{' + formattedFilters.slice(0, -1) + '}';
+    }
+
+    return formattedFilters;
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -164,4 +186,5 @@ export default {
     getSubscriptionEvents,
     getRecordValueForHeader,
     getImpactAndUrgencyOptions,
+    getFormattedFilters,
 };

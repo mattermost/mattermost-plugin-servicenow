@@ -152,11 +152,26 @@ const pluginApi = createApi({
                 body,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName]: builder.query<IncidentFieldsData[], void>({
+        [Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName]: builder.query<IncidentFieldsData[], void>({
             query: () => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: Constants.pluginApiServiceConfigs.getIncidentFeilds.path,
-                method: Constants.pluginApiServiceConfigs.getIncidentFeilds.method,
+                url: Constants.pluginApiServiceConfigs.getIncidentFields.path,
+                method: Constants.pluginApiServiceConfigs.getIncidentFields.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getFilterData.apiServiceName]: builder.query<FieldsFilterData[], SearchFilterItemsParams>({
+            query: ({search, filter, perPage}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getFilterData.path}/${filter}`,
+                method: Constants.pluginApiServiceConfigs.getFilterData.method,
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getTableFields.apiServiceName]: builder.query<void, string>({
+            query: (table) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getTableFields.path}/${table}`,
+                method: Constants.pluginApiServiceConfigs.getTableFields.method,
             }),
         }),
     }),

@@ -12,7 +12,7 @@ exports[`Download Button Should render correctly 1`] = `
   >
     <a
       download={true}
-      href="http://localhost:8065/plugins/mattermost-plugin-servicenow/public/servicenow_for_mattermost_notifications_v2.2.xml"
+      href="http://localhost:8065/plugins/mattermost-plugin-servicenow/public/servicenow_for_mattermost_notifications_v2.3.xml"
     >
       <Button
         active={false}
