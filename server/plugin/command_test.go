@@ -776,7 +776,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			description: "HandleEditSubscription: Unable to get the subscription",
 			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
-				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
