@@ -211,9 +211,9 @@ func (p *Plugin) handleSubscriptions(args *model.CommandArgs, parameters []strin
 	case constants.SubCommandList:
 		return p.handleListSubscriptions(args, parameters, client, isSysAdmin)
 	case constants.SubCommandAdd:
-		return ""
+		return p.handleSubscribe(args)
 	case constants.SubCommandEdit:
-		return p.handleEditSubscription(parameters)
+		return p.handleEditSubscription(args, parameters, client, isSysAdmin)
 	case constants.SubCommandDelete:
 		return p.handleDeleteSubscription(args, parameters, client, isSysAdmin)
 	default:
@@ -221,7 +221,7 @@ func (p *Plugin) handleSubscriptions(args *model.CommandArgs, parameters []strin
 	}
 }
 
-func (p *Plugin) handleCreate(_ *model.CommandArgs, parameters []string, _ Client, _ bool) string {
+func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, _ Client, _ bool) string {
 	if len(parameters) == 0 {
 		return "Invalid create command. Available commands are 'incident' and 'request'."
 	}
@@ -229,14 +229,16 @@ func (p *Plugin) handleCreate(_ *model.CommandArgs, parameters []string, _ Clien
 	command := parameters[0]
 
 	switch command {
-	case constants.SubCommandIncident, constants.SubCommandRequest:
-		return ""
+	case constants.SubCommandIncident:
+		return p.handleCreateIncident(args)
+	case constants.SubCommandRequest:
+		return p.handleCreateRequest(args)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
 }
 
-func (p *Plugin) handleRecords(_ *model.CommandArgs, parameters []string, _ Client, _ bool) string {
+func (p *Plugin) handleRecords(args *model.CommandArgs, parameters []string, _ Client, _ bool) string {
 	if len(parameters) == 0 {
 		return "Invalid record command. Available command is 'share'."
 	}
@@ -244,7 +246,7 @@ func (p *Plugin) handleRecords(_ *model.CommandArgs, parameters []string, _ Clie
 	command := parameters[0]
 	switch command {
 	case constants.SubCommandSearchAndShare:
-		return ""
+		return p.handleSearchAndShare(args)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
@@ -370,7 +372,17 @@ func (p *Plugin) handleDeleteSubscription(args *model.CommandArgs, params []stri
 	return genericWaitMessage
 }
 
-func (p *Plugin) handleEditSubscription(params []string) string {
+func (p *Plugin) handleSubscribe(args *model.CommandArgs) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenAddSubscriptionModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
+func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
 		return constants.ErrorCommandInvalidNumberOfParams
 	}
@@ -384,6 +396,60 @@ func (p *Plugin) handleEditSubscription(params []string) string {
 	if !valid {
 		return invalidSubscriptionIDMessage
 	}
+
+	subscription, _, err := client.GetSubscription(subscriptionID)
+	if err != nil {
+		p.API.LogError("Unable to get subscription", "SubscriptionID", subscriptionID, "Error", err.Error())
+		return p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, "")
+	}
+
+	if subscription.Type == constants.SubscriptionTypeRecord {
+		p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
+	} else {
+		p.GetFiltersFromServiceNow(subscription, client, nil, false)
+	}
+
+	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
+	if err != nil {
+		p.API.LogError("Unable to convert subscription to map", "SubscriptionID", subscriptionID, "Error", err.Error())
+		return genericErrorMessage
+	}
+
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenEditSubscriptionModal,
+		subscriptionMap,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
+func (p *Plugin) handleCreateIncident(args *model.CommandArgs) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenCreateIncidentModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
+func (p *Plugin) handleCreateRequest(args *model.CommandArgs) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenCreateRequestModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
+func (p *Plugin) handleSearchAndShare(args *model.CommandArgs) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenSearchAndShareRecordsModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
 
 	return ""
 }

@@ -344,16 +344,6 @@ export type TypesContainingLink = KnowledgeRecordDataConfigKeys | RecordDataConf
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
-    getConnectedUser: {
-        path: '/connected',
-        method: 'GET',
-        apiServiceName: 'getConnectedUser',
-    },
-    checkSubscriptionsConfigured: {
-        path: '/subscriptions-configured',
-        method: 'GET',
-        apiServiceName: 'checkSubscriptionsConfigured',
-    },
     getChannels: {
         path: '/channels',
         method: 'GET',
@@ -378,11 +368,6 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         path: '/subscriptions',
         method: 'GET',
         apiServiceName: 'fetchSubscriptions',
-    },
-    fetchSubscription: {
-        path: '/subscriptions',
-        method: 'GET',
-        apiServiceName: 'fetchSubscription',
     },
     editSubscription: {
         path: '/subscriptions',

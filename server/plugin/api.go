@@ -35,7 +35,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createSubscription)))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getAllSubscriptions)))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getSubscription)))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
 	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.editSubscription)))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
@@ -51,7 +50,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathCheckSubscriptionsConfigured, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfiguredAPI))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchFilterValues, p.checkAuth(p.checkOAuth(p.searchFilterValuesInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetTableFields, p.checkAuth(p.checkOAuth(p.getTableFields))).Methods(http.MethodGet)
@@ -111,17 +109,6 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 
 		handler(w, r)
 	}
-}
-
-func (p *Plugin) checkSubscriptionsConfiguredAPI(w http.ResponseWriter, r *http.Request) {
-	client := p.GetClientFromRequest(r)
-	if _, err := client.ActivateSubscriptions(); err != nil {
-		_ = p.handleClientError(w, r, err, false, 0, "", "")
-		p.API.LogError(constants.ErrorSubscriptionsNotConfigured, "Error", err.Error())
-		return
-	}
-
-	returnStatusOK(w)
 }
 
 func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
@@ -398,30 +385,6 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w)
-}
-
-func (p *Plugin) getSubscription(w http.ResponseWriter, r *http.Request) {
-	pathParams := mux.Vars(r)
-	subscriptionID := pathParams[constants.PathParamSubscriptionID]
-	client := p.GetClientFromRequest(r)
-	subscription, statusCode, err := client.GetSubscription(subscriptionID)
-	if err != nil {
-		p.API.LogError(constants.ErrorGetSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
-		responseMessage := "No record found"
-		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorGetSubscription, err.Error())
-		}
-
-		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
-		return
-	}
-
-	if subscription.Type == constants.SubscriptionTypeBulk {
-		p.GetFiltersFromServiceNow(subscription, client, nil, false)
-	}
-
-	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
-	p.writeJSON(w, 0, subscription)
 }
 
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
