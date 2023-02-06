@@ -32,6 +32,14 @@ func GetBulkTypeSubscription() string {
 	return constants.SubscriptionTypeBulk
 }
 
+func GetSubscriptionBody() string {
+	return fmt.Sprintf(`{
+		"user_id": "%s",
+		"type": "%s",
+		"channel_id": "%s"
+		}`, GetID(), GetRecordTypeSubscription(), GetChannelID())
+}
+
 func GetChannel(channelType string) *model.Channel {
 	return &model.Channel{
 		Id:   api4.GenerateTestId(),
