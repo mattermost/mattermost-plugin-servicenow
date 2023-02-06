@@ -93,11 +93,14 @@ const (
 	FieldService              = "service"
 
 	// Websocket events
-	WSEventConnect              = "connect"
-	WSEventDisconnect           = "disconnect"
-	WSEventSubscriptionDeleted  = "subscription_deleted"
-	WSEventOpenCommentModal     = "comment_modal"
-	WSEventOpenUpdateStateModal = "update_state"
+	WSEventConnect                        = "connect"
+	WSEventDisconnect                     = "disconnect"
+	WSEventOpenAddSubscriptionModal       = "add_subscription"
+	WSEventOpenEditSubscriptionModal      = "edit_subscription"
+	WSEventSubscriptionDeleted            = "subscription_deleted"
+	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
+	WSEventOpenCreateIncidentModal        = "create_incident"
+	WSEventOpenCreateRequestModal         = "create_request"
 
 	// Custom posts type
 	CustomNotifictationPost = "custom_sn_notification"

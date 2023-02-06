@@ -11,13 +11,12 @@ const EditSubscription = () => {
     const dispatch = useDispatch();
     const {pluginState} = usePluginApi();
     const {data} = getGlobalModalState(pluginState);
-    const subscriptionData = typeof (data) === 'string' ? data as string : data as EditSubscriptionData;
 
     return (
         <AddOrEditSubscriptionModal
             open={isEditSubscriptionModalOpen(pluginState)}
             close={() => dispatch(resetGlobalModalState())}
-            subscriptionData={subscriptionData}
+            subscriptionData={data as EditSubscriptionData}
         />
     );
 };
