@@ -21,6 +21,7 @@ type ServiceNowRecord struct {
 	SysID            string      `json:"sys_id"`
 	Number           string      `json:"number"`
 	ShortDescription string      `json:"short_description"`
+	Description      string      `json:"description"`
 	RecordType       string      `json:"record_type,omitempty"`
 	State            string      `json:"state,omitempty"`
 	Priority         string      `json:"priority,omitempty"`
@@ -66,10 +67,18 @@ func ServiceNowRecordFromJSON(data io.Reader) (*ServiceNowRecord, error) {
 
 func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, pluginURL, sharedByUsername string) *model.Post {
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do?sys_id=%s", serviceNowURL, sr.RecordType, sr.SysID)
+	if sr.Description == "" {
+		sr.Description = constants.DefaultEmptyValue
+	}
+
+	if len(sr.Description) > constants.MaxDescriptionChars {
+		sr.Description = fmt.Sprintf("%s... [see more](%s)", sr.Description[:constants.MaxDescriptionChars], titleLink)
+	}
+
 	fields := []*model.SlackAttachmentField{
 		{
-			Title: "Short Description",
-			Value: sr.ShortDescription,
+			Title: "Description",
+			Value: sr.Description,
 		},
 	}
 
@@ -78,18 +87,22 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 			{
 				Title: "Knowledge Base",
 				Value: sr.KnowledgeBase,
+				Short: true,
 			},
 			{
 				Title: "Workflow",
 				Value: sr.Workflow,
+				Short: true,
 			},
 			{
 				Title: "Category",
 				Value: sr.Category,
+				Short: true,
 			},
 			{
 				Title: "Author",
 				Value: sr.Author,
+				Short: true,
 			},
 		}...)
 	} else {
@@ -97,28 +110,33 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 			{
 				Title: "State",
 				Value: sr.State,
+				Short: true,
 			},
 			{
 				Title: "Priority",
 				Value: sr.Priority,
+				Short: true,
 			},
 			{
 				Title: "Assigned To",
 				Value: sr.AssignedTo,
+				Short: true,
 			},
 			{
 				Title: "Assignment Group",
 				Value: sr.AssignmentGroup,
+				Short: true,
 			},
 			{
 				Title: "Service",
 				Value: sr.Service,
+				Short: true,
 			},
 		}...)
 	}
 
 	slackAttachment := &model.SlackAttachment{
-		Title:  fmt.Sprintf("[%s](%s)", sr.Number, titleLink),
+		Title:  fmt.Sprintf("[%s](%s): %s", sr.Number, titleLink, sr.ShortDescription),
 		Fields: fields,
 	}
 
@@ -175,7 +193,7 @@ func (sr *ServiceNowRecord) HandleNestedFields(serviceNowURL string) error {
 
 func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (string, error) {
 	if _, ok := field.(string); ok || field == nil {
-		return "N/A", nil
+		return constants.DefaultEmptyValue, nil
 	}
 
 	jsonObject, ok := field.(map[string]interface{})

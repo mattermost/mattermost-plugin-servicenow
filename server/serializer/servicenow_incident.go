@@ -31,6 +31,7 @@ type IncidentPayload struct {
 type IncidentResponse struct {
 	SysID            string      `json:"sys_id"`
 	ShortDescription string      `json:"short_description"`
+	Description      string      `json:"description"`
 	Number           string      `json:"number"`
 	State            string      `json:"state,omitempty"`
 	Priority         string      `json:"priority,omitempty"`

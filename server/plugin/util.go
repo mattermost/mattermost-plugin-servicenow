@@ -146,8 +146,8 @@ func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer
 	record, _, err := client.GetRecordFromServiceNow(subscription.RecordType, subscription.RecordID)
 	if err != nil {
 		p.API.LogError("Error in getting record from ServiceNow", "Record type", subscription.RecordType, "Record ID", subscription.RecordID, "Error", err.Error())
-		subscription.Number = "N/A"
-		subscription.ShortDescription = "N/A"
+		subscription.Number = constants.DefaultEmptyValue
+		subscription.ShortDescription = constants.DefaultEmptyValue
 		return
 	}
 	subscription.Number = record.Number
