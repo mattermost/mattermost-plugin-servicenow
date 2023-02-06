@@ -60,8 +60,10 @@ const (
 	DefaultPage                                = 0
 	DefaultPerPage                             = 20
 	MaxPerPage                                 = 100
+	MaxDescriptionChars                        = 500
 	DefaultCharacterThresholdForSearching      = 3
 	CharacterThresholdForSearchingCatalogItems = 4
+	DefaultEmptyValue                          = "N/A"
 	QueryParamPage                             = "page"
 	QueryParamPerPage                          = "per_page"
 	QueryParamChannelID                        = "channel_id"
