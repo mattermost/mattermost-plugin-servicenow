@@ -399,7 +399,7 @@ func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string
 
 	subscription, _, err := client.GetSubscription(subscriptionID)
 	if err != nil {
-		p.API.LogError("Unable to get subscription", "Error", err.Error())
+		p.API.LogError("Unable to get subscription", "ID", subscriptionID, "Error", err.Error())
 		return p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, "")
 	}
 
@@ -411,7 +411,7 @@ func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string
 
 	subscriptionMap, err := ConvertSubscriptionToMap(subscription)
 	if err != nil {
-		p.API.LogError("Unable to convert subscription to map", "Error", err.Error())
+		p.API.LogError("Unable to convert subscription to map", "ID", subscriptionID, "Error", err.Error())
 		return genericErrorMessage
 	}
 

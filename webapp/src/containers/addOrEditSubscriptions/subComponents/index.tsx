@@ -163,11 +163,11 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setRecordId(subscriptionData.recordId);
             setSuggestionChosen(true);
 
-            // Set initial value for filters panel
+            // Set initial values for filters panel
             setFilters(subscriptionData.filtersData ?? []);
             setEditing(true);
 
-            // Set initial value for events panel
+            // Set initial values for events panel
             setSubscriptionEvents(subscriptionData.subscriptionEvents);
         }
     }, [open, subscriptionData]);
