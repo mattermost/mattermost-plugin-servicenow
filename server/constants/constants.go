@@ -253,6 +253,11 @@ var (
 		RecordTypeChangeRequest: "Change Request",
 	}
 
+	FormattedFilterTypes = map[string]string{
+		FilterAssignmentGroup: "Assignment Group",
+		FilterService:         "Service",
+	}
+
 	RecordTypesSupportingComments = map[string]bool{
 		RecordTypeIncident:      true,
 		RecordTypeProblem:       true,

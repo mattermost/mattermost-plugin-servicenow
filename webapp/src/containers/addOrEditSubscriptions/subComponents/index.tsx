@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 import Cookies from 'js-cookie';
 
-import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
+import {CircularLoader, CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
@@ -137,7 +137,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setSuggestionChosen(true);
 
         // Set initial value for filters panel
-        setFilters(Utils.getFiltersList(data.filters));
+        setFilters(data.filtersData ?? []);
 
         // Set initial value for events panel
         setSubscriptionEvents(data.subscriptionEvents);
@@ -156,6 +156,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionEvents: Utils.getSubscriptionEvents(data.subscription_events),
                     id: data.sys_id,
                     filters: data.filters,
+                    filtersData: data.filters_data,
                 });
 
                 handleSubscriptionData(subscriptionDataFromApi);
@@ -483,16 +484,10 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         </Modal>
     );
 
-    if (subscriptionsConfiguredStateLoading) {
-        return <></>;
-    }
-
     if (typeof (subscriptionData) === 'string' && !editSubscriptionData && subscriptionsConfiguredStateSuccess) {
         if (getSubscriptionState().isError) {
             return handleErrorComponent(getSubscriptionState().error);
         }
-
-        return <></>;
     }
 
     return (
@@ -509,6 +504,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
+                {(subscriptionsConfiguredStateLoading || getSubscriptionState().isLoading) && <CircularLoader/>}
                 <ModalLoader loading={showLoader}/>
                 <ChannelPanel
                     className={`
@@ -521,6 +517,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     channel={channel}
                     setChannel={setChannel}
                     setApiError={setApiError}
+                    showModalLoader={(subscriptionsConfiguredStateLoading || getSubscriptionState().isLoading)}
                     channelOptions={channelOptions}
                     setChannelOptions={setChannelOptions}
                     actionBtnDisabled={showLoader}
@@ -609,6 +606,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionType={subscriptionType as SubscriptionType}
                     record={recordValue}
                     recordType={recordType as RecordType}
+                    filters={filters}
                     continueBtnDisabled={showLoader || !subscriptionEvents.length}
                     backBtnDisabled={showLoader}
                 />

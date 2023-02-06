@@ -535,7 +535,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				})
 			},
 			isResponse:       true,
-			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
+			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel | Filters | \n| :----|:--------| :--------|:--------|:--------|:---------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
@@ -614,7 +614,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				})
 			},
 			isResponse:       true,
-			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
+			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel | Filters | \n| :----|:--------| :--------|:--------|:--------|:---------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 	} {
