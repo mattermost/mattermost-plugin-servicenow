@@ -53,21 +53,22 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 		subscriptionEvents.WriteString(event)
 	}
 
-	var subscriptionFilters strings.Builder
 	var filtersData string
 	if len(s.FiltersData) == 0 {
-		filtersData = "N/A "
+		filtersData = "N/A"
 	} else {
-		for _, filter := range s.FiltersData {
-			filtersData = fmt.Sprintf("%s %s:%s,", filtersData, filter.FilterType, filter.FilterName)
+		for index, filter := range s.FiltersData {
+			filtersData = fmt.Sprintf("%s %s:%s", filtersData, filter.FilterType, filter.FilterName)
+			if index != len(s.FiltersData)-1 {
+				filtersData += ", "
+			}
 		}
 	}
 
-	subscriptionFilters.WriteString(filtersData[:len(filtersData)-1])
 	if s.Type == constants.SubscriptionTypeRecord {
 		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String(), s.UserName, s.ChannelName)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), s.UserName, s.ChannelName, subscriptionFilters.String())
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), s.UserName, s.ChannelName, filtersData)
 }
 
 type SubscriptionResult struct {

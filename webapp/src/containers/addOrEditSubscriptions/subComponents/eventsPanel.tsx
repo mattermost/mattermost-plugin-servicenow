@@ -67,7 +67,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
                         <div className='margin-left-150'>
                             {filters.map((filter) => (
                                 filter.filterValue &&
-                                    <div key={filter.filterValue ?? ''}>
+                                    <div key={filter.filterValue}>
                                         <h4 className='events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header'>{`${SupportedFiltersLabelsMap[filter.filterType as SupportedFilters]}`}</h4>
                                         <p className='events-panel__prev-data-text font-14 wt-400 margin-v-5'>{filter.filterName}</p>
                                     </div>
