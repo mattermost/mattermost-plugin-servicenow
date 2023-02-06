@@ -9,11 +9,11 @@ import Utils from 'src/utils';
 
 import './styles.scss';
 
-type ShareRecordPostProps = {
+type ServiceNowPostProps = {
     post: Post,
 }
 
-const ServiceNowPost = ({post}: ShareRecordPostProps) => {
+const ServiceNowPost = ({post}: ServiceNowPostProps) => {
     const {type, props} = post;
     const {attachments, record_id, record_type} = props;
     const {fields, pretext, title} = attachments[0] as RecordAttachments;
