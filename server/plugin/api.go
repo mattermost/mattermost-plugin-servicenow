@@ -745,6 +745,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		SysID:            response.SysID,
 		Number:           response.Number,
 		ShortDescription: response.ShortDescription,
+		Description:      response.Description,
 		RecordType:       constants.RecordTypeIncident,
 		State:            response.State,
 		Priority:         response.Priority,
