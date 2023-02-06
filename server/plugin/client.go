@@ -322,7 +322,7 @@ func (c *client) GetIncidentFieldsFromServiceNow() ([]*serializer.ServiceNowInci
 }
 
 func (c *client) SearchFilterValuesInServiceNow(searchTerm, limit, offset, requestURL string) ([]*serializer.ServiceNowFilter, int, error) {
-	query := fmt.Sprintf("%s LIKE%s", constants.FieldName, searchTerm)
+	query := fmt.Sprintf("%s LIKE%s ^OR %s=%s", constants.FieldName, searchTerm, constants.FieldSysID, searchTerm)
 	queryParams := url.Values{
 		constants.SysQueryParam:       {query},
 		constants.SysQueryParamLimit:  {limit},

@@ -175,6 +175,19 @@ const getFormattedFilters = (filters: FiltersData[]) => {
     return formattedFilters;
 };
 
+const getFiltersList = (formattedFilters: string): FiltersData[] => {
+    if (!formattedFilters) {
+        return [];
+    }
+
+    const filters: FiltersData[] = [];
+    JSON.parse(formattedFilters, (filterType, filterValue) => {
+        filters.push({filterType, filterValue});
+    });
+
+    return filters.slice(0, -1);
+};
+
 export default {
     getBaseUrls,
     debounce,
@@ -187,4 +200,5 @@ export default {
     getRecordValueForHeader,
     getImpactAndUrgencyOptions,
     getFormattedFilters,
+    getFiltersList,
 };
