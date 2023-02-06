@@ -20,9 +20,9 @@ type ApiServiceName =
     'searchItems' |
     'getUsers' |
     'createIncident' |
-    'getIncidentFeilds' |
+    'getIncidentFields' |
     'getFilterData' |
-    'getTableFeilds';
+    'getTableFields';
 
 type PluginApiService = {
     path: string,

@@ -65,6 +65,7 @@ type SubscriptionData = {
     sys_id: string;
     number: string;
     short_description: string;
+    filters: string;
 }
 
 type ConfigData = {
@@ -105,6 +106,7 @@ type EditSubscriptionData = {
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
     userId: string;
+    filters: string;
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base' | 'business_service';
@@ -176,7 +178,7 @@ type MessageHtmlToComponentOptions = {
     mentionHighlight: boolean;
 }
 
-type FieldsFilterData = {
+type FilterFieldsData = {
     sys_id: string;
     name: string;
 }
