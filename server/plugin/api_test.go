@@ -1060,13 +1060,9 @@ func TestCreateSubscription(t *testing.T) {
 		ExpectedStatusCode   int
 		ExpectedErrorMessage string
 	}{
-		"success with subscription type record": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeRecord, testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+		"success with subscription type: record": {
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeRecord),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusOK, nil,
@@ -1088,14 +1084,9 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			ExpectedStatusCode: http.StatusCreated,
 		},
-		"success with subscription type bulk": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s",
-				"filters": "mockFilters"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeBulk, testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+		"success with subscription type: bulk": {
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeBulk),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("GetTableFieldsFromServiceNow", mock.AnythingOfType("string")).Return(
 					testutils.GetServiceNowTableFields(3), http.StatusOK, nil,
@@ -1115,19 +1106,14 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusOK, "", nil
 				})
 			},
 			ExpectedStatusCode: http.StatusCreated,
 		},
 		"error with subscription type bulk": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"type": "%s",
-				"channel_id": "%s",
-				"filters": "mockFilters"
-			  	}`, testutils.GetID(), constants.SubscriptionTypeBulk, testutils.GetChannelID()),
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeBulk),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1142,8 +1128,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusOK, "", nil
 				})
 			},
 			ExpectedErrorMessage: constants.ErrorGetTableFields,
@@ -1197,10 +1183,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorUserMismatch,
 		},
 		"unable to get permissions for the channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeRecord),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1217,10 +1200,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
 		"user does not have the permission to create a subscription for this channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeRecord),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1237,7 +1217,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
 		"failed to check duplicate subscription": {
-			RequestBody: testutils.GetSubscriptionBody(),
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeRecord),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1260,7 +1240,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "duplicate subscription error",
 		},
 		"duplicate subscription exists": {
-			RequestBody: testutils.GetSubscriptionBody(),
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeRecord),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
@@ -1281,7 +1261,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "Subscription already exists",
 		},
 		"failed to create subscription": {
-			RequestBody: testutils.GetSubscriptionBody(),
+			RequestBody: testutils.GetSubscriptionBody(constants.SubscriptionTypeRecord),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1913,6 +1893,98 @@ func TestAPICreateIncident(t *testing.T) {
 			},
 			ExpectedStatusCode: http.StatusOK,
 		},
+		"channel type is direct": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("GetDirectChannel", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					testutils.GetChannel(model.CHANNEL_DIRECT), nil,
+				)
+
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
+					nil, nil,
+				)
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(
+					testutils.GetServiceNowIncidentResponse(), http.StatusOK, nil,
+				)
+			},
+			SetupPlugin: func() {
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+
+				var p *Plugin
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusOK, model.CHANNEL_DIRECT, nil
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"error getting direct channel": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("GetDirectChannel", testutils.GetMockArgumentsWithType("string", 2)...).Return(
+					nil, testutils.GetInternalServerAppError("error getting direct channel"),
+				)
+
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(
+					testutils.GetServiceNowIncidentResponse(), http.StatusOK, nil,
+				)
+			},
+			SetupPlugin: func() {
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+
+				var p *Plugin
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusOK, model.CHANNEL_DIRECT, nil
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"unable to get permissions for the channel": {
+			RequestBody: "{}",
+			SetupAPI:    func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func() {
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+
+				var p *Plugin
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				})
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
+		},
+		"user does not have the permission to create a subscription for this channel": {
+			RequestBody: "{}",
+			SetupAPI:    func(api *plugintest.API) {},
+			SetupClient: func(client *mock_plugin.Client) {},
+			SetupPlugin: func() {
+				var s *serializer.IncidentPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValid", func(_ *serializer.IncidentPayload) error {
+					return nil
+				})
+
+				var p *Plugin
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
+				})
+			},
+			ExpectedStatusCode:   http.StatusBadRequest,
+			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
+		},
 		"invalid request body": {
 			RequestBody: "",
 			SetupAPI: func(api *plugintest.API) {
@@ -2311,13 +2383,6 @@ func TestAPIGetTableFields(t *testing.T) {
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedCount:      3,
 		},
-		"missing table query param": {
-			SetupAPI:             func(api *plugintest.API) {},
-			SetupClient:          func(client *mock_plugin.Client) {},
-			ExpectedStatusCode:   http.StatusBadRequest,
-			ExpectedErrorMessage: "Missing table name",
-			ExpectedCount:        -1,
-		},
 		"failed to get the table fields": {
 			tableName: table,
 			SetupAPI: func(api *plugintest.API) {
@@ -2355,9 +2420,7 @@ func TestAPIGetTableFields(t *testing.T) {
 			defer api.AssertExpectations(t)
 
 			w := httptest.NewRecorder()
-			queryParams := url.Values{constants.QueryParamTableTerm: {test.tableName}}
-			r := httptest.NewRequest(http.MethodGet, requestURL, nil)
-			r.URL.RawQuery = queryParams.Encode()
+			r := httptest.NewRequest(http.MethodGet, strings.Replace(requestURL, "{table_name}", test.tableName, 1), nil)
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 

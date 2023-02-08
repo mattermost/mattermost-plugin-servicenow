@@ -445,6 +445,34 @@ func TestHandleCreate(t *testing.T) {
 	}
 }
 
+func TestHandleRecords(t *testing.T) {
+	p := Plugin{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+	for _, testCase := range []struct {
+		description      string
+		params           []string
+		expectedResponse string
+	}{
+		{
+			description:      "HandleRecords: Invalid number of params",
+			expectedResponse: "Invalid record command. Available command is 'share'.",
+		},
+		{
+			description:      "HandleRecords: Unknown command",
+			params:           []string{"invalidCommand"},
+			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			assert := assert.New(t)
+			resp := p.handleRecords(args, testCase.params, mock_plugin.NewClient(t), true)
+			assert.EqualValues(testCase.expectedResponse, resp)
+		})
+	}
+}
+
 func TestHandleListSubscriptions(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
@@ -727,6 +755,23 @@ func TestHandleDeleteSubscription(t *testing.T) {
 	}
 }
 
+func TestHandleSubscribe(t *testing.T) {
+	p := Plugin{}
+	mockAPI := &plugintest.API{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+
+	t.Run("HandleSubscribe: Success", func(t *testing.T) {
+		defer mockAPI.AssertExpectations(t)
+		assert := assert.New(t)
+		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+		p.SetAPI(mockAPI)
+		resp := p.handleSubscribe(args)
+		assert.EqualValues("", resp)
+	})
+}
+
 func TestHandleEditSubscription(t *testing.T) {
 	defer monkey.UnpatchAll()
 	p := Plugin{}
@@ -750,7 +795,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					testutils.GetSubscription(constants.SubscriptionTypeBulk), 0, nil,
+					testutils.GetSubscription(constants.SubscriptionTypeBulk, false), 0, nil,
 				)
 			},
 			setupPlugin: func() {
@@ -800,6 +845,57 @@ func TestHandleEditSubscription(t *testing.T) {
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}
+}
+
+func TestHandleCreateIncident(t *testing.T) {
+	p := Plugin{}
+	mockAPI := &plugintest.API{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+
+	t.Run("HandleCreateIncident: Success", func(t *testing.T) {
+		defer mockAPI.AssertExpectations(t)
+		assert := assert.New(t)
+		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+		p.SetAPI(mockAPI)
+		resp := p.handleCreateIncident(args)
+		assert.EqualValues("", resp)
+	})
+}
+
+func TestHandleCreateRequest(t *testing.T) {
+	p := Plugin{}
+	mockAPI := &plugintest.API{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+
+	t.Run("HandleCreateRequest: Success", func(t *testing.T) {
+		defer mockAPI.AssertExpectations(t)
+		assert := assert.New(t)
+		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+		p.SetAPI(mockAPI)
+		resp := p.handleCreateRequest(args)
+		assert.EqualValues("", resp)
+	})
+}
+
+func TestHandleSearchAndShare(t *testing.T) {
+	p := Plugin{}
+	mockAPI := &plugintest.API{}
+	args := &model.CommandArgs{
+		UserId: testutils.GetID(),
+	}
+
+	t.Run("HandleSearchAndShare: Success", func(t *testing.T) {
+		defer mockAPI.AssertExpectations(t)
+		assert := assert.New(t)
+		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+		p.SetAPI(mockAPI)
+		resp := p.handleSearchAndShare(args)
+		assert.EqualValues("", resp)
+	})
 }
 
 func TestGetAutocompleteData(t *testing.T) {

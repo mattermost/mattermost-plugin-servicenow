@@ -32,12 +32,13 @@ func GetBulkTypeSubscription() string {
 	return constants.SubscriptionTypeBulk
 }
 
-func GetSubscriptionBody() string {
+func GetSubscriptionBody(subscriptionType string) string {
 	return fmt.Sprintf(`{
 		"user_id": "%s",
 		"type": "%s",
-		"channel_id": "%s"
-		}`, GetID(), GetRecordTypeSubscription(), GetChannelID())
+		"channel_id": "%s",
+		"filters": "mockFilter"
+		}`, GetID(), subscriptionType, GetChannelID())
 }
 
 func GetChannel(channelType string) *model.Channel {
@@ -188,8 +189,8 @@ func GetServiceNowRecord() *serializer.ServiceNowRecord {
 	}
 }
 
-func GetSubscription(subscriptionType string) *serializer.SubscriptionResponse {
-	return &serializer.SubscriptionResponse{
+func GetSubscription(subscriptionType string, addFilters bool) *serializer.SubscriptionResponse {
+	response := &serializer.SubscriptionResponse{
 		SysID:              GetServiceNowSysID(),
 		UserID:             GetID(),
 		ChannelID:          GetID(),
@@ -200,15 +201,21 @@ func GetSubscription(subscriptionType string) *serializer.SubscriptionResponse {
 		Number:             GetServiceNowNumber(),
 		ShortDescription:   GetServiceNowShortDescription(),
 	}
+
+	if addFilters {
+		response.Filters = fmt.Sprintf(`{"%s":"filter1","%s":"filter2"}`, constants.FilterAssignmentGroup, constants.FilterService)
+	}
+
+	return response
 }
 
 func GetSubscriptions(count int) []*serializer.SubscriptionResponse {
 	subscriptions := make([]*serializer.SubscriptionResponse, count)
 	for i := 0; i < count; i++ {
 		if i%2 == 0 {
-			subscriptions[i] = GetSubscription(constants.SubscriptionTypeBulk)
+			subscriptions[i] = GetSubscription(constants.SubscriptionTypeBulk, false)
 		} else {
-			subscriptions[i] = GetSubscription(constants.SubscriptionTypeRecord)
+			subscriptions[i] = GetSubscription(constants.SubscriptionTypeRecord, false)
 		}
 	}
 
