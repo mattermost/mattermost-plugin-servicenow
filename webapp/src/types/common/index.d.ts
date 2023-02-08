@@ -65,6 +65,8 @@ type SubscriptionData = {
     sys_id: string;
     number: string;
     short_description: string;
+    filters: string;
+    filters_data?: FiltersData[];
 }
 
 type ConfigData = {
@@ -105,6 +107,8 @@ type EditSubscriptionData = {
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
     userId: string;
+    filters: string;
+    filtersData?: FiltersData[];
 }
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base' | 'business_service';
@@ -121,6 +125,7 @@ type WebsocketEventParams = {
 
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
+    filters?: JSX.Element,
     labelValuePairs?: Array<{ label: string, value: string }>,
 }
 
@@ -176,7 +181,7 @@ type MessageHtmlToComponentOptions = {
     mentionHighlight: boolean;
 }
 
-type FieldsFilterData = {
+type FilterFieldsData = {
     sys_id: string;
     name: string;
 }
@@ -189,4 +194,5 @@ type FilterType = {
 type FiltersData = {
     filterType: string;
     filterValue: string | null;
+    filterName: string | null;
 }

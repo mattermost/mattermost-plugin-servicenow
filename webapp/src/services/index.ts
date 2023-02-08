@@ -10,20 +10,6 @@ const pluginApi = createApi({
     baseQuery: fetchBaseQuery({baseUrl: Utils.getBaseUrls().pluginApiBaseUrl}),
     tagTypes: ['Posts'],
     endpoints: (builder) => ({
-        [Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.apiServiceName]: builder.query<void, void>({
-            query: () => ({
-                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.path,
-                method: Constants.pluginApiServiceConfigs.checkSubscriptionsConfigured.method,
-            }),
-        }),
-        [Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName]: builder.query<ConnectedState, void>({
-            query: () => ({
-                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: Constants.pluginApiServiceConfigs.getConnectedUser.path,
-                method: Constants.pluginApiServiceConfigs.getConnectedUser.method,
-            }),
-        }),
         [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelData[], FetchChannelsParams>({
             query: (params) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
@@ -60,13 +46,6 @@ const pluginApi = createApi({
                 url: `${Constants.pluginApiServiceConfigs.fetchSubscriptions.path}`,
                 method: Constants.pluginApiServiceConfigs.fetchSubscriptions.method,
                 params,
-            }),
-        }),
-        [Constants.pluginApiServiceConfigs.fetchSubscription.apiServiceName]: builder.query<SubscriptionData, string>({
-            query: (id) => ({
-                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: `${Constants.pluginApiServiceConfigs.fetchSubscription.path}/${id}`,
-                method: Constants.pluginApiServiceConfigs.fetchSubscription.method,
             }),
         }),
         [Constants.pluginApiServiceConfigs.editSubscription.apiServiceName]: builder.query<void, EditSubscriptionPayload>({
@@ -152,14 +131,14 @@ const pluginApi = createApi({
                 body,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName]: builder.query<IncidentFieldsData[], void>({
+        [Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName]: builder.query<IncidentFieldsData[], void>({
             query: () => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: Constants.pluginApiServiceConfigs.getIncidentFeilds.path,
-                method: Constants.pluginApiServiceConfigs.getIncidentFeilds.method,
+                url: Constants.pluginApiServiceConfigs.getIncidentFields.path,
+                method: Constants.pluginApiServiceConfigs.getIncidentFields.method,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.getFilterData.apiServiceName]: builder.query<FieldsFilterData[], SearchFilterItemsParams>({
+        [Constants.pluginApiServiceConfigs.getFilterData.apiServiceName]: builder.query<FilterFieldsData[], SearchFilterItemsParams>({
             query: ({search, filter, perPage}) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.getFilterData.path}/${filter}`,
@@ -167,12 +146,11 @@ const pluginApi = createApi({
                 params: {search, perPage: perPage || Constants.DefaultPerPageParam},
             }),
         }),
-        [Constants.pluginApiServiceConfigs.getTableFeilds.apiServiceName]: builder.query<void, string>({
+        [Constants.pluginApiServiceConfigs.getTableFields.apiServiceName]: builder.query<void, string>({
             query: (table) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: Constants.pluginApiServiceConfigs.getTableFeilds.path,
-                method: Constants.pluginApiServiceConfigs.getTableFeilds.method,
-                params: {table},
+                url: `${Constants.pluginApiServiceConfigs.getTableFields.path}/${table}`,
+                method: Constants.pluginApiServiceConfigs.getTableFields.method,
             }),
         }),
     }),

@@ -17,7 +17,7 @@ const (
 	InvalidConfigAdminMessage   = "Before using this plugin, you'll need to configure it in the System Console`"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
-	ServiceNowSubscriptionsTableName          = "x_830655_mm_std_servicenow_for_mattermost_subscriptions"
+	ServiceNowSubscriptionsTableName          = ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
 	SysQueryParam                             = "sysparm_query"
 	SysQueryParamLimit                        = "sysparm_limit"
@@ -60,8 +60,10 @@ const (
 	DefaultPage                                = 0
 	DefaultPerPage                             = 20
 	MaxPerPage                                 = 100
+	MaxDescriptionChars                        = 500
 	DefaultCharacterThresholdForSearching      = 3
 	CharacterThresholdForSearchingCatalogItems = 4
+	DefaultEmptyValue                          = "N/A"
 	QueryParamPage                             = "page"
 	QueryParamPerPage                          = "per_page"
 	QueryParamChannelID                        = "channel_id"
@@ -74,6 +76,7 @@ const (
 	PathParamRecordID                          = "record_id"
 	PathParamFilterType                        = "filter_type"
 	QueryParamTableTerm                        = "table"
+	PathParamTableName                         = "table_name"
 
 	// ServiceNow table fields
 	FieldSysID                = "sys_id"
@@ -92,11 +95,14 @@ const (
 	FieldService              = "service"
 
 	// Websocket events
-	WSEventConnect              = "connect"
-	WSEventDisconnect           = "disconnect"
-	WSEventSubscriptionDeleted  = "subscription_deleted"
-	WSEventOpenCommentModal     = "comment_modal"
-	WSEventOpenUpdateStateModal = "update_state"
+	WSEventConnect                        = "connect"
+	WSEventDisconnect                     = "disconnect"
+	WSEventOpenAddSubscriptionModal       = "add_subscription"
+	WSEventOpenEditSubscriptionModal      = "edit_subscription"
+	WSEventSubscriptionDeleted            = "subscription_deleted"
+	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
+	WSEventOpenCreateIncidentModal        = "create_incident"
+	WSEventOpenCreateRequestModal         = "create_request"
 
 	// Custom posts type
 	CustomNotifictationPost = "custom_sn_notification"
@@ -126,19 +132,20 @@ const (
 	ContextNameRecordID   = "record_id"
 
 	// Slash commands
-	CommandHelp           = "help"
-	CommandConnect        = "connect"
-	CommandDisconnect     = "disconnect"
-	CommandSubscriptions  = "subscriptions"
-	CommandUnsubscribe    = "unsubscribe"
-	CommandSearchAndShare = "share"
-	CommandCreate         = "create"
-	SubCommandIncident    = "incident"
-	SubCommandRequest     = "request"
-	SubCommandList        = "list"
-	SubCommandAdd         = "add"
-	SubCommandEdit        = "edit"
-	SubCommandDelete      = "delete"
+	CommandHelp              = "help"
+	CommandConnect           = "connect"
+	CommandDisconnect        = "disconnect"
+	CommandSubscriptions     = "subscriptions"
+	CommandUnsubscribe       = "unsubscribe"
+	CommandRecords           = "records"
+	CommandCreate            = "create"
+	SubCommandIncident       = "incident"
+	SubCommandRequest        = "request"
+	SubCommandList           = "list"
+	SubCommandAdd            = "add"
+	SubCommandEdit           = "edit"
+	SubCommandDelete         = "delete"
+	SubCommandSearchAndShare = "share"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -193,6 +200,8 @@ const (
 	ErrorSearchingFilterValues            = "Error in searching for filter values in ServiceNow"
 	ErrorInvalidFilterType                = "Invalid filter type"
 	ErrorGetTableFields                   = "Error in getting the table fields"
+	ErrorConnectionRefused                = "Unable to make a connection to the specified ServiceNow instance"
+	ErrorAccessTable                      = "Unauthorized to access table"
 )
 
 // kv store keys prefix
@@ -245,6 +254,11 @@ var (
 		RecordTypeProblem:       "Problem",
 		RecordTypeIncident:      "Incident",
 		RecordTypeChangeRequest: "Change Request",
+	}
+
+	FormattedFilterTypes = map[string]string{
+		FilterAssignmentGroup: "Assignment Group",
+		FilterService:         "Service",
 	}
 
 	RecordTypesSupportingComments = map[string]bool{

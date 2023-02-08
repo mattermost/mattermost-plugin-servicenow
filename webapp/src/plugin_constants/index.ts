@@ -182,6 +182,11 @@ export enum RecordDataConfigLabels {
     SERVICE = 'Service',
 }
 
+export const SupportedFiltersLabelsMap: Record<SupportedFilters, string> = {
+    [SupportedFilters.ASSIGNMENT_GROUP]: RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    [SupportedFilters.SERVICE]: RecordDataConfigLabels.SERVICE,
+};
+
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
@@ -291,16 +296,16 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
 
 export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
     {
-        value: '1 - High',
-        label: 'High',
+        value: '1',
+        label: '1 - High',
     },
     {
-        value: '2 - Medium',
-        label: 'Medium',
+        value: '2',
+        label: '2 - Medium',
     },
     {
-        value: '3 - Low',
-        label: 'Low',
+        value: '3',
+        label: '3 - Low',
     },
 ];
 
@@ -339,16 +344,6 @@ export type TypesContainingLink = KnowledgeRecordDataConfigKeys | RecordDataConf
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
-    getConnectedUser: {
-        path: '/connected',
-        method: 'GET',
-        apiServiceName: 'getConnectedUser',
-    },
-    checkSubscriptionsConfigured: {
-        path: '/subscriptions-configured',
-        method: 'GET',
-        apiServiceName: 'checkSubscriptionsConfigured',
-    },
     getChannels: {
         path: '/channels',
         method: 'GET',
@@ -373,11 +368,6 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         path: '/subscriptions',
         method: 'GET',
         apiServiceName: 'fetchSubscriptions',
-    },
-    fetchSubscription: {
-        path: '/subscriptions',
-        method: 'GET',
-        apiServiceName: 'fetchSubscription',
     },
     editSubscription: {
         path: '/subscriptions',
@@ -434,20 +424,20 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createIncident',
     },
-    getIncidentFeilds: {
+    getIncidentFields: {
         path: '/incident-fields',
         method: 'GET',
-        apiServiceName: 'getIncidentFeilds',
+        apiServiceName: 'getIncidentFields',
     },
     getFilterData: {
         path: '/filter',
         method: 'GET',
         apiServiceName: 'getFilterData',
     },
-    getTableFeilds: {
+    getTableFields: {
         path: '/fields',
         method: 'GET',
-        apiServiceName: 'getTableFeilds',
+        apiServiceName: 'getTableFields',
     },
 };
 
@@ -460,6 +450,7 @@ export const PanelDefaultHeights = {
     searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
+    errorPanel: 267,
     panelHeader: 65,
 };
 

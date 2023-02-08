@@ -14,22 +14,20 @@ import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
 import CreateIncident from 'src/containers/createIncident';
-import NotificationPost from 'src/containers/custom_post/notificationPost';
-import ShareRecordPost from 'src/containers/custom_post/shareRecordPost';
 import CreateRequest from 'src/containers/createRequest';
 import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
+import ServiceNowPost from 'src/containers/custom_post/sericeNowPost';
 import UpdateState from 'src/containers/updateState';
 
 import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleSubscriptionDeleted} from 'src/websocket';
+import {handleConnect, handleDisconnect, handleSubscriptionDeleted, handleOpenEditSubscriptionModal, handleOpenShareRecordModal, handleOpenIncidentModal, handleOpenAddSubscriptionModal, handleOpenRequestModal} from 'src/websocket';
 import Utils from 'src/utils';
 
 import App from './app';
 
-import Hooks from './hooks';
 import manifest from './manifest';
 
 import './styles/main.scss';
@@ -55,14 +53,19 @@ export default class Plugin {
             registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
         }
 
-        const hooks = new Hooks(store);
-        registry.registerSlashCommandWillBePostedHook(hooks.slashCommandWillBePostedHook);
         registry.registerPostDropdownMenuComponent(CreateIncidentPostMenuAction);
+
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_edit_subscription`, handleOpenEditSubscriptionModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_subscription_deleted`, handleSubscriptionDeleted(store, id));
-        registry.registerPostTypeComponent('custom_sn_share', ShareRecordPost);
-        registry.registerPostTypeComponent('custom_sn_notification', NotificationPost);
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_search_and_share_record`, handleOpenShareRecordModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_create_incident`, handleOpenIncidentModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_create_request`, handleOpenRequestModal(store));
+
+        registry.registerPostTypeComponent('custom_sn_share', ServiceNowPost);
+        registry.registerPostTypeComponent('custom_sn_notification', ServiceNowPost);
     }
 }
 

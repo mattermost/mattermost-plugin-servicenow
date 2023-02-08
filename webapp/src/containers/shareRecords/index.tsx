@@ -34,7 +34,6 @@ const ShareRecords = () => {
     const [recordData, setRecordData] = useState<RecordData | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
-    const [showModal, setShowModal] = useState(false);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -62,7 +61,6 @@ const ShareRecords = () => {
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
         resetFieldStates();
-        setShowModal(false);
     }, []);
 
     // Opens share record modal
@@ -79,7 +77,13 @@ const ShareRecords = () => {
         serviceName: Constants.pluginApiServiceConfigs.shareRecord.apiServiceName,
         payload: shareRecordPayload,
         handleSuccess: () => setShowResultPanel(true),
-        handleError: setApiError,
+        handleError: (error) => {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
+
+            setApiError(error);
+        },
     });
 
     const shareRecord = () => {
@@ -110,28 +114,22 @@ const ShareRecords = () => {
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-
-        if (open && pluginState.connectedReducer.connected) {
-            setShowModal(true);
-        } else {
-            dispatch(resetGlobalModalState());
-        }
     }, [open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
-            dispatch(setConnected(false));
+        if (apiError) {
             return action ? hideModal : 'Close';
         }
+
         return action ? handleOpenShareRecordModal : 'Share another record';
     }, [apiError]);
 
     const {isLoading} = getShareRecordState();
     return (
         <Modal
-            show={showModal}
+            show={open}
             onHide={hideModal}
-            className='servicenow-rhs-modal'
+            className='servicenow-modal'
         >
             <>
                 <ModalHeader
@@ -150,7 +148,7 @@ const ShareRecords = () => {
                         }}
                         secondaryBtn={{
                             text: 'Close',
-                            onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
+                            onClick: apiError ? null : hideModal,
                         }}
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />

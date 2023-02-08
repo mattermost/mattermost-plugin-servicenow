@@ -3,19 +3,22 @@ import {useDispatch} from 'react-redux';
 
 import {Post} from 'mattermost-redux/types/posts';
 
+import {ModalIds, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation, TypesContainingLink} from 'src/plugin_constants';
 import {setGlobalModalState} from 'src/reducers/globalModal';
+import Utils from 'src/utils';
 
 import './styles.scss';
-import {ModalIds, RecordTypesSupportingComments, RecordTypesSupportingStateUpdation} from 'src/plugin_constants';
 
-type NotificationPostProps = {
+type ServiceNowPostProps = {
     post: Post,
 }
 
-const NotificationPost = ({post}: NotificationPostProps) => {
+const ServiceNowPost = ({post}: ServiceNowPostProps) => {
+    const {type, props} = post;
+    const {attachments, record_id, record_type} = props;
+    const {fields, pretext, title} = attachments[0] as RecordAttachments;
+
     const dispatch = useDispatch();
-    const {attachments, record_id, record_type} = post.props;
-    const {fields, title} = attachments[0] as RecordAttachments;
     const data: CommentAndStateModalData = {
         recordId: record_id,
         recordType: record_type,
@@ -24,6 +27,11 @@ const NotificationPost = ({post}: NotificationPostProps) => {
     const {formatText, messageHtmlToComponent} = window.PostUtils;
     const postTitleText = formatText(title);
     const postTitle = messageHtmlToComponent(postTitleText, false);
+    const atMentionText = formatText(pretext, {atMentions: true});
+    const atMention = messageHtmlToComponent(atMentionText, false, {mentionHighlight: true});
+    const descriptionText = formatText(((fields?.filter((f) => f.title === 'Description') as unknown as RecordFields[])?.[0]?.value) as string);
+    const description = messageHtmlToComponent(descriptionText, false);
+
     const getNotificationBody = (): JSX.Element => {
         const fieldTables = [] as JSX.Element[];
         let headerCols = [] as JSX.Element[];
@@ -72,13 +80,23 @@ const NotificationPost = ({post}: NotificationPostProps) => {
                     key={field.title}
                     className='shared-post__field-value'
                 >
-                    <span>
-                        {field.value}
-                    </span>
+                    {field.title === 'Description' ? (
+                        <span>
+                            {description}
+                        </span>
+                    ) : (
+                        <span>
+                            {(type as string) === 'custom_sn_share' ? Utils.getRecordValueForHeader(field.title as TypesContainingLink, field.value) : (field.value)}
+                        </span>
+                    )}
                 </td>,
             );
 
             rowPos++;
+
+            if (field.title === 'Description') {
+                rowPos++;
+            }
         });
 
         if (headerCols.length) {
@@ -102,17 +120,10 @@ const NotificationPost = ({post}: NotificationPostProps) => {
         }
 
         return (
-            <div>
-                {fieldTables}
-            </div>
-        );
-    };
-
-    return (
-        <div className='servicenow-post'>
-            <div className='shared-post'>
-                <div className='wt-600'>{postTitle}</div>
-                {getNotificationBody()}
+            <>
+                <div>
+                    {fieldTables}
+                </div>
                 <div>
                     {RecordTypesSupportingComments.has(record_type) && (
                         <button
@@ -131,9 +142,19 @@ const NotificationPost = ({post}: NotificationPostProps) => {
                         </button>
                     )}
                 </div>
+            </>
+        );
+    };
+
+    return (
+        <div className='servicenow-post'>
+            {atMention}
+            <div className='shared-post'>
+                <span className='wt-600'>{postTitle}</span>
+                {getNotificationBody()}
             </div>
         </div>
     );
 };
 
-export default NotificationPost;
+export default ServiceNowPost;

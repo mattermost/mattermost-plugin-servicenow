@@ -131,6 +131,8 @@ const Rhs = (): JSX.Element => {
             subscriptionEvents: Utils.getSubscriptionEvents(subscription.subscription_events),
             id: subscription.sys_id,
             userId: subscription.user_id,
+            filters: subscription.filters,
+            filtersData: subscription.filters_data,
         };
         dispatch(setGlobalModalState({modalId: ModalIds.EDIT_SUBSCRIPTION, data: subscriptionData}));
     }, [dispatch]);

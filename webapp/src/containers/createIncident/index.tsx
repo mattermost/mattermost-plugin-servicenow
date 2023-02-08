@@ -40,7 +40,7 @@ const CreateIncident = () => {
     const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
     const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
-    const [showModal, setShowModal] = useState(false);
+    const [showChannelValidationError, setShowChannelValidationError] = useState<boolean>(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -70,12 +70,12 @@ const CreateIncident = () => {
         setSubscriptionPayload(null);
         setShowChannelPanel(false);
         setRefetchIncidentFields(true);
+        setShowChannelValidationError(false);
     }, []);
 
     // Hide the modal and reset the states
     const hideModal = useCallback(() => {
         dispatch(resetGlobalModalState());
-        setShowModal(false);
         setTimeout(() => {
             resetFieldStates();
         });
@@ -94,7 +94,7 @@ const CreateIncident = () => {
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
     const getIncidentFieldsState = () => {
-        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName);
         return {isLoading, data: data as IncidentFieldsData[]};
     };
 
@@ -109,8 +109,7 @@ const CreateIncident = () => {
     };
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
-            dispatch(setConnected(false));
+        if (apiError) {
             return action ? hideModal : 'Close';
         }
 
@@ -123,27 +122,42 @@ const CreateIncident = () => {
             return;
         }
 
+        if (!channel && showChannelPanel) {
+            setShowChannelValidationError(true);
+            return;
+        }
+
         // Set the first impact and urgency values by default.
         const payload: IncidentPayload = {
             short_description: shortDescription,
             description,
-            impact: parseInt(impact ?? impactOptions[0].value, 10),
-            urgency: parseInt(urgency ?? urgencyOptions[0].value, 10),
             caller_id: caller ?? '',
             channel_id: channel ?? currentChannelId,
         };
+
+        if (impact) {
+            payload.impact = parseInt(impact, 10);
+        }
+
+        if (urgency) {
+            payload.urgency = parseInt(urgency, 10);
+        }
 
         setIncidentPayload(payload);
         makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, payload);
     };
 
     const handleError = (error: APIError) => {
+        if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+            dispatch(setConnected(false));
+        }
+
         setApiError(error);
         setShowResultPanel(true);
     };
 
     useApiRequestCompletionState({
-        serviceName: Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName,
+        serviceName: Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName,
         handleSuccess: () => Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, incidentFieldsData),
         handleError,
     });
@@ -175,7 +189,6 @@ const CreateIncident = () => {
                 record_id: createIncidentData.sys_id || '',
                 subscription_events: subscriptionEvents.join(','),
                 channel_id: channel ?? currentChannelId,
-                filters: '',
             };
 
             setSubscriptionPayload(payload);
@@ -200,24 +213,22 @@ const CreateIncident = () => {
             setChannel(currentChannelId);
         }
 
-        if (open && pluginState.connectedReducer.connected) {
-            setShowModal(true);
-        } else {
-            dispatch(resetGlobalModalState());
-            return;
-        }
-
         if (open && getGlobalModalState(pluginState).data) {
-            const {shortDescription: reduxStateShortDescription, description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
-            setShortDescription(reduxStateShortDescription);
+            const {description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
             setDescription(reduxStateDescription);
         }
 
         if (open && refetchIncidentFields) {
-            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFeilds.apiServiceName);
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName);
             setRefetchIncidentFields(false);
         }
     }, [open, refetchIncidentFields]);
+
+    useEffect(() => {
+        if (channel) {
+            setShowChannelValidationError(false);
+        }
+    }, [channel]);
 
     // Get services data
     const {isLoading: incidentFieldsLoading, data: incidentFieldsData} = getIncidentFieldsState();
@@ -226,7 +237,7 @@ const CreateIncident = () => {
     const showLoader = incidentFieldsLoading || createIncidentLoading || createSubscriptionLoading;
     return (
         <Modal
-            show={showModal}
+            show={open}
             onHide={hideModal}
             className='servicenow-rhs-modal'
         >
@@ -247,7 +258,7 @@ const CreateIncident = () => {
                         }}
                         secondaryBtn={{
                             text: 'Close',
-                            onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
+                            onClick: apiError ? null : hideModal,
                         }}
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
@@ -312,6 +323,8 @@ const CreateIncident = () => {
                                     setChannelOptions={setChannelOptions}
                                     actionBtnDisabled={showLoader}
                                     editing={true}
+                                    validationError={showChannelValidationError}
+                                    required={true}
                                     placeholder='Select channel to create subscription'
                                     className={`incident-body__auto-suggest ${channel && 'incident-body__suggestion-chosen'}`}
                                 />

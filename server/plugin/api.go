@@ -35,7 +35,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 	s.HandleFunc(constants.PathCreateSubscription, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.createSubscription)))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathGetAllSubscriptions, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getAllSubscriptions)))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.getSubscription)))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.deleteSubscription)))).Methods(http.MethodDelete)
 	s.HandleFunc(constants.PathSubscriptionOperationsByID, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfigured(p.editSubscription)))).Methods(http.MethodPatch)
 	s.HandleFunc(constants.PathGetUserChannelsForTeam, p.checkAuth(p.getUserChannelsForTeam)).Methods(http.MethodGet)
@@ -51,7 +50,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathCheckSubscriptionsConfigured, p.checkAuth(p.checkOAuth(p.checkSubscriptionsConfiguredAPI))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchFilterValues, p.checkAuth(p.checkOAuth(p.searchFilterValuesInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetTableFields, p.checkAuth(p.checkOAuth(p.getTableFields))).Methods(http.MethodGet)
@@ -111,17 +109,6 @@ func (p *Plugin) checkSubscriptionsConfigured(handler http.HandlerFunc) http.Han
 
 		handler(w, r)
 	}
-}
-
-func (p *Plugin) checkSubscriptionsConfiguredAPI(w http.ResponseWriter, r *http.Request) {
-	client := p.GetClientFromRequest(r)
-	if _, err := client.ActivateSubscriptions(); err != nil {
-		_ = p.handleClientError(w, r, err, false, 0, "", "")
-		p.API.LogError(constants.ErrorSubscriptionsNotConfigured, "Error", err.Error())
-		return
-	}
-
-	returnStatusOK(w)
 }
 
 func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
@@ -211,6 +198,7 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 <html>
 	<head>
 		<script>
+			window.open('','_parent','');
 			window.close();
 		</script>
 	</head>
@@ -247,7 +235,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -324,18 +312,19 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg := sync.WaitGroup{}
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
-		_, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
+		_, _, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID, true)
 		if permissionErr != nil {
 			continue
 		}
 
-		if subscription.Type == constants.SubscriptionTypeBulk {
-			bulkSubscriptions = append(bulkSubscriptions, subscription)
-			continue
-		}
 		wg.Add(1)
-		go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
-		recordSubscriptions = append(recordSubscriptions, subscription)
+		if subscription.Type == constants.SubscriptionTypeBulk {
+			go p.GetFiltersFromServiceNow(subscription, client, &wg, false)
+			bulkSubscriptions = append(bulkSubscriptions, subscription)
+		} else {
+			go p.GetRecordFromServiceNowForSubscription(subscription, client, &wg)
+			recordSubscriptions = append(recordSubscriptions, subscription)
+		}
 	}
 
 	wg.Wait()
@@ -379,7 +368,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -397,26 +386,6 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnStatusOK(w)
-}
-
-func (p *Plugin) getSubscription(w http.ResponseWriter, r *http.Request) {
-	pathParams := mux.Vars(r)
-	subscriptionID := pathParams[constants.PathParamSubscriptionID]
-	client := p.GetClientFromRequest(r)
-	subscription, statusCode, err := client.GetSubscription(subscriptionID)
-	if err != nil {
-		p.API.LogError(constants.ErrorGetSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
-		responseMessage := "No record found"
-		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorGetSubscription, err.Error())
-		}
-
-		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
-		return
-	}
-
-	p.GetRecordFromServiceNowForSubscription(subscription, client, nil)
-	p.writeJSON(w, 0, subscription)
 }
 
 func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) {
@@ -547,7 +516,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, channelID)
+	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, channelID, true)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -721,6 +690,13 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	permissionStatusCode, channelType, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID, false)
+	if permissionErr != nil {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
+		return
+	}
+
 	client := p.GetClientFromRequest(r)
 	response, statusCode, err := client.CreateIncident(incident)
 	if err != nil {
@@ -733,6 +709,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		SysID:            response.SysID,
 		Number:           response.Number,
 		ShortDescription: response.ShortDescription,
+		Description:      response.Description,
 		RecordType:       constants.RecordTypeIncident,
 		State:            response.State,
 		Priority:         response.Priority,
@@ -746,7 +723,18 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(incident.ChannelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	channelID := incident.ChannelID
+	if channelType == model.CHANNEL_DIRECT || channelType == model.CHANNEL_GROUP {
+		channel, err := p.API.GetDirectChannel(userID, p.botID)
+		if err != nil {
+			p.API.LogError("Couldn't get bot's DM channel", "user_id", userID, "error", err.Error())
+			return
+		}
+
+		channelID = channel.Id
+	}
+
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
@@ -789,7 +777,7 @@ func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.R
 	pathParams := mux.Vars(r)
 	filterType := pathParams[constants.PathParamFilterType]
 	if !constants.ValidFiltersForSearching[filterType] {
-		p.API.LogError("Invalid filter type while searching", "Filter type", filterType)
+		p.API.LogError("Invalid filter type while searching", "FilterType", filterType)
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: constants.ErrorInvalidFilterType})
 		return
 	}
@@ -821,14 +809,15 @@ func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.R
 }
 
 func (p *Plugin) getTableFields(w http.ResponseWriter, r *http.Request) {
-	table := r.URL.Query().Get(constants.QueryParamTableTerm)
-	if table == "" {
+	pathParams := mux.Vars(r)
+	tableName := pathParams[constants.PathParamTableName]
+	if tableName == "" {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusBadRequest, Message: "Missing table name"})
 		return
 	}
 
 	client := p.GetClientFromRequest(r)
-	fields, statusCode, err := client.GetTableFieldsFromServiceNow(table)
+	fields, statusCode, err := client.GetTableFieldsFromServiceNow(tableName)
 	if err != nil {
 		p.API.LogError(constants.ErrorGetTableFields, "Error", err.Error())
 		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetTableFields, err.Error()))
