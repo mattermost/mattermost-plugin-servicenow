@@ -1922,7 +1922,7 @@ func TestAPICreateIncident(t *testing.T) {
 			},
 			ExpectedStatusCode: http.StatusOK,
 		},
-		"error getting direct channel": {
+		"error getting the direct channel": {
 			RequestBody: "{}",
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetDirectChannel", testutils.GetMockArgumentsWithType("string", 2)...).Return(

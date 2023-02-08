@@ -209,13 +209,13 @@ func (p *Plugin) handleSubscriptions(args *model.CommandArgs, parameters []strin
 
 	switch command {
 	case constants.SubCommandList:
-		return p.handleListSubscriptions(args, parameters, client, isSysAdmin)
+		return p.HandleListSubscriptions(args, parameters, client, isSysAdmin)
 	case constants.SubCommandAdd:
-		return p.handleSubscribe(args)
+		return p.HandleSubscribe(args)
 	case constants.SubCommandEdit:
-		return p.handleEditSubscription(args, parameters, client, isSysAdmin)
+		return p.HandleEditSubscription(args, parameters, client, isSysAdmin)
 	case constants.SubCommandDelete:
-		return p.handleDeleteSubscription(args, parameters, client, isSysAdmin)
+		return p.HandleDeleteSubscription(args, parameters, client, isSysAdmin)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
@@ -230,9 +230,9 @@ func (p *Plugin) handleCreate(args *model.CommandArgs, parameters []string, _ Cl
 
 	switch command {
 	case constants.SubCommandIncident:
-		return p.handleCreateIncident(args)
+		return p.HandleCreateIncident(args)
 	case constants.SubCommandRequest:
-		return p.handleCreateRequest(args)
+		return p.HandleCreateRequest(args)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
@@ -246,13 +246,13 @@ func (p *Plugin) handleRecords(args *model.CommandArgs, parameters []string, _ C
 	command := parameters[0]
 	switch command {
 	case constants.SubCommandSearchAndShare:
-		return p.handleSearchAndShare(args)
+		return p.HandleSearchAndShare(args)
 	default:
 		return fmt.Sprintf("Unknown subcommand %v", command)
 	}
 }
 
-func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) HandleListSubscriptions(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	userID := args.UserId
 	channelID := args.ChannelId
 	if len(params) >= 1 {
@@ -335,7 +335,7 @@ func (p *Plugin) handleListSubscriptions(args *model.CommandArgs, params []strin
 	return listSubscriptionsWaitMessage
 }
 
-func (p *Plugin) handleDeleteSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) HandleDeleteSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
 		return constants.ErrorCommandInvalidNumberOfParams
 	}
@@ -372,7 +372,7 @@ func (p *Plugin) handleDeleteSubscription(args *model.CommandArgs, params []stri
 	return genericWaitMessage
 }
 
-func (p *Plugin) handleSubscribe(args *model.CommandArgs) string {
+func (p *Plugin) HandleSubscribe(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenAddSubscriptionModal,
 		nil,
@@ -382,7 +382,7 @@ func (p *Plugin) handleSubscribe(args *model.CommandArgs) string {
 	return ""
 }
 
-func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
+func (p *Plugin) HandleEditSubscription(args *model.CommandArgs, params []string, client Client, isSysAdmin bool) string {
 	if len(params) < 1 {
 		return constants.ErrorCommandInvalidNumberOfParams
 	}
@@ -424,7 +424,7 @@ func (p *Plugin) handleEditSubscription(args *model.CommandArgs, params []string
 	return ""
 }
 
-func (p *Plugin) handleCreateIncident(args *model.CommandArgs) string {
+func (p *Plugin) HandleCreateIncident(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateIncidentModal,
 		nil,
@@ -434,7 +434,7 @@ func (p *Plugin) handleCreateIncident(args *model.CommandArgs) string {
 	return ""
 }
 
-func (p *Plugin) handleCreateRequest(args *model.CommandArgs) string {
+func (p *Plugin) HandleCreateRequest(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenCreateRequestModal,
 		nil,
@@ -444,7 +444,7 @@ func (p *Plugin) handleCreateRequest(args *model.CommandArgs) string {
 	return ""
 }
 
-func (p *Plugin) handleSearchAndShare(args *model.CommandArgs) string {
+func (p *Plugin) HandleSearchAndShare(args *model.CommandArgs) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenSearchAndShareRecordsModal,
 		nil,

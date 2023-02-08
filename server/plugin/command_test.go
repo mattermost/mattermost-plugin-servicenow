@@ -390,6 +390,7 @@ func TestHandleDisconnect(t *testing.T) {
 }
 
 func TestHandleSubscriptions(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
@@ -397,20 +398,64 @@ func TestHandleSubscriptions(t *testing.T) {
 	for _, testCase := range []struct {
 		description      string
 		params           []string
+		setupPlugin      func(p *Plugin)
 		expectedResponse string
 	}{
 		{
 			description:      "HandleSubscriptions: Invalid number of params",
+			setupPlugin:      func(p *Plugin) {},
 			expectedResponse: "Invalid subscribe command. Available commands are 'list', 'add', 'edit' and 'delete'.",
 		},
 		{
 			description:      "HandleSubscriptions: Unknown command",
 			params:           []string{"invalidCommand"},
+			setupPlugin:      func(p *Plugin) {},
 			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+		{
+			description: "HandleCreate: list command",
+			params:      []string{"list"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleListSubscriptions", func(*Plugin, *model.CommandArgs, []string, Client, bool) string {
+					return "list command executed successfully"
+				})
+			},
+			expectedResponse: "list command executed successfully",
+		},
+		{
+			description: "HandleCreate: add command",
+			params:      []string{"add"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleSubscribe", func(*Plugin, *model.CommandArgs) string {
+					return "add command executed successfully"
+				})
+			},
+			expectedResponse: "add command executed successfully",
+		},
+		{
+			description: "HandleCreate: edit command",
+			params:      []string{"edit"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleEditSubscription", func(*Plugin, *model.CommandArgs, []string, Client, bool) string {
+					return "edit command executed successfully"
+				})
+			},
+			expectedResponse: "edit command executed successfully",
+		},
+		{
+			description: "HandleCreate: delete command",
+			params:      []string{"delete"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleDeleteSubscription", func(*Plugin, *model.CommandArgs, []string, Client, bool) string {
+					return "delete command executed successfully"
+				})
+			},
+			expectedResponse: "delete command executed successfully",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
+			testCase.setupPlugin(&p)
 			resp := p.handleSubscriptions(args, testCase.params, mock_plugin.NewClient(t), true)
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
@@ -418,6 +463,7 @@ func TestHandleSubscriptions(t *testing.T) {
 }
 
 func TestHandleCreate(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
@@ -425,20 +471,44 @@ func TestHandleCreate(t *testing.T) {
 	for _, testCase := range []struct {
 		description      string
 		params           []string
+		setupPlugin      func(p *Plugin)
 		expectedResponse string
 	}{
 		{
 			description:      "HandleCreate: Invalid number of params",
+			setupPlugin:      func(p *Plugin) {},
 			expectedResponse: "Invalid create command. Available commands are 'incident' and 'request'.",
 		},
 		{
 			description:      "HandleCreate: Unknown command",
 			params:           []string{"invalidCommand"},
+			setupPlugin:      func(p *Plugin) {},
 			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+		{
+			description: "HandleCreate: incident command",
+			params:      []string{"incident"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleCreateIncident", func(*Plugin, *model.CommandArgs) string {
+					return "incident command executed successfully"
+				})
+			},
+			expectedResponse: "incident command executed successfully",
+		},
+		{
+			description: "HandleCreate: request command",
+			params:      []string{"request"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleCreateRequest", func(*Plugin, *model.CommandArgs) string {
+					return "request command executed successfully"
+				})
+			},
+			expectedResponse: "request command executed successfully",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
+			testCase.setupPlugin(&p)
 			resp := p.handleCreate(args, testCase.params, mock_plugin.NewClient(t), true)
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
@@ -446,6 +516,7 @@ func TestHandleCreate(t *testing.T) {
 }
 
 func TestHandleRecords(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
@@ -453,20 +524,34 @@ func TestHandleRecords(t *testing.T) {
 	for _, testCase := range []struct {
 		description      string
 		params           []string
+		setupPlugin      func(p *Plugin)
 		expectedResponse string
 	}{
 		{
 			description:      "HandleRecords: Invalid number of params",
 			expectedResponse: "Invalid record command. Available command is 'share'.",
+			setupPlugin:      func(p *Plugin) {},
 		},
 		{
 			description:      "HandleRecords: Unknown command",
 			params:           []string{"invalidCommand"},
 			expectedResponse: "Unknown subcommand invalidCommand",
+			setupPlugin:      func(p *Plugin) {},
+		},
+		{
+			description: "HandleRecords: share command",
+			params:      []string{"share"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleSearchAndShare", func(*Plugin, *model.CommandArgs) string {
+					return "share command executed successfully"
+				})
+			},
+			expectedResponse: "share command executed successfully",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
+			testCase.setupPlugin(&p)
 			resp := p.handleRecords(args, testCase.params, mock_plugin.NewClient(t), true)
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
@@ -663,7 +748,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleListSubscriptions(args, testCase.params, c, true)
+			resp := p.HandleListSubscriptions(args, testCase.params, c, true)
 
 			// This is used to wait for goroutine to finish.
 			time.Sleep(100 * time.Millisecond)
@@ -748,7 +833,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleDeleteSubscription(args, testCase.params, c, true)
+			resp := p.HandleDeleteSubscription(args, testCase.params, c, true)
 			assert.EqualValues(testCase.expectedError, resp)
 			time.Sleep(100 * time.Millisecond)
 		})
@@ -767,7 +852,7 @@ func TestHandleSubscribe(t *testing.T) {
 		assert := assert.New(t)
 		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 		p.SetAPI(mockAPI)
-		resp := p.handleSubscribe(args)
+		resp := p.HandleSubscribe(args)
 		assert.EqualValues("", resp)
 	})
 }
@@ -841,7 +926,7 @@ func TestHandleEditSubscription(t *testing.T) {
 			testCase.setupPlugin()
 			p.SetAPI(mockAPI)
 
-			resp := p.handleEditSubscription(args, testCase.params, c, true)
+			resp := p.HandleEditSubscription(args, testCase.params, c, true)
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}
@@ -859,7 +944,7 @@ func TestHandleCreateIncident(t *testing.T) {
 		assert := assert.New(t)
 		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 		p.SetAPI(mockAPI)
-		resp := p.handleCreateIncident(args)
+		resp := p.HandleCreateIncident(args)
 		assert.EqualValues("", resp)
 	})
 }
@@ -876,7 +961,7 @@ func TestHandleCreateRequest(t *testing.T) {
 		assert := assert.New(t)
 		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 		p.SetAPI(mockAPI)
-		resp := p.handleCreateRequest(args)
+		resp := p.HandleCreateRequest(args)
 		assert.EqualValues("", resp)
 	})
 }
@@ -893,7 +978,7 @@ func TestHandleSearchAndShare(t *testing.T) {
 		assert := assert.New(t)
 		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
 		p.SetAPI(mockAPI)
-		resp := p.handleSearchAndShare(args)
+		resp := p.HandleSearchAndShare(args)
 		assert.EqualValues("", resp)
 	})
 }
