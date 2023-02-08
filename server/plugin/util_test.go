@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	mock_plugin "github.com/mattermost/mattermost-plugin-servicenow/server/mocks"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
@@ -62,6 +63,54 @@ func TestParseSubscriptionsToCommandResponse(t *testing.T) {
 
 			resp := ParseSubscriptionsToCommandResponse(testCase.subscripitons)
 			assert.EqualValues(testCase.expectedResult, resp)
+		})
+	}
+}
+
+func TestGetFiltersFromServiceNow(t *testing.T) {
+	defer monkey.UnpatchAll()
+	for _, testCase := range []struct {
+		description  string
+		subscription *serializer.SubscriptionResponse
+		setupAPI     func(api *plugintest.API)
+		setupClient  func(client *mock_plugin.Client)
+	}{
+		{
+			description:  "GetFiltersFromServiceNow: with no filters",
+			subscription: testutils.GetSubscription(constants.SubscriptionTypeRecord, false),
+			setupAPI:     func(api *plugintest.API) {},
+			setupClient:  func(client *mock_plugin.Client) {},
+		},
+		{
+			description:  "GetFiltersFromServiceNow: with all filters",
+			subscription: testutils.GetSubscription(constants.SubscriptionTypeBulk, true),
+			setupAPI:     func(api *plugintest.API) {},
+			setupClient: func(client *mock_plugin.Client) {
+				client.On("SearchFilterValuesInServiceNow", testutils.GetMockArgumentsWithType("string", 4)...).Twice().Return(
+					testutils.GetServiceNowFilterValues(1), http.StatusOK, nil,
+				)
+			},
+		},
+		{
+			description:  "GetFiltersFromServiceNow: error in searching filter values",
+			subscription: testutils.GetSubscription(constants.SubscriptionTypeBulk, true),
+			setupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Once()
+			},
+			setupClient: func(client *mock_plugin.Client) {
+				client.On("SearchFilterValuesInServiceNow", testutils.GetMockArgumentsWithType("string", 4)...).Once().Return(
+					nil, http.StatusInternalServerError, fmt.Errorf("failed to get the filter values"),
+				)
+			},
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			testCase.setupClient(client)
+			testCase.setupAPI(api)
+			defer api.AssertExpectations(t)
+			p.GetFiltersFromServiceNow(testCase.subscription, client, nil, true)
 		})
 	}
 }
