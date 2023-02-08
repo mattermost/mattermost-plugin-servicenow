@@ -86,7 +86,7 @@ func TestGetFiltersFromServiceNow(t *testing.T) {
 			subscription: testutils.GetSubscription(constants.SubscriptionTypeBulk, true),
 			setupAPI:     func(api *plugintest.API) {},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("SearchFilterValuesInServiceNow", testutils.GetMockArgumentsWithType("string", 4)...).Return(
+				client.On("SearchFilterValuesInServiceNow", testutils.GetMockArgumentsWithType("string", 4)...).Twice().Return(
 					testutils.GetServiceNowFilterValues(1), http.StatusOK, nil,
 				)
 			},
@@ -95,10 +95,10 @@ func TestGetFiltersFromServiceNow(t *testing.T) {
 			description:  "GetFiltersFromServiceNow: error in searching filter values",
 			subscription: testutils.GetSubscription(constants.SubscriptionTypeBulk, true),
 			setupAPI: func(api *plugintest.API) {
-				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...)
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Once()
 			},
 			setupClient: func(client *mock_plugin.Client) {
-				client.On("SearchFilterValuesInServiceNow", testutils.GetMockArgumentsWithType("string", 4)...).Return(
+				client.On("SearchFilterValuesInServiceNow", testutils.GetMockArgumentsWithType("string", 4)...).Once().Return(
 					nil, http.StatusInternalServerError, fmt.Errorf("failed to get the filter values"),
 				)
 			},

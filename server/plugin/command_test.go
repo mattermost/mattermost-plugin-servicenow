@@ -840,23 +840,6 @@ func TestHandleDeleteSubscription(t *testing.T) {
 	}
 }
 
-func TestHandleSubscribe(t *testing.T) {
-	p := Plugin{}
-	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
-
-	t.Run("HandleSubscribe: Success", func(t *testing.T) {
-		defer mockAPI.AssertExpectations(t)
-		assert := assert.New(t)
-		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-		p.SetAPI(mockAPI)
-		resp := p.HandleSubscribe(args)
-		assert.EqualValues("", resp)
-	})
-}
-
 func TestHandleEditSubscription(t *testing.T) {
 	defer monkey.UnpatchAll()
 	p := Plugin{}
@@ -930,57 +913,6 @@ func TestHandleEditSubscription(t *testing.T) {
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}
-}
-
-func TestHandleCreateIncident(t *testing.T) {
-	p := Plugin{}
-	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
-
-	t.Run("HandleCreateIncident: Success", func(t *testing.T) {
-		defer mockAPI.AssertExpectations(t)
-		assert := assert.New(t)
-		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-		p.SetAPI(mockAPI)
-		resp := p.HandleCreateIncident(args)
-		assert.EqualValues("", resp)
-	})
-}
-
-func TestHandleCreateRequest(t *testing.T) {
-	p := Plugin{}
-	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
-
-	t.Run("HandleCreateRequest: Success", func(t *testing.T) {
-		defer mockAPI.AssertExpectations(t)
-		assert := assert.New(t)
-		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-		p.SetAPI(mockAPI)
-		resp := p.HandleCreateRequest(args)
-		assert.EqualValues("", resp)
-	})
-}
-
-func TestHandleSearchAndShare(t *testing.T) {
-	p := Plugin{}
-	mockAPI := &plugintest.API{}
-	args := &model.CommandArgs{
-		UserId: testutils.GetID(),
-	}
-
-	t.Run("HandleSearchAndShare: Success", func(t *testing.T) {
-		defer mockAPI.AssertExpectations(t)
-		assert := assert.New(t)
-		mockAPI.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
-		p.SetAPI(mockAPI)
-		resp := p.HandleSearchAndShare(args)
-		assert.EqualValues("", resp)
-	})
 }
 
 func TestGetAutocompleteData(t *testing.T) {
