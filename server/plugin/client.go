@@ -259,7 +259,7 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 	}
 
 	if len(userList.UserDetails) == 0 {
-		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow instance %s with email %s", c.plugin.getConfiguration().ServiceNowBaseURL, userEmail)
+		return nil, statusCode, fmt.Errorf("please make sure your email address on your Mattermost account matches the email in your ServiceNow account")
 	}
 
 	if len(userList.UserDetails) > 1 {
