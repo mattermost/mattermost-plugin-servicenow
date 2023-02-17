@@ -130,6 +130,7 @@ func (p *Plugin) OnConfigurationChange() error {
 		return errors.Wrap(err, "failed to validate configuration")
 	}
 
+	oldEncryptionSecret := p.getConfiguration().EncryptionSecret
 	mattermostSiteURL := p.API.GetConfig().ServiceSettings.SiteURL
 	if mattermostSiteURL == nil {
 		return errors.New("plugin requires Mattermost Site URL to be set")
@@ -141,5 +142,10 @@ func (p *Plugin) OnConfigurationChange() error {
 	configuration.PluginID = manifest.ID
 
 	p.setConfiguration(configuration)
+
+	if oldEncryptionSecret != "" && oldEncryptionSecret != p.getConfiguration().EncryptionSecret {
+		go p.store.DeleteUserTokenOnEncryptionSecretChange()
+	}
+
 	return nil
 }

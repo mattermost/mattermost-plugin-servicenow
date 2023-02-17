@@ -62,7 +62,7 @@
                 "key": "EncryptionSecret",
                 "display_name": "Encryption Secret:",
                 "type": "generated",
-                "help_text": "The secret key used to encrypt and decrpyt OAuth token.",
+                "help_text": "The secret key used to encrypt and decrpyt OAuth token.\nRegenerating the secret will require all users to re-connect their accounts to ServiceNow.",
                 "placeholder": "",
                 "default": null
             },
