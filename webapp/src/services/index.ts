@@ -153,6 +153,13 @@ const pluginApi = createApi({
                 method: Constants.pluginApiServiceConfigs.getTableFields.method,
             }),
         }),
+        [Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName]: builder.query<ConnectedState, void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getConnectedUser.path,
+                method: Constants.pluginApiServiceConfigs.getConnectedUser.method,
+            }),
+        }),
     }),
 });
 
