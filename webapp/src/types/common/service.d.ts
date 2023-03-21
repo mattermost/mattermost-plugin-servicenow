@@ -19,7 +19,8 @@ type ApiServiceName =
     'createIncident' |
     'getIncidentFields' |
     'getFilterData' |
-    'getTableFields';
+    'getTableFields' |
+    'getConnectedUser';
 
 type PluginApiService = {
     path: string,

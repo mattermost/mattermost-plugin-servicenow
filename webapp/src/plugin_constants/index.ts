@@ -439,6 +439,11 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'GET',
         apiServiceName: 'getTableFields',
     },
+    getConnectedUser: {
+        path: '/connected',
+        method: 'GET',
+        apiServiceName: 'getConnectedUser',
+    },
 };
 
 export const PanelDefaultHeights = {
