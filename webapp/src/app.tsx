@@ -5,7 +5,7 @@ import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
 
-import {setConnected} from './reducers/connectedState';
+import {setConnected} from 'src/reducers/connectedState';
 
 const GetConfig = (): JSX.Element => {
     const {makeApiRequest, getApiState} = usePluginApi();
