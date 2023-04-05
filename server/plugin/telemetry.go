@@ -38,7 +38,7 @@ func (p *Plugin) initializeTelemetry() {
 		p.API.GetServerVersion(),
 		manifest.ID,
 		manifest.Version,
-		"github",
+		"servicenow",
 		telemetry.NewTrackerConfig(p.API.GetConfig()),
 		telemetry.NewLogger(p.API),
 	)
