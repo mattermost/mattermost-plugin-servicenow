@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/telemetry"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -27,6 +28,11 @@ type Plugin struct {
 	router          *mux.Router
 	store           Store
 	CommandHandlers map[string]CommandHandleFunc
+
+	// Telemetry package copied inside repository, should be changed
+	// to plugin-api's one  after migrating to mattermost-sever/v6
+	telemetryClient telemetry.Client
+	tracker         telemetry.Tracker
 }
 
 // NewPlugin returns an instance of a Plugin.

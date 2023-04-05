@@ -187,6 +187,8 @@ func (p *Plugin) httpOAuth2Complete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p.TrackUserEvent("account_connected", mattermostUserID, nil)
+
 	p.API.PublishWebSocketEvent(
 		constants.WSEventConnect,
 		nil,
