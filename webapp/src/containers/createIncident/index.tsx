@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {CustomModal as Modal, InputField as Input, Dropdown, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
+import {CustomModal as Modal, InputField as Input, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
 
@@ -28,8 +28,6 @@ import './styles.scss';
 const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
     const [description, setDescription] = useState<string>('');
-    const [impact, setImpact] = useState<string | null>(null);
-    const [urgency, setUrgency] = useState<string | null>(null);
     const [caller, setCaller] = useState<string | null>(null);
     const [channel, setChannel] = useState<string | null>(null);
     const [channelOptions, setChannelOptions] = useState<DropdownOptionType[]>([]);
@@ -38,8 +36,6 @@ const CreateIncident = () => {
     const [subscriptionPayload, setSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
     const [showChannelPanel, setShowChannelPanel] = useState(false);
     const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
-    const [impactOptions, setImpactOptions] = useState<DropdownOptionType[]>([]);
-    const [urgencyOptions, setUrgencyOptions] = useState<DropdownOptionType[]>([]);
     const [showChannelValidationError, setShowChannelValidationError] = useState<boolean>(false);
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
@@ -59,8 +55,6 @@ const CreateIncident = () => {
     const resetFieldStates = useCallback(() => {
         setShortDescription('');
         setDescription('');
-        setImpact(null);
-        setUrgency(null);
         setCaller(null);
         setChannelOptions([]);
         setApiError(null);
@@ -92,11 +86,6 @@ const CreateIncident = () => {
     };
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
-
-    const getIncidentFieldsState = () => {
-        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName);
-        return {isLoading, data: data as IncidentFieldsData[]};
-    };
 
     const getIncidentState = () => {
         const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
@@ -135,14 +124,6 @@ const CreateIncident = () => {
             channel_id: channel ?? currentChannelId,
         };
 
-        if (impact) {
-            payload.impact = parseInt(impact, 10);
-        }
-
-        if (urgency) {
-            payload.urgency = parseInt(urgency, 10);
-        }
-
         setIncidentPayload(payload);
         makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, payload);
     };
@@ -155,12 +136,6 @@ const CreateIncident = () => {
         setApiError(error);
         setShowResultPanel(true);
     };
-
-    useApiRequestCompletionState({
-        serviceName: Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName,
-        handleSuccess: () => Utils.getImpactAndUrgencyOptions(setImpactOptions, setUrgencyOptions, incidentFieldsData),
-        handleError,
-    });
 
     useApiRequestCompletionState({
         serviceName: Constants.pluginApiServiceConfigs.createIncident.apiServiceName,
@@ -215,12 +190,13 @@ const CreateIncident = () => {
 
         if (open && getGlobalModalState(pluginState).data) {
             const {description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
-            setDescription(reduxStateDescription);
-        }
-
-        if (open && refetchIncidentFields) {
-            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName);
-            setRefetchIncidentFields(false);
+            if (reduxStateDescription.length > Constants.MaxShortDescriptionLimit) {
+                setDescription(reduxStateDescription);
+            } else if (reduxStateDescription.length > Constants.MaxShortDescriptionCharactersView) {
+                setShortDescription(reduxStateDescription.slice(0, Constants.MaxShortDescriptionCharactersView) + '...');
+            } else {
+                setShortDescription(reduxStateDescription);
+            }
         }
     }, [open, refetchIncidentFields]);
 
@@ -231,10 +207,9 @@ const CreateIncident = () => {
     }, [channel]);
 
     // Get services data
-    const {isLoading: incidentFieldsLoading, data: incidentFieldsData} = getIncidentFieldsState();
     const {isLoading: createIncidentLoading, data: createIncidentData} = getIncidentState();
     const {isLoading: createSubscriptionLoading} = getSubscriptionState();
-    const showLoader = incidentFieldsLoading || createIncidentLoading || createSubscriptionLoading;
+    const showLoader = createIncidentLoading || createSubscriptionLoading;
     return (
         <Modal
             show={open}
@@ -280,24 +255,6 @@ const CreateIncident = () => {
                                 onChange={handleDescriptionChange}
                                 className='incident-body__text-area'
                                 disabled={showLoader}
-                            />
-                            <Dropdown
-                                placeholder='Select impact'
-                                value={impact}
-                                onChange={setImpact}
-                                options={impactOptions}
-                                disabled={showLoader || !impactOptions.length}
-                                className='margin-top-20'
-                                loadingOptions={!impactOptions.length}
-                            />
-                            <Dropdown
-                                placeholder='Select urgency'
-                                value={urgency}
-                                onChange={setUrgency}
-                                options={urgencyOptions}
-                                disabled={showLoader || !urgencyOptions.length}
-                                className='margin-top-20'
-                                loadingOptions={!urgencyOptions.length}
                             />
                             <CallerPanel
                                 caller={caller}

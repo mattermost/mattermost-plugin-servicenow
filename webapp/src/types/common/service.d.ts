@@ -17,7 +17,6 @@ type ApiServiceName =
     'searchItems' |
     'getUsers' |
     'createIncident' |
-    'getIncidentFields' |
     'getFilterData' |
     'getTableFields' |
     'getConnectedUser';
