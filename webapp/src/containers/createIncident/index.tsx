@@ -37,6 +37,7 @@ const CreateIncident = () => {
     const [showChannelPanel, setShowChannelPanel] = useState(false);
     const [refetchIncidentFields, setRefetchIncidentFields] = useState(true);
     const [showChannelValidationError, setShowChannelValidationError] = useState<boolean>(false);
+    const [senderId, setSenderId] = useState<string>('');
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
@@ -65,6 +66,7 @@ const CreateIncident = () => {
         setShowChannelPanel(false);
         setRefetchIncidentFields(true);
         setShowChannelValidationError(false);
+        setSenderId('');
     }, []);
 
     // Hide the modal and reset the states
@@ -189,7 +191,8 @@ const CreateIncident = () => {
         }
 
         if (open && getGlobalModalState(pluginState).data) {
-            const {description: reduxStateDescription} = getGlobalModalState(pluginState).data as IncidentModalData;
+            const {description: reduxStateDescription, senderId: reduxSenderId} = getGlobalModalState(pluginState).data as IncidentModalData;
+            setSenderId(reduxSenderId);
             if (reduxStateDescription.length > Constants.MaxShortDescriptionLimit) {
                 setDescription(reduxStateDescription);
             } else if (reduxStateDescription.length > Constants.MaxShortDescriptionCharactersView) {
@@ -259,6 +262,7 @@ const CreateIncident = () => {
                             <CallerPanel
                                 caller={caller}
                                 setCaller={setCaller}
+                                senderId={senderId ?? ''}
                                 setApiError={setApiError}
                                 showModalLoader={showLoader}
                                 className={`incident-body__auto-suggest ${caller && 'incident-body__suggestion-chosen'}`}
