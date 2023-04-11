@@ -10,6 +10,7 @@ type CallerPanelProps = {
     className?: string;
     caller: string | null;
     setCaller: (value: string | null) => void;
+    senderId?: string;
     showModalLoader: boolean;
     setApiError: (apiError: APIError | null) => void;
     placeholder?: string;
@@ -19,6 +20,7 @@ const CallerPanel = (({
     className,
     caller,
     setCaller,
+    senderId,
     showModalLoader,
     setApiError,
     placeholder,
@@ -57,6 +59,15 @@ const CallerPanel = (({
         handleSuccess: () => {
             setApiError(null);
             setOptions(data);
+            if (senderId) {
+                const senderDetails = data?.find((c) => c.mattermostUserID === senderId);
+                if (senderDetails) {
+                    handleCallerSelection({
+                        userId: senderDetails.serviceNowUser.sys_id,
+                        userName: senderDetails.username,
+                    });
+                }
+            }
         },
         handleError: setApiError,
     });

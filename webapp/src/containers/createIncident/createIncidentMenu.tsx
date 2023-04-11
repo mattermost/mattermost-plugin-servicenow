@@ -30,6 +30,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
         e.preventDefault();
         const incidentModalData: IncidentModalData = {
             description: post.message,
+            senderId: post.user_id,
         };
         dispatch(setGlobalModalState({modalId: ModalIds.CREATE_INCIDENT, data: incidentModalData}) as Action);
     }, [postId]);
