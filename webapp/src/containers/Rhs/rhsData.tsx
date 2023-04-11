@@ -1,14 +1,15 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {GlobalState} from 'mattermost-webapp/types/store';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
+import {EmptyState, SubscriptionCard, BellIcon, SvgWrapper} from '@brightscout/mattermost-ui-library';
 
+import Chip from 'src/components/chip';
 import Spinner from 'src/components/spinner';
+import SVGIcons from 'src/plugin_constants/icons';
 
-import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionTypeLabelMap, SubscriptionEventLabels} from 'src/plugin_constants';
+import Constants, {SubscriptionEvents, SubscriptionType, RecordType, SubscriptionEventLabels, ModalIds, SupportedFiltersLabelsMap, SupportedFilters} from 'src/plugin_constants';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -18,7 +19,6 @@ import Utils from 'src/utils';
 
 type RhsDataProps = {
     showAllSubscriptions: boolean;
-    setShowAllSubscriptions: (show: boolean) => void;
     totalSubscriptions: SubscriptionData[];
     loadingSubscriptions: boolean;
     handleEditSubscription: (subscriptionData: SubscriptionData) => void;
@@ -27,9 +27,6 @@ type RhsDataProps = {
     isCurrentUserSysAdmin: boolean;
     paginationQueryParams: PaginationQueryParams;
     handlePagination: () => void;
-    filter: SubscriptionFilters;
-    setFilter: (filter: SubscriptionFilters) => void;
-    setResetFilter: (resetFilter: boolean) => void;
 }
 
 type BulkSubscriptionRecordType = Extract<RecordType, RecordType.INCIDENT | RecordType.PROBLEM | RecordType.CHANGE_REQUEST>;
@@ -54,28 +51,54 @@ const RhsData = ({
     const {makeApiRequest, getApiState} = usePluginApi();
     const {currentTeamId} = useSelector((state: GlobalState) => state.entities.teams);
 
-    const getChannelState = useCallback(() => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
-    }, [getApiState, currentTeamId]);
+    const getChannelState = () => {
+        const {data} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: currentTeamId});
+        return {data: data as ChannelData[]};
+    };
 
     const getConfigState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {data} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
+        return {data: data as ConfigData | undefined};
     };
 
     // Fetch channels to show channel name in the subscription card
     useEffect(() => {
-        makeApiRequest(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: currentTeamId});
-    }, [currentTeamId, makeApiRequest]);
+        if (showAllSubscriptions) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: currentTeamId});
+        }
+    }, [showAllSubscriptions]);
 
     const getSubscriptionCardBody = useCallback((subscription: SubscriptionData): SubscriptionCardBody => ({
         labelValuePairs: [{
             label: 'ID',
             value: subscription.sys_id,
         }],
-        list: subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]),
+        filters: subscription.filters_data && getSubscriptionCardFilters(subscription.filters_data),
+        list: subscription.subscription_events ? subscription.subscription_events.split(',').map((event) => SubscriptionEventLabels[event as SubscriptionEvents]) : [],
     }), []);
+
+    const getSubscriptionCardFilters = (filters_data: FiltersData[]): JSX.Element => (
+        <div className='d-flex'>
+            <div className='subscription-card__filter-icon'>
+                <SvgWrapper
+                    width={18}
+                    height={12}
+                    viewBox='0 0 16 16'
+                >
+                    {SVGIcons.filter}
+                </SvgWrapper>
+            </div>
+            <div className='subscription-card__chip-wrapper'>
+                {filters_data.map((filterData) => (
+                    <div key={filterData.filterValue ?? ''}>
+                        <Chip
+                            text={`${SupportedFiltersLabelsMap[filterData.filterType as SupportedFilters]}: ${filterData.filterName}`}
+                        />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 
     const hasMoreSubscriptions = useMemo<boolean>(() => (
         (totalSubscriptions.length - (paginationQueryParams.page * Constants.DefaultPageSize) === Constants.DefaultPageSize)
@@ -103,6 +126,7 @@ const RhsData = ({
         );
     }, [getConfigState().data?.ServiceNowBaseURL]);
 
+    const {data} = getChannelState();
     return (
         <>
             {error && (
@@ -135,18 +159,17 @@ const RhsData = ({
                                 <SubscriptionCard
                                     key={subscription.sys_id}
                                     header={getSubscriptionCardHeader(subscription)}
-                                    label={SubscriptionTypeLabelMap[subscription.type]}
                                     onEdit={() => handleEditSubscription(subscription)}
                                     onDelete={() => handleDeleteClick(subscription)}
                                     cardBody={getSubscriptionCardBody(subscription)}
                                     className='subscription-card'
-                                    channel={showAllSubscriptions ? getChannelState().data.find((ch) => ch.id === subscription.channel_id) : null}
+                                    channel={showAllSubscriptions ? data?.find((ch) => ch.id === subscription.channel_id) : null}
                                 />
                             ))}
                             <div className='rhs-btn-container padding-12 channel-bg'>
                                 <button
                                     className='btn btn-primary rhs-btn plugin-btn'
-                                    onClick={() => dispatch(setGlobalModalState({modalId: 'addSubscription'}))}
+                                    onClick={() => dispatch(setGlobalModalState({modalId: ModalIds.ADD_SUBSCRIPTION}))}
                                 >
                                     {'Add Subscription'}
                                 </button>
@@ -159,7 +182,7 @@ const RhsData = ({
                         title='No Subscriptions Found'
                         buttonConfig={{
                             text: 'Add new Subscription',
-                            action: () => dispatch(setGlobalModalState({modalId: 'addSubscription'})),
+                            action: () => dispatch(setGlobalModalState({modalId: ModalIds.ADD_SUBSCRIPTION})),
                         }}
                         icon={<BellIcon/>}
                     />

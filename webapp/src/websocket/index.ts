@@ -2,10 +2,9 @@ import {Store, Action} from 'redux';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
 
-import {SubscriptionEventsMap} from 'src/plugin_constants';
-
+import {ModalIds, SubscriptionEventsMap} from 'src/plugin_constants';
 import {setConnected} from 'src/reducers/connectedState';
-import {setGlobalModalState, resetGlobalModalState} from 'src/reducers/globalModal';
+import {resetGlobalModalState, setGlobalModalState} from 'src/reducers/globalModal';
 import {refetch} from 'src/reducers/refetchState';
 
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
@@ -25,9 +24,18 @@ export function handleDisconnect(store: Store<GlobalState, Action<Record<string,
     };
 }
 
+export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
+    return (_: WebsocketEventParams) => {
+        const {rhsState, pluggableId} = (store.getState() as GlobalState).views.rhs;
+        if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
+            store.dispatch(refetch() as Action);
+        }
+    };
+}
+
 export function handleOpenAddSubscriptionModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(setGlobalModalState({modalId: 'addSubscription'}) as Action);
+        store.dispatch(setGlobalModalState({modalId: ModalIds.ADD_SUBSCRIPTION}) as Action);
     };
 }
 
@@ -43,45 +51,28 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
             id: data.sys_id,
             recordType: data.record_type as RecordType,
             subscriptionEvents,
+            filters: data.filters,
             userId: data.user_id,
+            filtersData: data.filters_data as unknown as FiltersData[],
         };
-        store.dispatch(setGlobalModalState({modalId: 'editSubscription', data: subscriptionData}) as Action);
-    };
-}
-
-export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
-    return (_: WebsocketEventParams) => {
-        const {rhsState, pluggableId} = (store.getState() as GlobalState).views.rhs;
-        if (rhsState === 'plugin' && pluggableId === rhsComponentId) {
-            store.dispatch(refetch() as Action);
-        }
+        store.dispatch(setGlobalModalState({modalId: ModalIds.EDIT_SUBSCRIPTION, data: subscriptionData}) as Action);
     };
 }
 
 export function handleOpenShareRecordModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(setGlobalModalState({modalId: 'shareRecord'}) as Action);
+        store.dispatch(setGlobalModalState({modalId: ModalIds.SHARE_RECORD}) as Action);
     };
 }
 
-export function handleOpenCommentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
-    return (msg: WebsocketEventParams) => {
-        const {data} = msg;
-        const commentModalData: CommentAndStateModalData = {
-            recordType: data.record_type as RecordType,
-            recordId: data.record_id,
-        };
-        store.dispatch(setGlobalModalState({modalId: 'addOrViewComments', data: commentModalData}) as Action);
+export function handleOpenIncidentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(setGlobalModalState({modalId: ModalIds.CREATE_INCIDENT}) as Action);
     };
 }
 
-export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
-    return (msg: WebsocketEventParams) => {
-        const {data} = msg;
-        const updateStateModalData: CommentAndStateModalData = {
-            recordType: data.record_type as RecordType,
-            recordId: data.record_id,
-        };
-        store.dispatch(setGlobalModalState({modalId: 'updateState', data: updateStateModalData}) as Action);
+export function handleOpenRequestModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(setGlobalModalState({modalId: ModalIds.CREATE_REQUEST}) as Action);
     };
 }

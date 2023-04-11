@@ -2,12 +2,14 @@ import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 import Cookies from 'js-cookie';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
+import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
+
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'src/plugin_constants';
 
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 import {setConnected} from 'src/reducers/connectedState';
@@ -19,6 +21,7 @@ import ChannelPanel from './channelPanel';
 import SubscriptionTypePanel from './subscriptionTypePanel';
 import RecordTypePanel from './recordTypePanel';
 import EventsPanel from './eventsPanel';
+import FiltersPanel from './filtersPanel';
 import SearchRecordsPanel from './searchRecordsPanel';
 
 import './styles.scss';
@@ -37,12 +40,19 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Subscription type panel values
     const [subscriptionType, setSubscriptionType] = useState<SubscriptionType | null>(null);
+    const [editSubscriptionData, setEditSubscriptionData] = useState<EditSubscriptionData | null>(null);
 
     // Record panel values
     const [recordValue, setRecordValue] = useState('');
     const [recordId, setRecordId] = useState<string | null>(null);
     const [suggestionChosen, setSuggestionChosen] = useState(false);
     const [resetRecordPanelStates, setResetRecordPanelStates] = useState(false);
+
+    // Filter panel values
+    const [resetFiltersPanelStates, setResetFiltersPanelStates] = useState(false);
+    const [getTableFields, setGetTableFields] = useState(true);
+    const [filters, setFilters] = useState<FiltersData[]>([]);
+    const [editing, setEditing] = useState(false);
 
     // Record type panel
     const [recordType, setRecordType] = useState<RecordType | null>(null);
@@ -51,18 +61,16 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [subscriptionTypePanelOpen, setSubscriptionTypePanelOpen] = useState(false);
     const [recordTypePanelOpen, setRecordTypePanelOpen] = useState(false);
     const [searchRecordsPanelOpen, setSearchRecordsPanelOpen] = useState(false);
+    const [filtersPanelOpen, setFiltersPanelOpen] = useState(false);
     const [eventsPanelOpen, setEventsPanelOpen] = useState(false);
     const [successPanelOpen, setSuccessPanelOpen] = useState(false);
+    const [showErrorComponent, setShowErrorComponent] = useState(false);
 
     // Events panel values
     const [subscriptionEvents, setSubscriptionEvents] = useState<SubscriptionEvents[]>([]);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
-    const [apiResponseValid, setApiResponseValid] = useState(false);
-
-    // Loaders
-    const [showModalLoader, setShowModalLoader] = useState(false);
 
     // Create subscription payload
     const [createSubscriptionPayload, setCreateSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
@@ -72,7 +80,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [editSubscriptionPayload, setEditSubscriptionPayload] = useState<EditSubscriptionPayload | null>(null);
 
     // usePluginApi hook
-    const {makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequest, makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
 
     // Create refs to access height of the panels and providing height to modal-dialog
     // We've made all the panels absolute positioned to apply animations and because they are absolute positioned, their parent container, which is modal-dialog, won't expand the same as their heights
@@ -80,29 +88,68 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const subscriptionTypePanelRef = createRef<HTMLDivElement>();
     const recordTypePanelRef = createRef<HTMLDivElement>();
     const searchRecordsPanelRef = createRef<HTMLDivElement>();
+    const filtersPanelRef = createRef<HTMLDivElement>();
     const eventsPanelRef = createRef<HTMLDivElement>();
     const resultPanelRef = createRef<HTMLDivElement>();
 
     const dispatch = useDispatch();
 
+    const getTableFieldsState = () => {
+        const {isLoading, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getTableFields.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        return {isLoading, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+    };
+
     // Get create subscription state
     const getCreateSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload);
+        return {isLoading};
     };
 
     // Get edit subscription state
     const getEditSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, editSubscriptionPayload as EditSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading} = getApiState(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, editSubscriptionPayload);
+        return {isLoading};
     };
 
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.createSubscription.apiServiceName,
+        payload: createSubscriptionPayload,
+        handleSuccess: () => {
+            setSuccessPanelOpen(true);
+            dispatch(refetch());
+        },
+        handleError: setApiError,
+    });
+
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.editSubscription.apiServiceName,
+        payload: editSubscriptionPayload,
+        handleSuccess: () => {
+            setSuccessPanelOpen(true);
+            dispatch(refetch());
+        },
+        handleError: setApiError,
+    });
+
+    const {isLoading: createSubscriptionLoading} = getCreateSubscriptionState();
+    const {isLoading: editSubscriptionLoading} = getEditSubscriptionState();
+    const {isLoading: tableFieldsStateLoading, isError: tableFieldsStateError} = getTableFieldsState();
+    const showLoader = createSubscriptionLoading || editSubscriptionLoading;
+
     useEffect(() => {
-        if (open && currentChannelId) {
+        if (!open) {
+            return;
+        }
+
+        if (currentChannelId) {
             setChannel(currentChannelId);
         }
 
-        if (open && subscriptionData) {
+        if (getTableFields) {
+            makeApiRequest(Constants.pluginApiServiceConfigs.getTableFields.apiServiceName, Constants.SERVICENOW_SUBSCRIPTIONS_TABLE);
+        }
+
+        if (subscriptionData) {
             // Set values for channel panel
             setChannel(subscriptionData.channel);
 
@@ -116,41 +163,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setRecordId(subscriptionData.recordId);
             setSuggestionChosen(true);
 
-            // Set initial value for events panel
+            // Set initial values for filters panel
+            setFilters(subscriptionData.filtersData ?? []);
+            setEditing(true);
+
+            // Set initial values for events panel
             setSubscriptionEvents(subscriptionData.subscriptionEvents);
         }
-    }, [open, subscriptionData, currentChannelId]);
-
-    useEffect(() => {
-        const createSubscriptionState = getCreateSubscriptionState();
-
-        if (createSubscriptionState.isLoading) {
-            setApiResponseValid(true);
-        }
-        if (createSubscriptionState.isError && apiResponseValid && createSubscriptionState.error) {
-            setApiError(createSubscriptionState.error);
-        }
-        if (createSubscriptionState.isSuccess && apiResponseValid) {
-            setSuccessPanelOpen(true);
-            dispatch(refetch());
-        }
-        setShowModalLoader(createSubscriptionState.isLoading);
-    }, [getCreateSubscriptionState().isLoading, getCreateSubscriptionState().isError, getCreateSubscriptionState().isSuccess, apiResponseValid]);
-
-    useEffect(() => {
-        const editSubscriptionState = getEditSubscriptionState();
-        if (editSubscriptionState.isLoading) {
-            setApiResponseValid(true);
-        }
-        if (editSubscriptionState.isError && apiResponseValid && editSubscriptionState.error) {
-            setApiError(editSubscriptionState.error);
-        }
-        if (editSubscriptionState.data && apiResponseValid) {
-            setSuccessPanelOpen(true);
-            dispatch(refetch());
-        }
-        setShowModalLoader(editSubscriptionState.isLoading);
-    }, [getEditSubscriptionState().isLoading, getEditSubscriptionState().isError, getEditSubscriptionState().isSuccess]);
+    }, [open, subscriptionData]);
 
     // Reset input field states
     const resetFieldStates = useCallback(() => {
@@ -159,6 +179,11 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setSuggestionChosen(false);
         setRecordType(null);
         setSubscriptionEvents([]);
+        setEditSubscriptionData(null);
+        setFilters([]);
+        setResetFiltersPanelStates(true);
+        setGetTableFields(false);
+        setEditing(false);
     }, []);
 
     // Reset panel states
@@ -166,13 +191,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         setSubscriptionTypePanelOpen(false);
         setRecordTypePanelOpen(false);
         setSearchRecordsPanelOpen(false);
+        setFiltersPanelOpen(false);
         setEventsPanelOpen(false);
         setSuccessPanelOpen(false);
+        setShowErrorComponent(false);
     }, []);
 
     // Reset error states
     const resetError = useCallback(() => {
-        setApiResponseValid(false);
         setApiError(null);
     }, []);
 
@@ -190,7 +216,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         // Resetting opened panel states so that there isn't unnecessary jump from one panel to another while closing the modal
         setTimeout(() => {
             resetPanelStates();
-        }, 500);
+        });
     };
 
     // Handle action when add another subscription button is clicked
@@ -220,21 +246,30 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     useEffect(() => {
         let height;
 
-        if (successPanelOpen || (apiError && apiResponseValid)) {
+        if (successPanelOpen || apiError || showErrorComponent) {
             height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.successPanel;
+            if (showErrorComponent) {
+                height = resultPanelRef.current?.offsetHeight || PanelDefaultHeights.errorPanel;
+            }
 
             setModalDialogHeight(height);
             return;
         }
+
         if (eventsPanelOpen) {
             height = eventsPanelRef.current?.offsetHeight || PanelDefaultHeights.eventsPanel;
-
             setModalDialogHeight(height);
             return;
         }
+
+        if (filtersPanelOpen) {
+            height = filtersPanelRef.current?.offsetHeight || PanelDefaultHeights.filtersPanel;
+            setModalDialogHeight(height);
+            return;
+        }
+
         if (searchRecordsPanelOpen) {
             height = searchRecordsPanelRef.current?.offsetHeight || PanelDefaultHeights.searchRecordPanel;
-
             if (suggestionChosen && height < PanelDefaultHeights.searchRecordPanelExpanded) {
                 height = PanelDefaultHeights.searchRecordPanelExpanded;
             }
@@ -242,28 +277,28 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             setModalDialogHeight(height);
             return;
         }
+
         if (recordTypePanelOpen) {
             height = recordTypePanelRef.current?.offsetHeight || PanelDefaultHeights.recordTypePanel;
-
             setModalDialogHeight(height);
             return;
         }
+
         if (subscriptionTypePanelOpen) {
             height = subscriptionTypePanelRef.current?.offsetHeight || PanelDefaultHeights.subscriptionTypePanel;
-
             setModalDialogHeight(height);
             return;
         }
-        if (!subscriptionTypePanelOpen && !recordTypePanelOpen && !searchRecordsPanelOpen && !eventsPanelOpen) {
-            height = channelPanelRef.current?.offsetHeight || PanelDefaultHeights.channelPanel;
 
+        if (!subscriptionTypePanelOpen && !recordTypePanelOpen && !searchRecordsPanelOpen && !filtersPanelOpen && !eventsPanelOpen) {
+            height = channelPanelRef.current?.offsetHeight || PanelDefaultHeights.channelPanel;
             setModalDialogHeight(height);
         }
-    }, [subscriptionTypePanelOpen, eventsPanelOpen, searchRecordsPanelOpen, recordTypePanelOpen, apiError, apiResponseValid, suggestionChosen, successPanelOpen]);
+    }, [subscriptionTypePanelOpen, eventsPanelOpen, searchRecordsPanelOpen, filtersPanelOpen, recordTypePanelOpen, apiError, suggestionChosen, successPanelOpen]);
 
     // Returns action handler for primary button in the result panel
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError && apiResponseValid) {
+        if (apiError) {
             if (apiError.id === Constants.ApiErrorIdNotConnected || apiError.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
                 return action ? hideModal : 'Close';
@@ -273,21 +308,23 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             return null;
         }
         return action ? addAnotherSubscription : 'Add Another Subscription';
-    }, [apiError, apiResponseValid, subscriptionData, resetFailureState, addAnotherSubscription]);
+    }, [apiError, subscriptionData, resetFailureState, addAnotherSubscription]);
 
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
-        if (apiError && apiResponseValid) {
+        if (apiError) {
             return Utils.getResultPanelHeader(apiError, hideModal);
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }
         return Constants.SubscriptionAddedMsg;
-    }, [apiError, apiResponseValid, subscriptionData]);
+    }, [apiError, subscriptionData]);
 
     // Handles create subscription
     const createSubscription = () => {
         setApiError(null);
+
+        const formattedFilters = Utils.getFormattedFilters(filters);
 
         // Create subscription payload
         const payload: CreateSubscriptionPayload = {
@@ -301,35 +338,58 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             channel_id: channel as string,
         };
 
+        if (formattedFilters) {
+            payload.filters = formattedFilters;
+        }
+
         // Set payload
         setCreateSubscriptionPayload(payload);
 
         // Make API request for creating the subscription
-        makeApiRequest(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, payload);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, payload);
     };
 
     // Handles edit subscription
     const editSubscription = () => {
         setApiError(null);
 
+        const formattedFilters = Utils.getFormattedFilters(filters);
+
         // Edit subscription payload
         const payload: EditSubscriptionPayload = {
             server_url: SiteURL ?? '',
             is_active: true,
-            user_id: subscriptionData?.userId ?? '',
+            user_id: (typeof (subscriptionData) === 'string' ? editSubscriptionData?.userId : subscriptionData?.userId) ?? '',
             type: subscriptionType as SubscriptionType,
             record_type: recordType as RecordType,
             record_id: recordId || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
-            sys_id: subscriptionData?.id as string,
+            sys_id: (typeof (subscriptionData) === 'string' ? subscriptionData : subscriptionData?.id) as string,
         };
+
+        if (formattedFilters) {
+            payload.filters = formattedFilters;
+        }
 
         // Set payload
         setEditSubscriptionPayload(payload);
 
         // Make API request for editing the subscription
-        makeApiRequest(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, payload);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, payload);
+    };
+
+    const handleRecordsPanelOnContinue = () => {
+        if (subscriptionType === SubscriptionType.RECORD) {
+            setSearchRecordsPanelOpen(true);
+            return;
+        }
+
+        if (!tableFieldsStateLoading && tableFieldsStateError) {
+            setEventsPanelOpen(true);
+        } else {
+            setFiltersPanelOpen(true);
+        }
     };
 
     return (
@@ -346,31 +406,30 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onHide={hideModal}
                     showCloseIconInHeader={true}
                 />
-                <ModalLoader loading={showModalLoader}/>
+                <ModalLoader loading={showLoader}/>
                 <ChannelPanel
                     className={`
                         modal__body channel-panel wizard__primary-panel 
                         ${subscriptionTypePanelOpen && 'wizard__primary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__primary-panel--fade-out'}
+                        ${(successPanelOpen || apiError || showErrorComponent) && 'wizard__primary-panel--fade-out'}
                     `}
                     ref={channelPanelRef}
                     onContinue={() => setSubscriptionTypePanelOpen(true)}
                     channel={channel}
                     setChannel={setChannel}
-                    setShowModalLoader={setShowModalLoader}
                     setApiError={setApiError}
-                    setApiResponseValid={setApiResponseValid}
                     channelOptions={channelOptions}
                     setChannelOptions={setChannelOptions}
-                    actionBtnDisabled={showModalLoader}
+                    actionBtnDisabled={showLoader}
                     editing={true}
                     showFooter={true}
+                    required={true}
                 />
                 <SubscriptionTypePanel
                     className={`
                         ${subscriptionTypePanelOpen && 'wizard__secondary-panel--slide-in'}
                         ${(recordTypePanelOpen || searchRecordsPanelOpen || eventsPanelOpen) && 'wizard__secondary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || apiError) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={subscriptionTypePanelRef}
                     onContinue={() => setRecordTypePanelOpen(true)}
@@ -382,11 +441,11 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     className={`
                         modal__body wizard__secondary-panel 
                         ${recordTypePanelOpen && 'wizard__secondary-panel--slide-in'}
-                        ${(searchRecordsPanelOpen || eventsPanelOpen) && 'wizard__secondary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
+                        ${(searchRecordsPanelOpen || filtersPanelOpen || eventsPanelOpen) && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || apiError) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={recordTypePanelRef}
-                    onContinue={() => (subscriptionType === SubscriptionType.RECORD ? setSearchRecordsPanelOpen(true) : setEventsPanelOpen(true))}
+                    onContinue={handleRecordsPanelOnContinue}
                     onBack={() => setRecordTypePanelOpen(false)}
                     recordType={recordType}
                     setRecordType={setRecordType}
@@ -399,7 +458,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                         modal__body search-panel wizard__secondary-panel 
                         ${searchRecordsPanelOpen && 'wizard__secondary-panel--slide-in'}
                         ${eventsPanelOpen && 'wizard__secondary-panel--fade-out'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || apiError) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={searchRecordsPanelRef}
                     onContinue={() => setEventsPanelOpen(true)}
@@ -410,18 +469,33 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     setSuggestionChosen={setSuggestionChosen}
                     recordType={recordType}
                     setApiError={setApiError}
-                    setApiResponseValid={setApiResponseValid}
-                    setShowModalLoader={setShowModalLoader}
                     recordId={recordId}
                     setRecordId={setRecordId}
                     resetStates={resetRecordPanelStates}
                     setResetStates={setResetRecordPanelStates}
                     showFooter={true}
                 />
+                <FiltersPanel
+                    className={`
+                        modal__body wizard__secondary-panel 
+                        ${filtersPanelOpen && 'wizard__secondary-panel--slide-in'}
+                        ${eventsPanelOpen && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || apiError) && 'wizard__secondary-panel--fade-out'}
+                    `}
+                    ref={filtersPanelRef}
+                    onContinue={() => setEventsPanelOpen(true)}
+                    onBack={() => setFiltersPanelOpen(false)}
+                    filters={filters}
+                    setFilters={setFilters}
+                    resetStates={resetFiltersPanelStates}
+                    setResetStates={setResetFiltersPanelStates}
+                    editing={editing}
+                    setEditing={setEditing}
+                />
                 <EventsPanel
                     className={`
                         ${eventsPanelOpen && 'wizard__secondary-panel--slide-in'}
-                        ${(successPanelOpen || (apiResponseValid && apiError)) && 'wizard__secondary-panel--fade-out'}
+                        ${(successPanelOpen || apiError) && 'wizard__secondary-panel--fade-out'}
                     `}
                     ref={eventsPanelRef}
                     onContinue={subscriptionData ? editSubscription : createSubscription}
@@ -432,13 +506,14 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     subscriptionType={subscriptionType as SubscriptionType}
                     record={recordValue}
                     recordType={recordType as RecordType}
-                    continueBtnDisabled={showModalLoader || !subscriptionEvents.length}
-                    backBtnDisabled={showModalLoader}
+                    filters={filters}
+                    continueBtnDisabled={showLoader || !subscriptionEvents.length}
+                    backBtnDisabled={showLoader}
                 />
                 <ResultPanel
-                    className={`${(successPanelOpen || (apiError && apiResponseValid)) && 'wizard__secondary-panel--slide-in'}`}
+                    className={`${(successPanelOpen || apiError || showErrorComponent) && 'wizard__secondary-panel--slide-in'}`}
                     ref={resultPanelRef}
-                    iconClass={apiError && apiResponseValid ? 'fa-times-circle-o result-panel-icon--error' : null}
+                    iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : null}
                     header={getResultPanelHeader()}
                     primaryBtn={{
                         text: getResultPanelPrimaryBtnActionOrText(false) as string,

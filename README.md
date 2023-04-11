@@ -53,7 +53,7 @@ This plugin contains the following features:
 - Ability to see the existing subscriptions in the Right-Hand Sidebar or slash command.
     * In Right-hand sidebar
 
-        ![image](https://user-images.githubusercontent.com/77336594/201642077-6098b4c6-111f-4364-a75d-b6b43cbdfe12.png)
+        ![image](https://user-images.githubusercontent.com/100013900/208841484-aa7c2792-20d4-41f2-b6fa-81d88d4cc20a.png)
 
     * Using slash command
 
@@ -82,6 +82,22 @@ This plugin contains the following features:
 - Ability to open the "Add and View comments" modal or "Update State" modal through buttons present in a notification post or a shared record post.
 - Supported record types for sharing a record - incident, problem, change_request, kb_knowledge, task, change_task and cert_follow_on_task.
 - Supported record types for updating a record state - incident, task, change_task and cert_follow_on_task.
+- Ability to open the incident modal through UI or slash command and create an incident in ServiceNow.
+- Ability to auto-subscribe to the newly created incident using a toggle switch present inside the incident modal.
+
+    ![image](https://user-images.githubusercontent.com/100013900/209933247-ff39a3f8-7f77-47b2-a97b-0329d56ad031.png)
+
+- Ability to open the incident modal from post menu actions and auto-fill the "Short description" and "Description" fields with the post data.
+
+    ![image](https://user-images.githubusercontent.com/100013900/205903818-2b5b40ca-10a1-486c-bed1-c0c766bc0eff.png)
+
+- Ability to open the request modal through UI or slash command and begin a catalog request in ServiceNow.
+
+    ![image](https://user-images.githubusercontent.com/100013900/208844538-a74ded9c-435f-40c5-bab4-8e03e4bef984.png)
+
+- Feature to open the "Incident" modal, "Request" modal, and "Share record" modal using a menu present in the RHS.
+
+    ![image](https://user-images.githubusercontent.com/100013900/206096719-54994d12-e0c8-4673-976a-cd5cb54ee9a2.png)
 
 ## Installation
 

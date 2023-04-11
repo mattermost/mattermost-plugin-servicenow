@@ -1,17 +1,16 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
-import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
+import {ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
-import Constants, {RecordType} from 'src/plugin_constants';
+import Constants, {RecordType, TypesContainingLink} from 'src/plugin_constants';
 
-import Utils, {getLinkData, validateKeysContainingLink} from 'src/utils';
+import Utils from 'src/utils';
 
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 type SearchRecordsPanelProps = {
     className?: string;
-    error?: string;
     onContinue?: () => void;
     onBack?: () => void;
     actionBtnDisabled?: boolean;
@@ -23,8 +22,6 @@ type SearchRecordsPanelProps = {
     setRecordData?: (value: RecordData | null) => void;
     recordType: RecordType | null;
     setApiError: (error: APIError | null) => void;
-    setApiResponseValid?: (valid: boolean) => void;
-    setShowModalLoader: (show: boolean) => void;
     recordId: string | null;
     setRecordId: (recordId: string | null) => void;
     resetStates: boolean;
@@ -38,7 +35,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     onBack,
     onContinue,
     actionBtnDisabled,
-    error,
     recordValue,
     setRecordValue,
     suggestionChosen,
@@ -46,7 +42,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     setRecordData,
     recordType,
     setApiError,
-    setApiResponseValid,
     setRecordId,
     recordId,
     resetStates,
@@ -56,20 +51,20 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
-    const {makeApiRequest, getApiState} = usePluginApi();
+    const {makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
     const [searchRecordsPayload, setSearchRecordsPayload] = useState<SearchRecordsParams | null>(null);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [getSuggestionDataPayload, setGetSuggestionDataPayload] = useState<GetRecordParams | null>(null);
     const [disabledInput, setDisabledInput] = useState(false);
 
     const getRecordsSuggestions = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload as SearchRecordsParams);
-        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload);
+        return {isLoading, data: data as Suggestion[]};
     };
 
     const getRecordDataState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getSuggestionDataPayload as GetRecordParams);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getSuggestionDataPayload);
+        return {isLoading, data: data as RecordData};
     };
 
     // Get the suggestions from the API
@@ -77,7 +72,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         setApiError(null);
         if (recordType) {
             setSearchRecordsPayload({recordType, search: searchFor || ''});
-            makeApiRequest(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, {recordType, search: searchFor || ''});
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, {recordType, search: searchFor || ''});
         } else {
             setSearchRecordsPayload(null);
         }
@@ -87,7 +82,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     const getSuggestionData = (suggestionId: string) => {
         if (recordType) {
             setGetSuggestionDataPayload({recordType, recordId: suggestionId});
-            makeApiRequest(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, {recordType, recordId: suggestionId});
+            makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, {recordType, recordId: suggestionId});
         }
     };
 
@@ -102,7 +97,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         setSuggestions([]);
     }, []);
 
-    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, 500), [getSuggestions]);
+    const debouncedGetSuggestions = useCallback(Utils.debounce(getSuggestions, Constants.DebounceFunctionTimeLimit), [getSuggestions]);
 
     // If "recordId" is provided when the component is mounted, then the subscription is being edited, hence fetch the record data from the API
     useEffect(() => {
@@ -126,45 +121,31 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     }, [resetStates]);
 
-    // Set the default "inputValue" when the subscription is being edited
-    useEffect(() => {
-        const recordDataState = getRecordDataState();
-        if (setRecordData) {
-            setRecordData(recordDataState.data);
-        }
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.searchRecords.apiServiceName,
+        payload: searchRecordsPayload,
+        handleSuccess: () => setSuggestions(recordSuggestionsData),
+        handleError: setApiError,
+    });
 
-        if (recordId && !recordValue) {
-            if (recordDataState.data) {
-                setRecordValue(`${recordDataState.data.number}: ${recordDataState.data.short_description}`);
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.getRecord.apiServiceName,
+        payload: getSuggestionDataPayload,
+        handleSuccess: () => {
+            if (setRecordData) {
+                setRecordData(recordData);
+            }
+
+            if (recordId && !recordValue) {
+                setRecordValue(`${recordData.number}: ${recordData.short_description}`);
                 setDisabledInput(false);
             }
-        }
-    }, [getRecordDataState().isSuccess]);
+        },
+        handleError: setApiError,
+    });
 
-    // Handle API state updates in the suggestions
-    useEffect(() => {
-        const searchSuggestionsState = getRecordsSuggestions();
-        if (searchSuggestionsState.isLoading && setApiResponseValid) {
-            setApiResponseValid(true);
-        }
-        if (searchSuggestionsState.isError && searchSuggestionsState.error) {
-            setApiError(searchSuggestionsState.error);
-        }
-        if (searchSuggestionsState.data) {
-            setSuggestions(searchSuggestionsState.data);
-        }
-    }, [getRecordsSuggestions().isLoading, getRecordsSuggestions().isError, getRecordsSuggestions().isSuccess]);
-
-    // Handle API state updates while fetching record data
-    useEffect(() => {
-        const recordDataState = getRecordDataState();
-        if (recordDataState.isLoading && setApiResponseValid) {
-            setApiResponseValid(true);
-        }
-        if (recordDataState.isError && recordDataState.error) {
-            setApiError(recordDataState.error);
-        }
-    }, [getRecordDataState().isLoading, getRecordDataState().isError]);
+    const {isLoading: recordSuggestionsLoading, data: recordSuggestionsData} = getRecordsSuggestions();
+    const {isLoading: recordDataLoading, data: recordData} = getRecordDataState();
 
     // Hide error state once the value is valid
     useEffect(() => {
@@ -216,33 +197,6 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
         }
     };
 
-    // Returns value for record data header
-    const getRecordValueForHeader = (key: RecordDataKeys): string | JSX.Element | null => {
-        const value = getRecordDataState().data?.[key];
-
-        if (!value) {
-            return null;
-        } else if (typeof value === 'string') {
-            if (value === Constants.EmptyFieldsInServiceNow || !validateKeysContainingLink(key)) {
-                return value;
-            }
-
-            const data: LinkData = getLinkData(value);
-            return (
-                <a
-                    href={data.link}
-                    target='_blank'
-                    rel='noreferrer'
-                    className='btn btn-link padding-0'
-                >
-                    {data.display_value}
-                </a>
-            );
-        }
-
-        return null;
-    };
-
     return (
         <div
             className={className}
@@ -261,7 +215,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     required={true}
                     error={validationMsg || validationFailed}
                     className='search-panel__auto-suggest margin-bottom-30'
-                    loadingSuggestions={getRecordsSuggestions().isLoading || (getRecordDataState().isLoading && disabledInput)}
+                    loadingSuggestions={recordSuggestionsLoading || (recordDataLoading && disabledInput)}
                     charThresholdToShowSuggestions={Constants.DefaultCharThresholdToShowSuggestions}
                     disabled={disabledInput || disabled}
                 />
@@ -274,7 +228,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key as TypesContainingLink, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
                                 </li>
                             ))
                         ) : (
@@ -284,13 +238,12 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                                     className='d-flex align-items-center search-panel__description-item margin-bottom-10'
                                 >
                                     <span className='search-panel__description-header margin-right-10 text-ellipsis'>{header.label}</span>
-                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : getRecordValueForHeader(header.key) || 'N/A'}</span>
+                                    <span className='search-panel__description-text channel-text wt-500 text-ellipsis'>{getRecordDataState().isLoading ? <SkeletonLoader/> : Utils.getRecordValueForHeader(header.key as TypesContainingLink, getRecordDataState().data?.[header.key]) || 'N/A'}</span>
                                 </li>
                             ))
                         )}
                     </ul>
                 )}
-                <ModalSubtitleAndError error={error}/>
             </div>
             {showFooter && (
                 <ModalFooter
@@ -298,8 +251,8 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
                     onConfirm={handleContinue}
                     cancelBtnText='Back'
                     confirmBtnText='Continue'
-                    confirmDisabled={actionBtnDisabled || getRecordDataState().isLoading}
-                    cancelDisabled={actionBtnDisabled || getRecordDataState().isLoading}
+                    confirmDisabled={actionBtnDisabled || recordDataLoading}
+                    cancelDisabled={actionBtnDisabled || recordDataLoading}
                 />
             )}
         </div>

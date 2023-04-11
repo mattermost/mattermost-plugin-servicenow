@@ -36,6 +36,7 @@ type CreateSubscriptionPayload = {
     record_id: string;
     subscription_events: string;
     channel_id: string;
+    filters?: string;
 }
 
 type FetchSubscriptionsParams = {
@@ -55,6 +56,7 @@ type EditSubscriptionPayload = {
     subscription_events: string;
     channel_id: string;
     sys_id: string;
+    filters?: string;
 }
 
 type CommentsPayload = {
@@ -69,6 +71,15 @@ type ShareRecordPayload = {
     channel_id: string;
 }
 
+type IncidentPayload = {
+    short_description: string;
+    description: string;
+    urgency?: number;
+    impact?: number;
+    caller_id: string;
+    channel_id: string;
+}
+
 interface PaginationQueryParams {
     page: number;
     per_page: number;
@@ -76,4 +87,15 @@ interface PaginationQueryParams {
 
 type SubscriptionFilters = {
     createdBy: string,
+}
+
+type SearchItemsParams = {
+    search: string;
+    perPage?: number;
+}
+
+type SearchFilterItemsParams = {
+    search: string;
+    filter?: string;
+    perPage?: number;
 }

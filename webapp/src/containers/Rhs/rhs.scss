@@ -81,6 +81,12 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
+  .rhs-menu-popover {
+    right: 12px;
+    width: 310px;
+    padding: 0;
+  }
+
   .toggle-class {
     .toggle-switch-container {
       border: none;
@@ -109,25 +115,20 @@
     .channel-icon {
       position: static;
     }
-  }
 
-  .share-record-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 30px;
-    width: 88px;
-    height: 40px;
-    border-radius: 4px;
-
-    &__without-filter {
-      margin-left: auto;
+    &__label {
+      padding-left: 0 !important;
     }
-  }
 
-  .share-record-icon {
-    margin-right: 3px;
-    margin-top: 4px;
+    &__filter-icon {
+      margin: 1px 5px 0 -6px;
+    }
+
+    &__chip-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+    }
   }
 
   .configuration-not-enabled-err-state {

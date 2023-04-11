@@ -21,22 +21,25 @@ type SubscriptionPayload struct {
 	IsActive           *bool   `json:"is_active"`
 	SubscriptionEvents *string `json:"subscription_events"`
 	ServerURL          *string `json:"server_url"`
+	Filters            *string `json:"filters"`
 }
 
 type SubscriptionResponse struct {
-	SysID              string `json:"sys_id"`
-	UserID             string `json:"user_id"`
-	UserName           string `json:"-"`
-	ChannelID          string `json:"channel_id"`
-	ChannelName        string `json:"-"`
-	RecordType         string `json:"record_type"`
-	RecordID           string `json:"record_id"`
-	SubscriptionEvents string `json:"subscription_events"`
-	Type               string `json:"type"`
-	ServerURL          string `json:"server_url"`
-	IsActive           string `json:"is_active"`
-	Number             string `json:"number"`
-	ShortDescription   string `json:"short_description"`
+	SysID              string                  `json:"sys_id"`
+	UserID             string                  `json:"user_id"`
+	UserName           string                  `json:"-"`
+	ChannelID          string                  `json:"channel_id"`
+	ChannelName        string                  `json:"-"`
+	RecordType         string                  `json:"record_type"`
+	RecordID           string                  `json:"record_id"`
+	SubscriptionEvents string                  `json:"subscription_events"`
+	Type               string                  `json:"type"`
+	ServerURL          string                  `json:"server_url"`
+	IsActive           string                  `json:"is_active"`
+	Number             string                  `json:"number"`
+	ShortDescription   string                  `json:"short_description"`
+	Filters            string                  `json:"filters"`
+	FiltersData        []*ServiceNowFilterData `json:"filters_data"`
 }
 
 func (s *SubscriptionResponse) GetFormattedSubscription() string {
@@ -50,10 +53,22 @@ func (s *SubscriptionResponse) GetFormattedSubscription() string {
 		subscriptionEvents.WriteString(event)
 	}
 
+	var filtersData string
+	if len(s.FiltersData) == 0 {
+		filtersData = "N/A"
+	} else {
+		for index, filter := range s.FiltersData {
+			filtersData = fmt.Sprintf("%s %s:%s", filtersData, filter.FilterType, filter.FilterName)
+			if index != len(s.FiltersData)-1 {
+				filtersData += ", "
+			}
+		}
+	}
+
 	if s.Type == constants.SubscriptionTypeRecord {
 		return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], s.Number, s.ShortDescription, subscriptionEvents.String(), s.UserName, s.ChannelName)
 	}
-	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), s.UserName, s.ChannelName)
+	return fmt.Sprintf("\n|%s|%s|%s|%s|%s|%s|", s.SysID, constants.FormattedRecordTypes[s.RecordType], subscriptionEvents.String(), s.UserName, s.ChannelName, filtersData)
 }
 
 type SubscriptionResult struct {

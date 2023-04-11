@@ -21,10 +21,12 @@ type ServiceNowEvent struct {
 	Events           string `json:"subscription_events"`
 	Number           string `json:"number"`
 	ShortDescription string `json:"short_description"`
+	Description      string `json:"description"`
 	State            string `json:"state"`
 	Priority         string `json:"priority"`
 	AssignedTo       string `json:"assigned_to"`
 	AssignmentGroup  string `json:"assignment_group"`
+	Service          string `json:"service"`
 	EventOccurred    string `json:"event_occurred"`
 }
 
@@ -38,51 +40,33 @@ func ServiceNowEventFromJSON(data io.Reader) (*ServiceNowEvent, error) {
 }
 
 func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginURL string) *model.Post {
-	post := &model.Post{
-		ChannelId: se.ChannelID,
-		UserId:    botID,
-	}
-
 	if se.AssignedTo == "" {
-		se.AssignedTo = "N/A"
+		se.AssignedTo = constants.DefaultEmptyValue
 	}
 	if se.AssignmentGroup == "" {
-		se.AssignmentGroup = "N/A"
+		se.AssignmentGroup = constants.DefaultEmptyValue
 	}
-
-	var actions []*model.PostAction
-	if constants.RecordTypesSupportingComments[se.RecordType] {
-		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
-			Name: "Add and view comments",
-			Integration: &model.PostActionIntegration{
-				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
-				Context: map[string]interface{}{
-					constants.ContextNameRecordType: se.RecordType,
-					constants.ContextNameRecordID:   se.RecordID,
-				},
-			},
-		})
-	}
-
-	if constants.RecordTypesSupportingStateUpdation[se.RecordType] {
-		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
-			Name: "Update State",
-			Integration: &model.PostActionIntegration{
-				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),
-				Context: map[string]interface{}{
-					constants.ContextNameRecordType: se.RecordType,
-					constants.ContextNameRecordID:   se.RecordID,
-				},
-			},
-		})
+	if se.Service == "" {
+		se.Service = constants.DefaultEmptyValue
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do%%3Fsys_id=%s%%26sysparm_stack=%s_list.do%%3Fsysparm_query=active=true", serviceNowURL, se.RecordType, se.RecordID, se.RecordType)
+
+	if se.Description == "" {
+		se.Description = constants.DefaultEmptyValue
+	}
+
+	if len(se.Description) > constants.MaxDescriptionChars {
+		se.Description = fmt.Sprintf("%s... [see more](%s)", se.Description[:constants.MaxDescriptionChars], titleLink)
+	}
+
 	slackAttachment := &model.SlackAttachment{
 		Title: fmt.Sprintf("[%s](%s): %s", se.Number, titleLink, se.ShortDescription),
 		Fields: []*model.SlackAttachmentField{
+			{
+				Title: "Description",
+				Value: se.Description,
+			},
 			{
 				Title: "Event",
 				Value: constants.FormattedEventNames[se.EventOccurred],
@@ -104,17 +88,31 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 				Short: true,
 			},
 			{
-				Title: "Assigned to",
+				Title: "Assigned To",
 				Value: se.AssignedTo,
 				Short: true,
 			},
 			{
-				Title: "Assignment group",
+				Title: "Assignment Group",
 				Value: se.AssignmentGroup,
 				Short: true,
 			},
+			{
+				Title: "Service",
+				Value: se.Service,
+				Short: true,
+			},
 		},
-		Actions: actions,
+	}
+
+	post := &model.Post{
+		ChannelId: se.ChannelID,
+		UserId:    botID,
+		Type:      constants.CustomNotifictationPost,
+		Props: map[string]interface{}{
+			"record_id":   se.RecordID,
+			"record_type": se.RecordType,
+		},
 	}
 
 	model.ParseSlackAttachment(post, []*model.SlackAttachment{slackAttachment})

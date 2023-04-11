@@ -6,9 +6,11 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
+export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.3.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
+export const REQUEST_BASE_URL = 'com.glideapp.servicecatalog_cat_item_view.do?v=1&sysparm_id=';
+export const SERVICENOW_SUBSCRIPTIONS_TABLE = 'x_830655_mm_std_servicenow_for_mattermost_subscriptions';
 
 const MMCSRF = 'MMCSRF';
 const HeaderCSRFToken = 'X-CSRF-Token';
@@ -17,6 +19,7 @@ const RightSidebarHeader = 'ServiceNow';
 const RhsSubscritpions = 'Subscriptions';
 const ShareRecordButton = 'Share';
 const RhsToggleLabel = 'Show all subscriptions';
+const ChannelPanelToggleLabel = 'Subscribe to the new incident';
 const InvalidAutoCompleteValueMsg = 'Invalid value, please select a value from the suggestions.';
 const ChannelHeaderTooltipText = 'ServiceNow';
 const DefaultCharThresholdToShowSuggestions = 3;
@@ -35,13 +38,32 @@ const DeleteSubscriptionHeading = 'Confirm Subscription Delete';
 const DeleteSubscriptionMsg = 'Are you sure you want to delete the subscription?';
 const RecordSharedMsg = 'Record shared successfully!';
 const StateUpdatedMsg = 'State updated successfully!';
+const IncidentCreatedMsg = 'Incident created successfully!';
 const CharThresholdToSuggestChannel = 0;
+const CharThresholdToSuggestRequest = 4;
 const RequiredMsg = 'Required';
 const NoSubscriptionPresent = 'No more subscriptions present.';
 const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
+const ServiceNowSysIdRegex = '[0-9a-f]{32}';
+const RequestButtonText = 'Submit Request on ServiceNow';
+const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
+const DefaultPerPageParam = 10;
+const DebounceFunctionTimeLimit = 500;
+const MaxShortDescriptionCharactersView = 75;
+const MaxShortDescriptionLimit = 160;
+
+export enum ModalIds {
+    ADD_SUBSCRIPTION = 'addSubscription',
+    EDIT_SUBSCRIPTION = 'editSubscription',
+    SHARE_RECORD = 'shareRecord',
+    ADD_OR_VIEW_COMMENTS = 'addOrViewComments',
+    UPDATE_STATE = 'updateState',
+    CREATE_INCIDENT = 'createIncident',
+    CREATE_REQUEST = 'createRequest',
+}
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -66,6 +88,16 @@ export enum RecordType {
     CHANGE_TASK = 'change_task',
     FOLLOW_ON_TASK = 'cert_follow_on_task',
 }
+
+export enum SupportedFilters {
+    ASSIGNMENT_GROUP = 'assignment_group',
+    SERVICE = 'business_service',
+}
+
+export const SupportedFiltersMap: Record<SupportedFilters, string> = {
+    [SupportedFilters.ASSIGNMENT_GROUP]: '"assignment_group"',
+    [SupportedFilters.SERVICE]: '"business_service"',
+};
 
 export const SubscriptionEventsMap: Record<string, SubscriptionEvents> = {
     created: SubscriptionEvents.CREATED,
@@ -93,7 +125,6 @@ export const SubscriptionTypeLabelMap: Record<SubscriptionType, string> = {
 export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
-    [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.KNOWLEDGE]: 'Knowledge',
     [RecordType.TASK]: 'Task',
@@ -135,31 +166,49 @@ const shareRecordTypeOptions: DropdownOptionType[] = recordTypeOptions.concat([
     },
 ]);
 
-export enum RecordDataLabelConfigKey {
+export enum RecordDataConfigKeys {
     SHORT_DESCRIPTION = 'short_description',
     STATE = 'state',
     PRIORITY = 'priority',
     ASSIGNED_TO = 'assigned_to',
     ASSIGNMENT_GROUP = 'assignment_group',
+    SERVICE = 'business_service',
 }
+
+export enum RecordDataConfigLabels {
+    SHORT_DESCRIPTION = 'Short Description',
+    STATE = 'State',
+    PRIORITY = 'Priority',
+    ASSIGNED_TO = 'Assigned To',
+    ASSIGNMENT_GROUP = 'Assignment Group',
+    SERVICE = 'Service',
+}
+
+export const SupportedFiltersLabelsMap: Record<SupportedFilters, string> = {
+    [SupportedFilters.ASSIGNMENT_GROUP]: RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    [SupportedFilters.SERVICE]: RecordDataConfigLabels.SERVICE,
+};
 
 // Used in search records panel for rendering the key-value pairs of the record for showing the record details
 const RecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: RecordDataLabelConfigKey.SHORT_DESCRIPTION,
-        label: 'Short Description',
+        key: RecordDataConfigKeys.SHORT_DESCRIPTION,
+        label: RecordDataConfigLabels.SHORT_DESCRIPTION,
     }, {
-        key: RecordDataLabelConfigKey.STATE,
-        label: 'State',
+        key: RecordDataConfigKeys.STATE,
+        label: RecordDataConfigLabels.STATE,
     }, {
-        key: RecordDataLabelConfigKey.PRIORITY,
-        label: 'Priority',
+        key: RecordDataConfigKeys.PRIORITY,
+        label: RecordDataConfigLabels.PRIORITY,
     }, {
-        key: RecordDataLabelConfigKey.ASSIGNED_TO,
-        label: 'Assigned To',
+        key: RecordDataConfigKeys.ASSIGNED_TO,
+        label: RecordDataConfigLabels.ASSIGNED_TO,
     }, {
-        key: RecordDataLabelConfigKey.ASSIGNMENT_GROUP,
-        label: 'Assignment Group',
+        key: RecordDataConfigKeys.ASSIGNMENT_GROUP,
+        label: RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    }, {
+        key: RecordDataConfigKeys.SERVICE,
+        label: RecordDataConfigLabels.SERVICE,
     },
 ];
 
@@ -183,7 +232,7 @@ export const SubscriptionFilterCreatedByOptions = [
     },
 ];
 
-export enum KnowledgeRecordDataLabelConfigKey {
+export enum KnowledgeRecordDataConfigKeys {
     SHORT_DESCRIPTION = 'short_description',
     WORKFLOW_STATE = 'workflow_state',
     AUTHOR = 'author',
@@ -191,22 +240,49 @@ export enum KnowledgeRecordDataLabelConfigKey {
     KNOWLEDGE_BASE = 'kb_knowledge_base',
 }
 
+export enum KnowledgeRecordDataConfigLabels {
+    SHORT_DESCRIPTION = 'Short Description',
+    WORKFLOW_STATE = 'Workflow',
+    AUTHOR = 'Author',
+    CATEGORY = 'Category',
+    KNOWLEDGE_BASE = 'Knowledge Base',
+}
+
 const KnowledgeRecordDataLabelConfig: RecordDataLabelConfigType[] = [
     {
-        key: KnowledgeRecordDataLabelConfigKey.SHORT_DESCRIPTION,
+        key: KnowledgeRecordDataConfigKeys.SHORT_DESCRIPTION,
+        label: KnowledgeRecordDataConfigLabels.SHORT_DESCRIPTION,
+    }, {
+        key: KnowledgeRecordDataConfigKeys.WORKFLOW_STATE,
+        label: KnowledgeRecordDataConfigLabels.WORKFLOW_STATE,
+    }, {
+        key: KnowledgeRecordDataConfigKeys.AUTHOR,
+        label: KnowledgeRecordDataConfigLabels.AUTHOR,
+    }, {
+        key: KnowledgeRecordDataConfigKeys.CATEGORY,
+        label: KnowledgeRecordDataConfigLabels.CATEGORY,
+    }, {
+        key: KnowledgeRecordDataConfigKeys.KNOWLEDGE_BASE,
+        label: KnowledgeRecordDataConfigLabels.KNOWLEDGE_BASE,
+    },
+];
+
+export enum RequestDataLabelConfigKey {
+    SHORT_DESCRIPTION = 'short_description',
+    PRICE = 'price',
+    CATEGORY = 'title',
+}
+
+const RequestDataLabelConfig = [
+    {
+        key: RequestDataLabelConfigKey.SHORT_DESCRIPTION,
         label: 'Short Description',
     }, {
-        key: KnowledgeRecordDataLabelConfigKey.WORKFLOW_STATE,
-        label: 'Workflow',
-    }, {
-        key: KnowledgeRecordDataLabelConfigKey.AUTHOR,
-        label: 'Author',
-    }, {
-        key: KnowledgeRecordDataLabelConfigKey.CATEGORY,
+        key: RequestDataLabelConfigKey.CATEGORY,
         label: 'Category',
     }, {
-        key: KnowledgeRecordDataLabelConfigKey.KNOWLEDGE_BASE,
-        label: 'Knowledge Base',
+        key: RequestDataLabelConfigKey.PRICE,
+        label: 'Price',
     },
 ];
 
@@ -219,6 +295,54 @@ export const SubscriptionEventLabels: Record<SubscriptionEvents, string> = {
     [SubscriptionEvents.ASSIGNED_TO]: 'Assigned to changed',
     [SubscriptionEvents.ASSIGNMENT_GROUP]: 'Assignment group changed',
 };
+
+export const DefaultIncidentImpactAndUrgencyOptions: DropdownOptionType[] = [
+    {
+        value: '1',
+        label: '1 - High',
+    },
+    {
+        value: '2',
+        label: '2 - Medium',
+    },
+    {
+        value: '3',
+        label: '3 - Low',
+    },
+];
+
+export const RecordTypesSupportingComments = new Set([
+    RecordType.INCIDENT,
+    RecordType.PROBLEM,
+    RecordType.CHANGE_REQUEST,
+    RecordType.TASK,
+    RecordType.CHANGE_TASK,
+    RecordType.FOLLOW_ON_TASK,
+]);
+
+export const RecordTypesSupportingStateUpdation = new Set([
+    RecordType.INCIDENT,
+    RecordType.TASK,
+    RecordType.CHANGE_TASK,
+    RecordType.FOLLOW_ON_TASK,
+]);
+
+export const KeysContainingLink = new Set([
+    KnowledgeRecordDataConfigKeys.KNOWLEDGE_BASE,
+    KnowledgeRecordDataConfigKeys.AUTHOR,
+    KnowledgeRecordDataConfigKeys.CATEGORY,
+    RecordDataConfigKeys.ASSIGNED_TO,
+    RecordDataConfigKeys.ASSIGNMENT_GROUP,
+    RecordDataConfigKeys.SERVICE,
+    KnowledgeRecordDataConfigLabels.KNOWLEDGE_BASE,
+    KnowledgeRecordDataConfigLabels.AUTHOR,
+    KnowledgeRecordDataConfigLabels.CATEGORY,
+    RecordDataConfigLabels.ASSIGNED_TO,
+    RecordDataConfigLabels.ASSIGNMENT_GROUP,
+    RecordDataConfigLabels.SERVICE,
+]);
+
+export type TypesContainingLink = KnowledgeRecordDataConfigKeys | RecordDataConfigKeys | KnowledgeRecordDataConfigLabels | RecordDataConfigLabels;
 
 // Plugin api service (RTK query) configs
 const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
@@ -287,6 +411,36 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    searchItems: {
+        path: '/catalog',
+        method: 'GET',
+        apiServiceName: 'searchItems',
+    },
+    getUsers: {
+        path: '/users',
+        method: 'GET',
+        apiServiceName: 'getUsers',
+    },
+    createIncident: {
+        path: '/incident',
+        method: 'POST',
+        apiServiceName: 'createIncident',
+    },
+    getFilterData: {
+        path: '/filter',
+        method: 'GET',
+        apiServiceName: 'getFilterData',
+    },
+    getTableFields: {
+        path: '/fields',
+        method: 'GET',
+        apiServiceName: 'getTableFields',
+    },
+    getConnectedUser: {
+        path: '/connected',
+        method: 'GET',
+        apiServiceName: 'getConnectedUser',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -294,9 +448,11 @@ export const PanelDefaultHeights = {
     subscriptionTypePanel: 195,
     recordTypePanel: 210,
     searchRecordPanel: 210,
+    filtersPanel: 375,
     searchRecordPanelExpanded: 335,
     eventsPanel: 500,
     successPanel: 220,
+    errorPanel: 267,
     panelHeader: 65,
 };
 
@@ -306,18 +462,22 @@ export default {
     ShareRecordButton,
     UPLOAD_SET_FILENAME,
     SERVICENOW_ICON_URL,
+    REQUEST_BASE_URL,
+    SERVICENOW_SUBSCRIPTIONS_TABLE,
     pluginApiServiceConfigs,
     MMCSRF,
     HeaderCSRFToken,
     InvalidAutoCompleteValueMsg,
     RecordDataLabelConfig,
     KnowledgeRecordDataLabelConfig,
+    RequestDataLabelConfig,
     MMUSERID,
     SubscriptionsConfigErrorTitle,
     SubscriptionsConfigErrorSubtitleForAdmin,
     SubscriptionsConfigErrorSubtitleForUser,
     ChannelHeaderTooltipText,
     RhsToggleLabel,
+    ChannelPanelToggleLabel,
     DefaultCharThresholdToShowSuggestions,
     DefaultPage,
     DefaultPageSize,
@@ -337,7 +497,9 @@ export default {
     DeleteSubscriptionMsg,
     RecordSharedMsg,
     StateUpdatedMsg,
+    IncidentCreatedMsg,
     CharThresholdToSuggestChannel,
+    CharThresholdToSuggestRequest,
     RequiredMsg,
     recordTypeOptions,
     shareRecordTypeOptions,
@@ -349,4 +511,11 @@ export default {
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
+    ServiceNowSysIdRegex,
+    RequestButtonText,
+    RequestButtonRedirectText,
+    DefaultPerPageParam,
+    DebounceFunctionTimeLimit,
+    MaxShortDescriptionCharactersView,
+    MaxShortDescriptionLimit,
 };

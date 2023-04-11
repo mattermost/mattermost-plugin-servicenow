@@ -22,7 +22,7 @@ const pluginApi = createApi({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
                 url: `${Constants.pluginApiServiceConfigs.searchRecords.path}/${recordType}`,
                 method: Constants.pluginApiServiceConfigs.searchRecords.method,
-                params: {search, perPage: perPage || 10},
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
             }),
         }),
         [Constants.pluginApiServiceConfigs.getRecord.apiServiceName]: builder.query<RecordData, GetRecordParams>({
@@ -106,6 +106,51 @@ const pluginApi = createApi({
                 url: `${Constants.pluginApiServiceConfigs.updateState.path}/${recordType}/${recordId}`,
                 method: Constants.pluginApiServiceConfigs.updateState.method,
                 body,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.searchItems.apiServiceName]: builder.query<RequestData[], SearchItemsParams>({
+            query: ({search, perPage}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.searchItems.path,
+                method: Constants.pluginApiServiceConfigs.searchItems.method,
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getUsers.apiServiceName]: builder.query<CallerData[], void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getUsers.path,
+                method: Constants.pluginApiServiceConfigs.getUsers.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.createIncident.apiServiceName]: builder.query<RecordData, IncidentPayload>({
+            query: (body) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.createIncident.path,
+                method: Constants.pluginApiServiceConfigs.createIncident.method,
+                body,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getFilterData.apiServiceName]: builder.query<FilterFieldsData[], SearchFilterItemsParams>({
+            query: ({search, filter, perPage}) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getFilterData.path}/${filter}`,
+                method: Constants.pluginApiServiceConfigs.getFilterData.method,
+                params: {search, perPage: perPage || Constants.DefaultPerPageParam},
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getTableFields.apiServiceName]: builder.query<void, string>({
+            query: (table) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: `${Constants.pluginApiServiceConfigs.getTableFields.path}/${table}`,
+                method: Constants.pluginApiServiceConfigs.getTableFields.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName]: builder.query<ConnectedState, void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getConnectedUser.path,
+                method: Constants.pluginApiServiceConfigs.getConnectedUser.method,
             }),
         }),
     }),

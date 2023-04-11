@@ -2,8 +2,6 @@
  * Keep all common types here which are to be used throughout the project
 */
 
-// TODO: Create an enum for the below modal Ids
-type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | null
 type SubscriptionType = import('../../plugin_constants').SubscriptionType;
 type RecordType = import('../../plugin_constants').RecordType;
 
@@ -43,6 +41,7 @@ type Suggestion = {
 type RecordData = {
     assigned_to: string | LinkData;
     assignment_group: string | LinkData;
+    business_service: string | LinkData;
     number: string;
     priority: string;
     short_description: string;
@@ -66,6 +65,8 @@ type SubscriptionData = {
     sys_id: string;
     number: string;
     short_description: string;
+    filters: string;
+    filters_data?: FiltersData[];
 }
 
 type ConfigData = {
@@ -106,9 +107,11 @@ type EditSubscriptionData = {
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
     userId: string;
+    filters: string;
+    filtersData?: FiltersData[];
 }
 
-type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
+type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base' | 'business_service';
 
 type RecordDataLabelConfigType = {
     key: RecordDataKeys;
@@ -122,5 +125,74 @@ type WebsocketEventParams = {
 
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
+    filters?: JSX.Element,
     labelValuePairs?: Array<{ label: string, value: string }>,
+}
+
+type RecordFields = {
+    title: string;
+    value: string | LinkData;
+}
+
+type RecordAttachments = {
+    title: string;
+    title_link: string;
+    pretext: string;
+    fields: RecordFields[];
+}
+
+type ServiceNowUser = {
+    sys_id: string;
+    email: string;
+    user_name: string;
+}
+
+type CallerData = {
+    mattermostUserID: string;
+    username: string;
+    serviceNowUser: ServiceNowUser;
+}
+
+type RequestCategoryData = {
+    sys_id: string,
+    title: string
+}
+
+type RequestData = {
+    sys_id: string,
+    name: string,
+    short_description: string,
+    price: string,
+    category: RequestCategoryData
+}
+
+type IncidentFieldsData = {
+    label: string;
+    value: string;
+    element: string;
+}
+
+type FormatTextOptions = {
+    atMentions?: boolean;
+    markdown?: boolean;
+}
+
+type MessageHtmlToComponentOptions = {
+    mentionHighlight: boolean;
+}
+
+type FilterFieldsData = {
+    sys_id: string;
+    name: string;
+}
+
+type FilterType = {
+    searchFor: string;
+    filter: string;
+}
+
+type FiltersData = {
+    filterType: string;
+    filterValue: string | null;
+    filterName: string | null;
 }

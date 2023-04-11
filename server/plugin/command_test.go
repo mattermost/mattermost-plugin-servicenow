@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -22,20 +23,20 @@ import (
 	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
 
-func (p *Plugin) mockHandleDisconnect(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleDisconnect(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleDisconnect"
 }
 
-func (p *Plugin) mockHandleSubscriptions(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleSubscriptions(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleSubscriptions"
 }
 
-func (p *Plugin) mockHandleDeleteSubscription(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
+func (p *Plugin) mockHandleDeleteSubscription(*model.CommandArgs, []string, Client, bool) string {
 	return "mockHandleDeleteSubscription"
 }
 
-func (p *Plugin) mockHandleSearchAndShare(*plugin.Context, *model.CommandArgs, []string, Client, bool) string {
-	return "mockHandleSearchAndShare"
+func (p *Plugin) mockHandleRecords(*model.CommandArgs, []string, Client, bool) string {
+	return "mockHandleRecords"
 }
 
 func setMockConfigurations(p *Plugin) {
@@ -53,10 +54,10 @@ func TestExecuteCommand(t *testing.T) {
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	p.CommandHandlers = map[string]CommandHandleFunc{
-		constants.CommandDisconnect:     p.mockHandleDisconnect,
-		constants.CommandSubscriptions:  p.mockHandleSubscriptions,
-		constants.CommandUnsubscribe:    p.mockHandleDeleteSubscription,
-		constants.CommandSearchAndShare: p.mockHandleSearchAndShare,
+		constants.CommandDisconnect:    p.mockHandleDisconnect,
+		constants.CommandSubscriptions: p.mockHandleSubscriptions,
+		constants.CommandUnsubscribe:   p.mockHandleDeleteSubscription,
+		constants.CommandRecords:       p.mockHandleRecords,
 	}
 	for _, testCase := range []struct {
 		description      string
@@ -381,7 +382,7 @@ func TestHandleDisconnect(t *testing.T) {
 				return testCase.errorMessage
 			})
 
-			resp := p.handleDisconnect(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
+			resp := p.handleDisconnect(args, []string{}, mock_plugin.NewClient(t), true)
 
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
@@ -389,6 +390,7 @@ func TestHandleDisconnect(t *testing.T) {
 }
 
 func TestHandleSubscriptions(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
@@ -396,84 +398,162 @@ func TestHandleSubscriptions(t *testing.T) {
 	for _, testCase := range []struct {
 		description      string
 		params           []string
+		setupPlugin      func(p *Plugin)
 		expectedResponse string
 	}{
 		{
 			description:      "HandleSubscriptions: Invalid number of params",
+			setupPlugin:      func(p *Plugin) {},
 			expectedResponse: "Invalid subscribe command. Available commands are 'list', 'add', 'edit' and 'delete'.",
 		},
 		{
 			description:      "HandleSubscriptions: Unknown command",
 			params:           []string{"invalidCommand"},
+			setupPlugin:      func(p *Plugin) {},
 			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+		{
+			description: "HandleCreate: list command",
+			params:      []string{"list"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleListSubscriptions", func(*Plugin, *model.CommandArgs, []string, Client, bool) string {
+					return "list command executed successfully"
+				})
+			},
+			expectedResponse: "list command executed successfully",
+		},
+		{
+			description: "HandleCreate: add command",
+			params:      []string{"add"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleSubscribe", func(*Plugin, *model.CommandArgs) string {
+					return "add command executed successfully"
+				})
+			},
+			expectedResponse: "add command executed successfully",
+		},
+		{
+			description: "HandleCreate: edit command",
+			params:      []string{"edit"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleEditSubscription", func(*Plugin, *model.CommandArgs, []string, Client, bool) string {
+					return "edit command executed successfully"
+				})
+			},
+			expectedResponse: "edit command executed successfully",
+		},
+		{
+			description: "HandleCreate: delete command",
+			params:      []string{"delete"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleDeleteSubscription", func(*Plugin, *model.CommandArgs, []string, Client, bool) string {
+					return "delete command executed successfully"
+				})
+			},
+			expectedResponse: "delete command executed successfully",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
 			assert := assert.New(t)
-			resp := p.handleSubscriptions(&plugin.Context{}, args, testCase.params, mock_plugin.NewClient(t), true)
+			testCase.setupPlugin(&p)
+			resp := p.handleSubscriptions(args, testCase.params, mock_plugin.NewClient(t), true)
 			assert.EqualValues(testCase.expectedResponse, resp)
 		})
 	}
 }
 
-func TestHandleSubscribe(t *testing.T) {
+func TestHandleCreate(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
-	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
-		description   string
-		setupAPI      func(*plugintest.API)
-		expectedError string
+		description      string
+		params           []string
+		setupPlugin      func(p *Plugin)
+		expectedResponse string
 	}{
 		{
-			description: "HandleSubscribe: Success",
-			setupAPI: func(a *plugintest.API) {
-				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+			description:      "HandleCreate: Invalid number of params",
+			setupPlugin:      func(p *Plugin) {},
+			expectedResponse: "Invalid create command. Available commands are 'incident' and 'request'.",
+		},
+		{
+			description:      "HandleCreate: Unknown command",
+			params:           []string{"invalidCommand"},
+			setupPlugin:      func(p *Plugin) {},
+			expectedResponse: "Unknown subcommand invalidCommand",
+		},
+		{
+			description: "HandleCreate: incident command",
+			params:      []string{"incident"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleCreateIncident", func(*Plugin, *model.CommandArgs) string {
+					return "incident command executed successfully"
+				})
 			},
+			expectedResponse: "incident command executed successfully",
+		},
+		{
+			description: "HandleCreate: request command",
+			params:      []string{"request"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleCreateRequest", func(*Plugin, *model.CommandArgs) string {
+					return "request command executed successfully"
+				})
+			},
+			expectedResponse: "request command executed successfully",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			defer mockAPI.AssertExpectations(t)
 			assert := assert.New(t)
-			testCase.setupAPI(mockAPI)
-			p.SetAPI(mockAPI)
-
-			resp := p.handleSubscribe(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
-
-			assert.EqualValues(testCase.expectedError, resp)
+			testCase.setupPlugin(&p)
+			resp := p.handleCreate(args, testCase.params, mock_plugin.NewClient(t), true)
+			assert.EqualValues(testCase.expectedResponse, resp)
 		})
 	}
 }
 
-func TestHandleSearchAndShare(t *testing.T) {
+func TestHandleRecords(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
-	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
 		UserId: testutils.GetID(),
 	}
 	for _, testCase := range []struct {
-		description   string
-		setupAPI      func(*plugintest.API)
-		expectedError string
+		description      string
+		params           []string
+		setupPlugin      func(p *Plugin)
+		expectedResponse string
 	}{
 		{
-			description: "HandleSearchAndShare: Success",
-			setupAPI: func(a *plugintest.API) {
-				a.On("PublishWebSocketEvent", mock.AnythingOfType("string"), mock.Anything, mock.AnythingOfType("*model.WebsocketBroadcast")).Return()
+			description:      "HandleRecords: Invalid number of params",
+			expectedResponse: "Invalid record command. Available command is 'share'.",
+			setupPlugin:      func(p *Plugin) {},
+		},
+		{
+			description:      "HandleRecords: Unknown command",
+			params:           []string{"invalidCommand"},
+			expectedResponse: "Unknown subcommand invalidCommand",
+			setupPlugin:      func(p *Plugin) {},
+		},
+		{
+			description: "HandleRecords: share command",
+			params:      []string{"share"},
+			setupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HandleSearchAndShare", func(*Plugin, *model.CommandArgs) string {
+					return "share command executed successfully"
+				})
 			},
+			expectedResponse: "share command executed successfully",
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
-			defer mockAPI.AssertExpectations(t)
 			assert := assert.New(t)
-			testCase.setupAPI(mockAPI)
-			p.SetAPI(mockAPI)
-
-			resp := p.handleSearchAndShare(&plugin.Context{}, args, []string{}, mock_plugin.NewClient(t), true)
-
-			assert.EqualValues(testCase.expectedError, resp)
+			testCase.setupPlugin(&p)
+			resp := p.handleRecords(args, testCase.params, mock_plugin.NewClient(t), true)
+			assert.EqualValues(testCase.expectedResponse, resp)
 		})
 	}
 }
@@ -549,10 +629,10 @@ func TestHandleListSubscriptions(t *testing.T) {
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 				a.On("GetChannel", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError(""),
 				)
 			},
 			setupClient: func(client *mock_plugin.Client) {
@@ -564,12 +644,12 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusOK, "", nil
 				})
 			},
 			isResponse:       true,
-			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
+			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel | Filters | \n| :----|:--------| :--------|:--------|:--------|:---------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 		{
@@ -589,8 +669,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			isResponse:       true,
@@ -603,10 +683,10 @@ func TestHandleListSubscriptions(t *testing.T) {
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError("unable to get the user"),
 				)
 				a.On("GetChannel", mock.AnythingOfType("string")).Return(
-					nil, testutils.GetInternalServerAppError(),
+					nil, testutils.GetInternalServerAppError("unable to get the channel"),
 				)
 			},
 			setupClient: func(client *mock_plugin.Client) {
@@ -615,8 +695,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			isResponse:       true,
@@ -643,12 +723,12 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, string, error) {
+					return http.StatusOK, "", nil
 				})
 			},
 			isResponse:       true,
-			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
+			expectedResponse: fmt.Sprintf("#### Bulk subscriptions\n| Subscription ID | Record Type | Events | Created By | Channel | Filters | \n| :----|:--------| :--------|:--------|:--------|:---------|\n|%s|Problem|Priority changed, State changed|N/A|N/A|N/A|\n#### Record subscriptions\n| Subscription ID | Record Type | Record Number | Record Short Description | Events | Created By | Channel |\n| :----|:--------| :--------| :-----| :--------|:--------|:--------|\n|%s|Problem|PRB0000005|Test description|Priority changed, State changed|N/A|N/A|", testutils.GetServiceNowSysID(), testutils.GetServiceNowSysID()),
 			expectedError:    listSubscriptionsWaitMessage,
 		},
 	} {
@@ -668,7 +748,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleListSubscriptions(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.HandleListSubscriptions(args, testCase.params, c, true)
 
 			// This is used to wait for goroutine to finish.
 			time.Sleep(100 * time.Millisecond)
@@ -753,7 +833,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 				}).Once().Return(&model.Post{})
 			}
 
-			resp := p.handleDeleteSubscription(&plugin.Context{}, args, testCase.params, c, true)
+			resp := p.HandleDeleteSubscription(args, testCase.params, c, true)
 			assert.EqualValues(testCase.expectedError, resp)
 			time.Sleep(100 * time.Millisecond)
 		})
@@ -761,6 +841,7 @@ func TestHandleDeleteSubscription(t *testing.T) {
 }
 
 func TestHandleEditSubscription(t *testing.T) {
+	defer monkey.UnpatchAll()
 	p := Plugin{}
 	mockAPI := &plugintest.API{}
 	args := &model.CommandArgs{
@@ -771,6 +852,7 @@ func TestHandleEditSubscription(t *testing.T) {
 		params        []string
 		setupAPI      func(*plugintest.API)
 		setupClient   func(client *mock_plugin.Client)
+		setupPlugin   func()
 		expectedError string
 	}{
 		{
@@ -781,14 +863,18 @@ func TestHandleEditSubscription(t *testing.T) {
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
-					testutils.GetSubscription(constants.SubscriptionTypeBulk), 0, nil,
+					testutils.GetSubscription(constants.SubscriptionTypeBulk, false), 0, nil,
 				)
+			},
+			setupPlugin: func() {
+				monkey.PatchInstanceMethod(reflect.TypeOf(&p), "GetFiltersFromServiceNow", func(*Plugin, *serializer.SubscriptionResponse, Client, *sync.WaitGroup, bool) {})
 			},
 		},
 		{
 			description:   "HandleEditSubscription: Invalid number of params",
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
+			setupPlugin:   func() {},
 			expectedError: constants.ErrorCommandInvalidNumberOfParams,
 		},
 		{
@@ -796,19 +882,21 @@ func TestHandleEditSubscription(t *testing.T) {
 			params:        []string{"invalidID"},
 			setupAPI:      func(a *plugintest.API) {},
 			setupClient:   func(client *mock_plugin.Client) {},
+			setupPlugin:   func() {},
 			expectedError: invalidSubscriptionIDMessage,
 		},
 		{
 			description: "HandleEditSubscription: Unable to get the subscription",
 			params:      []string{testutils.GetServiceNowSysID()},
 			setupAPI: func(a *plugintest.API) {
-				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 			},
 			setupClient: func(client *mock_plugin.Client) {
 				client.On("GetSubscription", testutils.GetServiceNowSysID()).Return(
 					nil, 0, errors.New("unable to get the subscription"),
 				)
 			},
+			setupPlugin:   func() {},
 			expectedError: genericErrorMessage,
 		},
 	} {
@@ -818,10 +906,10 @@ func TestHandleEditSubscription(t *testing.T) {
 			c := mock_plugin.NewClient(t)
 			testCase.setupAPI(mockAPI)
 			testCase.setupClient(c)
+			testCase.setupPlugin()
 			p.SetAPI(mockAPI)
 
-			resp := p.handleEditSubscription(&plugin.Context{}, args, testCase.params, c, true)
-
+			resp := p.HandleEditSubscription(args, testCase.params, c, true)
 			assert.EqualValues(testCase.expectedError, resp)
 		})
 	}
@@ -846,31 +934,32 @@ func TestParseCommand(t *testing.T) {
 		{
 			description:        "ParseCommand: subscriptions list command",
 			input:              " /servicenow subscriptions   list  me  all_channels ",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandList, constants.FilterCreatedByMe, constants.FilterAllChannels},
 		},
 		{
 			description:        "ParseCommand: subscriptions add command",
 			input:              "/servicenow subscriptions add",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandAdd},
 		},
 		{
 			description:        "ParseCommand: subscriptions edit command",
 			input:              "/servicenow subscriptions edit mockID",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandEdit, "mockID"},
 		},
 		{
 			description:        "ParseCommand: subscriptions delete command",
 			input:              "     /servicenow       subscriptions      delete     mockID    ",
-			expectedAction:     "subscriptions",
+			expectedAction:     constants.CommandSubscriptions,
 			expectedParameters: []string{constants.SubCommandDelete, "mockID"},
 		},
 		{
-			description:    "ParseCommand: share command",
-			input:          "/servicenow share",
-			expectedAction: constants.CommandSearchAndShare,
+			description:        "ParseCommand: records command",
+			input:              "/servicenow records share",
+			expectedAction:     constants.CommandRecords,
+			expectedParameters: []string{constants.SubCommandSearchAndShare},
 		},
 		{
 			description:    "ParseCommand: connect command",

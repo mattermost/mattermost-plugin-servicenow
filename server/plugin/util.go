@@ -99,7 +99,7 @@ func ParseSubscriptionsToCommandResponse(subscriptions []*serializer.Subscriptio
 
 	if bulkSubscriptions.Len() > 0 {
 		sb.WriteString("#### Bulk subscriptions\n")
-		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel |\n| :----|:--------| :--------|:--------|:--------|")
+		sb.WriteString("| Subscription ID | Record Type | Events | Created By | Channel | Filters | \n| :----|:--------| :--------|:--------|:--------|:---------|")
 		sb.WriteString(bulkSubscriptions.String())
 	}
 
@@ -146,12 +146,64 @@ func (p *Plugin) GetRecordFromServiceNowForSubscription(subscription *serializer
 	record, _, err := client.GetRecordFromServiceNow(subscription.RecordType, subscription.RecordID)
 	if err != nil {
 		p.API.LogError("Error in getting record from ServiceNow", "Record type", subscription.RecordType, "Record ID", subscription.RecordID, "Error", err.Error())
-		subscription.Number = "N/A"
-		subscription.ShortDescription = "N/A"
+		subscription.Number = constants.DefaultEmptyValue
+		subscription.ShortDescription = constants.DefaultEmptyValue
 		return
 	}
 	subscription.Number = record.Number
 	subscription.ShortDescription = record.ShortDescription
+}
+
+func (p *Plugin) GetFiltersFromServiceNow(subscription *serializer.SubscriptionResponse, client Client, wg *sync.WaitGroup, getFormatted bool) {
+	if wg != nil {
+		defer wg.Done()
+	}
+
+	if subscription.Filters == "" {
+		return
+	}
+
+	filters := strings.Split(subscription.Filters, ",")
+	for index, filter := range filters {
+		data := strings.Split(filter, ":")
+		filterTypeData, filterValueData := data[0], data[1]
+
+		filterValue := filterValueData[1 : len(filterValueData)-1]
+		if index == len(filters)-1 {
+			filterValue = filterValueData[1 : len(filterValueData)-2]
+		}
+
+		filterType := filterTypeData[1 : len(filterTypeData)-1]
+		if index == 0 {
+			filterType = filterTypeData[2 : len(filterTypeData)-1]
+		}
+
+		var requestURL string
+		if strings.Contains(filterType, constants.FilterAssignmentGroup) {
+			requestURL = constants.PathGetAssignmentGroupsFromServiceNow
+			if getFormatted {
+				filterType = constants.FormattedFilterTypes[constants.FilterAssignmentGroup]
+			}
+		} else {
+			requestURL = constants.PathGetServicesFromServiceNow
+			if getFormatted {
+				filterType = constants.FormattedFilterTypes[constants.FilterService]
+			}
+		}
+
+		filter, _, err := client.SearchFilterValuesInServiceNow(fmt.Sprint(filterValue), fmt.Sprint(constants.DefaultPerPage), fmt.Sprint(constants.DefaultPage), requestURL)
+		if err != nil || len(filter) == 0 {
+			p.API.LogError("Error in getting filters from ServiceNow", "Error", err.Error())
+			subscription.FiltersData = []*serializer.ServiceNowFilterData{}
+			return
+		}
+
+		subscription.FiltersData = append(subscription.FiltersData, &serializer.ServiceNowFilterData{
+			FilterType:  filterType,
+			FilterValue: filter[0].SysID,
+			FilterName:  filter[0].Name,
+		})
+	}
 }
 
 func (p *Plugin) getHelpMessage(header string, isSysAdmin bool) string {
@@ -274,13 +326,27 @@ func (p *Plugin) handleClientError(w http.ResponseWriter, r *http.Request, err e
 		return message
 	}
 
+	if strings.Contains(err.Error(), constants.APIErrorAccessTable) {
+		if w != nil {
+			p.handleAPIError(w, &serializer.APIErrorResponse{ID: constants.APIErrorIDAccessTable, StatusCode: http.StatusUnauthorized, Message: constants.APIErrorAccessTable})
+		}
+
+		return constants.APIErrorAccessTable
+	}
+
 	if w != nil {
 		if statusCode == 0 {
 			statusCode = http.StatusInternalServerError
 		}
+
+		if strings.Contains(err.Error(), constants.ErrorConnectionRefused) {
+			response = constants.ErrorConnectionRefused
+		}
+
 		if response == "" {
 			response = err.Error()
 		}
+
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: statusCode, Message: response})
 	}
 
@@ -308,23 +374,23 @@ func decodeKey(key string) (string, error) {
 	return string(decodedKey), nil
 }
 
-func (p *Plugin) HasChannelPermissions(userID, channelID string) (int, error) {
+func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool) (int, string, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return channelErr.StatusCode, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+		return channelErr.StatusCode, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 	}
 
 	// Check if a channel is direct message or group channel
-	if channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP {
-		return http.StatusBadRequest, fmt.Errorf(constants.ErrorInvalidChannelType)
+	if checkType && (channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP) {
+		return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 
 	// Check if a user is a part of the channel
 	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return channelErr.StatusCode, fmt.Errorf(constants.ErrorInsufficientPermissions)
+		return channelErr.StatusCode, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
 	}
 
-	return http.StatusOK, nil
+	return http.StatusOK, channel.Type, nil
 }

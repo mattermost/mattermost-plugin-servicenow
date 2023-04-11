@@ -1,12 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
 import {GlobalState} from 'mattermost-webapp/types/store';
 
 import {CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
+import useApiRequestCompletionState from 'src/hooks/useApiRequestCompletionState';
 import usePluginApi from 'src/hooks/usePluginApi';
 
 import Constants from 'src/plugin_constants';
@@ -39,11 +38,9 @@ const ShareRecords = () => {
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
 
-    // Loaders
-    const [showModalLoader, setShowModalLoader] = useState(false);
-
     // usePluginApi hook
-    const {pluginState, makeApiRequest, getApiState} = usePluginApi();
+    const {pluginState, makeApiRequestWithCompletionStatus, getApiState} = usePluginApi();
+    const open = isShareRecordModalOpen(pluginState);
 
     const dispatch = useDispatch();
 
@@ -56,15 +53,14 @@ const ShareRecords = () => {
         setChannelOptions([]);
         setShowChannelValidationError(false);
         setApiError(null);
-        setShowModalLoader(false);
         setShareRecordPayload(null);
         setRecordData(null);
         setShowResultPanel(false);
     }, []);
 
     const hideModal = useCallback(() => {
-        resetFieldStates();
         dispatch(resetGlobalModalState());
+        resetFieldStates();
     }, []);
 
     // Opens share record modal
@@ -73,22 +69,22 @@ const ShareRecords = () => {
     }, []);
 
     const getShareRecordState = () => {
-        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, shareRecordPayload as ShareRecordPayload);
-        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading} = getApiState(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, shareRecordPayload as ShareRecordPayload);
+        return {isLoading};
     };
 
-    useEffect(() => {
-        const shareRecordState = getShareRecordState();
-        if (shareRecordState.isError && shareRecordState.error) {
-            setApiError(shareRecordState.error);
-        }
+    useApiRequestCompletionState({
+        serviceName: Constants.pluginApiServiceConfigs.shareRecord.apiServiceName,
+        payload: shareRecordPayload,
+        handleSuccess: () => setShowResultPanel(true),
+        handleError: (error) => {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
 
-        if (shareRecordState.isSuccess) {
-            setShowResultPanel(true);
-        }
-
-        setShowModalLoader(shareRecordState.isLoading);
-    }, [getShareRecordState().isLoading, getShareRecordState().isError, getShareRecordState().isSuccess]);
+            setApiError(error);
+        },
+    });
 
     const shareRecord = () => {
         if (!channel) {
@@ -103,7 +99,7 @@ const ShareRecords = () => {
         };
 
         setShareRecordPayload(payload);
-        makeApiRequest(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, payload);
+        makeApiRequestWithCompletionStatus(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, payload);
     };
 
     // Remove validation error
@@ -113,24 +109,25 @@ const ShareRecords = () => {
         }
     }, [channel, suggestionChosen]);
 
-    // Set the channel when button is clicked
     useEffect(() => {
+        // Set the channel when button is clicked
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
-    }, [currentChannelId, isShareRecordModalOpen(pluginState)]);
+    }, [open]);
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
-        if (apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired) {
-            dispatch(setConnected(false));
+        if (apiError) {
             return action ? hideModal : 'Close';
         }
+
         return action ? handleOpenShareRecordModal : 'Share another record';
     }, [apiError]);
 
+    const {isLoading} = getShareRecordState();
     return (
         <Modal
-            show={isShareRecordModalOpen(pluginState)}
+            show={open}
             onHide={hideModal}
             className='servicenow-modal'
         >
@@ -151,7 +148,7 @@ const ShareRecords = () => {
                         }}
                         secondaryBtn={{
                             text: 'Close',
-                            onClick: apiError?.id === Constants.ApiErrorIdNotConnected || apiError?.id === Constants.ApiErrorIdRefreshTokenExpired ? null : hideModal,
+                            onClick: apiError ? null : hideModal,
                         }}
                         iconClass={apiError ? 'fa-times-circle-o result-panel-icon--error' : ''}
                     />
@@ -171,7 +168,6 @@ const ShareRecords = () => {
                             setSuggestionChosen={setSuggestionChosen}
                             recordType={recordType}
                             setApiError={setApiError}
-                            setShowModalLoader={setShowModalLoader}
                             recordId={recordId}
                             setRecordId={setRecordId}
                             resetStates={resetRecordPanelStates}
@@ -183,23 +179,25 @@ const ShareRecords = () => {
                             <ChannelPanel
                                 channel={channel}
                                 setChannel={setChannel}
-                                setShowModalLoader={setShowModalLoader}
+                                showModalLoader={isLoading}
                                 setApiError={setApiError}
                                 channelOptions={channelOptions}
                                 setChannelOptions={setChannelOptions}
-                                actionBtnDisabled={showModalLoader}
+                                actionBtnDisabled={isLoading}
                                 placeholder='Search channel to share'
                                 validationError={showChannelValidationError}
                                 editing={true}
+                                required={true}
+                                className='padding-top-10'
                             />
                         )}
                         <ModalFooter
                             onConfirm={recordData?.sys_id ? shareRecord : null}
                             confirmBtnText='Share'
-                            confirmDisabled={showModalLoader}
+                            confirmDisabled={isLoading}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
-                            cancelDisabled={showModalLoader}
+                            cancelDisabled={isLoading}
                         />
                     </>
                 )}

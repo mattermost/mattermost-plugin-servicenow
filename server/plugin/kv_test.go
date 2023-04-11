@@ -1,12 +1,15 @@
 package plugin
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
@@ -141,6 +144,96 @@ func TestDeleteUser(t *testing.T) {
 			}
 
 			assert.Nil(err)
+		})
+	}
+}
+
+func TestGetAllUsers(t *testing.T) {
+	defer monkey.UnpatchAll()
+	ps := new(pluginStore)
+	ps.plugin = &Plugin{}
+	ps.userKV = kvstore.NewHashedKeyStore(kvstore.NewPluginStore(&plugintest.API{}), constants.UserKeyPrefix)
+	for _, test := range []struct {
+		description   string
+		setupTest     func()
+		setupAPI      func(*plugintest.API)
+		expectedError string
+	}{
+		{
+			description: "GetAllUsers: success",
+			setupTest: func() {
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
+					return testutils.GetSerializerUser(), nil
+				})
+			},
+			setupAPI: func(a *plugintest.API) {
+				a.On("KVList", testutils.GetMockArgumentsWithType("int", 2)...).Return(
+					[]string{
+						testutils.GetUserKey(true),
+					}, nil,
+				)
+			},
+		},
+		{
+			description: "GetAllUsers: KVList gives error",
+			setupTest:   func() {},
+			setupAPI: func(a *plugintest.API) {
+				a.On("KVList", testutils.GetMockArgumentsWithType("int", 2)...).Return(
+					nil, testutils.GetInternalServerAppError("error in loading the user list"),
+				)
+			},
+			expectedError: "error in loading the user list",
+		},
+		{
+			description: "GetAllUsers: unable to decode the key",
+			setupTest: func() {
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
+					return testutils.GetSerializerUser(), nil
+				})
+			},
+			setupAPI: func(a *plugintest.API) {
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+				a.On("KVList", testutils.GetMockArgumentsWithType("int", 2)...).Return(
+					[]string{
+						testutils.GetUserKey(false),
+					}, nil,
+				)
+			},
+		},
+		{
+			description: "GetAllUsers: unable to load the user",
+			setupTest: func() {
+				monkey.PatchInstanceMethod(reflect.TypeOf(ps), "LoadUser", func(*pluginStore, string) (*serializer.User, error) {
+					return nil, errors.New("unable to load the user")
+				})
+			},
+			setupAPI: func(a *plugintest.API) {
+				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+				a.On("KVList", testutils.GetMockArgumentsWithType("int", 2)...).Return(
+					[]string{
+						testutils.GetUserKey(true),
+					}, nil,
+				)
+			},
+		},
+	} {
+		t.Run(test.description, func(t *testing.T) {
+			mockAPI := &plugintest.API{}
+			defer mockAPI.AssertExpectations(t)
+			assert := assert.New(t)
+			test.setupTest()
+			ps.plugin.API = mockAPI
+			test.setupAPI(mockAPI)
+
+			resp, err := ps.GetAllUsers()
+			if test.expectedError != "" {
+				assert.Contains(err.Error(), test.expectedError)
+				assert.Nil(resp)
+				return
+			}
+
+			assert.Nil(err)
+			assert.NotNil(resp)
 		})
 	}
 }

@@ -31,6 +31,8 @@ type Client interface {
 	GetMe(userEmail string) (*serializer.ServiceNowUser, int, error)
 	CreateIncident(*serializer.IncidentPayload) (*serializer.IncidentResponse, int, error)
 	SearchCatalogItemsInServiceNow(searchTerm, limit, offset string) ([]*serializer.ServiceNowCatalogItem, int, error)
+	SearchFilterValuesInServiceNow(searchTerm, limit, offset, requestURL string) ([]*serializer.ServiceNowFilter, int, error)
+	GetTableFieldsFromServiceNow(tableName string) ([]*serializer.ServiceNowTableFields, int, error)
 }
 
 type client struct {
@@ -156,6 +158,10 @@ func (c *client) EditSubscription(subscriptionID string, subscription *serialize
 // The boolean return type value should be checked only if the error being returned is nil
 func (c *client) CheckForDuplicateSubscription(subscription *serializer.SubscriptionPayload) (bool, int, error) {
 	query := fmt.Sprintf("channel_id=%s^is_active=true^type=%s^record_type=%s^record_id=%s^server_url=%s", *subscription.ChannelID, *subscription.Type, *subscription.RecordType, *subscription.RecordID, *subscription.ServerURL)
+	if *subscription.Type == constants.SubscriptionTypeBulk && subscription.Filters != nil {
+		query = fmt.Sprintf("%s^filters=%s", query, *subscription.Filters)
+	}
+
 	queryParams := url.Values{
 		constants.SysQueryParam:      {query},
 		constants.SysQueryParamLimit: {fmt.Sprint(constants.DefaultPerPage)},
@@ -231,7 +237,7 @@ func (c *client) GetStatesFromServiceNow(recordType string) ([]*serializer.Servi
 	url := strings.Replace(constants.PathGetStatesFromServiceNow, "{record_type}", recordType, 1)
 	_, statusCode, err := c.CallJSON(http.MethodGet, url, nil, states, nil)
 	if err != nil {
-		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), "Requested URI does not represent any resource") {
+		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), constants.ServiceNowAPIErrorURINotPresent) {
 			return nil, statusCode, errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded)
 		}
 
@@ -270,9 +276,13 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 }
 
 func (c *client) CreateIncident(incident *serializer.IncidentPayload) (*serializer.IncidentResponse, int, error) {
+	queryParams := url.Values{
+		constants.SysQueryParamDisplayValue: {"true"},
+	}
+
 	response := &serializer.IncidentResult{}
 	url := strings.Replace(constants.PathGetRecordsFromServiceNow, "{tableName}", constants.RecordTypeIncident, 1)
-	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, nil)
+	_, statusCode, err := c.CallJSON(http.MethodPost, url, incident, response, queryParams)
 	if err != nil {
 		return nil, statusCode, errors.Wrap(err, "failed to create the incident in ServiceNow")
 	}
@@ -294,4 +304,38 @@ func (c *client) SearchCatalogItemsInServiceNow(searchTerm, limit, offset string
 	}
 
 	return items.Result, statusCode, nil
+}
+
+func (c *client) SearchFilterValuesInServiceNow(searchTerm, limit, offset, requestURL string) ([]*serializer.ServiceNowFilter, int, error) {
+	query := fmt.Sprintf("%s LIKE%s ^OR %s=%s", constants.FieldName, searchTerm, constants.FieldSysID, searchTerm)
+	queryParams := url.Values{
+		constants.SysQueryParam:       {query},
+		constants.SysQueryParamLimit:  {limit},
+		constants.SysQueryParamOffset: {offset},
+		constants.SysQueryParamFields: {fmt.Sprintf("%s,%s", constants.FieldSysID, constants.FieldName)},
+	}
+
+	assignmentGroups := &serializer.ServiceNowFilterResult{}
+	_, statusCode, err := c.CallJSON(http.MethodGet, requestURL, nil, assignmentGroups, queryParams)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	return assignmentGroups.Result, statusCode, nil
+}
+
+func (c *client) GetTableFieldsFromServiceNow(tableName string) ([]*serializer.ServiceNowTableFields, int, error) {
+	fields := &serializer.ServiceNowTableFieldsResult{}
+	queryParams := url.Values{constants.QueryParamTableTerm: {tableName}}
+
+	_, statusCode, err := c.CallJSON(http.MethodGet, constants.PathGetTableFieldsFromServiceNow, nil, fields, queryParams)
+	if err != nil {
+		if statusCode == http.StatusBadRequest && strings.Contains(err.Error(), constants.ServiceNowAPIErrorURINotPresent) {
+			return nil, statusCode, errors.New(constants.APIErrorIDLatestUpdateSetNotUploaded)
+		}
+
+		return nil, statusCode, err
+	}
+
+	return fields.Result, statusCode, nil
 }

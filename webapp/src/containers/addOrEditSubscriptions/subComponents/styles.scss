@@ -55,4 +55,20 @@
       max-width: calc(100% - 140px);
     }
   }
+
+  .filters-panel {
+    min-height: 247px;
+
+    &__label {
+      color: rgba(var(--center-channel-color-rgb), 0.8);
+      margin: 12px 0 12px 25px;
+    }
+
+    &__auto-suggest {
+      .auto-suggest {
+          left: 12px;
+          width: 573px;
+      }
+    }
+  }
 }

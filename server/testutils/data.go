@@ -24,6 +24,23 @@ func GetChannelID() string {
 	return "bnqnzipmnir4zkkj95ggba5pde"
 }
 
+func GetRecordTypeSubscription() string {
+	return constants.SubscriptionTypeRecord
+}
+
+func GetBulkTypeSubscription() string {
+	return constants.SubscriptionTypeBulk
+}
+
+func GetSubscriptionBody(subscriptionType string) string {
+	return fmt.Sprintf(`{
+		"user_id": "%s",
+		"type": "%s",
+		"channel_id": "%s",
+		"filters": "mockFilter"
+		}`, GetID(), subscriptionType, GetChannelID())
+}
+
 func GetChannel(channelType string) *model.Channel {
 	return &model.Channel{
 		Id:   api4.GenerateTestId(),
@@ -68,9 +85,10 @@ func GetBadRequestAppError() *model.AppError {
 	}
 }
 
-func GetInternalServerAppError() *model.AppError {
+func GetInternalServerAppError(errorMsg string) *model.AppError {
 	return &model.AppError{
-		StatusCode: http.StatusInternalServerError,
+		StatusCode:    http.StatusInternalServerError,
+		DetailedError: errorMsg,
 	}
 }
 
@@ -171,8 +189,8 @@ func GetServiceNowRecord() *serializer.ServiceNowRecord {
 	}
 }
 
-func GetSubscription(subscriptionType string) *serializer.SubscriptionResponse {
-	return &serializer.SubscriptionResponse{
+func GetSubscription(subscriptionType string, addFilters bool) *serializer.SubscriptionResponse {
+	response := &serializer.SubscriptionResponse{
 		SysID:              GetServiceNowSysID(),
 		UserID:             GetID(),
 		ChannelID:          GetID(),
@@ -183,23 +201,29 @@ func GetSubscription(subscriptionType string) *serializer.SubscriptionResponse {
 		Number:             GetServiceNowNumber(),
 		ShortDescription:   GetServiceNowShortDescription(),
 	}
+
+	if addFilters {
+		response.Filters = fmt.Sprintf(`{"%s":"filter1","%s":"filter2"}`, constants.FilterAssignmentGroup, constants.FilterService)
+	}
+
+	return response
 }
 
 func GetSubscriptions(count int) []*serializer.SubscriptionResponse {
 	subscriptions := make([]*serializer.SubscriptionResponse, count)
 	for i := 0; i < count; i++ {
 		if i%2 == 0 {
-			subscriptions[i] = GetSubscription(constants.SubscriptionTypeBulk)
+			subscriptions[i] = GetSubscription(constants.SubscriptionTypeBulk, false)
 		} else {
-			subscriptions[i] = GetSubscription(constants.SubscriptionTypeRecord)
+			subscriptions[i] = GetSubscription(constants.SubscriptionTypeRecord, false)
 		}
 	}
 
 	return subscriptions
 }
 
-func GetSearchTerm(valid bool) string {
-	l := constants.CharacterThresholdForSearchingRecords
+func GetSearchTerm(valid bool, threshold int) string {
+	l := threshold
 	if !valid {
 		l--
 	}
@@ -210,4 +234,110 @@ func GetSearchTerm(valid bool) string {
 	}
 
 	return sb.String()
+}
+
+func GetUserKey(valid bool) string {
+	if valid {
+		return "user_bW9ja0tleQ=="
+	}
+
+	return "user_invalidKey"
+}
+
+func GetServiceNowIncidentResponse() *serializer.IncidentResponse {
+	return &serializer.IncidentResponse{
+		SysID:            GetServiceNowSysID(),
+		ShortDescription: GetServiceNowShortDescription(),
+	}
+}
+
+func GetServiceNowCatalogItem() *serializer.ServiceNowCatalogItem {
+	return &serializer.ServiceNowCatalogItem{
+		SysID: GetServiceNowSysID(),
+	}
+}
+
+func GetServiceNowCatalogItems(count int) []*serializer.ServiceNowCatalogItem {
+	if count == 0 {
+		return nil
+	}
+
+	items := make([]*serializer.ServiceNowCatalogItem, count)
+	for i := 0; i < count; i++ {
+		items[i] = GetServiceNowCatalogItem()
+	}
+
+	return items
+}
+
+func GetServiceNowFilterValue() *serializer.ServiceNowFilter {
+	return &serializer.ServiceNowFilter{
+		SysID: GetServiceNowSysID(),
+		Name:  "mockName",
+	}
+}
+
+func GetServiceNowFilterValues(count int) []*serializer.ServiceNowFilter {
+	if count == 0 {
+		return nil
+	}
+
+	items := make([]*serializer.ServiceNowFilter, count)
+	for i := 0; i < count; i++ {
+		items[i] = GetServiceNowFilterValue()
+	}
+
+	return items
+}
+
+func GetServiceNowIncidentCaller() *serializer.IncidentCaller {
+	return &serializer.IncidentCaller{
+		ServiceNowUser: GetServiceNowUser(),
+	}
+}
+
+func GetServiceNowIncidentCallers(count int) []*serializer.IncidentCaller {
+	if count == 0 {
+		return nil
+	}
+
+	users := make([]*serializer.IncidentCaller, count)
+	for i := 0; i < count; i++ {
+		users[i] = GetServiceNowIncidentCaller()
+	}
+
+	return users
+}
+
+func GetServiceNowIncidentFields(count int) []*serializer.ServiceNowIncidentFields {
+	if count == 0 {
+		return nil
+	}
+
+	fields := make([]*serializer.ServiceNowIncidentFields, count)
+	for i := 0; i < count; i++ {
+		fields[i] = &serializer.ServiceNowIncidentFields{
+			Label:   "mockLabel",
+			Value:   "mockValue",
+			Element: "mockElement",
+		}
+	}
+
+	return fields
+}
+
+func GetServiceNowTableFields(count int) []*serializer.ServiceNowTableFields {
+	if count == 0 {
+		return nil
+	}
+
+	fields := make([]*serializer.ServiceNowTableFields, count)
+	for i := 0; i < count; i++ {
+		fields[i] = &serializer.ServiceNowTableFields{
+			Label: "mockLabel",
+			Name:  "mockName",
+		}
+	}
+
+	return fields
 }

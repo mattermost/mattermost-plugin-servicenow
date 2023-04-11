@@ -17,6 +17,7 @@ const (
 	InvalidConfigAdminMessage   = "Before using this plugin, you'll need to configure it in the System Console`"
 
 	ServiceNowForMattermostNotificationsAppID = "x_830655_mm_std"
+	ServiceNowSubscriptionsTableName          = ServiceNowForMattermostNotificationsAppID + "_servicenow_for_mattermost_subscriptions"
 	ServiceNowSysIDRegex                      = "[0-9a-f]{32}"
 	SysQueryParam                             = "sysparm_query"
 	SysQueryParamLimit                        = "sysparm_limit"
@@ -26,7 +27,7 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.1"
+	UpdateSetVersion            = "v2.2"
 	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
@@ -49,6 +50,8 @@ const (
 	FilterCreatedByMe     = "me"
 	FilterCreatedByAnyone = "anyone"
 	FilterAllChannels     = "all_channels"
+	FilterAssignmentGroup = "assignment_group"
+	FilterService         = "business_service"
 
 	// Used for storing the token in the request context to pass from one middleware to another
 	// #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -57,8 +60,10 @@ const (
 	DefaultPage                                = 0
 	DefaultPerPage                             = 20
 	MaxPerPage                                 = 100
-	CharacterThresholdForSearchingRecords      = 3
+	MaxDescriptionChars                        = 500
+	DefaultCharacterThresholdForSearching      = 3
 	CharacterThresholdForSearchingCatalogItems = 4
+	DefaultEmptyValue                          = "N/A"
 	QueryParamPage                             = "page"
 	QueryParamPerPage                          = "per_page"
 	QueryParamChannelID                        = "channel_id"
@@ -69,6 +74,9 @@ const (
 	PathParamTeamID                            = "team_id"
 	PathParamRecordType                        = "record_type"
 	PathParamRecordID                          = "record_id"
+	PathParamFilterType                        = "filter_type"
+	QueryParamTableTerm                        = "table"
+	PathParamTableName                         = "table_name"
 
 	// ServiceNow table fields
 	FieldSysID                = "sys_id"
@@ -80,6 +88,11 @@ const (
 	FieldAssignmentGroup      = "assignment_group"
 	FieldKnowledgeBase        = "knowledge_base"
 	FieldCategory             = "category"
+	FieldUrgency              = "urgency"
+	FieldImpact               = "impact"
+	FieldName                 = "name"
+	FieldDescription          = "description"
+	FieldService              = "service"
 
 	// Websocket events
 	WSEventConnect                        = "connect"
@@ -88,8 +101,12 @@ const (
 	WSEventOpenEditSubscriptionModal      = "edit_subscription"
 	WSEventSubscriptionDeleted            = "subscription_deleted"
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
-	WSEventOpenCommentModal               = "comment_modal"
-	WSEventOpenUpdateStateModal           = "update_state"
+	WSEventOpenCreateIncidentModal        = "create_incident"
+	WSEventOpenCreateRequestModal         = "create_request"
+
+	// Custom posts type
+	CustomNotifictationPost = "custom_sn_notification"
+	CustomSharePost         = "custom_sn_share"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -106,22 +123,29 @@ const (
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
+	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
+	APIErrorIDAccessTable                = "unauthorized_to_access_table"
+	APIErrorAccessTable                  = "unauthorized to access table"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
 	ContextNameRecordID   = "record_id"
 
 	// Slash commands
-	CommandHelp           = "help"
-	CommandConnect        = "connect"
-	CommandDisconnect     = "disconnect"
-	CommandSubscriptions  = "subscriptions"
-	CommandUnsubscribe    = "unsubscribe"
-	CommandSearchAndShare = "share"
-	SubCommandList        = "list"
-	SubCommandAdd         = "add"
-	SubCommandEdit        = "edit"
-	SubCommandDelete      = "delete"
+	CommandHelp              = "help"
+	CommandConnect           = "connect"
+	CommandDisconnect        = "disconnect"
+	CommandSubscriptions     = "subscriptions"
+	CommandUnsubscribe       = "unsubscribe"
+	CommandRecords           = "records"
+	CommandCreate            = "create"
+	SubCommandIncident       = "incident"
+	SubCommandRequest        = "request"
+	SubCommandList           = "list"
+	SubCommandAdd            = "add"
+	SubCommandEdit           = "edit"
+	SubCommandDelete         = "delete"
+	SubCommandSearchAndShare = "share"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
@@ -156,6 +180,7 @@ const (
 	ErrorGetSubscriptions                 = "Error in getting all subscriptions"
 	ErrorEditingSubscription              = "Error in editing the subscription"
 	ErrorDeleteSubscription               = "Error in deleting the subscription"
+	ErrorGetSubscription                  = "Error in getting the subscription"
 	ErrorGetComments                      = "Error in getting all comments"
 	ErrorCreateComment                    = "Error in creating the comment"
 	ErrorSearchingRecord                  = "Error in searching for records in ServiceNow"
@@ -165,11 +190,18 @@ const (
 	ErrorACLRestrictsRecordRetrieval      = "ACL restricts the record retrieval"
 	ErrorHandlingNestedFields             = "Error in handling the nested fields"
 	ErrorCommandInvalidNumberOfParams     = "Some field(s) are missing to run the command. Please run `/servicenow help` for more information."
+	ErrorSubscriptionsNotConfigured       = "Unable to check or activate subscriptions in ServiceNow."
+	ErrorGetIncidentFields                = "Error in getting the incident fields"
 	ErrorUserMismatch                     = "User ID does not match with the currently logged-in user ID."
 	ErrorInsufficientPermissions          = "user has insufficient permissions for the current channel"
 	ErrorChannelPermissionsForUser        = "unable to get the channel permissions for a user"
 	ErrorNoActiveSubscriptions            = "You don't have any active subscriptions."
 	ErrorInvalidChannelType               = "invalid channel type for performing action"
+	ErrorSearchingFilterValues            = "Error in searching for filter values in ServiceNow"
+	ErrorInvalidFilterType                = "Invalid filter type"
+	ErrorGetTableFields                   = "Error in getting the table fields"
+	ErrorConnectionRefused                = "Unable to make a connection to the specified ServiceNow instance"
+	ErrorAccessTable                      = "Unauthorized to access table"
 )
 
 // kv store keys prefix
@@ -224,6 +256,11 @@ var (
 		RecordTypeChangeRequest: "Change Request",
 	}
 
+	FormattedFilterTypes = map[string]string{
+		FilterAssignmentGroup: "Assignment Group",
+		FilterService:         "Service",
+	}
+
 	RecordTypesSupportingComments = map[string]bool{
 		RecordTypeIncident:      true,
 		RecordTypeProblem:       true,
@@ -238,6 +275,11 @@ var (
 		RecordTypeTask:         true,
 		RecordTypeChangeTask:   true,
 		RecordTypeFollowOnTask: true,
+	}
+
+	ValidFiltersForSearching = map[string]bool{
+		FilterAssignmentGroup: true,
+		FilterService:         true,
 	}
 )
 
