@@ -131,13 +131,6 @@ const pluginApi = createApi({
                 body,
             }),
         }),
-        [Constants.pluginApiServiceConfigs.getIncidentFields.apiServiceName]: builder.query<IncidentFieldsData[], void>({
-            query: () => ({
-                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
-                url: Constants.pluginApiServiceConfigs.getIncidentFields.path,
-                method: Constants.pluginApiServiceConfigs.getIncidentFields.method,
-            }),
-        }),
         [Constants.pluginApiServiceConfigs.getFilterData.apiServiceName]: builder.query<FilterFieldsData[], SearchFilterItemsParams>({
             query: ({search, filter, perPage}) => ({
                 headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},

@@ -645,50 +645,6 @@ func TestSearchCatalogItemsInServiceNowClient(t *testing.T) {
 	}
 }
 
-func TestGetIncidentFieldsFromServiceNowClient(t *testing.T) {
-	defer monkey.UnpatchAll()
-	c := new(client)
-	c.plugin = &Plugin{}
-	for _, testCase := range []struct {
-		description  string
-		statusCode   int
-		errorMessage error
-		expectedErr  string
-	}{
-		{
-			description: "GetIncidentFieldsFromServiceNow: valid",
-			statusCode:  http.StatusOK,
-		},
-		{
-			description:  "GetIncidentFieldsFromServiceNow: with latest update set not uploaded",
-			statusCode:   http.StatusBadRequest,
-			errorMessage: fmt.Errorf("mockError: %s", constants.ServiceNowAPIErrorURINotPresent),
-			expectedErr:  constants.APIErrorIDLatestUpdateSetNotUploaded,
-		},
-		{
-			description:  "GetIncidentFieldsFromServiceNow: error in getting the incident fields",
-			statusCode:   http.StatusInternalServerError,
-			errorMessage: errors.New("error in getting the incident fields"),
-			expectedErr:  "error in getting the incident fields",
-		},
-	} {
-		t.Run(testCase.description, func(t *testing.T) {
-			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
-				return nil, testCase.statusCode, testCase.errorMessage
-			})
-
-			_, statusCode, err := c.GetIncidentFieldsFromServiceNow()
-			if testCase.expectedErr != "" {
-				assert.EqualError(t, err, testCase.expectedErr)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			assert.EqualValues(t, testCase.statusCode, statusCode)
-		})
-	}
-}
-
 func TestSearchFilterValuesInServiceNowClient(t *testing.T) {
 	defer monkey.UnpatchAll()
 	c := new(client)

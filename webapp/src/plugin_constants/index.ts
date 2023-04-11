@@ -52,6 +52,8 @@ const RequestButtonText = 'Submit Request on ServiceNow';
 const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
 const DefaultPerPageParam = 10;
 const DebounceFunctionTimeLimit = 500;
+const MaxShortDescriptionCharactersView = 80;
+const MaxShortDescriptionLimit = 160;
 
 export enum ModalIds {
     ADD_SUBSCRIPTION = 'addSubscription',
@@ -424,11 +426,6 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'POST',
         apiServiceName: 'createIncident',
     },
-    getIncidentFields: {
-        path: '/incident-fields',
-        method: 'GET',
-        apiServiceName: 'getIncidentFields',
-    },
     getFilterData: {
         path: '/filter',
         method: 'GET',
@@ -519,4 +516,6 @@ export default {
     RequestButtonRedirectText,
     DefaultPerPageParam,
     DebounceFunctionTimeLimit,
+    MaxShortDescriptionCharactersView,
+    MaxShortDescriptionLimit,
 };

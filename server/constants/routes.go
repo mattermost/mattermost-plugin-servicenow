@@ -20,7 +20,6 @@ const (
 	PathSearchCatalogItems           = "/catalog"
 	PathGetUsers                     = "/users"
 	PathCreateIncident               = "/incident"
-	PathGetIncidentFields            = "/incident-fields"
 	PathCheckSubscriptionsConfigured = "/subscriptions-configured"
 	PathSearchFilterValues           = "/filter/{filter_type}"
 	PathGetTableFields               = "/fields/{table_name}"

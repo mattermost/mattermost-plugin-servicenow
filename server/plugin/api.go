@@ -50,7 +50,6 @@ func (p *Plugin) InitAPI() *mux.Router {
 	s.HandleFunc(constants.PathGetUsers, p.checkAuth(p.checkOAuth(p.handleGetUsers))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathCreateIncident, p.checkAuth(p.checkOAuth(p.createIncident))).Methods(http.MethodPost)
 	s.HandleFunc(constants.PathSearchCatalogItems, p.checkAuth(p.checkOAuth(p.searchCatalogItemsInServiceNow))).Methods(http.MethodGet)
-	s.HandleFunc(constants.PathGetIncidentFields, p.checkAuth(p.checkOAuth(p.getIncidentFields))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathSearchFilterValues, p.checkAuth(p.checkOAuth(p.searchFilterValuesInServiceNow))).Methods(http.MethodGet)
 	s.HandleFunc(constants.PathGetTableFields, p.checkAuth(p.checkOAuth(p.getTableFields))).Methods(http.MethodGet)
 
@@ -759,18 +758,6 @@ func (p *Plugin) searchCatalogItemsInServiceNow(w http.ResponseWriter, r *http.R
 	}
 
 	p.writeJSONArray(w, statusCode, items)
-}
-
-func (p *Plugin) getIncidentFields(w http.ResponseWriter, r *http.Request) {
-	client := p.GetClientFromRequest(r)
-	fields, statusCode, err := client.GetIncidentFieldsFromServiceNow()
-	if err != nil {
-		p.API.LogError(constants.ErrorGetIncidentFields, "Error", err.Error())
-		_ = p.handleClientError(w, r, err, false, statusCode, "", fmt.Sprintf("%s. Error: %s", constants.ErrorGetIncidentFields, err.Error()))
-		return
-	}
-
-	p.writeJSONArray(w, statusCode, fields)
 }
 
 func (p *Plugin) searchFilterValuesInServiceNow(w http.ResponseWriter, r *http.Request) {
