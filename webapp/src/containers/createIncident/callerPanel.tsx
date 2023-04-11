@@ -60,7 +60,7 @@ const CallerPanel = (({
             setApiError(null);
             setOptions(data);
             if (senderId) {
-                const senderDetails = data?.filter((c) => c.mattermostUserID === senderId)[0];
+                const senderDetails = data?.find((c) => c.mattermostUserID === senderId);
                 if (senderDetails) {
                     handleCallerSelection({
                         userId: senderDetails.serviceNowUser.sys_id,

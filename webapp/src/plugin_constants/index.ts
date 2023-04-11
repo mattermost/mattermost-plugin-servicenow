@@ -52,7 +52,7 @@ const RequestButtonText = 'Submit Request on ServiceNow';
 const RequestButtonRedirectText = 'You will be redirected to ServiceNow to complete this request';
 const DefaultPerPageParam = 10;
 const DebounceFunctionTimeLimit = 500;
-const MaxShortDescriptionCharactersView = 80;
+const MaxShortDescriptionCharactersView = 75;
 const MaxShortDescriptionLimit = 160;
 
 export enum ModalIds {
