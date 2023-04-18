@@ -1,7 +1,8 @@
 package plugin
 
 import (
-	"github.com/mattermost/mattermost-plugin-servicenow/server/telemetry"
+	"github.com/mattermost/mattermost-plugin-api/experimental/bot/logger"
+	"github.com/mattermost/mattermost-plugin-api/experimental/telemetry"
 )
 
 func (p *Plugin) TrackEvent(event string, properties map[string]interface{}) {
@@ -36,10 +37,10 @@ func (p *Plugin) initializeTelemetry() {
 		p.telemetryClient,
 		p.API.GetDiagnosticId(),
 		p.API.GetServerVersion(),
-		manifest.ID,
-		manifest.Version,
+		Manifest.Id,
+		Manifest.Version,
 		"servicenow",
 		telemetry.NewTrackerConfig(p.API.GetConfig()),
-		telemetry.NewLogger(p.API),
+		logger.New(p.API),
 	)
 }

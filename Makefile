@@ -4,10 +4,7 @@ CURL ?= $(shell command -v curl 2> /dev/null)
 MM_DEBUG ?=
 MANIFEST_FILE ?= plugin.json
 GOPATH ?= $(shell go env GOPATH)
-# We need to export GOBIN to allow it to be set
-# for processes spawned from the Makefile
-export GOBIN ?= $(PWD)/bin
-GO_TEST_FLAGS ?= -race -gcflags=-l
+GO_TEST_FLAGS ?= -race
 GO_BUILD_FLAGS ?=
 MM_UTILITIES_DIR ?= ../mattermost-utilities
 DLV_DEBUG_PORT := 2346
@@ -25,6 +22,7 @@ default: all
 
 # Verify environment, and define PLUGIN_ID, PLUGIN_VERSION, HAS_SERVER and HAS_WEBAPP as needed.
 include build/setup.mk
+include build/legacy.mk
 
 BUNDLE_NAME ?= $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
 
@@ -42,21 +40,6 @@ endif
 ## Checks the code style, tests, builds and bundles the plugin.
 .PHONY: all
 all: check-style test dist
-
-## Propagates plugin manifest information into the server/ and webapp/ folders as required.
-.PHONY: apply
-apply:
-	./build/bin/manifest apply
-
-.PHONY: store-mocks
-store-mocks: ## Creates mock files.
-	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
-	$(GOBIN)/mockery --dir server/plugin --name "Store" --output server/mocks --filename mock_store.go --note 'Regenerate this file using `make store-mocks`.'
-
-.PHONY: client-mocks
-client-mocks: ## Creates mock files.
-	$(GO) install github.com/vektra/mockery/v2/...@v2.11.0
-	$(GOBIN)/mockery --dir server/plugin --name "Client" --output server/mocks --filename mock_client.go --note 'Regenerate this file using `make client-mocks`.'
 
 ## Runs eslint and golangci-lint
 .PHONY: check-style
@@ -142,7 +125,7 @@ endif
 
 ## Builds and bundles the plugin.
 .PHONY: dist
-dist: apply	server webapp bundle
+dist:	server webapp bundle
 
 ## Builds and installs the plugin to a server.
 .PHONY: deploy

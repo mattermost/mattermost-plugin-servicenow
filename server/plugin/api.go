@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/mux"
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
@@ -120,7 +120,7 @@ func (p *Plugin) getConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
+	if strings.Contains(user.Roles, model.SystemAdminRoleId) {
 		p.writeJSON(w, 0, p.getConfiguration())
 		return
 	}
@@ -405,7 +405,7 @@ func (p *Plugin) getUserChannelsForTeam(w http.ResponseWriter, r *http.Request) 
 
 	var requiredChannels []*model.Channel
 	for _, channel := range channels {
-		if channel.Type == model.CHANNEL_PRIVATE || channel.Type == model.CHANNEL_OPEN {
+		if channel.Type == model.ChannelTypePrivate || channel.Type == model.ChannelTypeOpen {
 			requiredChannels = append(requiredChannels, channel)
 		}
 	}
@@ -784,13 +784,15 @@ func (p *Plugin) searchCatalogItemsInServiceNow(w http.ResponseWriter, r *http.R
 func returnStatusOK(w http.ResponseWriter) {
 	m := make(map[string]string)
 	w.Header().Set("Content-Type", "application/json")
-	m[model.STATUS] = model.STATUS_OK
-	_, _ = w.Write([]byte(model.MapToJson(m)))
+	m[model.STATUS] = model.StatusOk
+
+	_ = json.NewEncoder(w).Encode(m)
 }
 
 func (p *Plugin) returnPostActionIntegrationResponse(w http.ResponseWriter, res *model.PostActionIntegrationResponse) {
 	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(res.ToJson()); err != nil {
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		p.API.LogWarn("failed to write PostActionIntegrationResponse", "Error", err.Error())
 	}
 }

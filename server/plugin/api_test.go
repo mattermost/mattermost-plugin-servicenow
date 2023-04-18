@@ -13,9 +13,9 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
@@ -125,7 +125,7 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 		"success": {
 			TeamID: testutils.GetID(),
 			SetupAPI: func(api *plugintest.API) {
-				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(testutils.GetChannels(3, model.CHANNEL_PRIVATE), nil)
+				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(testutils.GetChannels(3, model.ChannelTypePrivate), nil)
 			},
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedCount:      3,
@@ -159,7 +159,7 @@ func TestGetUserChannelsForTeam(t *testing.T) {
 		"no public or private channels present": {
 			TeamID: testutils.GetID(),
 			SetupAPI: func(api *plugintest.API) {
-				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(testutils.GetChannels(3, model.CHANNEL_DIRECT), nil)
+				api.On("GetChannelsForTeamForUser", testutils.GetID(), testutils.GetID(), false).Return(testutils.GetChannels(3, model.ChannelTypeDirect), nil)
 			},
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedCount:      0,
@@ -398,7 +398,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(
@@ -433,7 +433,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -454,7 +454,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", mock.AnythingOfType("string"), "Record type", "testRecordType").Return()
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -492,7 +492,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 			},
 			SetupClient: func(client *mock_plugin.Client) {},
@@ -512,7 +512,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 			},
 			SetupClient: func(client *mock_plugin.Client) {},
@@ -532,7 +532,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
@@ -558,7 +558,7 @@ func TestShareRecordInChannel(t *testing.T) {
 			ChannelID: testutils.GetChannelID(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(

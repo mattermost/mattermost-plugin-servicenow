@@ -7,12 +7,18 @@ import (
 	"sync"
 
 	"github.com/gorilla/mux"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	pluginapi "github.com/mattermost/mattermost-plugin-api"
+	"github.com/mattermost/mattermost-plugin-api/experimental/telemetry"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 	"golang.org/x/oauth2"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/telemetry"
+
+	root "github.com/mattermost/mattermost-plugin-servicenow"
 )
+
+var Manifest model.Manifest = root.Manifest
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
 type Plugin struct {
@@ -23,7 +29,9 @@ type Plugin struct {
 
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
-	configuration   *configuration
+	configuration *configuration
+
+	client          *pluginapi.Client
 	botID           string
 	router          *mux.Router
 	store           Store
@@ -59,7 +67,7 @@ func (p *Plugin) GetSiteURL() string {
 }
 
 func (p *Plugin) GetPluginURLPath() string {
-	return "/plugins/" + manifest.ID + "/api/v1"
+	return "/plugins/" + Manifest.Id + "/api/v1"
 }
 
 func (p *Plugin) GetPluginURL() string {

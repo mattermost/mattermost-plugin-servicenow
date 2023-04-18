@@ -6,8 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/mattermost/mattermost-plugin-api/experimental/telemetry"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
-	"github.com/mattermost/mattermost-plugin-servicenow/server/telemetry"
 )
 
 // configuration captures the plugin's external configuration as exposed in the Mattermost server
@@ -139,7 +139,7 @@ func (p *Plugin) OnConfigurationChange() error {
 	configuration.MattermostSiteURL = *mattermostSiteURL
 	configuration.PluginURL = p.GetPluginURL()
 	configuration.PluginURLPath = p.GetPluginURLPath()
-	configuration.PluginID = manifest.ID
+	configuration.PluginID = Manifest.Id
 
 	p.setConfiguration(configuration)
 
