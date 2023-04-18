@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/mattermost/mattermost-plugin-api/experimental/telemetry"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost-plugin-api/experimental/telemetry"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
