@@ -1,5 +1,4 @@
 # Include custom targets and environment variables here
-
 default: all
 
 # If there's no MM_RUDDER_PLUGINS_PROD, add DEV data

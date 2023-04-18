@@ -37,8 +37,6 @@ type Plugin struct {
 	store           Store
 	CommandHandlers map[string]CommandHandleFunc
 
-	// Telemetry package copied inside repository, should be changed
-	// to plugin-api's one  after migrating to mattermost-sever/v6
 	telemetryClient telemetry.Client
 	tracker         telemetry.Tracker
 }
