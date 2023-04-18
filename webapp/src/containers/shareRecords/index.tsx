@@ -183,7 +183,7 @@ const ShareRecords = () => {
                             <ChannelPanel
                                 channel={channel}
                                 setChannel={setChannel}
-                                setShowModalLoader={setShowModalLoader}
+                                showModalLoader={getShareRecordState().isLoading}
                                 setApiError={setApiError}
                                 channelOptions={channelOptions}
                                 setChannelOptions={setChannelOptions}
@@ -191,6 +191,7 @@ const ShareRecords = () => {
                                 placeholder='Search channel to share'
                                 validationError={showChannelValidationError}
                                 editing={true}
+                                required={true}
                             />
                         )}
                         <ModalFooter

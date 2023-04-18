@@ -45,11 +45,14 @@ const AddOrViewComments = () => {
         resetFieldStates();
     }, []);
 
-    const getCommentsPayload = (): CommentsPayload => ({
-        record_type: getGlobalModalState(pluginState).data?.recordType as RecordType,
-        record_id: getGlobalModalState(pluginState).data?.recordId as string,
-        comments,
-    });
+    const getCommentsPayload = (): CommentsPayload => {
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
+        return {
+            record_type: data?.recordType || '',
+            record_id: data?.recordId || '',
+            comments,
+        };
+    };
 
     const getCommentsState = () => {
         const payload = getCommentsPayload();

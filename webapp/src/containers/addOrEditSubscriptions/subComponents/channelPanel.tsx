@@ -18,7 +18,7 @@ type ChannelPanelProps = {
     actionBtnDisabled?: boolean;
     channel: string | null;
     setChannel: (value: string | null) => void;
-    showModalLoader: boolean;
+    showModalLoader?: boolean;
     setApiError: (error: APIError | null) => void;
     setApiResponseValid?: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
