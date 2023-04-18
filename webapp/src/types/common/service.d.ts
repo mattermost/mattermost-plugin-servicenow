@@ -13,7 +13,9 @@ type ApiServiceName =
     'getComments' |
     'addComments' |
     'getStates' |
-    'updateState';
+    'updateState' |
+    'getUsers' |
+    'createIncident';
 
 type PluginApiService = {
     path: string,

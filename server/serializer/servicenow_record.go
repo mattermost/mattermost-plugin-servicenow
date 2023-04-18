@@ -21,6 +21,7 @@ type ServiceNowRecord struct {
 	SysID            string      `json:"sys_id"`
 	Number           string      `json:"number"`
 	ShortDescription string      `json:"short_description"`
+	Description      string      `json:"description"`
 	RecordType       string      `json:"record_type,omitempty"`
 	State            string      `json:"state,omitempty"`
 	Priority         string      `json:"priority,omitempty"`

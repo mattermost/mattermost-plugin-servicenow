@@ -13,13 +13,15 @@ import Rhs from 'src/containers/Rhs';
 import AddOrViewComments from 'src/containers/addOrViewComments';
 import AddSubscription from 'src/containers/addOrEditSubscriptions/addSubscription';
 import EditSubscription from 'src/containers/addOrEditSubscriptions/editSubscription';
+import CreateIncident from 'src/containers/createIncident';
+import CreateIncidentPostMenuAction from 'src/containers/createIncident/createIncidentMenu';
 import ShareRecords from 'src/containers/shareRecords';
 import UpdateState from 'src/containers/updateState';
 
 import Constants from 'src/plugin_constants';
 
 import DownloadButton from 'src/components/admin_settings/download_button';
-import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal} from 'src/websocket';
+import {handleConnect, handleDisconnect, handleOpenAddSubscriptionModal, handleOpenEditSubscriptionModal, handleSubscriptionDeleted, handleOpenShareRecordModal, handleOpenCommentModal, handleOpenUpdateStateModal, handleOpenIncidentModal} from 'src/websocket';
 import Utils from 'src/utils';
 
 import App from './app';
@@ -36,6 +38,7 @@ export default class Plugin {
         registry.registerRootComponent(AddSubscription);
         registry.registerRootComponent(EditSubscription);
         registry.registerRootComponent(AddOrViewComments);
+        registry.registerRootComponent(CreateIncident);
         registry.registerRootComponent(ShareRecords);
         registry.registerRootComponent(UpdateState);
         registry.registerRootComponent(App);
@@ -47,6 +50,8 @@ export default class Plugin {
             registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
         }
 
+        registry.registerPostDropdownMenuComponent(CreateIncidentPostMenuAction);
+
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_connect`, handleConnect(store, id));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_disconnect`, handleDisconnect(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_add_subscription`, handleOpenAddSubscriptionModal(store));
@@ -55,6 +60,7 @@ export default class Plugin {
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_search_and_share_record`, handleOpenShareRecordModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_comment_modal`, handleOpenCommentModal(store));
         registry.registerWebSocketEventHandler(`custom_${manifest.id}_update_state`, handleOpenUpdateStateModal(store));
+        registry.registerWebSocketEventHandler(`custom_${manifest.id}_create_incident`, handleOpenIncidentModal(store));
     }
 }
 

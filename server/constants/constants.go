@@ -26,8 +26,6 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.1"
-	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
 	SubscriptionTypeBulk             = "object"
@@ -90,6 +88,7 @@ const (
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
 	WSEventOpenCommentModal               = "comment_modal"
 	WSEventOpenUpdateStateModal           = "update_state"
+	WSEventOpenCreateIncidentModal        = "create_incident"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -106,6 +105,7 @@ const (
 	APIErrorRefreshTokenExpired          = "Your connection with ServiceNow has expired. Please reconnect your account."
 	APIErrorCreateIncident               = "Error in creating the incident"
 	APIErrorSearchingCatalogItems        = "Error in searching for catalog items in ServiceNow"
+	ServiceNowAPIErrorURINotPresent      = "Requested URI does not represent any resource"
 
 	// Slack attachment context constants
 	ContextNameRecordType = "record_type"
@@ -122,6 +122,8 @@ const (
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"
 	SubCommandDelete      = "delete"
+	CommandCreate         = "create"
+	SubCommandIncident    = "incident"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
