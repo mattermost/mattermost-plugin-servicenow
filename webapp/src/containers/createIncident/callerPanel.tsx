@@ -5,7 +5,6 @@ import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import Constants from 'src/plugin_constants';
-
 import usePluginApi from 'src/hooks/usePluginApi';
 
 type CallerPanelProps = {
@@ -58,7 +57,6 @@ const CallerPanel = (({
 
     useEffect(() => {
         const {isError, error, isSuccess, data} = getUsersState();
-
         if (isError && error) {
             setApiError(error);
         }
