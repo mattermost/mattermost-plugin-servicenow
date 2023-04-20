@@ -223,7 +223,7 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 
 func (p *Plugin) handleCreate(_ *plugin.Context, args *model.CommandArgs, parameters []string, _ Client, _ bool) string {
 	if len(parameters) == 0 {
-		return "Invalid create command. Available commands are 'incident' and 'request'."
+		return "Invalid create command. Available command is 'incident'."
 	}
 
 	command := parameters[0]
