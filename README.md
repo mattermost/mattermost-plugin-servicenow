@@ -6,6 +6,7 @@
 - [Installation](#installation)
 - [Setup](#setup)
 - [Connecting to ServiceNow](#connecting-to-servicenow)
+- [FAQ](#faq)
 
 ## License
 
@@ -127,6 +128,48 @@ There are two methods by which you can connect your Mattermost account to your S
 
 After connecting successfully, you will get a direct message from the ServiceNow bot containing a Welcome message and some useful information along with some instructions for the system admins.
 **Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages only between two users of the same team, then you will not get any direct message.
+
+
+## FAQ
+
+### What is Update Set that is present in the ServiceNow?
+
+An update set tracks and stores the changes of a ServiceNow instance and is used for moving those changes from one instance to another by first exporting this update set and importing the same update set to another ServiceNow instance. These changes can include things like some custom APIs (scripted REST APIs), changes in the tables, etc.
+
+### What changes does our Update Set do?
+
+- **GetTableFields scripted REST API**: Returns the fields for a particular table with some details like label, name, type, isWritable, and isChoice.
+
+- **GetIncidentFields scripted REST API**: Returns the different options available for the impact and urgency of the incident table.
+
+- **GetStates scripted REST API**: Returns different states available for the records. Records supported: incident, task, change_task, and cert_follow_on_task
+
+- An application with the name **ServiceNow for Mattermost Notifications**
+
+    - **ServiceNow for Mattermost Notifications** application handles the storing of subscription details and sending notifications on the subscribed events.
+
+        - **ServiceNow for Mattermost Notifications Auth** table to store different Mattermost server URLs with their webhook secrets.
+
+        - **ServiceNow for Mattermost Subscriptions** table to store the subscription details.
+
+        - **Business rules** to handle different events (example: new record created, comment added on record, record state updated, etc.)
+
+        - **Script actions** to send notifications based on the subscription events.
+
+        - **Events registration** to register different record-type events.
+
+### Which ServiceNow tables are accessible through our plugin?
+
+- incident
+- problem
+- change_request
+- kb_knowledge
+- task
+- change_task
+- cert_follow_on_task
+- x_830655_mm_std_servicenow_for_mattermost_notifications_auth
+- x_830655_mm_std_servicenow_for_mattermost_subscriptions
+- All the tables extending these tables
 
 ---
 
