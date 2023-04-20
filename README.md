@@ -134,9 +134,9 @@ After connecting successfully, you will get a direct message from the ServiceNow
 
 ### What is Update Set that is present in the ServiceNow?
 
-An update set tracks and stores the changes of an instance and is used for moving those changes from one instance to another by first exporting this update set and importing the same update set to another ServiceNow application. These changes can include things like some custom APIs (scripted REST APIs), changes in the tables, etc.
+An update set tracks and stores the changes of a ServiceNow instance and is used for moving those changes from one instance to another by first exporting this update set and importing the same update set to another ServiceNow instance. These changes can include things like some custom APIs (scripted REST APIs), changes in the tables, etc.
 
-### What changes our Update Set do?
+### What changes does our Update Set do?
 
 - **GetTableFields scripted REST API**: Returns the fields for a particular table with some details like label, name, type, isWritable, and isChoice.
 
