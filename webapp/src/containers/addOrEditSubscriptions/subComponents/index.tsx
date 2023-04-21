@@ -357,7 +357,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onContinue={() => setSubscriptionTypePanelOpen(true)}
                     channel={channel}
                     setChannel={setChannel}
-                    setShowModalLoader={setShowModalLoader}
                     setApiError={setApiError}
                     setApiResponseValid={setApiResponseValid}
                     channelOptions={channelOptions}

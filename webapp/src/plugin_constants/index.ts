@@ -42,6 +42,10 @@ const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
+const IncidentCreatedMsg = 'Incident created successfully!';
+const ChannelPanelToggleLabel = 'Subscribe to the new incident';
+const MaxShortDescriptionCharactersView = 75;
+const MaxShortDescriptionLimit = 160;
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -287,6 +291,21 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    getUsers: {
+        path: '/users',
+        method: 'GET',
+        apiServiceName: 'getUsers',
+    },
+    createIncident: {
+        path: '/incident',
+        method: 'POST',
+        apiServiceName: 'createIncident',
+    },
+    getConnectedUser: {
+        path: '/connected',
+        method: 'GET',
+        apiServiceName: 'getConnectedUser',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -349,4 +368,8 @@ export default {
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
+    IncidentCreatedMsg,
+    ChannelPanelToggleLabel,
+    MaxShortDescriptionCharactersView,
+    MaxShortDescriptionLimit,
 };

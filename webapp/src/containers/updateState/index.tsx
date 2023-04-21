@@ -52,7 +52,7 @@ const UpdateState = () => {
     };
 
     useEffect(() => {
-        const {data} = getGlobalModalState(pluginState);
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
         if (isUpdateStateModalOpen(pluginState) && data?.recordType && data?.recordId) {
             const params: GetStatesParams = {recordType: data.recordType};
             setGetStatesParams(params);
@@ -61,7 +61,7 @@ const UpdateState = () => {
     }, [isUpdateStateModalOpen(pluginState)]);
 
     const updateState = () => {
-        const {data} = getGlobalModalState(pluginState);
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
         if (data) {
             const {recordType, recordId} = data;
             const payload: UpdateStatePayload = {recordType, recordId, state: selectedState ?? ''};

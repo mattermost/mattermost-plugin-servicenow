@@ -564,8 +564,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
+					return http.StatusOK, "", nil
 				})
 			},
 			isResponse:       true,
@@ -589,8 +589,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
+					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			isResponse:       true,
@@ -615,8 +615,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
+					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			isResponse:       true,
@@ -643,8 +643,8 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
+					return http.StatusOK, "", nil
 				})
 			},
 			isResponse:       true,
