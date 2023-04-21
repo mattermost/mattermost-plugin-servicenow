@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 	"golang.org/x/oauth2"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
@@ -172,7 +172,7 @@ func (p *Plugin) IsAuthorizedSysAdmin(userID string) (bool, error) {
 		return false, appErr
 	}
 
-	if !strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID) {
+	if !strings.Contains(user.Roles, model.SystemAdminRoleId) {
 		return false, nil
 	}
 
@@ -308,7 +308,7 @@ func decodeKey(key string) (string, error) {
 	return string(decodedKey), nil
 }
 
-func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool) (int, string, error) {
+func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool) (int, model.ChannelType, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
@@ -316,7 +316,7 @@ func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool)
 	}
 
 	// Check if a channel is direct message or group channel
-	if checkType && (channel.Type == model.CHANNEL_DIRECT || channel.Type == model.CHANNEL_GROUP) {
+	if checkType && (channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup) {
 		return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 

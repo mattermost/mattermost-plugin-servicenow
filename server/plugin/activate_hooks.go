@@ -3,14 +3,18 @@ package plugin
 import (
 	"path/filepath"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	pluginapi "github.com/mattermost/mattermost-plugin-api"
+	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
 
 func (p *Plugin) OnActivate() error {
+	if p.client == nil {
+		p.client = pluginapi.NewClient(p.API, p.Driver)
+	}
+
 	if err := p.initBotUser(); err != nil {
 		return err
 	}
@@ -34,11 +38,11 @@ func (p *Plugin) OnActivate() error {
 }
 
 func (p *Plugin) initBotUser() error {
-	botID, err := p.Helpers.EnsureBot(&model.Bot{
+	botID, err := p.client.Bot.EnsureBot(&model.Bot{
 		Username:    constants.BotUserName,
 		DisplayName: constants.BotDisplayName,
 		Description: constants.BotDescription,
-	}, plugin.ProfileImagePath(filepath.Join("assets", "profile.png")))
+	}, pluginapi.ProfileImagePath(filepath.Join("assets", "profile.png")))
 	if err != nil {
 		return errors.Wrap(err, "failed to ensure bot")
 	}
