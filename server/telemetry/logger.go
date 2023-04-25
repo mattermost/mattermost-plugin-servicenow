@@ -1,8 +1,10 @@
 // Copyright (c) 2019-present Mattermost, Inc. All Rights Reserved.
 // See License for license information.
 
-// Copied from pluginapi/experimental/bot/logger to avoid upgrading to mattermost-server/v6
-// remove this file once mattermost-server/v6 migration is completed
+// Copied from pluginapi/experimental/bot/logger to avoid upgrading min_server_version
+// remove this file once pluginapi can be updated to 0.1.3+ ( min_server_version is
+//
+//	safe to point at 7.x)
 package telemetry
 
 import (
