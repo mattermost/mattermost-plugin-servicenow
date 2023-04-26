@@ -8,7 +8,7 @@ ifdef MM_RUDDER_PLUGINS_PROD
 	RUDDER_WRITE_KEY = $(MM_RUDDER_PLUGINS_PROD)
 endif
 
-GO_BUILD_FLAGS += -ldflags '-X "github.com/mattermost/mattermost-plugin-servicenow/telemetry.rudderWriteKey=$(RUDDER_WRITE_KEY)"'
+GO_BUILD_FLAGS += -ldflags '-X "github.com/mattermost/mattermost-plugin-servicenow/server/telemetry.rudderWriteKey=$(RUDDER_WRITE_KEY)"'
 
 GO_TEST_FLAGS = -race -gcflags=-l
 
