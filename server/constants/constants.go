@@ -121,8 +121,8 @@ const (
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"
 	SubCommandDelete      = "delete"
-	CommandCreate         = "create"
-	SubCommandIncident    = "incident"
+	CommandIncident       = "incident"
+	SubCommandCreate      = "create"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential
