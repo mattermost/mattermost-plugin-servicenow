@@ -46,7 +46,7 @@ func NewPlugin() *Plugin {
 		constants.CommandSubscriptions:  p.handleSubscriptions,
 		constants.CommandUnsubscribe:    p.handleDeleteSubscription,
 		constants.CommandSearchAndShare: p.handleSearchAndShare,
-		constants.CommandCreate:         p.handleCreate,
+		constants.CommandIncident:       p.handleIncident,
 	}
 
 	return p

@@ -23,7 +23,6 @@ const AddOrViewComments = () => {
     const [showModalLoader, setShowModalLoader] = useState(false);
     const [apiError, setApiError] = useState<APIError | null>(null);
     const [showErrorPanel, setShowErrorPanel] = useState(false);
-    const [validationError, setValidationError] = useState('');
     const [refetch, setRefetch] = useState(false);
 
     // usePluginApi hook
@@ -36,7 +35,6 @@ const AddOrViewComments = () => {
         setComments('');
         setShowModalLoader(false);
         setApiError(null);
-        setValidationError('');
         setRefetch(false);
     }, []);
 
@@ -67,17 +65,11 @@ const AddOrViewComments = () => {
     };
 
     const addComment = () => {
-        if (!comments) {
-            setValidationError(Constants.RequiredMsg);
-            return;
-        }
-
         const payload = getCommentsPayload();
         makeApiRequest(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
     };
 
     const onChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setValidationError('');
         setComments(e.target.value);
     };
 
@@ -173,7 +165,6 @@ const AddOrViewComments = () => {
                                 onChange={onChangeHandle}
                                 className='comment-body__text-area'
                                 disabled={showModalLoader}
-                                error={validationError}
                             />
                             {!apiError && <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>}
                             {commentsData ? (
@@ -189,7 +180,7 @@ const AddOrViewComments = () => {
                         <ModalFooter
                             onConfirm={addComment}
                             confirmBtnText='Submit'
-                            confirmDisabled={showModalLoader}
+                            confirmDisabled={showModalLoader || !comments.length}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}
