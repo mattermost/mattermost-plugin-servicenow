@@ -132,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare && action != constants.CommandIncident {
+		if action == constants.CommandSubscriptions || action == constants.CommandUnsubscribe {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}

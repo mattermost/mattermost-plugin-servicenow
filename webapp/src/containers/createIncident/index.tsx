@@ -13,13 +13,12 @@ import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/p
 
 import {setConnected} from 'src/reducers/connectedState';
 import {resetGlobalModalState} from 'src/reducers/globalModal';
-import {refetch} from 'src/reducers/refetchState';
 import {getGlobalModalState, isCreateIncidentModalOpen} from 'src/selectors';
-import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/channelPanel';
 
 import Utils from 'src/utils';
 
 import CallerPanel from './callerPanel';
+import SubscribeNewIncident from './subscribeToNewIncident';
 
 import './styles.scss';
 
@@ -54,6 +53,7 @@ const CreateIncident = () => {
 
     // Reset the field states
     const resetFieldStates = useCallback(() => {
+        setSubscriptionPayload(null);
         setShortDescription('');
         setDescription('');
         setCaller(null);
@@ -62,7 +62,6 @@ const CreateIncident = () => {
         setValidationError(null);
         setShowResultPanel(false);
         setIncidentPayload(null);
-        setSubscriptionPayload(null);
         setShowChannelPanel(false);
         setShowChannelValidationError(false);
         setSenderId('');
@@ -90,11 +89,6 @@ const CreateIncident = () => {
 
     const getIncidentState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
-    };
-
-    const getSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
         return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
     };
 
@@ -177,22 +171,6 @@ const CreateIncident = () => {
     }, [getIncidentState().isError, getIncidentState().isSuccess, getIncidentState().isLoading]);
 
     useEffect(() => {
-        if (subscriptionPayload) {
-            const {isLoading, isError, isSuccess, error} = getSubscriptionState();
-            setShowModalLoader(isLoading);
-            if (isError && error) {
-                handleError(error);
-            }
-
-            if (isSuccess) {
-                setApiError(null);
-                dispatch(refetch());
-                setShowResultPanel(true);
-            }
-        }
-    }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
-
-    useEffect(() => {
         if (currentChannelId) {
             setChannel(currentChannelId);
         }
@@ -232,7 +210,7 @@ const CreateIncident = () => {
                 {showResultPanel || apiError ? (
                     <ResultPanel
                         header={Utils.getResultPanelHeader(apiError, hideModal, Constants.IncidentCreatedMsg)}
-                        className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
+                        className={`${(showResultPanel || apiError) ? 'wizard__secondary-panel--slide-in result-panel' : ''}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,
                             onClick: getResultPanelPrimaryBtnActionOrText(true) as (() => void) | null,
@@ -270,29 +248,21 @@ const CreateIncident = () => {
                                 showModalLoader={showModalLoader}
                                 className={`incident-body__auto-suggest ${caller && 'incident-body__suggestion-chosen'}`}
                             />
-                            <ToggleSwitch
-                                active={showChannelPanel}
-                                onChange={setShowChannelPanel}
-                                label={Constants.ChannelPanelToggleLabel}
-                                labelPositioning='right'
-                                className='incident-body__toggle-switch'
+                            <SubscribeNewIncident
+                                subscriptionPayload={subscriptionPayload}
+                                channel={channel}
+                                setChannel={setChannel}
+                                showModalLoader={showModalLoader}
+                                setShowModalLoader={setShowModalLoader}
+                                setApiError={setApiError}
+                                channelOptions={channelOptions}
+                                setChannelOptions={setChannelOptions}
+                                showChannelValidationError={showChannelValidationError}
+                                handleError={handleError}
+                                setShowResultPanel={setShowResultPanel}
+                                showChannelPanel={showChannelPanel}
+                                setShowChannelPanel={setShowChannelPanel}
                             />
-                            {showChannelPanel && (
-                                <ChannelPanel
-                                    channel={channel}
-                                    setChannel={setChannel}
-                                    showModalLoader={showModalLoader}
-                                    setApiError={setApiError}
-                                    channelOptions={channelOptions}
-                                    setChannelOptions={setChannelOptions}
-                                    actionBtnDisabled={showModalLoader}
-                                    editing={true}
-                                    validationError={showChannelValidationError}
-                                    required={true}
-                                    placeholder='Select channel to create subscription'
-                                    className={`incident-body__auto-suggest ${channel && 'incident-body__suggestion-chosen'}`}
-                                />
-                            )}
                         </div>
                         <ModalFooter
                             onConfirm={createIncident}
