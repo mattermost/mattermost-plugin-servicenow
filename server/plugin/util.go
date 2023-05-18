@@ -308,7 +308,7 @@ func decodeKey(key string) (string, error) {
 	return string(decodedKey), nil
 }
 
-func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool) (int, error) {
+func (p *Plugin) HasChannelPermissions(userID, channelID string) (int, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
@@ -316,7 +316,7 @@ func (p *Plugin) HasChannelPermissions(userID, channelID string, checkType bool)
 	}
 
 	// Check if a channel is direct message or group channel
-	if checkType && (channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup) {
+	if channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup {
 		return http.StatusBadRequest, fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 

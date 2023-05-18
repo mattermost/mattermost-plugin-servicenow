@@ -235,7 +235,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
+	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -303,7 +303,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg := sync.WaitGroup{}
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
-		_, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID, true)
+		_, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
 		if permissionErr != nil {
 			continue
 		}
@@ -358,7 +358,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
+	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -506,7 +506,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, channelID, true)
+	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, channelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -719,8 +719,8 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID, false)
-	if permissionErr != nil {
+	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID)
+	if permissionErr != nil && permissionErr.Error() != constants.ErrorInvalidChannelType {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
 	}
