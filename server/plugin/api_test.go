@@ -406,8 +406,8 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			SetupClient: func(client *mock_plugin.Client) {
@@ -437,8 +437,8 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
@@ -458,8 +458,8 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			SetupClient:          func(client *mock_plugin.Client) {},
@@ -497,8 +497,8 @@ func TestShareRecordInChannel(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
@@ -517,8 +517,8 @@ func TestShareRecordInChannel(t *testing.T) {
 			},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
@@ -543,8 +543,8 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
@@ -573,8 +573,8 @@ func TestShareRecordInChannel(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode: http.StatusOK,
@@ -1092,8 +1092,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode: http.StatusCreated,
@@ -1138,8 +1138,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1158,8 +1158,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			ExpectedStatusCode:   http.StatusInternalServerError,
@@ -1178,8 +1178,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1204,8 +1204,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
@@ -1228,8 +1228,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1258,8 +1258,8 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
@@ -1324,8 +1324,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode: http.StatusOK,
@@ -1386,8 +1386,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			ExpectedStatusCode: http.StatusOK,
@@ -1401,8 +1401,8 @@ func TestGetAllSubscriptions(t *testing.T) {
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedStatusCode: http.StatusOK,
@@ -1544,8 +1544,8 @@ func TestEditSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode: http.StatusOK,
@@ -1588,8 +1588,8 @@ func TestEditSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusInternalServerError, "", fmt.Errorf(constants.ErrorChannelPermissionsForUser)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
 			ExpectedStatusCode:   http.StatusInternalServerError,
@@ -1608,8 +1608,8 @@ func TestEditSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusBadRequest, "", fmt.Errorf(constants.ErrorInsufficientPermissions)
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
 			ExpectedStatusCode:   http.StatusBadRequest,
@@ -1634,8 +1634,8 @@ func TestEditSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, model.ChannelType, error) {
-					return http.StatusOK, "", nil
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string, _ bool) (int, error) {
+					return http.StatusOK, nil
 				})
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
