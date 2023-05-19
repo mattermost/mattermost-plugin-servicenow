@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import Cookies from 'js-cookie';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
@@ -15,8 +16,7 @@ const getBaseUrls = (): {
     mattermostApiBaseUrl: string;
     publicFilesUrl: string;
 } => {
-    const url = new URL(window.location.href);
-    const baseUrl = `${url.protocol}//${url.host}`;
+    const baseUrl = Cookies.get('SiteUrl');
     const pluginUrl = `${baseUrl}/plugins/${pluginId}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
     const mattermostApiBaseUrl = `${baseUrl}/api/v4`;

@@ -2,12 +2,12 @@ import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 
 import Constants from 'src/plugin_constants';
-import Utils from 'src/utils';
+import {id as pluginId} from '../manifest';
 
 // Service to make plugin API requests
 const pluginApi = createApi({
     reducerPath: 'pluginApi',
-    baseQuery: fetchBaseQuery({baseUrl: Utils.getBaseUrls().pluginApiBaseUrl}),
+    baseQuery: fetchBaseQuery({baseUrl: Cookies.get('SiteUrl') + `/plugins/${pluginId}/api/v1`}),
     tagTypes: ['Posts'],
     endpoints: (builder) => ({
         [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelData[], FetchChannelsParams>({
