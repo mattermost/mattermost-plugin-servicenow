@@ -22,6 +22,8 @@ import SubscribeNewIncident from './subscribeToNewIncident';
 
 import './styles.scss';
 
+const MAX_DESCRIPTION_LENGTH = 160;
+
 const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -81,7 +83,7 @@ const CreateIncident = () => {
     }, []);
 
     const handleShortDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setShortDescription(e.target.value);
+        setShortDescription(e.target.value.substring(0, MAX_DESCRIPTION_LENGTH));
         setValidationError('');
     };
 
