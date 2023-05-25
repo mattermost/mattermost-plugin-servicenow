@@ -1,6 +1,7 @@
-import Cookies from 'js-cookie';
 import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+
+import Cookies from 'js-cookie';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
 
