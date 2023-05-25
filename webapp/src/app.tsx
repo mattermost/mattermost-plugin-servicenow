@@ -1,7 +1,8 @@
 import Cookies from 'js-cookie';
-import {GlobalState} from 'mattermost-webapp/types/store';
 import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+
+import {GlobalState} from 'mattermost-webapp/types/store';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -19,7 +20,7 @@ const GetConfig = (): JSX.Element => {
     };
 
     const {entities} = useSelector((state: GlobalState) => state);
-    Cookies.set('SiteUrl', entities.general.config.SiteURL as string);
+    Cookies.set(Constants.SiteUrl, entities.general.config.SiteURL as string);
 
     useEffect(() => {
         makeApiRequest(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);

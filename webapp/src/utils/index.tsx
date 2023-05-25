@@ -16,7 +16,7 @@ const getBaseUrls = (): {
     mattermostApiBaseUrl: string;
     publicFilesUrl: string;
 } => {
-    const baseUrl = Cookies.get('SiteUrl');
+    const baseUrl = Cookies.get(Constants.SiteUrl);
     const pluginUrl = `${baseUrl}/plugins/${pluginId}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
     const mattermostApiBaseUrl = `${baseUrl}/api/v4`;

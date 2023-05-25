@@ -12,7 +12,19 @@ import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/ch
 
 import './styles.scss';
 
-const SubscribeNewIncident = ({subscriptionPayload, channel, setChannel, showModalLoader, setShowModalLoader, setApiError, channelOptions, setChannelOptions, showChannelValidationError, handleError, setShowResultPanel, showChannelPanel, setShowChannelPanel}: any) => {
+const SubscribeNewIncident = ({
+    subscriptionPayload,
+    channel, setChannel,
+    showModalLoader,
+    setShowModalLoader,
+    setApiError,
+    channelOptions,
+    setChannelOptions,
+    showChannelValidationError,
+    handleError,
+    setShowResultPanel,
+    showChannelPanel,
+    setShowChannelPanel}: any) => {
     // usePluginApi hook
     const {getApiState} = usePluginApi();
 
@@ -40,7 +52,7 @@ const SubscribeNewIncident = ({subscriptionPayload, channel, setChannel, showMod
     }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
 
     return (
-        <div>
+        <>
             <ToggleSwitch
                 active={showChannelPanel}
                 onChange={setShowChannelPanel}
@@ -61,10 +73,10 @@ const SubscribeNewIncident = ({subscriptionPayload, channel, setChannel, showMod
                     validationError={showChannelValidationError}
                     required={true}
                     placeholder='Select channel to create subscription'
-                    className={`incident-body__auto-suggest ${channel && 'incident-body__suggestion-chosen'}`}
+                    className={`incident-body__auto-suggest ${channel ? 'incident-body__suggestion-chosen' : ''}`}
                 />
             )}
-        </div>
+        </>
     );
 };
 

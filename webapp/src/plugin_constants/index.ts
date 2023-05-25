@@ -46,6 +46,7 @@ const IncidentCreatedMsg = 'Incident created successfully!';
 const ChannelPanelToggleLabel = 'Subscribe to the new incident';
 const MaxShortDescriptionCharactersView = 75;
 const MaxShortDescriptionLimit = 160;
+const SiteUrl = 'SiteUrl';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -372,4 +373,5 @@ export default {
     ChannelPanelToggleLabel,
     MaxShortDescriptionCharactersView,
     MaxShortDescriptionLimit,
+    SiteUrl,
 };
