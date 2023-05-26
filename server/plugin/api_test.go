@@ -3,6 +3,7 @@ package plugin
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -1824,6 +1825,161 @@ func TestCheckSubscriptionsConfigured(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodPost, requestURL, nil)
+			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
+			p.ServeHTTP(nil, w, r)
+
+			result := w.Result()
+			require.NotNil(t, result)
+			defer result.Body.Close()
+
+			assert.Equal(test.ExpectedStatusCode, result.StatusCode)
+			if test.ExpectedErrorMessage != "" {
+				var resp *serializer.APIErrorResponse
+				err := json.NewDecoder(result.Body).Decode(&resp)
+				require.Nil(t, err)
+
+				assert.Contains(resp.Message, test.ExpectedErrorMessage)
+			}
+		})
+	}
+}
+
+func TestCreateIncident(t *testing.T) {
+	requestURL := fmt.Sprintf("%s%s", constants.PathPrefix, constants.PathCreateIncident)
+	for name, test := range map[string]struct {
+		RequestBody          string
+		SetupAPI             func(*plugintest.API)
+		SetupPlugin          func(p *Plugin)
+		SetupClient          func(client *mock_plugin.Client)
+		ExpectedStatusCode   int
+		ExpectedErrorMessage string
+	}{
+		"incident created successfully": {
+			RequestBody: fmt.Sprintf(`{
+				"short_description": "mockShortDescription",
+				"description": "mockDescription",
+				"caller_id": "%s",
+				"channel_id": "%s"
+			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(&model.Post{}, nil)
+			},
+			SetupPlugin: func(p *Plugin) {
+				record := &serializer.ServiceNowRecord{}
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(record), "HandleNestedFields", func(_ *serializer.ServiceNowRecord, _ string) error {
+					return nil
+				})
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(record), "CreateSharingPost", func(_ *serializer.ServiceNowRecord, _, _, _, _, _ string) *model.Post {
+					return &model.Post{}
+				})
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(&serializer.IncidentResponse{}, http.StatusOK, nil)
+			},
+			ExpectedStatusCode: http.StatusOK,
+		},
+		"invalid body": {
+			RequestBody: "",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupPlugin:        func(p *Plugin) {},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"invalid incident": {
+			RequestBody: "{}",
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupPlugin:        func(p *Plugin) {},
+			SetupClient:        func(client *mock_plugin.Client) {},
+			ExpectedStatusCode: http.StatusBadRequest,
+		},
+		"does not have permission to access the channel": {
+			RequestBody: fmt.Sprintf(`{
+				"short_description": "mockShortDescription",
+				"description": "mockDescription",
+				"caller_id": "%s",
+				"channel_id": "%s"
+			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			SetupAPI: func(api *plugintest.API) {},
+			SetupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusInternalServerError, errors.New("channel permission error")
+				})
+			},
+			SetupClient:          func(client *mock_plugin.Client) {},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "channel permission error",
+		},
+		"failed to create incident": {
+			RequestBody: fmt.Sprintf(`{
+				"short_description": "mockShortDescription",
+				"description": "mockDescription",
+				"caller_id": "%s",
+				"channel_id": "%s"
+			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupPlugin: func(p *Plugin) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(&serializer.IncidentResponse{}, http.StatusInternalServerError, errors.New("error occurred while creating the incident"))
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "error occurred while creating the incident",
+		},
+		"error while handling the nested fields": {
+			RequestBody: fmt.Sprintf(`{
+				"short_description": "mockShortDescription",
+				"description": "mockDescription",
+				"caller_id": "%s",
+				"channel_id": "%s"
+			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+			},
+			SetupPlugin: func(p *Plugin) {
+				record := &serializer.ServiceNowRecord{}
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(record), "HandleNestedFields", func(_ *serializer.ServiceNowRecord, _ string) error {
+					return errors.New("error while handling the nested fields")
+				})
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(&serializer.IncidentResponse{}, http.StatusOK, nil)
+			},
+			ExpectedStatusCode:   http.StatusInternalServerError,
+			ExpectedErrorMessage: "error while handling the nested fields",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+			defer monkey.UnpatchAll()
+
+			p, api := setupTestPlugin(&plugintest.API{}, nil)
+			client := setupPluginForCheckOAuthMiddleware(p, t)
+			test.SetupClient(client)
+			test.SetupAPI(api)
+			test.SetupPlugin(p)
+			defer api.AssertExpectations(t)
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPost, requestURL, bytes.NewBufferString(test.RequestBody))
 			r.Header.Add(constants.HeaderMattermostUserID, testutils.GetID())
 			p.ServeHTTP(nil, w, r)
 
