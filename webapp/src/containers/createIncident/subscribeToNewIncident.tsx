@@ -12,9 +12,26 @@ import ChannelPanel from 'src/containers/addOrEditSubscriptions/subComponents/ch
 
 import './styles.scss';
 
+type PropTypes = {
+    subscriptionPayload: CreateSubscriptionPayload | null;
+    channel: string | null;
+    setChannel : React.Dispatch<React.SetStateAction<string | null>>;
+    showModalLoader: boolean;
+    setShowModalLoader: React.Dispatch<React.SetStateAction<boolean>>;
+    setApiError: React.Dispatch<React.SetStateAction<APIError | null>>;
+    channelOptions: DropdownOptionType[];
+    setChannelOptions: React.Dispatch<React.SetStateAction<DropdownOptionType[]>>;
+    showChannelValidationError: boolean;
+    handleError: (error: APIError) => void;
+    setShowResultPanel: React.Dispatch<React.SetStateAction<boolean>>;
+    showChannelPanel: boolean;
+    setShowChannelPanel: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 const SubscribeNewIncident = ({
     subscriptionPayload,
-    channel, setChannel,
+    channel,
+    setChannel,
     showModalLoader,
     setShowModalLoader,
     setApiError,
@@ -24,7 +41,7 @@ const SubscribeNewIncident = ({
     handleError,
     setShowResultPanel,
     showChannelPanel,
-    setShowChannelPanel}: any) => {
+    setShowChannelPanel}: PropTypes) => {
     // usePluginApi hook
     const {getApiState} = usePluginApi();
 

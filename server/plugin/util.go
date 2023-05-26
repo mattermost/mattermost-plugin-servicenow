@@ -309,6 +309,16 @@ func decodeKey(key string) (string, error) {
 }
 
 func (p *Plugin) HasChannelPermissions(userID, channelID string) (int, error) {
+	// Check if a user is a part of the channel
+	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
+		return channelErr.StatusCode, fmt.Errorf(constants.ErrorInsufficientPermissions)
+	}
+
+	return http.StatusOK, nil
+}
+
+func (p *Plugin) HasPublicOrPrivateChannelPermissions(userID, channelID string) (int, error) {
 	channel, channelErr := p.API.GetChannel(channelID)
 	if channelErr != nil {
 		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())

@@ -1,5 +1,8 @@
 import React from 'react';
 import {shallow, ShallowWrapper} from 'enzyme';
+import Cookies from 'js-cookie';
+
+import Constants from 'src/plugin_constants';
 
 import DownloadButton from './download_button';
 
@@ -18,6 +21,8 @@ const downloadButtonProps = {
 };
 
 describe('Download Button', () => {
+    Cookies.set(Constants.SiteUrl, 'http://localhost:8065');
+
     let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
     beforeEach(() => {
