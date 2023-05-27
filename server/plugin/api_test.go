@@ -1855,12 +1855,7 @@ func TestCreateIncident(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"incident created successfully": {
-			RequestBody: fmt.Sprintf(`{
-				"short_description": "mockShortDescription",
-				"description": "mockDescription",
-				"caller_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetCreateIncidentPayload(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(&model.Post{}, nil)
 			},
@@ -1903,13 +1898,8 @@ func TestCreateIncident(t *testing.T) {
 			ExpectedStatusCode: http.StatusBadRequest,
 		},
 		"does not have permission to access the channel": {
-			RequestBody: fmt.Sprintf(`{
-				"short_description": "mockShortDescription",
-				"description": "mockDescription",
-				"caller_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.GetCreateIncidentPayload(),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusInternalServerError, errors.New("channel permission error")
@@ -1920,12 +1910,7 @@ func TestCreateIncident(t *testing.T) {
 			ExpectedErrorMessage: "channel permission error",
 		},
 		"failed to create incident": {
-			RequestBody: fmt.Sprintf(`{
-				"short_description": "mockShortDescription",
-				"description": "mockDescription",
-				"caller_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetCreateIncidentPayload(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1941,12 +1926,7 @@ func TestCreateIncident(t *testing.T) {
 			ExpectedErrorMessage: "error occurred while creating the incident",
 		},
 		"error while handling the nested fields": {
-			RequestBody: fmt.Sprintf(`{
-				"short_description": "mockShortDescription",
-				"description": "mockDescription",
-				"caller_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetCreateIncidentPayload(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
