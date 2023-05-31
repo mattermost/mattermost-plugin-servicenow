@@ -132,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare && action != constants.CommandIncident {
+		if action == constants.CommandSubscriptions || action == constants.CommandUnsubscribe {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}
@@ -301,7 +301,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		for _, subscription := range subscriptions {
-			_, _, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID, true)
+			_, permissionErr := p.HasPublicOrPrivateChannelPermissions(args.UserId, subscription.ChannelID)
 			if permissionErr == nil {
 				subscriptionList = append(subscriptionList, subscription)
 			}

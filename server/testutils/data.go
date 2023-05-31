@@ -211,3 +211,12 @@ func GetSearchTerm(valid bool) string {
 
 	return sb.String()
 }
+
+func GetCreateIncidentPayload() string {
+	return fmt.Sprintf(`{
+		"short_description": "mockShortDescription",
+		"description": "mockDescription",
+		"caller_id": "%s",
+		"channel_id": "%s"
+	}`, GetID(), GetChannelID())
+}

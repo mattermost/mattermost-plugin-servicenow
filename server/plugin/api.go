@@ -235,7 +235,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
+	permissionStatusCode, permissionErr := p.HasPublicOrPrivateChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -303,7 +303,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg := sync.WaitGroup{}
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
-		_, _, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID, true)
+		_, permissionErr := p.HasPublicOrPrivateChannelPermissions(mattermostUserID, subscription.ChannelID)
 		if permissionErr != nil {
 			continue
 		}
@@ -358,7 +358,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID, true)
+	permissionStatusCode, permissionErr := p.HasPublicOrPrivateChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -506,7 +506,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, _, permissionErr := p.HasChannelPermissions(userID, channelID, true)
+	permissionStatusCode, permissionErr := p.HasPublicOrPrivateChannelPermissions(userID, channelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -719,7 +719,7 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, channelType, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID, false)
+	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -752,16 +752,6 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 	}
 
 	channelID := incident.ChannelID
-	if channelType == model.ChannelTypeDirect || channelType == model.ChannelTypeGroup {
-		channel, err := p.API.GetDirectChannel(userID, p.botID)
-		if err != nil {
-			p.API.LogError("Couldn't get bot's DM channel", "UserID", userID, "Error", err.Error())
-			return
-		}
-
-		channelID = channel.Id
-	}
-
 	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
