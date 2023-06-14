@@ -29,6 +29,7 @@ const CallerPanel = (({
     const [options, setOptions] = useState<CallerData[]>([]);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [autoSuggestValue, setAutoSuggestValue] = useState('');
+    const [autoSuggestDefaultValue, setAutoSuggestDefaultValue] = useState<Record<string, string>>();
 
     // usePluginApi hook
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -47,6 +48,7 @@ const CallerPanel = (({
     const handleCallerSelection = (callerSuggestion: Record<string, string> | null) => {
         setAutoSuggestValue(callerSuggestion?.userName || '');
         setCaller(callerSuggestion?.userId || null);
+        setAutoSuggestDefaultValue(callerSuggestion || {});
     };
 
     // Set the suggestions when the input value of the auto-suggest changes
@@ -103,6 +105,7 @@ const CallerPanel = (({
                     renderValue: (suggestion) => suggestion.userName,
                 }}
                 charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
+                defaultValue={autoSuggestDefaultValue}
             />
         </div>
     );
