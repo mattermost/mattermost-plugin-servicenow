@@ -48,7 +48,7 @@ const CallerPanel = (({
     const handleCallerSelection = (callerSuggestion: Record<string, string> | null) => {
         setAutoSuggestValue(callerSuggestion?.userName || '');
         setCaller(callerSuggestion?.userId || null);
-        setAutoSuggestDefaultValue(callerSuggestion || {});
+        setAutoSuggestDefaultValue(callerSuggestion ?? {});
     };
 
     // Set the suggestions when the input value of the auto-suggest changes
