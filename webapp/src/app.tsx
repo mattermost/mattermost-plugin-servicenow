@@ -1,9 +1,5 @@
 import React, {useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-
-import Cookies from 'js-cookie';
-
-import {GlobalState} from 'mattermost-webapp/types/store';
+import {useDispatch} from 'react-redux';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -19,9 +15,6 @@ const GetConfig = (): JSX.Element => {
         const {isLoading, data} = getApiState(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
         return {isLoading, data: data as ConnectedState};
     };
-
-    const {entities} = useSelector((state: GlobalState) => state);
-    Cookies.set(Constants.SiteUrl, entities.general.config.SiteURL as string);
 
     useEffect(() => {
         makeApiRequest(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);

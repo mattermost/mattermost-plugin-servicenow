@@ -1,5 +1,6 @@
 import React from 'react';
 import {Store, Action} from 'redux';
+import Cookies from 'js-cookie';
 
 import {GlobalState} from 'mattermost-webapp/types/store';
 
@@ -45,6 +46,10 @@ export default class Plugin {
         const {id, toggleRHSPlugin} = registry.registerRightHandSidebarComponent(Rhs, Constants.RightSidebarHeader);
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon className='servicenow-icon'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
+
+        // Store the Mattermost site URL in cookies
+        Cookies.set(Constants.SiteUrl, store.getState().entities.general.config.SiteURL as string);
+
         const iconUrl = `${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`;
         if (registry.registerAppBarComponent) {
             registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
