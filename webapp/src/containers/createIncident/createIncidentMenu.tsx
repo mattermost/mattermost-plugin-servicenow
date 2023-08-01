@@ -21,6 +21,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
     const {pluginState} = usePluginApi();
     const dispatch = useDispatch();
     const post = useSelector((state: GlobalState) => getPost(state, postId));
+    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
 
     // Check if the current post is a system post or not a valid post
     const systemMessage = Boolean(!post || isSystemMessage(post));
@@ -51,7 +52,7 @@ const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
                     onClick={handleClick}
                 >
                     <img
-                        src={`${Utils.getBaseUrls().publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
+                        src={`${Utils.getBaseUrls(SiteURL).publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`}
                         alt='ServiceNow icon'
                         className='incident-menu-icon'
                     />

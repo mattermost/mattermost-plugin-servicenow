@@ -2,8 +2,6 @@ import React, {useEffect, useState} from 'react';
 
 import {AutoSuggest} from '@brightscout/mattermost-ui-library';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
 import Constants from 'src/plugin_constants';
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -40,8 +38,8 @@ const CallerPanel = (({
     }));
 
     const getUsersState = () => {
-        const {isLoading, isSuccess, isError, error: apiErr, data} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as CallerData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, isError, error, data} = getApiState(Constants.pluginApiServiceConfigs.getUsers.apiServiceName);
+        return {isLoading, isSuccess, isError, data: data as CallerData[], error};
     };
 
     // Set the callerID when any of the suggestion is selected

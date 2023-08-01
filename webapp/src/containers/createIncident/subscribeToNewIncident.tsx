@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import {useDispatch} from 'react-redux';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ToggleSwitch} from '@brightscout/mattermost-ui-library';
 
@@ -48,13 +47,14 @@ const SubscribeNewIncident = ({
     const dispatch = useDispatch();
 
     const getSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, isError, error} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, subscriptionPayload);
+        return {isLoading, isSuccess, isError, error};
     };
+
+    const {isLoading, isError, isSuccess, error} = getSubscriptionState();
 
     useEffect(() => {
         if (subscriptionPayload) {
-            const {isLoading, isError, isSuccess, error} = getSubscriptionState();
             setShowModalLoader(isLoading);
             if (isError && error) {
                 handleError(error);
@@ -66,7 +66,7 @@ const SubscribeNewIncident = ({
                 setShowResultPanel(true);
             }
         }
-    }, [getSubscriptionState().isError, getSubscriptionState().isSuccess, getSubscriptionState().isLoading]);
+    }, [subscriptionPayload, isLoading, isError, isSuccess]);
 
     return (
         <>

@@ -1,8 +1,9 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {useDispatch} from 'react-redux';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
+import {useDispatch, useSelector} from 'react-redux';
 
 import {CircularLoader, CustomModal as Modal, Dropdown, ModalFooter, ModalHeader, ResultPanel} from '@brightscout/mattermost-ui-library';
+
+import {GlobalState} from 'mattermost-webapp/types/store';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
@@ -19,6 +20,7 @@ const UpdateState = () => {
     const [getStatesParams, setGetStatesParams] = useState<GetStatesParams | null>(null);
     const [updateStatePayload, setUpdateStatePayload] = useState<UpdateStatePayload | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
+    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
@@ -43,12 +45,12 @@ const UpdateState = () => {
 
     const getStateForGetStatesAPI = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getStates.apiServiceName, getStatesParams as GetStatesParams);
-        return {isLoading, isSuccess, isError, data: data as StateData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as StateData[], error: apiErr};
     };
 
     const getStateForUpdateStateAPI = () => {
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.updateState.apiServiceName, updateStatePayload as UpdateStatePayload);
-        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, error: apiErr};
     };
 
     useEffect(() => {
@@ -121,7 +123,7 @@ const UpdateState = () => {
                 {showResultPanel ? (
                     <ResultPanel
                         className='wizard__secondary-panel--slide-in result-panel'
-                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.StateUpdatedMsg)}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, SiteURL, Constants.StateUpdatedMsg)}
                         primaryBtn={{
                             text: 'Close',
                             onClick: hideModal,

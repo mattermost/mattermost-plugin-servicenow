@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, InputField as Input, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
 
@@ -88,8 +87,8 @@ const CreateIncident = () => {
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value);
 
     const getIncidentState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, isError, data, error} = getApiState(Constants.pluginApiServiceConfigs.createIncident.apiServiceName, incidentPayload);
+        return {isLoading, isSuccess, isError, data: data as RecordData, error};
     };
 
     const getResultPanelPrimaryBtnActionOrText = useCallback((action: boolean) => {
@@ -209,7 +208,7 @@ const CreateIncident = () => {
                 {showModalLoader && <CircularLoader/>}
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.IncidentCreatedMsg)}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, SiteURL, Constants.IncidentCreatedMsg)}
                         className={`${(showResultPanel || apiError) ? 'wizard__secondary-panel--slide-in result-panel' : ''}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

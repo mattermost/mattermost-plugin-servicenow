@@ -1,8 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-
 import {GlobalState} from 'mattermost-webapp/types/store';
 
 import {CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
@@ -35,6 +33,7 @@ const ShareRecords = () => {
     const [recordData, setRecordData] = useState<RecordData | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
+    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -73,8 +72,8 @@ const ShareRecords = () => {
     }, []);
 
     const getShareRecordState = () => {
-        const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, shareRecordPayload as ShareRecordPayload);
-        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, isError, error} = getApiState(Constants.pluginApiServiceConfigs.shareRecord.apiServiceName, shareRecordPayload as ShareRecordPayload);
+        return {isLoading, isSuccess, isError, error};
     };
 
     useEffect(() => {
@@ -143,7 +142,7 @@ const ShareRecords = () => {
                 <ModalLoader loading={getShareRecordState().isLoading}/>
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={Utils.getResultPanelHeader(apiError, hideModal, Constants.RecordSharedMsg)}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, SiteURL, Constants.RecordSharedMsg)}
                         className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

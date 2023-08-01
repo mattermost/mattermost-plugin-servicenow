@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
+export const UPDATE_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
 
@@ -46,7 +46,6 @@ const IncidentCreatedMsg = 'Incident created successfully!';
 const ChannelPanelToggleLabel = 'Subscribe to the new incident';
 const MaxShortDescriptionCharactersView = 75;
 const MaxShortDescriptionLimit = 160;
-const SiteUrl = 'SITEURL';
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -98,7 +97,6 @@ export const SubscriptionTypeLabelMap: Record<SubscriptionType, string> = {
 export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
-    [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.KNOWLEDGE]: 'Knowledge',
     [RecordType.TASK]: 'Task',
@@ -324,7 +322,7 @@ export default {
     RightSidebarHeader,
     RhsSubscritpions,
     ShareRecordButton,
-    UPLOAD_SET_FILENAME,
+    UPDATE_SET_FILENAME,
     SERVICENOW_ICON_URL,
     pluginApiServiceConfigs,
     MMCSRF,
@@ -373,5 +371,4 @@ export default {
     ChannelPanelToggleLabel,
     MaxShortDescriptionCharactersView,
     MaxShortDescriptionLimit,
-    SiteUrl,
 };

@@ -309,10 +309,9 @@ func decodeKey(key string) (string, error) {
 }
 
 func (p *Plugin) HasChannelPermissions(userID, channelID string) (int, error) {
-	// Check if a user is a part of the channel
-	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
-		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return channelErr.StatusCode, fmt.Errorf(constants.ErrorInsufficientPermissions)
+	if !p.API.HasPermissionToChannel(userID, channelID, model.PermissionCreatePost) {
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "UserID", userID, "ChannelID", channelID)
+		return http.StatusForbidden, fmt.Errorf(constants.ErrorInsufficientPermissions)
 	}
 
 	return http.StatusOK, nil
@@ -327,13 +326,13 @@ func (p *Plugin) HasPublicOrPrivateChannelPermissions(userID, channelID string) 
 
 	// Check if a channel is direct message or group channel
 	if channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup {
+		p.API.LogDebug(constants.ErrorInvalidChannelType, "ChannelType", channel.Type)
 		return http.StatusBadRequest, fmt.Errorf(constants.ErrorInvalidChannelType)
 	}
 
-	// Check if a user is a part of the channel
-	if _, channelErr := p.API.GetChannelMember(channelID, userID); channelErr != nil {
-		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "Error", channelErr.Error())
-		return channelErr.StatusCode, fmt.Errorf(constants.ErrorInsufficientPermissions)
+	if !p.API.HasPermissionToChannel(userID, channelID, model.PermissionCreatePost) {
+		p.API.LogDebug(constants.ErrorChannelPermissionsForUser, "UserID", userID, "ChannelID", channelID)
+		return http.StatusForbidden, fmt.Errorf(constants.ErrorInsufficientPermissions)
 	}
 
 	return http.StatusOK, nil

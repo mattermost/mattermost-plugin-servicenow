@@ -1858,6 +1858,7 @@ func TestCreateIncident(t *testing.T) {
 			RequestBody: testutils.GetCreateIncidentPayload(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(&model.Post{}, nil)
+				api.On("HasPermissionToChannel", testutils.GetID(), testutils.GetChannelID(), model.PermissionCreatePost).Return(true)
 			},
 			SetupPlugin: func(p *Plugin) {
 				record := &serializer.ServiceNowRecord{}
@@ -1868,10 +1869,6 @@ func TestCreateIncident(t *testing.T) {
 
 				monkey.PatchInstanceMethod(reflect.TypeOf(record), "CreateSharingPost", func(_ *serializer.ServiceNowRecord, _, _, _, _, _ string) *model.Post {
 					return &model.Post{}
-				})
-
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
 				})
 			},
 			SetupClient: func(client *mock_plugin.Client) {
@@ -1899,26 +1896,22 @@ func TestCreateIncident(t *testing.T) {
 		},
 		"does not have permission to access the channel": {
 			RequestBody: testutils.GetCreateIncidentPayload(),
-			SetupAPI:    func(api *plugintest.API) {},
-			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusInternalServerError, errors.New("channel permission error")
-				})
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogDebug", testutils.GetMockArgumentsWithType("string", 5)...).Return()
+				api.On("HasPermissionToChannel", testutils.GetID(), testutils.GetChannelID(), model.PermissionCreatePost).Return(false)
 			},
+			SetupPlugin:          func(p *Plugin) {},
 			SetupClient:          func(client *mock_plugin.Client) {},
-			ExpectedStatusCode:   http.StatusInternalServerError,
-			ExpectedErrorMessage: "channel permission error",
+			ExpectedStatusCode:   http.StatusForbidden,
+			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
 		"failed to create incident": {
 			RequestBody: testutils.GetCreateIncidentPayload(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("HasPermissionToChannel", testutils.GetID(), testutils.GetChannelID(), model.PermissionCreatePost).Return(true)
 			},
-			SetupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
-				})
-			},
+			SetupPlugin: func(p *Plugin) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CreateIncident", mock.AnythingOfType("*serializer.IncidentPayload")).Return(&serializer.IncidentResponse{}, http.StatusInternalServerError, errors.New("error occurred while creating the incident"))
 			},
@@ -1929,15 +1922,13 @@ func TestCreateIncident(t *testing.T) {
 			RequestBody: testutils.GetCreateIncidentPayload(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("HasPermissionToChannel", testutils.GetID(), testutils.GetChannelID(), model.PermissionCreatePost).Return(true)
 			},
 			SetupPlugin: func(p *Plugin) {
 				record := &serializer.ServiceNowRecord{}
 
 				monkey.PatchInstanceMethod(reflect.TypeOf(record), "HandleNestedFields", func(_ *serializer.ServiceNowRecord, _ string) error {
 					return errors.New("error while handling the nested fields")
-				})
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
-					return http.StatusOK, nil
 				})
 			},
 			SetupClient: func(client *mock_plugin.Client) {

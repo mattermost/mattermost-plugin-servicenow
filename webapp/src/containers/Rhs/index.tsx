@@ -3,13 +3,12 @@ import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
 import {General as MMConstants} from 'mattermost-redux/constants';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {EmptyState, CircularLoader, ServiceNowIcon, UnlinkIcon, ConfirmationDialog} from '@brightscout/mattermost-ui-library';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 
-import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPLOAD_SET_FILENAME} from 'src/plugin_constants';
+import Constants, {SubscriptionEventsMap, CONNECT_ACCOUNT_LINK, UPDATE_SET_FILENAME} from 'src/plugin_constants';
 
 import {refetch, resetRefetch} from 'src/reducers/refetchState';
 
@@ -35,6 +34,7 @@ const Rhs = (): JSX.Element => {
     const refetchSubscriptions = pluginState.refetchReducer.refetch;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {currentUserId} = useSelector((state: GlobalState) => state.entities.users);
+    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
@@ -48,13 +48,13 @@ const Rhs = (): JSX.Element => {
     const [resetFilter, setResetFilter] = useState(false);
 
     const getSubscriptionsState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, isError, data, error} = getApiState(Constants.pluginApiServiceConfigs.fetchSubscriptions.apiServiceName, fetchSubscriptionParams as FetchSubscriptionsParams);
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error};
     };
 
     const getDeleteSubscriptionState = () => {
-        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
-        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        const {isLoading, isSuccess, isError, data, error} = getApiState(Constants.pluginApiServiceConfigs.deleteSubscription.apiServiceName, toBeDeleted as string);
+        return {isLoading, isSuccess, isError, data: data as SubscriptionData[], error};
     };
 
     // Reset the pagination params and empty the subscription list
@@ -260,7 +260,7 @@ const Rhs = (): JSX.Element => {
                                 subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
                                 buttonConfig={isCurrentUserSysAdmin ? ({
                                     text: 'Download update set',
-                                    link: Utils.getBaseUrls().publicFilesUrl + UPLOAD_SET_FILENAME,
+                                    link: Utils.getBaseUrls(SiteURL).publicFilesUrl + UPDATE_SET_FILENAME,
                                     download: true,
                                 }) : null
                                 }
@@ -283,7 +283,7 @@ const Rhs = (): JSX.Element => {
                         title='No Account Connected'
                         buttonConfig={{
                             text: 'Connect your account',
-                            link: Utils.getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
+                            link: Utils.getBaseUrls(SiteURL).pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
                         }}
                         className='configuration-err-state'
                         icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon'/>}

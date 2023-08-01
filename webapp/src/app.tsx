@@ -21,12 +21,12 @@ const GetConfig = (): JSX.Element => {
         makeApiRequest(Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName);
     }, []);
 
+    const {data, isLoading} = getConnectedUserState();
     useEffect(() => {
-        const {data, isLoading} = getConnectedUserState();
         if (!isLoading && data) {
             dispatch(setConnected(data.connected));
         }
-    }, [getConnectedUserState().isLoading, getConnectedUserState().data]);
+    }, [isLoading, data]);
 
     // This container is used just for making the API call for fetching the config, it doesn't render anything.
     return <></>;
