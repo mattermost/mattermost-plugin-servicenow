@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
@@ -53,7 +53,7 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 	var actions []*model.PostAction
 	if constants.RecordTypesSupportingComments[se.RecordType] {
 		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
+			Type: model.PostActionTypeButton,
 			Name: "Add and view comments",
 			Integration: &model.PostActionIntegration{
 				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
@@ -67,7 +67,7 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 
 	if constants.RecordTypesSupportingStateUpdation[se.RecordType] {
 		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
+			Type: model.PostActionTypeButton,
 			Name: "Update State",
 			Integration: &model.PostActionIntegration{
 				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),

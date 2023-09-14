@@ -139,7 +139,7 @@ func (p *Plugin) OnConfigurationChange() error {
 	configuration.MattermostSiteURL = *mattermostSiteURL
 	configuration.PluginURL = p.GetPluginURL()
 	configuration.PluginURLPath = p.GetPluginURLPath()
-	configuration.PluginID = manifest.ID
+	configuration.PluginID = Manifest.Id
 
 	p.setConfiguration(configuration)
 
