@@ -65,7 +65,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Create subscription payload
     const [createSubscriptionPayload, setCreateSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
-    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
+    const siteUrl = useSelector(Utils.getSiteUrl);
 
     // Edit subscription payload
     const [editSubscriptionPayload, setEditSubscriptionPayload] = useState<EditSubscriptionPayload | null>(null);
@@ -277,7 +277,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
-            return Utils.getResultPanelHeader(apiError, hideModal, SiteURL);
+            return Utils.getResultPanelHeader(apiError, hideModal, siteUrl);
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }
@@ -290,7 +290,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Create subscription payload
         const payload: CreateSubscriptionPayload = {
-            server_url: SiteURL ?? '',
+            server_url: siteUrl ?? '',
             is_active: true,
             user_id: Cookies.get(Constants.MMUSERID) ?? '',
             type: subscriptionType as SubscriptionType,
@@ -313,7 +313,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Edit subscription payload
         const payload: EditSubscriptionPayload = {
-            server_url: SiteURL ?? '',
+            server_url: siteUrl ?? '',
             is_active: true,
             user_id: subscriptionData?.userId ?? '',
             type: subscriptionType as SubscriptionType,

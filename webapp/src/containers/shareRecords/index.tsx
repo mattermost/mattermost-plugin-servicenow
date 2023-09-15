@@ -33,7 +33,7 @@ const ShareRecords = () => {
     const [recordData, setRecordData] = useState<RecordData | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
-    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
+    const siteUrl = useSelector(Utils.getSiteUrl);
 
     // API error
     const [apiError, setApiError] = useState<APIError | null>(null);
@@ -142,7 +142,7 @@ const ShareRecords = () => {
                 <ModalLoader loading={getShareRecordState().isLoading}/>
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={Utils.getResultPanelHeader(apiError, hideModal, SiteURL, Constants.RecordSharedMsg)}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, siteUrl, Constants.RecordSharedMsg)}
                         className={`${(showResultPanel || apiError) && 'wizard__secondary-panel--slide-in result-panel'}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

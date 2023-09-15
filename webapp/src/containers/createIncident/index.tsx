@@ -35,7 +35,7 @@ const CreateIncident = () => {
     const [senderId, setSenderId] = useState<string>('');
 
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
-    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
+    const siteUrl = useSelector(Utils.getSiteUrl);
 
     // Loaders
     const [showModalLoader, setShowModalLoader] = useState(false);
@@ -154,7 +154,7 @@ const CreateIncident = () => {
             ];
 
             const payload: CreateSubscriptionPayload = {
-                server_url: SiteURL ?? '',
+                server_url: siteUrl ?? '',
                 is_active: true,
                 user_id: Cookies.get(Constants.MMUSERID) ?? '',
                 type: SubscriptionType.RECORD,
@@ -208,7 +208,7 @@ const CreateIncident = () => {
                 {showModalLoader && <CircularLoader/>}
                 {showResultPanel || apiError ? (
                     <ResultPanel
-                        header={Utils.getResultPanelHeader(apiError, hideModal, SiteURL, Constants.IncidentCreatedMsg)}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, siteUrl, Constants.IncidentCreatedMsg)}
                         className={`${(showResultPanel || apiError) ? 'wizard__secondary-panel--slide-in result-panel' : ''}`}
                         primaryBtn={{
                             text: getResultPanelPrimaryBtnActionOrText(false) as string,

@@ -3,8 +3,6 @@ import {FormGroup, Col, Button} from 'react-bootstrap';
 
 import {useSelector} from 'react-redux';
 
-import {GlobalState} from 'mattermost-webapp/types/store';
-
 import Utils from 'src/utils';
 
 import {UPDATE_SET_FILENAME} from 'src/plugin_constants';
@@ -28,7 +26,7 @@ type Props = {
 }
 
 const DownloadButton = ({label, helpText}: Props) => {
-    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
+    const siteUrl = useSelector(Utils.getSiteUrl);
 
     return (
         <FormGroup>
@@ -37,7 +35,7 @@ const DownloadButton = ({label, helpText}: Props) => {
             </Col>
             <Col sm={8}>
                 <a
-                    href={Utils.getBaseUrls(SiteURL).publicFilesUrl + UPDATE_SET_FILENAME}
+                    href={Utils.getBaseUrls(siteUrl).publicFilesUrl + UPDATE_SET_FILENAME}
                     download={true}
                 >
                     <Button>

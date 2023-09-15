@@ -46,7 +46,7 @@ export default class Plugin {
         registry.registerChannelHeaderButtonAction(<ServiceNowIcon className='servicenow-icon'/>, () => store.dispatch(toggleRHSPlugin), null, Constants.ChannelHeaderTooltipText);
         registry.registerAdminConsoleCustomSetting('ServiceNowUpdateSetDownload', DownloadButton);
 
-        const iconUrl = `${Utils.getBaseUrls(store.getState().entities.general.config.SiteURL).publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`;
+        const iconUrl = `${Utils.getBaseUrls(Utils.getSiteUrl(store.getState())).publicFilesUrl}${Constants.SERVICENOW_ICON_URL}`;
         if (registry.registerAppBarComponent) {
             registry.registerAppBarComponent(iconUrl, () => store.dispatch(toggleRHSPlugin), Constants.ChannelHeaderTooltipText);
         }

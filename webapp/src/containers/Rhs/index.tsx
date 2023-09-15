@@ -34,7 +34,7 @@ const Rhs = (): JSX.Element => {
     const refetchSubscriptions = pluginState.refetchReducer.refetch;
     const {currentChannelId} = useSelector((state: GlobalState) => state.entities.channels);
     const {currentUserId} = useSelector((state: GlobalState) => state.entities.users);
-    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
+    const siteUrl = useSelector(Utils.getSiteUrl);
     const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [toBeDeleted, setToBeDeleted] = useState<null | string>(null);
     const [deleteApiResponseInvalid, setDeleteApiResponseInvalid] = useState(true);
@@ -260,7 +260,7 @@ const Rhs = (): JSX.Element => {
                                 subTitle={isCurrentUserSysAdmin ? Constants.SubscriptionsConfigErrorSubtitleForAdmin : Constants.SubscriptionsConfigErrorSubtitleForUser}
                                 buttonConfig={isCurrentUserSysAdmin ? ({
                                     text: 'Download update set',
-                                    link: Utils.getBaseUrls(SiteURL).publicFilesUrl + UPDATE_SET_FILENAME,
+                                    link: Utils.getBaseUrls(siteUrl).publicFilesUrl + UPDATE_SET_FILENAME,
                                     download: true,
                                 }) : null
                                 }
@@ -283,7 +283,7 @@ const Rhs = (): JSX.Element => {
                         title='No Account Connected'
                         buttonConfig={{
                             text: 'Connect your account',
-                            link: Utils.getBaseUrls(SiteURL).pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
+                            link: Utils.getBaseUrls(siteUrl).pluginApiBaseUrl + CONNECT_ACCOUNT_LINK,
                         }}
                         className='configuration-err-state'
                         icon={<ServiceNowIcon className='account-not-connected-icon rhs-state-icon'/>}
