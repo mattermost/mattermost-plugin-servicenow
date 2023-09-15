@@ -6,7 +6,7 @@ type ReduxState = {
 
 type GlobalModalState = {
     modalId: ModalId;
-    data?: EditSubscriptionData | CommentAndStateModalData | null;
+    data?: EditSubscriptionData | CommentAndStateModalData | IncidentModalData| null;
 }
 
 type CommentModalState = {
@@ -39,4 +39,9 @@ type UpdateStateModalReduxState = {
 type CommentAndStateModalData = {
     recordType: RecordType;
     recordId: string;
+}
+
+type IncidentModalData = {
+    description: string;
+    senderId: string;
 }

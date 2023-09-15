@@ -564,7 +564,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
 			},
@@ -589,7 +589,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
@@ -615,7 +615,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
@@ -643,7 +643,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
 			},
