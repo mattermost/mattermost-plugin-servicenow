@@ -1,9 +1,11 @@
 import React from 'react';
 import {FormGroup, Col, Button} from 'react-bootstrap';
 
+import {useSelector} from 'react-redux';
+
 import Utils from 'src/utils';
 
-import {UPLOAD_SET_FILENAME} from 'src/plugin_constants';
+import {UPDATE_SET_FILENAME} from 'src/plugin_constants';
 
 type HelpText = {
     key: string | null;
@@ -23,27 +25,31 @@ type Props = {
     helpText: HelpText;
 }
 
-const DownloadButton = ({label, helpText}: Props) => (
-    <FormGroup>
-        <Col sm={4}>
-            {label}
-        </Col>
-        <Col sm={8}>
-            <a
-                href={Utils.getBaseUrls().publicFilesUrl + UPLOAD_SET_FILENAME}
-                download={true}
-            >
-                <Button>
-                    {'Download'}
-                </Button>
-            </a>
-            <div className='help-text'>
-                <span>
-                    {helpText?.props?.text}
-                </span>
-            </div>
-        </Col>
-    </FormGroup>
-);
+const DownloadButton = ({label, helpText}: Props) => {
+    const siteUrl = useSelector(Utils.getSiteUrl);
+
+    return (
+        <FormGroup>
+            <Col sm={4}>
+                {label}
+            </Col>
+            <Col sm={8}>
+                <a
+                    href={Utils.getBaseUrls(siteUrl).publicFilesUrl + UPDATE_SET_FILENAME}
+                    download={true}
+                >
+                    <Button>
+                        {'Download'}
+                    </Button>
+                </a>
+                <div className='help-text'>
+                    <span>
+                        {helpText?.props?.text}
+                    </span>
+                </div>
+            </Col>
+        </FormGroup>
+    );
+};
 
 export default DownloadButton;

@@ -237,7 +237,7 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	permissionStatusCode, permissionErr := p.HasPublicOrPrivateChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -305,7 +305,7 @@ func (p *Plugin) getAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	wg := sync.WaitGroup{}
 	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	for _, subscription := range subscriptions {
-		_, permissionErr := p.HasChannelPermissions(mattermostUserID, subscription.ChannelID)
+		_, permissionErr := p.HasPublicOrPrivateChannelPermissions(mattermostUserID, subscription.ChannelID)
 		if permissionErr != nil {
 			continue
 		}
@@ -360,7 +360,7 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(constants.HeaderMattermostUserID)
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, *subscription.ChannelID)
+	permissionStatusCode, permissionErr := p.HasPublicOrPrivateChannelPermissions(userID, *subscription.ChannelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -508,7 +508,7 @@ func (p *Plugin) shareRecordInChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, channelID)
+	permissionStatusCode, permissionErr := p.HasPublicOrPrivateChannelPermissions(userID, channelID)
 	if permissionErr != nil {
 		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
 		return
@@ -707,7 +707,6 @@ func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
-	mattermostUserID := r.Header.Get(constants.HeaderMattermostUserID)
 	incident, err := serializer.IncidentFromJSON(r.Body)
 	if err != nil {
 		p.API.LogError(constants.ErrorUnmarshallingRequestBody, "Error", err.Error())
@@ -721,6 +720,13 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Header.Get(constants.HeaderMattermostUserID)
+	permissionStatusCode, permissionErr := p.HasChannelPermissions(userID, incident.ChannelID)
+	if permissionErr != nil {
+		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: permissionStatusCode, Message: permissionErr.Error()})
+		return
+	}
+
 	client := p.GetClientFromRequest(r)
 	response, statusCode, err := client.CreateIncident(incident)
 	if err != nil {
@@ -729,18 +735,11 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: post the created incident in the current channel instead of DM
-	channel, channelErr := p.API.GetDirectChannel(mattermostUserID, p.botID)
-	if channelErr != nil {
-		p.API.LogError(constants.ErrorGetBotChannel, "userID", mattermostUserID, "Error", channelErr.Error())
-		p.handleAPIError(w, &serializer.APIErrorResponse{StatusCode: http.StatusInternalServerError, Message: constants.ErrorGetBotChannel})
-		return
-	}
-
 	record := serializer.ServiceNowRecord{
 		SysID:            response.SysID,
 		Number:           response.Number,
 		ShortDescription: response.ShortDescription,
+		Description:      response.Description,
 		RecordType:       constants.RecordTypeIncident,
 		State:            response.State,
 		Priority:         response.Priority,
@@ -754,7 +753,8 @@ func (p *Plugin) createIncident(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := record.CreateSharingPost(channel.Id, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
+	channelID := incident.ChannelID
+	post := record.CreateSharingPost(channelID, p.botID, p.getConfiguration().ServiceNowBaseURL, p.GetPluginURL(), "")
 	if _, postErr := p.API.CreatePost(post); postErr != nil {
 		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
