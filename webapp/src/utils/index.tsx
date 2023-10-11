@@ -6,20 +6,20 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
+import {GlobalState} from 'mattermost-webapp/types/store';
+
 import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'src/plugin_constants';
 
 import {id as pluginId} from '../manifest';
 
-const getBaseUrls = (): {
+const getBaseUrls = (mmSiteUrl = ''): {
     pluginApiBaseUrl: string;
     mattermostApiBaseUrl: string;
     publicFilesUrl: string;
 } => {
-    const url = new URL(window.location.href);
-    const baseUrl = `${url.protocol}//${url.host}`;
-    const pluginUrl = `${baseUrl}/plugins/${pluginId}`;
+    const pluginUrl = `${mmSiteUrl}/plugins/${pluginId}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
-    const mattermostApiBaseUrl = `${baseUrl}/api/v4`;
+    const mattermostApiBaseUrl = `${mmSiteUrl}/api/v4`;
     const publicFilesUrl = `${pluginUrl}/public/`;
 
     return {pluginApiBaseUrl, mattermostApiBaseUrl, publicFilesUrl};
@@ -80,13 +80,13 @@ export const validateKeysContainingLink = (key: string) => (
     key === RecordDataLabelConfigKey.ASSIGNMENT_GROUP
 );
 
-const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void) => (
+const getContentForResultPanelWhenDisconnected = (message: string, onClick: () => void, mmSiteUrl?: string) => (
     <>
         <h2 className='font-16 margin-v-25 text-center'>{message}</h2>
         <a
             target='_blank'
             rel='noreferrer'
-            href={getBaseUrls().pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
+            href={getBaseUrls(mmSiteUrl).pluginApiBaseUrl + CONNECT_ACCOUNT_LINK}
         >
             <Button
                 text='Connect your account'
@@ -96,15 +96,17 @@ const getContentForResultPanelWhenDisconnected = (message: string, onClick: () =
     </>
 );
 
-const getResultPanelHeader = (error: APIError | null, onClick: () => void, successMessage?: string) => {
+const getResultPanelHeader = (error: APIError | null, onClick: () => void, mmSiteUrl?: string, successMessage?: string) => {
     if (error) {
         return error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired ?
-            getContentForResultPanelWhenDisconnected(error.message, onClick) :
+            getContentForResultPanelWhenDisconnected(error.message, onClick, mmSiteUrl) :
             error.message;
     }
 
     return successMessage;
 };
+
+const getSiteUrl = (state: GlobalState) => state.entities.general.config.SiteURL;
 
 export default {
     getBaseUrls,
@@ -114,4 +116,5 @@ export default {
     getLinkData,
     validateKeysContainingLink,
     getResultPanelHeader,
+    getSiteUrl,
 };

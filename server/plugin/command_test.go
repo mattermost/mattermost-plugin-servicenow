@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
 
@@ -564,7 +564,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
 			},
@@ -577,10 +577,10 @@ func TestHandleListSubscriptions(t *testing.T) {
 			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 				a.On("GetChannel", mock.AnythingOfType("string")).Return(
-					testutils.GetChannel(model.CHANNEL_PRIVATE), nil,
+					testutils.GetChannel(model.ChannelTypePrivate), nil,
 				)
 			},
 			setupClient: func(client *mock_plugin.Client) {
@@ -589,7 +589,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusInternalServerError, fmt.Errorf(constants.ErrorChannelPermissionsForUser)
 				})
 			},
@@ -615,7 +615,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusBadRequest, fmt.Errorf(constants.ErrorInsufficientPermissions)
 				})
 			},
@@ -628,10 +628,10 @@ func TestHandleListSubscriptions(t *testing.T) {
 			params:      []string{constants.FilterCreatedByMe, constants.FilterAllChannels},
 			setupAPI: func(a *plugintest.API) {
 				a.On("GetUser", mock.AnythingOfType("string")).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 				a.On("GetChannel", mock.AnythingOfType("string")).Return(
-					testutils.GetChannel(model.CHANNEL_PRIVATE), nil,
+					testutils.GetChannel(model.ChannelTypePrivate), nil,
 				)
 			},
 			setupClient: func(client *mock_plugin.Client) {
@@ -643,7 +643,7 @@ func TestHandleListSubscriptions(t *testing.T) {
 				)
 			},
 			setupPlugin: func(p *Plugin) {
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
 			},

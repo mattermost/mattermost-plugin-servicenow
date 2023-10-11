@@ -85,3 +85,9 @@ export function handleOpenUpdateStateModal(store: Store<GlobalState, Action<Reco
         store.dispatch(setGlobalModalState({modalId: 'updateState', data: updateStateModalData}) as Action);
     };
 }
+
+export function handleOpenIncidentModal(store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    return (_: WebsocketEventParams) => {
+        store.dispatch(setGlobalModalState({modalId: 'createIncident'}) as Action);
+    };
+}

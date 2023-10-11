@@ -1,7 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {useDispatch} from 'react-redux';
-
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
+import {useDispatch, useSelector} from 'react-redux';
 
 import {CircularLoader, CustomModal as Modal, ModalFooter, ModalHeader, ModalLoader, ModalSubtitleAndError, ResultPanel, TextArea} from '@brightscout/mattermost-ui-library';
 
@@ -23,8 +21,8 @@ const AddOrViewComments = () => {
     const [showModalLoader, setShowModalLoader] = useState(false);
     const [apiError, setApiError] = useState<APIError | null>(null);
     const [showErrorPanel, setShowErrorPanel] = useState(false);
-    const [validationError, setValidationError] = useState('');
     const [refetch, setRefetch] = useState(false);
+    const siteUrl = useSelector(Utils.getSiteUrl);
 
     // usePluginApi hook
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
@@ -36,7 +34,6 @@ const AddOrViewComments = () => {
         setComments('');
         setShowModalLoader(false);
         setApiError(null);
-        setValidationError('');
         setRefetch(false);
     }, []);
 
@@ -45,36 +42,33 @@ const AddOrViewComments = () => {
         resetFieldStates();
     }, []);
 
-    const getCommentsPayload = (): CommentsPayload => ({
-        record_type: getGlobalModalState(pluginState).data?.recordType as RecordType,
-        record_id: getGlobalModalState(pluginState).data?.recordId as string,
-        comments,
-    });
+    const getCommentsPayload = (): CommentsPayload => {
+        const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
+        return {
+            record_type: data?.recordType || '',
+            record_id: data?.recordId || '',
+            comments,
+        };
+    };
 
     const getCommentsState = () => {
         const payload = getCommentsPayload();
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getComments.apiServiceName, payload);
-        return {isLoading, isSuccess, isError, data: data as string, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as string, error: apiErr};
     };
 
     const addCommentState = () => {
         const payload = getCommentsPayload();
         const {isLoading, isSuccess, isError, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
-        return {isLoading, isSuccess, isError, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, error: apiErr};
     };
 
     const addComment = () => {
-        if (!comments) {
-            setValidationError(Constants.RequiredMsg);
-            return;
-        }
-
         const payload = getCommentsPayload();
         makeApiRequest(Constants.pluginApiServiceConfigs.addComments.apiServiceName, payload);
     };
 
     const onChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setValidationError('');
         setComments(e.target.value);
     };
 
@@ -150,7 +144,7 @@ const AddOrViewComments = () => {
                 {showModalLoader && !comments && <CircularLoader/>}
                 {(showErrorPanel && apiError) ? (
                     <ResultPanel
-                        header={Utils.getResultPanelHeader(apiError, hideModal)}
+                        header={Utils.getResultPanelHeader(apiError, hideModal, siteUrl)}
                         className='wizard__secondary-panel--slide-in result-panel'
                         primaryBtn={{
                             text: 'Close',
@@ -170,7 +164,6 @@ const AddOrViewComments = () => {
                                 onChange={onChangeHandle}
                                 className='comment-body__text-area'
                                 disabled={showModalLoader}
-                                error={validationError}
                             />
                             {!apiError && <h4 className='comment-body__heading'>{Constants.CommentsHeading}</h4>}
                             {commentsData ? (
@@ -186,7 +179,7 @@ const AddOrViewComments = () => {
                         <ModalFooter
                             onConfirm={addComment}
                             confirmBtnText='Submit'
-                            confirmDisabled={showModalLoader}
+                            confirmDisabled={showModalLoader || !comments.length}
                             onHide={hideModal}
                             cancelBtnText='Cancel'
                             cancelDisabled={showModalLoader}

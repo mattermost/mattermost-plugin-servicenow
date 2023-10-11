@@ -8,8 +8,8 @@ import (
 	"unicode"
 
 	"github.com/mattermost/mattermost-plugin-api/experimental/command"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
@@ -132,7 +132,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}
 
 		var client Client
-		if action != constants.CommandDisconnect && action != constants.CommandSearchAndShare {
+		if action == constants.CommandSubscriptions || action == constants.CommandUnsubscribe {
 			if client = p.GetClientFromUser(args, user); client == nil {
 				return &model.CommandResponse{}, nil
 			}
@@ -221,6 +221,31 @@ func (p *Plugin) handleSubscriptions(c *plugin.Context, args *model.CommandArgs,
 	}
 }
 
+func (p *Plugin) handleIncident(_ *plugin.Context, args *model.CommandArgs, parameters []string, _ Client, _ bool) string {
+	if len(parameters) == 0 {
+		return "Invalid incident command. Available command is 'create'."
+	}
+
+	command := parameters[0]
+
+	switch command {
+	case constants.SubCommandCreate:
+		return p.HandleCreateIncident(args)
+	default:
+		return fmt.Sprintf("Unknown subcommand %v", command)
+	}
+}
+
+func (p *Plugin) HandleCreateIncident(args *model.CommandArgs) string {
+	p.API.PublishWebSocketEvent(
+		constants.WSEventOpenCreateIncidentModal,
+		nil,
+		&model.WebsocketBroadcast{UserId: args.UserId},
+	)
+
+	return ""
+}
+
 func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenAddSubscriptionModal,
@@ -276,7 +301,7 @@ func (p *Plugin) handleListSubscriptions(_ *plugin.Context, args *model.CommandA
 		}
 
 		for _, subscription := range subscriptions {
-			_, permissionErr := p.HasChannelPermissions(args.UserId, subscription.ChannelID)
+			_, permissionErr := p.HasPublicOrPrivateChannelPermissions(args.UserId, subscription.ChannelID)
 			if permissionErr == nil {
 				subscriptionList = append(subscriptionList, subscription)
 			}
@@ -401,7 +426,7 @@ func (p *Plugin) handleEditSubscription(_ *plugin.Context, args *model.CommandAr
 }
 
 func getAutocompleteData() *model.AutocompleteData {
-	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandHelp))
+	serviceNow := model.NewAutocompleteData(constants.CommandTrigger, "[command]", fmt.Sprintf("Available commands: %s, %s, %s, %s, %s, %s", constants.CommandConnect, constants.CommandDisconnect, constants.CommandSubscriptions, constants.CommandSearchAndShare, constants.CommandIncident, constants.CommandHelp))
 
 	connect := model.NewAutocompleteData(constants.CommandConnect, "", "Connect your Mattermost account to your ServiceNow account")
 	serviceNow.AddCommand(connect)
@@ -436,6 +461,11 @@ func getAutocompleteData() *model.AutocompleteData {
 
 	searchRecords := model.NewAutocompleteData(constants.CommandSearchAndShare, "", "Search and share a ServiceNow record")
 	serviceNow.AddCommand(searchRecords)
+
+	incident := model.NewAutocompleteData(constants.CommandIncident, "[command]", fmt.Sprintf("Available command: %s", constants.SubCommandCreate))
+	incidentCreate := model.NewAutocompleteData(constants.SubCommandCreate, "", "Create an incident")
+	incident.AddCommand(incidentCreate)
+	serviceNow.AddCommand(incident)
 
 	help := model.NewAutocompleteData(constants.CommandHelp, "", "Display slash command help text")
 	serviceNow.AddCommand(help)

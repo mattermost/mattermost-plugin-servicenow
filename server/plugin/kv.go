@@ -3,7 +3,7 @@ package plugin
 import (
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
