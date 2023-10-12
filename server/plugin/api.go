@@ -693,7 +693,7 @@ func (p *Plugin) handleOpenStateModal(w http.ResponseWriter, r *http.Request) {
 	p.returnPostActionIntegrationResponse(w, response)
 }
 
-func (p *Plugin) handleGetUsers(w http.ResponseWriter, r *http.Request) {
+func (p *Plugin) handleGetUsers(w http.ResponseWriter, _ *http.Request) {
 	users, err := p.store.GetAllUsers()
 	if err != nil {
 		p.API.LogError(constants.ErrorGetUsers, "Error", err.Error())
