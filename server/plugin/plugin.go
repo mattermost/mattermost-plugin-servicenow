@@ -53,7 +53,7 @@ func NewPlugin() *Plugin {
 }
 
 // ServeHTTP demonstrates a plugin that handles HTTP requests
-func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+func (p *Plugin) ServeHTTP(_ *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	p.router.ServeHTTP(w, r)
 }
 

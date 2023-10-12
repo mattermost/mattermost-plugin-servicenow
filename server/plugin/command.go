@@ -246,7 +246,7 @@ func (p *Plugin) HandleCreateIncident(args *model.CommandArgs) string {
 	return ""
 }
 
-func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenAddSubscriptionModal,
 		nil,
@@ -256,7 +256,7 @@ func (p *Plugin) handleSubscribe(_ *plugin.Context, args *model.CommandArgs, par
 	return ""
 }
 
-func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, params []string, client Client, _ bool) string {
+func (p *Plugin) handleSearchAndShare(_ *plugin.Context, args *model.CommandArgs, _ []string, _ Client, _ bool) string {
 	p.API.PublishWebSocketEvent(
 		constants.WSEventOpenSearchAndShareRecordsModal,
 		nil,
