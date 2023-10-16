@@ -92,9 +92,6 @@ func (p *Plugin) GetUser(mattermostUserID string) (*serializer.User, error) {
 }
 
 func (p *Plugin) DisconnectUser(mattermostUserID string) error {
-	if err := p.store.DeleteUser(mattermostUserID); err != nil {
-		return err
-	}
-
-	return nil
+	err := p.store.DeleteUser(mattermostUserID)
+	return err
 }
