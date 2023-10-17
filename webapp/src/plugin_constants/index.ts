@@ -6,7 +6,7 @@ export enum ToggleSwitchLabelPositioning {
     Right = 'right',
 }
 
-export const UPLOAD_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
+export const UPDATE_SET_FILENAME = 'servicenow_for_mattermost_notifications_v2.1.xml';
 export const CONNECT_ACCOUNT_LINK = '/oauth2/connect';
 export const SERVICENOW_ICON_URL = 'servicenow-icon.png';
 
@@ -42,6 +42,10 @@ const CommentsHeading = 'Comments';
 const NoCommentsPresent = 'No more comments present.';
 const CommentsNotFound = 'No comments found.';
 const EmptyFieldsInServiceNow = 'N/A';
+const IncidentCreatedMsg = 'Incident created successfully!';
+const ChannelPanelToggleLabel = 'Subscribe to the new incident';
+const MaxShortDescriptionCharactersView = 75;
+const MaxShortDescriptionLimit = 160;
 
 export enum SubscriptionEvents {
     CREATED = 'created',
@@ -93,7 +97,6 @@ export const SubscriptionTypeLabelMap: Record<SubscriptionType, string> = {
 export const RecordTypeLabelMap: Record<RecordType, string> = {
     [RecordType.INCIDENT]: 'Incident',
     [RecordType.PROBLEM]: 'Problem',
-    [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.CHANGE_REQUEST]: 'Change Request',
     [RecordType.KNOWLEDGE]: 'Knowledge',
     [RecordType.TASK]: 'Task',
@@ -287,6 +290,21 @@ const pluginApiServiceConfigs: Record<ApiServiceName, PluginApiService> = {
         method: 'PATCH',
         apiServiceName: 'updateState',
     },
+    getUsers: {
+        path: '/users',
+        method: 'GET',
+        apiServiceName: 'getUsers',
+    },
+    createIncident: {
+        path: '/incident',
+        method: 'POST',
+        apiServiceName: 'createIncident',
+    },
+    getConnectedUser: {
+        path: '/connected',
+        method: 'GET',
+        apiServiceName: 'getConnectedUser',
+    },
 };
 
 export const PanelDefaultHeights = {
@@ -304,7 +322,7 @@ export default {
     RightSidebarHeader,
     RhsSubscritpions,
     ShareRecordButton,
-    UPLOAD_SET_FILENAME,
+    UPDATE_SET_FILENAME,
     SERVICENOW_ICON_URL,
     pluginApiServiceConfigs,
     MMCSRF,
@@ -349,4 +367,8 @@ export default {
     DefaultSubscriptionFilters,
     SubscriptionFilterCreatedByOptions,
     EmptyFieldsInServiceNow,
+    IncidentCreatedMsg,
+    ChannelPanelToggleLabel,
+    MaxShortDescriptionCharactersView,
+    MaxShortDescriptionLimit,
 };

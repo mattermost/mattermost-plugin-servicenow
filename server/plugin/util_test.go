@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest/mock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 
@@ -78,7 +78,7 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 			description: "IsAuthorizedSysAdmin: with admin",
 			setupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil,
+					testutils.GetUser(model.SystemAdminRoleId), nil,
 				)
 			},
 			isAdmin: true,
@@ -87,7 +87,7 @@ func TestIsAuthorizedSysAdmin(t *testing.T) {
 			description: "IsAuthorizedSysAdmin: with normal user",
 			setupAPI: func(api *plugintest.API) {
 				api.On("GetUser", testutils.GetID()).Return(
-					testutils.GetUser(model.SYSTEM_USER_ROLE_ID), nil,
+					testutils.GetUser(model.SystemUserRoleId), nil,
 				)
 			},
 		},

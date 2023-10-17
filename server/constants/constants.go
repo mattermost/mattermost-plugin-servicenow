@@ -26,8 +26,6 @@ const (
 	SysQueryParamText                         = "sysparm_text"
 
 	UpdateSetNotUploadedMessage = "it looks like the notifications have not been configured in ServiceNow by uploading and committing the update set."
-	UpdateSetVersion            = "v2.1"
-	UpdateSetFilename           = "servicenow_for_mattermost_notifications_" + UpdateSetVersion + ".xml"
 
 	SubscriptionTypeRecord           = "record"
 	SubscriptionTypeBulk             = "object"
@@ -90,6 +88,7 @@ const (
 	WSEventOpenSearchAndShareRecordsModal = "search_and_share_record"
 	WSEventOpenCommentModal               = "comment_modal"
 	WSEventOpenUpdateStateModal           = "update_state"
+	WSEventOpenCreateIncidentModal        = "create_incident"
 
 	// API Errors
 	APIErrorIDNotConnected               = "not_connected"
@@ -122,6 +121,8 @@ const (
 	SubCommandAdd         = "add"
 	SubCommandEdit        = "edit"
 	SubCommandDelete      = "delete"
+	CommandIncident       = "incident"
+	SubCommandCreate      = "create"
 )
 
 // #nosec G101 -- This is a false positive. The below line is not a hardcoded credential

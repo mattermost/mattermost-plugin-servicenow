@@ -2,7 +2,6 @@ import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 import Cookies from 'js-cookie';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
@@ -66,7 +65,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
     // Create subscription payload
     const [createSubscriptionPayload, setCreateSubscriptionPayload] = useState<CreateSubscriptionPayload | null>(null);
-    const {SiteURL} = useSelector((state: GlobalState) => state.entities.general.config);
+    const siteUrl = useSelector(Utils.getSiteUrl);
 
     // Edit subscription payload
     const [editSubscriptionPayload, setEditSubscriptionPayload] = useState<EditSubscriptionPayload | null>(null);
@@ -88,13 +87,13 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Get create subscription state
     const getCreateSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.createSubscription.apiServiceName, createSubscriptionPayload as CreateSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: apiErr};
     };
 
     // Get edit subscription state
     const getEditSubscriptionState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.editSubscription.apiServiceName, editSubscriptionPayload as EditSubscriptionPayload);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: apiErr};
     };
 
     useEffect(() => {
@@ -213,7 +212,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
         const setHeight = (modalContent: Element) => modalContent.setAttribute('style', `height:${bodyHeight + PanelDefaultHeights.panelHeader}px`);
 
         // Select all the modal-content elements and set the height
-        document.querySelectorAll('.servicenow-rhs-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
+        document.querySelectorAll('.servicenow-modal.add-edit-subscription-modal .modal-content').forEach((modalContent) => setHeight(modalContent));
     };
 
     // Change height of the modal depending on the height of the visible panel
@@ -278,7 +277,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     // Returns heading for the result panel
     const getResultPanelHeader = useCallback(() => {
         if (apiError && apiResponseValid) {
-            return Utils.getResultPanelHeader(apiError, hideModal);
+            return Utils.getResultPanelHeader(apiError, hideModal, siteUrl);
         } else if (subscriptionData) {
             return Constants.SubscriptionUpdatedMsg;
         }
@@ -291,7 +290,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Create subscription payload
         const payload: CreateSubscriptionPayload = {
-            server_url: SiteURL ?? '',
+            server_url: siteUrl ?? '',
             is_active: true,
             user_id: Cookies.get(Constants.MMUSERID) ?? '',
             type: subscriptionType as SubscriptionType,
@@ -314,7 +313,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
 
         // Edit subscription payload
         const payload: EditSubscriptionPayload = {
-            server_url: SiteURL ?? '',
+            server_url: siteUrl ?? '',
             is_active: true,
             user_id: subscriptionData?.userId ?? '',
             type: subscriptionType as SubscriptionType,
@@ -338,7 +337,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             onHide={hideModal}
 
             // If these classes are updated, please also update the query in the "setModalDialogHeight" function which is defined above.
-            className='servicenow-rhs-modal add-edit-subscription-modal wizard'
+            className='servicenow-modal add-edit-subscription-modal wizard'
         >
             <>
                 <ModalHeader
@@ -357,7 +356,6 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     onContinue={() => setSubscriptionTypePanelOpen(true)}
                     channel={channel}
                     setChannel={setChannel}
-                    setShowModalLoader={setShowModalLoader}
                     setApiError={setApiError}
                     setApiResponseValid={setApiResponseValid}
                     channelOptions={channelOptions}

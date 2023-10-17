@@ -27,9 +27,9 @@ func (a *mockAesgcm) NonceSize() int { return 1 }
 
 func (a *mockAesgcm) Overhead() int { return 0 }
 
-func (a *mockAesgcm) Seal(dst, nonce, plaintext, additionalData []byte) []byte { return []byte("mock") }
+func (a *mockAesgcm) Seal(_, _, _, _ []byte) []byte { return []byte("mock") }
 
-func (a *mockAesgcm) Open(dst, nonce, ciphertext, additionalData []byte) ([]byte, error) {
+func (a *mockAesgcm) Open(_, _, _, _ []byte) ([]byte, error) {
 	return []byte("mock"), nil
 }
 

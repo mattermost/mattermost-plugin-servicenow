@@ -1,13 +1,40 @@
+// eslint-disable-next-line import/no-unresolved
+import {BaseQueryApi} from '@reduxjs/toolkit/dist/query/baseQueryTypes';
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
+import {GlobalState} from 'mattermost-webapp/types/store';
 
 import Constants from 'src/plugin_constants';
 import Utils from 'src/utils';
 
+const handleBaseQuery = async (
+    args: {
+        url: string,
+        method: string,
+    },
+    api: BaseQueryApi,
+    extraOptions: Record<string, string> = {},
+) => {
+    const globalReduxState = api.getState() as GlobalState;
+    const result = await fetchBaseQuery({
+        baseUrl: Utils.getBaseUrls(globalReduxState?.entities?.general?.config?.SiteURL).pluginApiBaseUrl,
+        prepareHeaders: (headers) => {
+            headers.set(Constants.HeaderCSRFToken, Cookies.get(Constants.MMCSRF) ?? '');
+
+            return headers;
+        },
+    })(
+        args,
+        api,
+        extraOptions,
+    );
+    return result;
+};
+
 // Service to make plugin API requests
 const pluginApi = createApi({
     reducerPath: 'pluginApi',
-    baseQuery: fetchBaseQuery({baseUrl: Utils.getBaseUrls().pluginApiBaseUrl}),
+    baseQuery: handleBaseQuery,
     tagTypes: ['Posts'],
     endpoints: (builder) => ({
         [Constants.pluginApiServiceConfigs.getChannels.apiServiceName]: builder.query<ChannelData[], FetchChannelsParams>({
@@ -106,6 +133,28 @@ const pluginApi = createApi({
                 url: `${Constants.pluginApiServiceConfigs.updateState.path}/${recordType}/${recordId}`,
                 method: Constants.pluginApiServiceConfigs.updateState.method,
                 body,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getUsers.apiServiceName]: builder.query<CallerData[], void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getUsers.path,
+                method: Constants.pluginApiServiceConfigs.getUsers.method,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.createIncident.apiServiceName]: builder.query<RecordData, IncidentPayload>({
+            query: (body) => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.createIncident.path,
+                method: Constants.pluginApiServiceConfigs.createIncident.method,
+                body,
+            }),
+        }),
+        [Constants.pluginApiServiceConfigs.getConnectedUser.apiServiceName]: builder.query<ConnectedState, void>({
+            query: () => ({
+                headers: {[Constants.HeaderCSRFToken]: Cookies.get(Constants.MMCSRF)},
+                url: Constants.pluginApiServiceConfigs.getConnectedUser.path,
+                method: Constants.pluginApiServiceConfigs.getConnectedUser.method,
             }),
         }),
     }),
