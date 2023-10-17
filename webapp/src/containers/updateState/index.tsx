@@ -44,7 +44,7 @@ const UpdateState = () => {
 
     const getStateForGetRecordAPI = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getRecordParams as GetRecordParams);
-        return {isLoading, isSuccess, isError, data: data as StateData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as StateData[], error: apiErr};
     };
 
     const getStateForGetStatesAPI = () => {
@@ -124,8 +124,8 @@ const UpdateState = () => {
         if (isSuccess) {
             setApiError(null);
             const {data} = getGlobalModalState(pluginState);
-            if (data?.recordType) {
-                const params: GetStatesParams = {recordType: data.recordType};
+            if ((data as CommentAndStateModalData)?.recordType) {
+                const params: GetStatesParams = {recordType: (data as CommentAndStateModalData)?.recordType};
                 setGetStatesParams(params);
                 makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
             }
