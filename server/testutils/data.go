@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mattermost/mattermost-server/v5/api4"
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/api4"
+	"github.com/mattermost/mattermost-server/v6/model"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
@@ -24,7 +24,7 @@ func GetChannelID() string {
 	return "bnqnzipmnir4zkkj95ggba5pde"
 }
 
-func GetChannel(channelType string) *model.Channel {
+func GetChannel(channelType model.ChannelType) *model.Channel {
 	return &model.Channel{
 		Id:   api4.GenerateTestId(),
 		Type: channelType,
@@ -45,13 +45,13 @@ func GetUser(role string) *model.User {
 	}
 }
 
-func GetChannels(count int, channelType string) []*model.Channel {
+func GetChannels(count int, channelType model.ChannelType) []*model.Channel {
 	if count == 0 {
 		return nil
 	}
 
 	if channelType == "" {
-		channelType = model.CHANNEL_OPEN
+		channelType = model.ChannelTypeOpen
 	}
 
 	channels := make([]*model.Channel, count)
@@ -210,4 +210,13 @@ func GetSearchTerm(valid bool) string {
 	}
 
 	return sb.String()
+}
+
+func GetCreateIncidentPayload() string {
+	return fmt.Sprintf(`{
+		"short_description": "mockShortDescription",
+		"description": "mockDescription",
+		"caller_id": "%s",
+		"channel_id": "%s"
+	}`, GetID(), GetChannelID())
 }

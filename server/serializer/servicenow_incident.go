@@ -22,14 +22,14 @@ type IncidentResult struct {
 type IncidentPayload struct {
 	ShortDescription string `json:"short_description"`
 	Description      string `json:"description"`
-	Urgency          int    `json:"urgency"`
-	Impact           int    `json:"impact"`
 	Caller           string `json:"caller_id"`
+	ChannelID        string `json:"channel_id"`
 }
 
 type IncidentResponse struct {
 	SysID            string      `json:"sys_id"`
 	ShortDescription string      `json:"short_description"`
+	Description      string      `json:"description"`
 	Number           string      `json:"number"`
 	State            string      `json:"state,omitempty"`
 	Priority         string      `json:"priority,omitempty"`

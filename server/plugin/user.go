@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 
@@ -78,7 +78,7 @@ func (p *Plugin) CompleteOAuth2(authedUserID, code, state string) error {
 
 	// We are not handling the error here because if there is any error in creating the DM, it should not stop this function and just log the error
 	// and the logging is already being done inside the DM function
-	_, _ = p.DM(mattermostUserID, p.getHelpMessage(constants.ConnectSuccessMessage, strings.Contains(user.Roles, model.SYSTEM_ADMIN_ROLE_ID)), user.Username)
+	_, _ = p.DM(mattermostUserID, p.getHelpMessage(constants.ConnectSuccessMessage, strings.Contains(user.Roles, model.SystemAdminRoleId)), user.Username)
 	return nil
 }
 
@@ -92,9 +92,6 @@ func (p *Plugin) GetUser(mattermostUserID string) (*serializer.User, error) {
 }
 
 func (p *Plugin) DisconnectUser(mattermostUserID string) error {
-	if err := p.store.DeleteUser(mattermostUserID); err != nil {
-		return err
-	}
-
-	return nil
+	err := p.store.DeleteUser(mattermostUserID)
+	return err
 }
