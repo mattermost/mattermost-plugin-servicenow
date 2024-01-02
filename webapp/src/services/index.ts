@@ -2,7 +2,7 @@
 import {BaseQueryApi} from '@reduxjs/toolkit/dist/query/baseQueryTypes';
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
-import {GlobalState} from 'mattermost-webapp/types/store';
+import {GlobalState} from 'mattermost-redux/types/store';
 
 import Constants from 'src/plugin_constants';
 import Utils from 'src/utils';

@@ -1,6 +1,8 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-webapp/types/store';
+
+import {GlobalState} from 'mattermost-redux/types/store';
+
 import Cookies from 'js-cookie';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';

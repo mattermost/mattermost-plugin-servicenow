@@ -56,7 +56,7 @@
     "jest": "26.1.0",
     "jest-canvas-mock": "2.2.0",
     "jest-junit": "11.0.1",
-    "node-sass": "4.14.1",
+    "sass": "1.60.0",
     "sass-loader": "9.0.2",
     "style-loader": "1.2.1",
     "webpack": "4.43.0",
@@ -71,7 +71,6 @@
     "core-js": "3.6.5",
     "js-cookie": "3.0.1",
     "mattermost-redux": "5.27.0",
-    "mattermost-webapp": "github:mattermost/mattermost-webapp#v5.37.9",
     "react": "16.13.1",
     "react-bootstrap": "1.0.0",
     "react-infinite-scroll-component": "6.1.0",
@@ -118,7 +117,7 @@
       "jest-canvas-mock"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup.tsx"
+      "<rootDir>/tests/setup.js"
     ],
     "testURL": "http://localhost:8065"
   }

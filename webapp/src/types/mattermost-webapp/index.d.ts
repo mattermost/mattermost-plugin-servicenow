@@ -1,6 +1,4 @@
-import React from 'react';
-
-export interface PluginRegistry {
+interface PluginRegistry {
     registerReducer(reducer)
     registerPostTypeComponent(typeName: string, component: React.ElementType)
     registerRootComponent(component: ReactDOM)
