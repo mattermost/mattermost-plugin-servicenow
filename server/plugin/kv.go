@@ -63,11 +63,8 @@ func (s *pluginStore) LoadUser(mattermostUserID string) (*serializer.User, error
 }
 
 func (s *pluginStore) StoreUser(user *serializer.User) error {
-	if err := kvstore.StoreJSON(s.userKV, user.MattermostUserID, user); err != nil {
-		return err
-	}
-
-	return nil
+	err := kvstore.StoreJSON(s.userKV, user.MattermostUserID, user)
+	return err
 }
 
 func (s *pluginStore) DeleteUser(mattermostUserID string) error {
@@ -76,11 +73,8 @@ func (s *pluginStore) DeleteUser(mattermostUserID string) error {
 		return err
 	}
 
-	if err = s.userKV.Delete(u.MattermostUserID); err != nil {
-		return err
-	}
-
-	return nil
+	err = s.userKV.Delete(u.MattermostUserID)
+	return err
 }
 
 func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
