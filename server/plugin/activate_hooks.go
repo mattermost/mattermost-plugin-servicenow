@@ -3,8 +3,8 @@ package plugin
 import (
 	"path/filepath"
 
-	pluginapi "github.com/mattermost/mattermost-plugin-api"
-	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost/server/public/model"
+	"github.com/mattermost/mattermost/server/public/pluginapi"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
