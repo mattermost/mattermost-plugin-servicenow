@@ -31,6 +31,11 @@ func (_m *Store) DeleteUser(mattermostUserID string) error {
 	return r0
 }
 
+// DeleteUserTokenOnEncryptionSecretChange provides a mock function with given fields:
+func (_m *Store) DeleteUserTokenOnEncryptionSecretChange() {
+	_m.Called()
+}
+
 // GetAllUsers provides a mock function with given fields:
 func (_m *Store) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 	ret := _m.Called()
