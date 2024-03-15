@@ -139,6 +139,8 @@ Make sure you have the following components installed:
 
 - Make
 
+- The minimum supported version for mattermost is v6.3.0.
+
 ### Building the plugin
 
 Run the following command in the plugin repo to prepare a compiled, distributable plugin zip:
