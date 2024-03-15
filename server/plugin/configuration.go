@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/telemetry"
 )
 
 // configuration captures the plugin's external configuration as exposed in the Mattermost server
@@ -145,6 +146,12 @@ func (p *Plugin) OnConfigurationChange() error {
 
 	if oldEncryptionSecret != "" && oldEncryptionSecret != p.getConfiguration().EncryptionSecret {
 		go p.store.DeleteUserTokenOnEncryptionSecretChange()
+	}
+
+
+	// Some config changes require reloading tracking config
+	if p.tracker != nil {
+		p.tracker.ReloadConfig(telemetry.NewTrackerConfig(p.API.GetConfig()))
 	}
 
 	return nil

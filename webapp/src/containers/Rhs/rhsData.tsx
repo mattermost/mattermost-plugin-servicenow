@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useMemo} from 'react';
 import {GlobalState} from 'mattermost-webapp/types/store';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
@@ -56,12 +55,12 @@ const RhsData = ({
 
     const getChannelState = useCallback(() => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: ((apiErr as FetchBaseQueryError)?.data as APIError | undefined)?.message};
+        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: apiErr};
     }, [getApiState, currentTeamId]);
 
     const getConfigState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getConfig.apiServiceName);
-        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as ConfigData | undefined, error: apiErr};
     };
 
     // Fetch channels to show channel name in the subscription card

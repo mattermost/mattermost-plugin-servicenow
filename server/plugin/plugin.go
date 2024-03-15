@@ -13,6 +13,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
+	"github.com/mattermost/mattermost-plugin-servicenow/server/telemetry"
 
 	root "github.com/mattermost/mattermost-plugin-servicenow"
 )
@@ -35,6 +36,11 @@ type Plugin struct {
 	router          *mux.Router
 	store           Store
 	CommandHandlers map[string]CommandHandleFunc
+
+	// Telemetry package copied inside repository, should be changed
+	// to pluginapi's one (0.1.3+) when min_server_version is safe to point at 7.x
+	telemetryClient telemetry.Client
+	tracker         telemetry.Tracker
 }
 
 // NewPlugin returns an instance of a Plugin.
@@ -46,13 +52,14 @@ func NewPlugin() *Plugin {
 		constants.CommandSubscriptions:  p.handleSubscriptions,
 		constants.CommandUnsubscribe:    p.handleDeleteSubscription,
 		constants.CommandSearchAndShare: p.handleSearchAndShare,
+		constants.CommandIncident:       p.handleIncident,
 	}
 
 	return p
 }
 
 // ServeHTTP demonstrates a plugin that handles HTTP requests
-func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+func (p *Plugin) ServeHTTP(_ *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	p.router.ServeHTTP(w, r)
 }
 

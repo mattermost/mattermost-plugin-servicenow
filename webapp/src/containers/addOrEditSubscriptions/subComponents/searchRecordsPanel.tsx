@@ -1,5 +1,4 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest, SkeletonLoader} from '@brightscout/mattermost-ui-library';
 
@@ -64,12 +63,12 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
 
     const getRecordsSuggestions = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.searchRecords.apiServiceName, searchRecordsPayload as SearchRecordsParams);
-        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as Suggestion[], error: apiErr};
     };
 
     const getRecordDataState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getSuggestionDataPayload as GetRecordParams);
-        return {isLoading, isSuccess, isError, data: data as RecordData, error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as RecordData, error: apiErr};
     };
 
     // Get the suggestions from the API

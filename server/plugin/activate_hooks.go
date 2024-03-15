@@ -34,6 +34,15 @@ func (p *Plugin) OnActivate() error {
 
 	p.router = p.InitAPI()
 	p.store = p.NewStore(p.API)
+	p.initializeTelemetry()
+
+	return nil
+}
+
+func (p *Plugin) OnDeactivate() error {
+	if err := p.telemetryClient.Close(); err != nil {
+		p.API.LogWarn("Telemetry client failed to close", "error", err.Error())
+	}
 	return nil
 }
 
