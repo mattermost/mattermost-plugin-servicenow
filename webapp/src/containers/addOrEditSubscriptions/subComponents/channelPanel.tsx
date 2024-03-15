@@ -2,7 +2,6 @@ import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {GlobalState} from 'mattermost-webapp/types/store';
 import {General as MMConstants} from 'mattermost-redux/constants';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/mattermost-ui-library';
 
@@ -18,7 +17,7 @@ type ChannelPanelProps = {
     actionBtnDisabled?: boolean;
     channel: string | null;
     setChannel: (value: string | null) => void;
-    setShowModalLoader: (show: boolean) => void;
+    showModalLoader?: boolean;
     setApiError: (error: APIError | null) => void;
     setApiResponseValid?: (valid: boolean) => void;
     channelOptions: DropdownOptionType[],
@@ -26,6 +25,7 @@ type ChannelPanelProps = {
     editing?: boolean;
     showFooter? :boolean;
     placeholder?: string;
+    required?: boolean;
 }
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
@@ -36,13 +36,14 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     actionBtnDisabled,
     channel,
     setChannel,
-    setShowModalLoader,
+    showModalLoader,
     setApiError,
     setApiResponseValid,
     setChannelOptions,
     editing = false,
     showFooter = false,
     placeholder,
+    required = false,
 }: ChannelPanelProps, channelPanelRef): JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
     const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
@@ -53,7 +54,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
 
     const getChannelState = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getChannels.apiServiceName, {teamId: entities.teams.currentTeamId});
-        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: (apiErr as FetchBaseQueryError)?.data as APIError | undefined};
+        return {isLoading, isSuccess, isError, data: data as ChannelData[], error: apiErr};
     };
 
     const mapChannelsToSuggestions = useCallback((channels: ChannelData[]): Array<Record<string, string>> => channels.map((ch) => ({
@@ -96,7 +97,6 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
         if (channelListState.error) {
             setApiError(channelListState.error);
         }
-        setShowModalLoader(channelListState.isLoading);
     }, [getChannelState().isLoading, getChannelState().isError, getChannelState().isSuccess]);
 
     // Hide error state once the value is valid
@@ -163,9 +163,9 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
                         suggestions: channelSuggestions,
                         renderValue: (suggestion) => getChannelAutoSuggestOptionJSX(suggestion.channelName, suggestion.channelType),
                     }}
-                    required={true}
+                    required={required}
                     error={(validationFailed || validationError) && Constants.RequiredMsg}
-                    disabled={getChannelState().isLoading}
+                    disabled={getChannelState().isLoading || showModalLoader}
                     loadingSuggestions={getChannelState().isLoading}
                     charThresholdToShowSuggestions={Constants.CharThresholdToSuggestChannel}
                     defaultValue={autoSuggestDefaultValue}

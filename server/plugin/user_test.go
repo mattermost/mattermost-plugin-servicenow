@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest/mock"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 
@@ -93,7 +93,7 @@ func TestCompleteOAuth2(t *testing.T) {
 				s.On("StoreUser", mock.AnythingOfType("*serializer.User")).Return(nil)
 			},
 			setupAPI: func(a *plugintest.API) {
-				a.On("GetUser", mockUserID).Return(testutils.GetUser(model.SYSTEM_ADMIN_ROLE_ID), nil)
+				a.On("GetUser", mockUserID).Return(testutils.GetUser(model.SystemAdminRoleId), nil)
 			},
 			setupPlugin: func(p *Plugin) {
 				monkey.PatchInstanceMethod(reflect.TypeOf(&oauth2.Config{}), "Exchange", func(_ *oauth2.Config, _ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {

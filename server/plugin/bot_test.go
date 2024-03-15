@@ -3,9 +3,9 @@ package plugin
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest/mock"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest/mock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
@@ -23,7 +23,7 @@ func TestDM(t *testing.T) {
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), nil)
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.ChannelTypePrivate), nil)
 				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), nil)
 			},
 		},
@@ -31,7 +31,7 @@ func TestDM(t *testing.T) {
 			description: "DM: channel is not found",
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
-				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), testutils.GetInternalServerAppError())
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.ChannelTypePrivate), testutils.GetInternalServerAppError())
 			},
 			expectedError: "channel not found",
 		},
@@ -40,7 +40,7 @@ func TestDM(t *testing.T) {
 			setupAPI: func(a *plugintest.API) {
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 5)...).Return()
 				a.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
-				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.CHANNEL_PRIVATE), nil)
+				a.On("GetDirectChannel", mock.Anything, mock.Anything).Return(testutils.GetChannel(model.ChannelTypePrivate), nil)
 				a.On("CreatePost", mock.Anything).Return(testutils.GetPost(), testutils.GetInternalServerAppError())
 			},
 			expectedError: "error in creating the post",

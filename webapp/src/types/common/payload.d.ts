@@ -79,3 +79,12 @@ interface PaginationQueryParams {
 type SubscriptionFilters = {
     createdBy: string,
 }
+
+type IncidentPayload = {
+    short_description: string;
+    description: string;
+    urgency?: number;
+    impact?: number;
+    caller_id: string;
+    channel_id: string;
+}

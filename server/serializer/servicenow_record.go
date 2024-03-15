@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 )
@@ -21,6 +21,7 @@ type ServiceNowRecord struct {
 	SysID            string      `json:"sys_id"`
 	Number           string      `json:"number"`
 	ShortDescription string      `json:"short_description"`
+	Description      string      `json:"description"`
 	RecordType       string      `json:"record_type,omitempty"`
 	State            string      `json:"state,omitempty"`
 	Priority         string      `json:"priority,omitempty"`
@@ -115,7 +116,7 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	var actions []*model.PostAction
 	if constants.RecordTypesSupportingComments[sr.RecordType] {
 		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
+			Type: model.PostActionTypeButton,
 			Name: "Add and view comments",
 			Integration: &model.PostActionIntegration{
 				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenCommentModal),
@@ -129,7 +130,7 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 
 	if constants.RecordTypesSupportingStateUpdation[sr.RecordType] {
 		actions = append(actions, &model.PostAction{
-			Type: model.POST_ACTION_TYPE_BUTTON,
+			Type: model.PostActionTypeButton,
 			Name: "Update State",
 			Integration: &model.PostActionIntegration{
 				URL: fmt.Sprintf("%s%s", pluginURL, constants.PathOpenStateModal),

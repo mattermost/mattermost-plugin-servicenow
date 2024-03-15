@@ -1,5 +1,6 @@
 import {useCallback} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
+import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
 
 import services from 'src/services';
 
@@ -13,7 +14,7 @@ function usePluginApi() {
 
     const getApiState = useCallback((apiServiceName: string, body?: APIPayloadType) => {
         const {data, isError, isLoading, isSuccess, error} = services.endpoints[apiServiceName].select(body as APIPayloadType)(pluginState);
-        return {data, isError, isLoading, isSuccess, error};
+        return {data, isError, isLoading, isSuccess, error: (error as FetchBaseQueryError)?.data as APIError | undefined};
     }, [pluginState]);
 
     return {makeApiRequest, getApiState, pluginState};
