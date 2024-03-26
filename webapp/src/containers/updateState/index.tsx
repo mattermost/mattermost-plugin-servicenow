@@ -121,14 +121,19 @@ const UpdateState = () => {
             setShowResultPanel(true);
         }
 
-        if (isSuccess) {
-            setApiError(null);
-            const {data} = getGlobalModalState(pluginState);
-            if ((data as CommentAndStateModalData)?.recordType) {
-                const params: GetStatesParams = {recordType: (data as CommentAndStateModalData)?.recordType};
-                setGetStatesParams(params);
-                makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
-            }
+        if (!isSuccess) {
+            return;
+        }
+
+        setApiError(null);
+        const {data} = getGlobalModalState(pluginState);
+
+        const recordType = (data as CommentAndStateModalData)?.recordType;
+
+        if (recordType) {
+            const params: GetStatesParams = {recordType};
+            setGetStatesParams(params);
+            makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
         }
     }, [getStateForGetRecordAPI().isError, getStateForGetRecordAPI().isSuccess]);
 
