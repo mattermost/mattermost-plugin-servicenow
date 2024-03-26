@@ -42,6 +42,7 @@ const (
 	SubscriptionEventAssignedTo      = "assigned_to"
 	SubscriptionEventAssignmentGroup = "assignment_group"
 	SubscriptionEventCreated         = "created"
+	BulkSubscription                 = "Bulk"
 
 	// Filters
 	FilterCreatedByMe     = "me"

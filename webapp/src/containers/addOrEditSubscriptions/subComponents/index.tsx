@@ -42,6 +42,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
     const [recordId, setRecordId] = useState<string | null>(null);
     const [suggestionChosen, setSuggestionChosen] = useState(false);
     const [resetRecordPanelStates, setResetRecordPanelStates] = useState(false);
+    const [recordNumber, setRecordNumber] = useState('');
 
     // Record type panel
     const [recordType, setRecordType] = useState<RecordType | null>(null);
@@ -298,6 +299,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             record_id: recordId as string || '',
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
+            record_number: recordNumber,
         };
 
         // Set payload
@@ -322,6 +324,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
             subscription_events: subscriptionEvents.join(','),
             channel_id: channel as string,
             sys_id: subscriptionData?.id as string,
+            record_number: recordNumber,
         };
 
         // Set payload
@@ -415,6 +418,7 @@ const AddOrEditSubscription = ({open, close, subscriptionData}: AddOrEditSubscri
                     resetStates={resetRecordPanelStates}
                     setResetStates={setResetRecordPanelStates}
                     showFooter={true}
+                    setRecordNumber={setRecordNumber}
                 />
                 <EventsPanel
                     className={`

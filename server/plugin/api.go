@@ -256,10 +256,20 @@ func (p *Plugin) createSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if statusCode, err = client.CreateSubscription(subscription); err != nil {
+	resp, statusCode, err := client.CreateSubscription(subscription)
+	if err != nil {
 		_ = p.handleClientError(w, r, err, false, statusCode, "", "")
 		p.API.LogError("Error in creating subscription", "Error", err.Error())
 		return
+	}
+
+	if subscription.RecordNumber != nil {
+		resp.Number = *subscription.RecordNumber
+	}
+
+	post := resp.CreateSubscriptionCreatedPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
 	// Here, we are setting the Content-Type header even when it is being set in the "returnStatusOK" function
@@ -331,7 +341,7 @@ func (p *Plugin) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	subscriptionID := pathParams[constants.PathParamSubscriptionID]
 	client := p.GetClientFromRequest(r)
 	if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
-		p.API.LogError(constants.ErrorDeleteSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
+		p.API.LogError(constants.ErrorDeleteSubscription, "SubscriptionID", subscriptionID, "Error", err.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
 			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorDeleteSubscription, err.Error())
@@ -367,14 +377,24 @@ func (p *Plugin) editSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := p.GetClientFromRequest(r)
-	if statusCode, err := client.EditSubscription(subscriptionID, subscription); err != nil {
-		p.API.LogError(constants.ErrorEditingSubscription, "subscriptionID", subscriptionID, "Error", err.Error())
+	resp, statusCode, editErr := client.EditSubscription(subscriptionID, subscription)
+	if editErr != nil {
+		p.API.LogError(constants.ErrorEditingSubscription, "SubscriptionID", subscriptionID, "Error", editErr.Error())
 		responseMessage := "No record found"
 		if statusCode != http.StatusNotFound {
-			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, err.Error())
+			responseMessage = fmt.Sprintf("%s. Error: %s", constants.ErrorEditingSubscription, editErr.Error())
 		}
-		_ = p.handleClientError(w, r, err, false, statusCode, "", responseMessage)
+		_ = p.handleClientError(w, r, editErr, false, statusCode, "", responseMessage)
 		return
+	}
+
+	if subscription.RecordNumber != nil {
+		resp.Number = *subscription.RecordNumber
+	}
+
+	post := resp.CreateSubscriptionEditedPost(p.botID, p.getConfiguration().ServiceNowBaseURL)
+	if _, postErr := p.API.CreatePost(post); postErr != nil {
+		p.API.LogError(constants.ErrorCreatePost, "Error", postErr.Error())
 	}
 
 	returnStatusOK(w)

@@ -36,6 +36,7 @@ type CreateSubscriptionPayload = {
     record_id: string;
     subscription_events: string;
     channel_id: string;
+    record_number: string;
 }
 
 type FetchSubscriptionsParams = {
@@ -55,6 +56,7 @@ type EditSubscriptionPayload = {
     subscription_events: string;
     channel_id: string;
     sys_id: string;
+    record_number: string;
 }
 
 type CommentsPayload = {

@@ -71,12 +71,7 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	}
 
 	titleLink := fmt.Sprintf("%s/nav_to.do?uri=%s.do?sys_id=%s", serviceNowURL, sr.RecordType, sr.SysID)
-	fields := []*model.SlackAttachmentField{
-		{
-			Title: "Short Description",
-			Value: sr.ShortDescription,
-		},
-	}
+	fields := []*model.SlackAttachmentField{}
 
 	if sr.RecordType == constants.RecordTypeKnowledge {
 		fields = append(fields, []*model.SlackAttachmentField{
@@ -148,10 +143,9 @@ func (sr *ServiceNowRecord) CreateSharingPost(channelID, botID, serviceNowURL, p
 	}
 
 	slackAttachment := &model.SlackAttachment{
-		Title:     sr.Number,
-		TitleLink: titleLink,
-		Fields:    fields,
-		Actions:   actions,
+		Title:   fmt.Sprintf("[%s](%s): %s", sr.Number, titleLink, sr.ShortDescription),
+		Fields:  fields,
+		Actions: actions,
 	}
 
 	if sharedByUsername != "" {

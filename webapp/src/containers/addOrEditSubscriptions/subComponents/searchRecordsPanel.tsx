@@ -30,6 +30,7 @@ type SearchRecordsPanelProps = {
     setResetStates: (reset: boolean) => void;
     showFooter?: boolean;
     disabled?: boolean;
+    setRecordNumber?: (data: string) => void;
 }
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({
@@ -52,6 +53,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     setResetStates,
     showFooter = false,
     disabled = false,
+    setRecordNumber,
 }: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
@@ -157,6 +159,9 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     // Handle API state updates while fetching record data
     useEffect(() => {
         const recordDataState = getRecordDataState();
+        if (setRecordNumber) {
+            setRecordNumber(recordDataState?.data?.number);
+        }
         if (recordDataState.isLoading && setApiResponseValid) {
             setApiResponseValid(true);
         }
