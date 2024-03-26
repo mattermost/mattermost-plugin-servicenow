@@ -15,6 +15,7 @@ import Utils from 'src/utils';
 
 const UpdateState = () => {
     const [selectedState, setSelectedState] = useState<string | null>(null);
+    const [getRecordParams, setGetRecordParams] = useState<GetRecordParams | null>(null);
     const [getStatesParams, setGetStatesParams] = useState<GetStatesParams | null>(null);
     const [updateStatePayload, setUpdateStatePayload] = useState<UpdateStatePayload | null>(null);
     const [showResultPanel, setShowResultPanel] = useState(false);
@@ -41,6 +42,11 @@ const UpdateState = () => {
         resetStates();
     }, []);
 
+    const getStateForGetRecordAPI = () => {
+        const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, getRecordParams as GetRecordParams);
+        return {isLoading, isSuccess, isError, data: data as StateData[], error: apiErr};
+    };
+
     const getStateForGetStatesAPI = () => {
         const {isLoading, isSuccess, isError, data, error: apiErr} = getApiState(Constants.pluginApiServiceConfigs.getStates.apiServiceName, getStatesParams as GetStatesParams);
         return {isLoading, isSuccess, isError, data: data as StateData[], error: apiErr};
@@ -54,9 +60,9 @@ const UpdateState = () => {
     useEffect(() => {
         const data = getGlobalModalState(pluginState).data as CommentAndStateModalData;
         if (isUpdateStateModalOpen(pluginState) && data?.recordType && data?.recordId) {
-            const params: GetStatesParams = {recordType: data.recordType};
-            setGetStatesParams(params);
-            makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
+            const params: GetRecordParams = {recordType: data.recordType, recordId: data.recordId};
+            setGetRecordParams(params);
+            makeApiRequest(Constants.pluginApiServiceConfigs.getRecord.apiServiceName, params);
         }
     }, [isUpdateStateModalOpen(pluginState)]);
 
@@ -77,6 +83,7 @@ const UpdateState = () => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
+
             setApiError(error);
             setShowResultPanel(true);
         }
@@ -93,6 +100,7 @@ const UpdateState = () => {
             if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
                 dispatch(setConnected(false));
             }
+
             setApiError(error);
             setShowResultPanel(true);
         }
@@ -102,9 +110,37 @@ const UpdateState = () => {
         }
     }, [getStateForGetStatesAPI().isError, getStateForGetStatesAPI().isSuccess]);
 
+    useEffect(() => {
+        const {isError, isSuccess, error} = getStateForGetRecordAPI();
+        if (isError && error) {
+            if (error.id === Constants.ApiErrorIdNotConnected || error.id === Constants.ApiErrorIdRefreshTokenExpired) {
+                dispatch(setConnected(false));
+            }
+
+            setApiError(error);
+            setShowResultPanel(true);
+        }
+
+        if (!isSuccess) {
+            return;
+        }
+
+        setApiError(null);
+        const {data} = getGlobalModalState(pluginState);
+
+        const recordType = (data as CommentAndStateModalData)?.recordType;
+
+        if (recordType) {
+            const params: GetStatesParams = {recordType};
+            setGetStatesParams(params);
+            makeApiRequest(Constants.pluginApiServiceConfigs.getStates.apiServiceName, params);
+        }
+    }, [getStateForGetRecordAPI().isError, getStateForGetRecordAPI().isSuccess]);
+
+    const {isLoading: recordLoading} = getStateForGetRecordAPI();
     const {isLoading: statesLoading, data: stateOptions} = getStateForGetStatesAPI();
     const {isLoading: stateUpdating} = getStateForUpdateStateAPI();
-    const showLoader = statesLoading || stateUpdating;
+    const showLoader = recordLoading || statesLoading || stateUpdating;
     return (
         <Modal
             show={isUpdateStateModalOpen(pluginState)}
