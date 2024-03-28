@@ -162,6 +162,7 @@ const CreateIncident = () => {
                 record_id: data.sys_id || '',
                 subscription_events: subscriptionEvents.join(','),
                 channel_id: channel ?? currentChannelId,
+                record_number: data.number || '',
             };
 
             setSubscriptionPayload(payload);

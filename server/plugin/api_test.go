@@ -1271,7 +1271,7 @@ func TestCreateSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
 			},
@@ -1660,7 +1660,7 @@ func TestEditSubscription(t *testing.T) {
 					return nil
 				})
 
-				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
 					return http.StatusOK, nil
 				})
 			},
