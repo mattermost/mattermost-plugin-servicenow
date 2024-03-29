@@ -21,7 +21,7 @@ const (
 * |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
 * |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
-* |/servicenow search| - Search a record in ServiceNow and share it in a channel
+* |/servicenow share| - Search a record in ServiceNow and share it in a channel
 * |/servicenow help| - Know about the features of this plugin
 `
 
