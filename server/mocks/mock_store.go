@@ -17,6 +17,20 @@ type Store struct {
 	mock.Mock
 }
 
+// DeleteAllUsersState provides a mock function with given fields:
+func (_m *Store) DeleteAllUsersState() bool {
+	ret := _m.Called()
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func() bool); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 // DeleteUser provides a mock function with given fields: mattermostUserID
 func (_m *Store) DeleteUser(mattermostUserID string) error {
 	ret := _m.Called(mattermostUserID)

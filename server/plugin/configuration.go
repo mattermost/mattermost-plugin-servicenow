@@ -148,7 +148,6 @@ func (p *Plugin) OnConfigurationChange() error {
 		go p.store.DeleteUserTokenOnEncryptionSecretChange()
 	}
 
-
 	// Some config changes require reloading tracking config
 	if p.tracker != nil {
 		p.tracker.ReloadConfig(telemetry.NewTrackerConfig(p.API.GetConfig()))

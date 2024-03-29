@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mattermost/mattermost-plugin-api/cluster"
 	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 
@@ -30,6 +31,7 @@ type UserStore interface {
 	DeleteUser(mattermostUserID string) error
 	GetAllUsers() ([]*serializer.IncidentCaller, error)
 	DeleteUserTokenOnEncryptionSecretChange()
+	DeleteAllUsersState() bool
 }
 
 // OAuth2StateStore manages OAuth2 state
@@ -85,27 +87,25 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 	wg := new(sync.WaitGroup)
 	mu := new(sync.Mutex)
 	for {
+		wg.Add(1)
 		kvList, err := s.plugin.API.KVList(page, constants.DefaultPerPage)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, key := range kvList {
-			wg.Add(1)
-
-			go func(key string) {
-				defer wg.Done()
-
+		go func() {
+			defer wg.Done()
+			for _, key := range kvList {
 				if userID, isValidUserKey := IsValidUserKey(key); isValidUserKey {
 					decodedKey, decodeErr := decodeKey(userID)
 					if decodeErr != nil {
-						s.plugin.API.LogError("Unable to decode key", "UserID", userID, "Error", decodeErr.Error())
+						s.plugin.API.LogError("Unable to decode key", "Key", key, "Error", decodeErr.Error())
 						return
 					}
 
 					user, loadErr := s.LoadUser(decodedKey)
 					if loadErr != nil {
-						s.plugin.API.LogError("Unable to load user", "UserID", userID, "Error", loadErr.Error())
+						s.plugin.API.LogError("Unable to load user", "UserID", decodedKey, "Error", loadErr.Error())
 						return
 					}
 
@@ -118,11 +118,8 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 					})
 					mu.Unlock()
 				}
-			}(key)
-		}
-
-		// Wait for all goroutines to complete before continuing.
-		wg.Wait()
+			}
+		}()
 
 		if len(kvList) < constants.DefaultPerPage {
 			break
@@ -131,10 +128,28 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 		page++
 	}
 
+	wg.Wait()
 	return users, nil
 }
 
 func (s *pluginStore) DeleteUserTokenOnEncryptionSecretChange() {
+	deleteAllUsersMutex, err := cluster.NewMutex(s.plugin.API, constants.DeleteAllUsersMutexKey)
+	if err != nil {
+		s.plugin.API.LogError("Failed to create mutex for deleting users", "Error", err.Error())
+	}
+
+	deleteAllUsersMutex.Lock()
+	if deleteAllUsersState := s.DeleteAllUsersState(); !deleteAllUsersState {
+		deleteAllUsersMutex.Unlock()
+		return
+	}
+
+	defer func() {
+		if err = s.basicKV.Delete(constants.DeleteAllUsersKey); err != nil {
+			s.plugin.API.LogError("Unable to delete all users state from the store", "Error", err.Error())
+		}
+	}()
+	deleteAllUsersMutex.Unlock()
 	users, err := s.GetAllUsers()
 	if err != nil {
 		s.plugin.API.LogError(constants.ErrorGetUsers, "Error", err.Error())
@@ -143,10 +158,29 @@ func (s *pluginStore) DeleteUserTokenOnEncryptionSecretChange() {
 
 	for _, user := range users {
 		if err := s.DeleteUser(user.MattermostUserID); err != nil {
-			s.plugin.API.LogError("Unable to delete a user", "UserID", user.MattermostUserID, "Error", err.Error())
+			s.plugin.API.LogWarn("Unable to delete a user on encryption secret change", "UserID", user.MattermostUserID, "Error", err.Error())
 			continue
 		}
 	}
+}
+
+func (s *pluginStore) DeleteAllUsersState() bool {
+	key, err := s.basicKV.Load(constants.DeleteAllUsersKey)
+	if err != nil && err.Error() != "not found" {
+		s.plugin.API.LogError("Unable to get delete all users state from the store", "Error", err.Error())
+		return false
+	}
+
+	if len(key) == 0 {
+		if err := s.basicKV.Store(constants.DeleteAllUsersKey, []byte{1}); err != nil {
+			s.plugin.API.LogError("Unable to store delete all users state from the store", "Error", err.Error())
+			return false
+		}
+
+		return true
+	}
+
+	return false
 }
 
 func (s *pluginStore) VerifyOAuth2State(state string) error {
