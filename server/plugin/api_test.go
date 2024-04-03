@@ -1073,18 +1073,17 @@ func TestCreateSubscription(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					false, http.StatusOK, nil,
 				)
 
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusCreated, nil,
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusCreated, nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1147,10 +1146,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorUserMismatch,
 		},
 		"unable to get permissions for the channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1167,10 +1163,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
 		"user does not have the permission to create a subscription for this channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1187,10 +1180,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
 		"failed to check duplicate subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1213,11 +1203,8 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "duplicate subscription error",
 		},
 		"duplicate subscription exists": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
+			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
 					true, http.StatusOK, nil,
@@ -1237,10 +1224,7 @@ func TestCreateSubscription(t *testing.T) {
 			ExpectedErrorMessage: "Subscription already exists",
 		},
 		"failed to create subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI: func(api *plugintest.API) {
 				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
 			},
@@ -1250,7 +1234,7 @@ func TestCreateSubscription(t *testing.T) {
 				)
 
 				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusForbidden, fmt.Errorf("create subscription error"),
+					nil, http.StatusForbidden, fmt.Errorf("create subscription error"),
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1265,6 +1249,33 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "create subscription error",
+		},
+		"failed to create the post": {
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetInternalServerAppError())
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("CheckForDuplicateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					false, http.StatusOK, nil,
+				)
+
+				client.On("CreateSubscription", mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusCreated, nil,
+				)
+			},
+			SetupPlugin: func(p *Plugin) {
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForCreation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			ExpectedStatusCode: http.StatusCreated,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -1476,7 +1487,7 @@ func TestDeleteSubscription(t *testing.T) {
 		},
 		"failed to delete subscription": {
 			SetupAPI: func(api *plugintest.API) {
-				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "delete subscription error").Return()
+				api.On("LogError", mock.AnythingOfType("string"), "SubscriptionID", testutils.GetServiceNowSysID(), "Error", "delete subscription error").Return()
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("DeleteSubscription", testutils.GetServiceNowSysID()).Return(
@@ -1529,14 +1540,13 @@ func TestEditSubscription(t *testing.T) {
 		ExpectedErrorMessage string
 	}{
 		"success": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
-			SetupAPI: func(api *plugintest.API) {},
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, nil)
+			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusOK, nil,
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1577,10 +1587,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedErrorMessage: "new error",
 		},
 		"unable to get permissions for the channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1597,10 +1604,7 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedErrorMessage: constants.ErrorChannelPermissionsForUser,
 		},
 		"user does not have permission to edit the subscription for this channel": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI:    func(api *plugintest.API) {},
 			SetupClient: func(client *mock_plugin.Client) {},
 			SetupPlugin: func(p *Plugin) {
@@ -1616,17 +1620,14 @@ func TestEditSubscription(t *testing.T) {
 			ExpectedStatusCode:   http.StatusBadRequest,
 			ExpectedErrorMessage: constants.ErrorInsufficientPermissions,
 		},
-		"failed to edit subscription": {
-			RequestBody: fmt.Sprintf(`{
-				"user_id": "%s",
-				"channel_id": "%s"
-			  	}`, testutils.GetID(), testutils.GetChannelID()),
+		"failed to edit the subscription": {
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
 			SetupAPI: func(api *plugintest.API) {
-				api.On("LogError", mock.AnythingOfType("string"), "subscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
+				api.On("LogError", mock.AnythingOfType("string"), "SubscriptionID", testutils.GetServiceNowSysID(), "Error", "edit subscription error").Return()
 			},
 			SetupClient: func(client *mock_plugin.Client) {
 				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
-					http.StatusForbidden, fmt.Errorf("edit subscription error"),
+					nil, http.StatusForbidden, fmt.Errorf("edit subscription error"),
 				)
 			},
 			SetupPlugin: func(p *Plugin) {
@@ -1641,6 +1642,29 @@ func TestEditSubscription(t *testing.T) {
 			},
 			ExpectedStatusCode:   http.StatusForbidden,
 			ExpectedErrorMessage: "edit subscription error",
+		},
+		"failed to create the edit subscription post": {
+			RequestBody: testutils.GetTestUserAndChannelRequestBody(),
+			SetupAPI: func(api *plugintest.API) {
+				api.On("LogError", testutils.GetMockArgumentsWithType("string", 3)...).Return()
+				api.On("CreatePost", mock.AnythingOfType("*model.Post")).Return(nil, testutils.GetInternalServerAppError())
+			},
+			SetupClient: func(client *mock_plugin.Client) {
+				client.On("EditSubscription", testutils.GetServiceNowSysID(), mock.AnythingOfType("*serializer.SubscriptionPayload")).Return(
+					testutils.GetSubscription(constants.SubscriptionTypeRecord), http.StatusOK, nil,
+				)
+			},
+			SetupPlugin: func(p *Plugin) {
+				var s *serializer.SubscriptionPayload
+				monkey.PatchInstanceMethod(reflect.TypeOf(s), "IsValidForUpdation", func(_ *serializer.SubscriptionPayload, _ string) error {
+					return nil
+				})
+
+				monkey.PatchInstanceMethod(reflect.TypeOf(p), "HasPublicOrPrivateChannelPermissions", func(_ *Plugin, _, _ string) (int, error) {
+					return http.StatusOK, nil
+				})
+			},
+			ExpectedStatusCode: http.StatusOK,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
