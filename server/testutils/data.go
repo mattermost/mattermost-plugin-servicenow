@@ -12,6 +12,10 @@ import (
 	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
 )
 
+func GetTestUserAndChannelRequestBody() string {
+	return fmt.Sprintf(`{"user_id": "%s","channel_id": "%s"}`, GetID(), GetChannelID())
+}
+
 func GetSecret() string {
 	return "test-secret"
 }
