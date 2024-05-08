@@ -118,24 +118,33 @@ func (_m *Client) CreateIncident(_a0 *serializer.IncidentPayload) (*serializer.I
 }
 
 // CreateSubscription provides a mock function with given fields: _a0
-func (_m *Client) CreateSubscription(_a0 *serializer.SubscriptionPayload) (int, error) {
+func (_m *Client) CreateSubscription(_a0 *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error) {
 	ret := _m.Called(_a0)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(*serializer.SubscriptionPayload) int); ok {
+	var r0 *serializer.SubscriptionResponse
+	if rf, ok := ret.Get(0).(func(*serializer.SubscriptionPayload) *serializer.SubscriptionResponse); ok {
 		r0 = rf(_a0)
 	} else {
-		r0 = ret.Get(0).(int)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serializer.SubscriptionResponse)
+		}
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*serializer.SubscriptionPayload) error); ok {
+	var r1 int
+	if rf, ok := ret.Get(1).(func(*serializer.SubscriptionPayload) int); ok {
 		r1 = rf(_a0)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(int)
 	}
 
-	return r0, r1
+	var r2 error
+	if rf, ok := ret.Get(2).(func(*serializer.SubscriptionPayload) error); ok {
+		r2 = rf(_a0)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // DeleteSubscription provides a mock function with given fields: subscriptionID
@@ -160,24 +169,33 @@ func (_m *Client) DeleteSubscription(subscriptionID string) (int, error) {
 }
 
 // EditSubscription provides a mock function with given fields: subscriptionID, subscription
-func (_m *Client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error) {
+func (_m *Client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error) {
 	ret := _m.Called(subscriptionID, subscription)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(string, *serializer.SubscriptionPayload) int); ok {
+	var r0 *serializer.SubscriptionResponse
+	if rf, ok := ret.Get(0).(func(string, *serializer.SubscriptionPayload) *serializer.SubscriptionResponse); ok {
 		r0 = rf(subscriptionID, subscription)
 	} else {
-		r0 = ret.Get(0).(int)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serializer.SubscriptionResponse)
+		}
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string, *serializer.SubscriptionPayload) error); ok {
+	var r1 int
+	if rf, ok := ret.Get(1).(func(string, *serializer.SubscriptionPayload) int); ok {
 		r1 = rf(subscriptionID, subscription)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(int)
 	}
 
-	return r0, r1
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string, *serializer.SubscriptionPayload) error); ok {
+		r2 = rf(subscriptionID, subscription)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // GetAllComments provides a mock function with given fields: recordType, recordID

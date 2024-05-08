@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"sync"
 	"unicode"
@@ -21,7 +22,7 @@ const (
 * |/servicenow connect| - Connect your Mattermost account to your ServiceNow account
 * |/servicenow disconnect| - Disconnect your Mattermost account from your ServiceNow account
 * |/servicenow subscriptions| - Manage your subscriptions to the record changes in ServiceNow
-* |/servicenow search| - Search a record in ServiceNow and share it in a channel
+* |/servicenow share| - Search a record in ServiceNow and share it in a channel
 * |/servicenow help| - Know about the features of this plugin
 `
 
@@ -367,9 +368,13 @@ func (p *Plugin) handleDeleteSubscription(_ *plugin.Context, args *model.Command
 			return
 		}
 
-		if _, err = client.DeleteSubscription(subscriptionID); err != nil {
+		if statusCode, err := client.DeleteSubscription(subscriptionID); err != nil {
 			p.API.LogError("Unable to delete subscription", "Error", err.Error())
-			p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
+			if statusCode == http.StatusNotFound {
+				p.postCommandResponse(args, fmt.Sprintf("Subscription with ID %s doesn't exist.", subscriptionID))
+			} else {
+				p.postCommandResponse(args, p.handleClientError(nil, nil, err, isSysAdmin, 0, args.UserId, ""))
+			}
 			return
 		}
 

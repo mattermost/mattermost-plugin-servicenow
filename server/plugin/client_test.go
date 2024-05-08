@@ -95,9 +95,10 @@ func TestCreateSubscriptionClient(t *testing.T) {
 			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
 				return nil, testCase.statusCode, testCase.errorMessage
 			})
-			statusCode, err := c.CreateSubscription(&serializer.SubscriptionPayload{})
+			resp, statusCode, err := c.CreateSubscription(&serializer.SubscriptionPayload{})
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
+				assert.Nil(t, resp)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -252,9 +253,10 @@ func TestEditSubscriptionClient(t *testing.T) {
 			monkey.PatchInstanceMethod(reflect.TypeOf(c), "CallJSON", func(_ *client, _, _ string, _, _ interface{}, _ url.Values) (_ []byte, _ int, _ error) {
 				return nil, testCase.statusCode, testCase.errorMessage
 			})
-			statusCode, err := c.EditSubscription("mockSubscriptionID", &serializer.SubscriptionPayload{})
+			resp, statusCode, err := c.EditSubscription("mockSubscriptionID", &serializer.SubscriptionPayload{})
 			if testCase.expectedErr != "" {
 				assert.EqualError(t, err, testCase.expectedErr)
+				assert.Nil(t, resp)
 			} else {
 				assert.NoError(t, err)
 			}
