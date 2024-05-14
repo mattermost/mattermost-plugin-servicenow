@@ -1,6 +1,6 @@
 # Mattermost ServiceNow Plugin
 
-This plugin integrates ServiceNow with Mattermost by allowing users to subscribe to record changes in ServiceNow and manage them through Mattermost. For a stable production release, please download the latest version from the Plugin Marketplace and follow the instructions install and set up the plugin. If you are a developer who wants to work on this plugin, please switch to the [Developer docs](./docs/developer_docs.md).
+This plugin integrates ServiceNow with Mattermost by allowing users to subscribe to record changes in ServiceNow and manage them through Mattermost. For a stable production release, please download the latest version from the Plugin Marketplace and follow the instructions install and set up the plugin. If you are a developer who wants to work on this plugin, please see the [Developer docs](./docs/developer_docs.md).
 
 See the [Mattermost Product Documentation](https://docs.mattermost.com/integrate/servicenow-interoperability.html) for details on installing, configuring, enabling, and using this Mattermost integration.
 
