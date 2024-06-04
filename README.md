@@ -1,20 +1,8 @@
 # Mattermost ServiceNow Plugin
-## Table of Contents
-- [License](#license)
-- [Overview](#overview)
-- [Features](#features)
-- [Installation](#installation)
-- [Setup](#setup)
-- [Connecting to ServiceNow](#connecting-to-servicenow)
-- [FAQ](#faq)
 
-## License
+This plugin integrates ServiceNow with Mattermost by allowing users to subscribe to record changes in ServiceNow and manage them through Mattermost. For a stable production release, please download the latest version from the Plugin Marketplace and follow the instructions install and set up the plugin. If you are a developer who wants to work on this plugin, please see the [Developer docs](./docs/developer_docs.md).
 
-See the [LICENSE](./LICENSE) file for license rights and limitations.
-
-## Overview
-
-This plugin integrates ServiceNow with Mattermost by allowing users to subscribe to record changes in ServiceNow and manage them through Mattermost. For a stable production release, please download the latest version from the Plugin Marketplace and follow the instructions to [install](#installation) and [configure](#setup) the plugin. If you are a developer who wants to work on this plugin, please switch to the [Developer docs](./docs/developer_docs.md).
+See the [Mattermost Product Documentation](https://docs.mattermost.com/integrate/servicenow-interoperability.html) for details on installing, configuring, enabling, and using this Mattermost integration.
 
 ## Features
 
@@ -84,71 +72,9 @@ This plugin contains the following features:
 - Supported record types for sharing a record - incident, problem, change_request, kb_knowledge, task, change_task and cert_follow_on_task.
 - Supported record types for updating a record state - incident, task, change_task and cert_follow_on_task.
 
-## Installation
+## License
 
-1. Go to the [releases page of this GitHub repository](https://github.com/mattermost/mattermost-plugin-servicenow/releases) and download the latest release for your Mattermost server.
-2. Upload this file on the Mattermost **System Console > Plugins > Management** page to install the plugin. To learn more about how to upload a plugin, [see the documentation](https://docs.mattermost.com/administration/plugins.html#plugin-uploads).
-3. Enable the plugin from **System Console > Plugins > ServiceNow Plugin**.
-
-## Setup
-
-- [ServiceNow Setup](./docs/servicenow_setup.md)
-- [Plugin Setup](./docs/plugin_setup.md)
-
-## Connecting to ServiceNow
-
-There are two methods by which you can connect your Mattermost account to your ServiceNow account.
-
-- **Using slash command**
-    - Run the slash command `/servicenow connect` in any channel.
-    - You will get an ephemeral message from the ServiceNow bot containing a link to connect your account.
-    - Click on that link. If it asks for login, enter your ServiceNow credentials and click `Allow` to authorize and connect your account.
-
-- **Using the button in the right-hand sidebar**
-    - Open the right-hand sidebar by clicking on the ServiceNow icon present in the channel header section of all channels.
-    - You will see a button saying "Connect your account"
-        ![image](https://user-images.githubusercontent.com/77336594/186386427-6533a3fe-da58-4d14-a60c-f6c3bb8ea7f5.png)
-    - Click on that button. If it asks for login, enter your ServiceNow credentials and click `Allow` to authorize and connect your account.
-
-After connecting successfully, you will get a direct message from the ServiceNow bot containing a Welcome message and some useful information along with some instructions for the system admins.
-**Note**: You will only get a direct message from the bot if your Mattermost server is configured to allow direct messages between any users on the server. If your server is configured to allow direct messages only between two users of the same team, then you will not get any direct message.
-
-## FAQ
-
-### What is Update Set that is present in the ServiceNow?
-
-An update set tracks and stores the changes of a ServiceNow instance and is used for moving those changes from one instance to another by first exporting this update set and importing the same update set to another ServiceNow instance. These changes can include things like some custom APIs (scripted REST APIs), changes in the tables, etc.
-
-### What changes does our Update Set do?
-
-- **GetStates scripted REST API**: Returns different states available for the records. Records supported: incident, task, change_task, and cert_follow_on_task
-
-- An application with the name **ServiceNow for Mattermost Notifications**
-
-    - **ServiceNow for Mattermost Notifications** application handles the storing of subscription details and sending notifications on the subscribed events.
-
-        - **ServiceNow for Mattermost Notifications Auth** table to store different Mattermost server URLs with their webhook secrets.
-
-        - **ServiceNow for Mattermost Subscriptions** table to store the subscription details.
-
-        - **Business rules** to handle different events (example: new record created, comment added on record, record state updated, etc.)
-
-        - **Script actions** to send notifications based on the subscription events.
-
-        - **Events registration** to register different record-type events.
-
-### Which ServiceNow tables are accessible through our plugin?
-
-- incident
-- problem
-- change_request
-- kb_knowledge
-- task
-- change_task
-- cert_follow_on_task
-- x_830655_mm_std_servicenow_for_mattermost_notifications_auth
-- x_830655_mm_std_servicenow_for_mattermost_subscriptions
-- All the tables extending these tables
+See the [LICENSE](./LICENSE) file for license rights and limitations.
 
 ---
 
