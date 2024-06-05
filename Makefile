@@ -3,7 +3,7 @@ NPM ?= $(shell command -v npm 2> /dev/null)
 CURL ?= $(shell command -v curl 2> /dev/null)
 MM_DEBUG ?=
 GOPATH ?= $(shell go env GOPATH)
-GO_TEST_FLAGS ?= -race
+GO_TEST_FLAGS ?= -race -gcflags=-l
 GO_BUILD_FLAGS ?=
 MM_UTILITIES_DIR ?= ../mattermost-utilities
 DLV_DEBUG_PORT := 2346

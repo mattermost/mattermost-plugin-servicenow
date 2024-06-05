@@ -16,11 +16,11 @@ import (
 
 type Client interface {
 	ActivateSubscriptions() (int, error)
-	CreateSubscription(*serializer.SubscriptionPayload) (int, error)
+	CreateSubscription(*serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error)
 	GetSubscription(subscriptionID string) (*serializer.SubscriptionResponse, int, error)
 	GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error)
 	DeleteSubscription(subscriptionID string) (int, error)
-	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error)
+	EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error)
 	CheckForDuplicateSubscription(*serializer.SubscriptionPayload) (bool, int, error)
 	SearchRecordsInServiceNow(tableName, searchTerm, limit, offset string) ([]*serializer.ServiceNowPartialRecord, int, error)
 	GetRecordFromServiceNow(tableName, sysID string) (*serializer.ServiceNowRecord, int, error)
@@ -84,13 +84,14 @@ func (c *client) ActivateSubscriptions() (int, error) {
 	return http.StatusOK, nil
 }
 
-func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) (int, error) {
-	_, statusCode, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, nil, nil)
+func (c *client) CreateSubscription(subscription *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error) {
+	subscriptionResult := &serializer.SubscriptionResult{}
+	_, statusCode, err := c.CallJSON(http.MethodPost, constants.PathSubscriptionCRUD, subscription, subscriptionResult, nil)
 	if err != nil {
-		return statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
+		return nil, statusCode, errors.Wrap(err, "failed to create subscription in ServiceNow")
 	}
 
-	return statusCode, nil
+	return subscriptionResult.Result, statusCode, nil
 }
 
 func (c *client) GetAllSubscriptions(channelID, userID, subscriptionType, limit, offset string) ([]*serializer.SubscriptionResponse, int, error) {
@@ -144,12 +145,14 @@ func (c *client) DeleteSubscription(subscriptionID string) (int, error) {
 	return statusCode, nil
 }
 
-func (c *client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (int, error) {
-	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), subscription, nil, nil)
+func (c *client) EditSubscription(subscriptionID string, subscription *serializer.SubscriptionPayload) (*serializer.SubscriptionResponse, int, error) {
+	subscriptionResult := &serializer.SubscriptionResult{}
+	_, statusCode, err := c.CallJSON(http.MethodPatch, fmt.Sprintf("%s/%s", constants.PathSubscriptionCRUD, subscriptionID), subscription, subscriptionResult, nil)
 	if err != nil {
-		return statusCode, errors.Wrap(err, "failed to update subscription from ServiceNow")
+		return nil, statusCode, errors.Wrap(err, "failed to update subscription from ServiceNow")
 	}
-	return statusCode, nil
+
+	return subscriptionResult.Result, statusCode, nil
 }
 
 // CheckForDuplicateSubscription returns true and an error if a duplicate subscription exists in ServiceNow
@@ -259,7 +262,7 @@ func (c *client) GetMe(userEmail string) (*serializer.ServiceNowUser, int, error
 	}
 
 	if len(userList.UserDetails) == 0 {
-		return nil, statusCode, fmt.Errorf("user doesn't exist on ServiceNow instance %s with email %s", c.plugin.getConfiguration().ServiceNowBaseURL, userEmail)
+		return nil, statusCode, fmt.Errorf("please make sure your email address on your Mattermost account matches the email in your ServiceNow account")
 	}
 
 	if len(userList.UserDetails) > 1 {
