@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"sync"
 	"time"
 
 	"github.com/mattermost/mattermost-plugin-api/cluster"
@@ -84,7 +83,6 @@ func (s *pluginStore) DeleteUser(mattermostUserID string) error {
 func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 	page := 0
 	users := []*serializer.IncidentCaller{}
-	mu := new(sync.Mutex)
 	for {
 		kvList, err := s.plugin.API.KVList(page, constants.DefaultPerPage)
 		if err != nil {
@@ -96,23 +94,20 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 				decodedKey, decodeErr := decodeKey(userID)
 				if decodeErr != nil {
 					s.plugin.API.LogError("Unable to decode key", "Key", key, "Error", decodeErr.Error())
-					break
+					continue
 				}
 
 				user, loadErr := s.LoadUser(decodedKey)
 				if loadErr != nil {
 					s.plugin.API.LogError("Unable to load user", "UserID", decodedKey, "Error", loadErr.Error())
-					break
+					continue
 				}
 
-				// Append the loaded user to the users slice under a lock.
-				mu.Lock()
 				users = append(users, &serializer.IncidentCaller{
 					MattermostUserID: user.MattermostUserID,
 					Username:         user.Username,
 					ServiceNowUser:   user.ServiceNowUser,
 				})
-				mu.Unlock()
 			}
 		}
 
