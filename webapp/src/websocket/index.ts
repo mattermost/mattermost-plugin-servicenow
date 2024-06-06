@@ -1,6 +1,6 @@
 import {Store, Action} from 'redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from 'src/types/common/globalState';
 
 import {SubscriptionEventsMap} from 'src/plugin_constants';
 
@@ -11,7 +11,12 @@ import {refetch} from 'src/reducers/refetchState';
 export function handleConnect(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(true) as Action);
-        store.dispatch(refetch() as Action);
+        const globalState = (store.getState() as GlobalState);
+        if (globalState.views && globalState.views.rhs.rhsState === 'plugin' && globalState.views.rhs.pluggableId === rhsComponentId) {
+            store.dispatch(refetch() as Action);
+        } else {
+            store.dispatch(refetch() as Action);
+        }
     };
 }
 
@@ -48,7 +53,12 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
 
 export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
-        store.dispatch(refetch() as Action);
+        const globalState = (store.getState() as GlobalState);
+        if (globalState.views && globalState.views.rhs.rhsState === 'plugin' && globalState.views.rhs.pluggableId === rhsComponentId) {
+            store.dispatch(refetch() as Action);
+        } else {
+            store.dispatch(refetch() as Action);
+        }
     };
 }
 
