@@ -12,8 +12,10 @@ export function handleConnect(store: Store<GlobalState, Action<Record<string, un
     return (_: WebsocketEventParams) => {
         store.dispatch(setConnected(true) as Action);
         const globalState = (store.getState() as GlobalState);
-        if (globalState.views && globalState.views?.rhs?.rhsState === 'plugin' && globalState.views?.rhs?.pluggableId === rhsComponentId) {
-            store.dispatch(refetch() as Action);
+        if (globalState.views?.rhs?.rhsState === 'plugin') {
+            if (globalState.views.rhs.pluggableId === rhsComponentId) {
+                store.dispatch(refetch() as Action);
+            }
         } else {
             store.dispatch(refetch() as Action);
         }
@@ -54,8 +56,10 @@ export function handleOpenEditSubscriptionModal(store: Store<GlobalState, Action
 export function handleSubscriptionDeleted(store: Store<GlobalState, Action<Record<string, unknown>>>, rhsComponentId: string) {
     return (_: WebsocketEventParams) => {
         const globalState = (store.getState() as GlobalState);
-        if (globalState.views && globalState.views?.rhs?.rhsState === 'plugin' && globalState.views?.rhs?.pluggableId === rhsComponentId) {
-            store.dispatch(refetch() as Action);
+        if (globalState.views?.rhs?.rhsState === 'plugin') {
+            if (globalState.views.rhs.pluggableId === rhsComponentId) {
+                store.dispatch(refetch() as Action);
+            }
         } else {
             store.dispatch(refetch() as Action);
         }
