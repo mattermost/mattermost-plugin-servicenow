@@ -122,21 +122,13 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 }
 
 func (s *pluginStore) DeleteUserTokenOnEncryptionSecretChange() {
-	deleteAllUsersMutex, err := cluster.NewMutex(s.plugin.API, constants.DeleteAllUsersMutexKey)
-	if err != nil {
-		s.plugin.API.LogError("Failed to create mutex for deleting users", "Error", err.Error())
-	}
-
-	deleteAllUsersMutex.Lock()
 	deleteAllUsersState := s.DeleteAllUsersState()
-	deleteAllUsersMutex.Unlock()
-
 	if !deleteAllUsersState {
 		return
 	}
 
 	defer func() {
-		if err = s.basicKV.Delete(constants.DeleteAllUsersKey); err != nil {
+		if err := s.basicKV.Delete(constants.DeleteAllUsersKey); err != nil {
 			s.plugin.API.LogError("Unable to disconnect users job running flag from the store", "Error", err.Error())
 		}
 	}()
@@ -154,7 +146,20 @@ func (s *pluginStore) DeleteUserTokenOnEncryptionSecretChange() {
 	}
 }
 
+/*
+DeleteAllUsersState function is used for storing a process in store to check if the process to delete the users is already running on a node to avoid race conditions.
+A node acquires a lock on the below function to avoid race conditions while deleting the user from the store.
+We remove the lock as soon as all users are deleted.
+*/
 func (s *pluginStore) DeleteAllUsersState() bool {
+	deleteAllUsersMutex, err := cluster.NewMutex(s.plugin.API, constants.DeleteAllUsersMutexKey)
+	if err != nil {
+		s.plugin.API.LogError("Failed to create mutex for deleting users", "Error", err.Error())
+	}
+
+	deleteAllUsersMutex.Lock()
+	defer deleteAllUsersMutex.Unlock()
+
 	key, err := s.basicKV.Load(constants.DeleteAllUsersKey)
 	if err != nil && err.Error() != "not found" {
 		s.plugin.API.LogError("Unable to get disconnect users job running flag from the store", "Error", err.Error())
