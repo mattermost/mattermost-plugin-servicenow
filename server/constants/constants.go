@@ -176,8 +176,10 @@ const (
 
 // kv store keys prefix
 const (
-	UserKeyPrefix   = "user_"
-	OAuth2KeyPrefix = "oauth2_"
+	UserKeyPrefix          = "user_"
+	OAuth2KeyPrefix        = "oauth2_"
+	DeleteAllUsersMutexKey = "delete_all_users_mutex"
+	DeleteAllUsersKey      = "delete_all_users"
 )
 
 var (
