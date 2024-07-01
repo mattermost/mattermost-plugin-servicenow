@@ -6,18 +6,18 @@ import React from 'react';
 
 import {Button} from '@brightscout/mattermost-ui-library';
 
-import {GlobalState} from 'mattermost-webapp/types/store';
+import {GlobalState} from 'mattermost-redux/types/store';
 
 import Constants, {SubscriptionType, RecordType, KnowledgeRecordDataLabelConfigKey, RecordDataLabelConfigKey, CONNECT_ACCOUNT_LINK} from 'src/plugin_constants';
 
-import {id as pluginId} from '../manifest';
+import manifest from '../manifest';
 
 const getBaseUrls = (mmSiteUrl = ''): {
     pluginApiBaseUrl: string;
     mattermostApiBaseUrl: string;
     publicFilesUrl: string;
 } => {
-    const pluginUrl = `${mmSiteUrl}/plugins/${pluginId}`;
+    const pluginUrl = `${mmSiteUrl}/plugins/${manifest.id}`;
     const pluginApiBaseUrl = `${pluginUrl}/api/v1`;
     const mattermostApiBaseUrl = `${mmSiteUrl}/api/v4`;
     const publicFilesUrl = `${pluginUrl}/public/`;

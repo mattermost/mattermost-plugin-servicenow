@@ -1,6 +1,6 @@
 import {Store, Action} from 'redux';
 
-import {GlobalState} from 'mattermost-webapp/types/store';
+import {GlobalState} from 'mattermost-redux/types/store';
 
 export default class Hooks {
     store: Store<GlobalState, Action<Record<string, unknown>>>
