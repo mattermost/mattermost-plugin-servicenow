@@ -38,7 +38,8 @@
                 "help_text": "The webhook secret used by the ServiceNow API calls to Mattermost for sending notifications. Regenerating this key will stop the subscription notifications. Refer to the [documentation](https://github.com/mattermost/mattermost-plugin-servicenow) to update the secret in the ServiceNow instance and start receiving notifications again.",
                 "regenerate_help_text": "Regenerate a new webhook secret. This webhook secret is used to authenticate the HTTP requests from ServiceNow to Mattermost.",
                 "placeholder": "",
-                "default": null
+                "default": null,
+                "secret": true
             },
             {
                 "key": "ServiceNowOAuthClientID",
@@ -54,7 +55,8 @@
                 "type": "text",
                 "help_text": "The client secret for the OAuth app registered with ServiceNow.",
                 "placeholder": "",
-                "default": null
+                "default": null,
+                "secret": true
             },
             {
                 "key": "EncryptionSecret",
@@ -62,7 +64,8 @@
                 "type": "generated",
                 "help_text": "The secret key used to encrypt and decrpyt OAuth token.",
                 "placeholder": "",
-                "default": null
+                "default": null,
+                "secret": true
             },
             {
                 "key": "ServiceNowUpdateSetDownload",
