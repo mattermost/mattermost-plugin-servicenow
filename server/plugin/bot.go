@@ -3,7 +3,7 @@ package plugin
 import (
 	"fmt"
 
-	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost/server/public/model"
 )
 
 // Ephemeral sends an ephemeral message to a user
