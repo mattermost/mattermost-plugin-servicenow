@@ -105,8 +105,7 @@ This plugin contains the following features:
 
 ## Setup
 
-- [ServiceNow Setup](./servicenow_setup.md)
-- [Plugin Setup](./plugin_setup.md)
+See the [Mattermost Product Documentation](https://docs.mattermost.com/integrate/servicenow-interoperability.html) for details on installing, configuring, enabling, and using this Mattermost integration.
 
 ## Connecting to ServiceNow
 
