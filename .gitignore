@@ -2,6 +2,7 @@ bin/
 dist/
 webapp/src/manifest.ts
 server/plugin/manifest.go
+*.log
 
 # Mac
 .DS_Store
