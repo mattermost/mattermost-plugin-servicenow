@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {GlobalState} from 'mattermost-webapp/types/store';
+
+import {GlobalState} from 'mattermost-redux/types/store';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
 import {General as MMConstants} from 'mattermost-redux/constants';
 

@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mattermost/mattermost-server/v6/api4"
-	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost/server/public/model"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
 	"github.com/mattermost/mattermost-plugin-servicenow/server/serializer"
@@ -30,20 +29,20 @@ func GetChannelID() string {
 
 func GetChannel(channelType model.ChannelType) *model.Channel {
 	return &model.Channel{
-		Id:   api4.GenerateTestId(),
+		Id:   model.NewId(),
 		Type: channelType,
 	}
 }
 
 func GetPost() *model.Post {
 	return &model.Post{
-		Id: api4.GenerateTestId(),
+		Id: model.NewId(),
 	}
 }
 
 func GetUser(role string) *model.User {
 	return &model.User{
-		Id:       api4.GenerateTestId(),
+		Id:       model.NewId(),
 		Username: "test-user",
 		Roles:    role,
 	}
