@@ -1,10 +1,7 @@
 import React from 'react';
 import {Store, Action} from 'redux';
 
-import {GlobalState} from 'mattermost-webapp/types/store';
-
-// eslint-disable-next-line import/no-unresolved
-import {PluginRegistry} from 'src/types/mattermost-webapp';
+import {GlobalState} from 'mattermost-redux/types/store';
 
 import {ServiceNowIcon} from '@brightscout/mattermost-ui-library';
 

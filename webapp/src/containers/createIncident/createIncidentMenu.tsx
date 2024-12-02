@@ -5,7 +5,7 @@ import {Action} from 'redux';
 import {getPost} from 'mattermost-redux/selectors/entities/posts';
 import {isSystemMessage} from 'mattermost-redux/utils/post_utils';
 
-import {GlobalState} from 'mattermost-webapp/types/store';
+import {GlobalState} from 'mattermost-redux/types/store';
 
 import Constants from 'src/plugin_constants';
 
