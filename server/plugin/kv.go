@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/mattermost/mattermost/server/public/plugin"
+	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-plugin-servicenow/server/constants"
@@ -28,6 +29,8 @@ type UserStore interface {
 	StoreUser(user *serializer.User) error
 	DeleteUser(mattermostUserID string) error
 	GetAllUsers() ([]*serializer.IncidentCaller, error)
+	DeleteUserTokenOnEncryptionSecretChange()
+	DeleteAllUsersState() bool
 }
 
 // OAuth2StateStore manages OAuth2 state
@@ -90,13 +93,13 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 			if userID, isValidUserKey := IsValidUserKey(key); isValidUserKey {
 				decodedKey, decodeErr := decodeKey(userID)
 				if decodeErr != nil {
-					s.plugin.API.LogError("Unable to decode key", "UserID", userID, "Error", decodeErr.Error())
+					s.plugin.API.LogError("Unable to decode key", "Key", key, "Error", decodeErr.Error())
 					continue
 				}
 
 				user, loadErr := s.LoadUser(decodedKey)
 				if loadErr != nil {
-					s.plugin.API.LogError("Unable to load user", "UserID", userID, "Error", loadErr.Error())
+					s.plugin.API.LogError("Unable to load user", "UserID", decodedKey, "Error", loadErr.Error())
 					continue
 				}
 
@@ -116,6 +119,63 @@ func (s *pluginStore) GetAllUsers() ([]*serializer.IncidentCaller, error) {
 	}
 
 	return users, nil
+}
+
+func (s *pluginStore) DeleteUserTokenOnEncryptionSecretChange() {
+	deleteAllUsersState := s.DeleteAllUsersState()
+	if !deleteAllUsersState {
+		return
+	}
+
+	defer func() {
+		if err := s.basicKV.Delete(constants.DeleteAllUsersKey); err != nil {
+			s.plugin.API.LogError("Unable to disconnect users job running flag from the store", "Error", err.Error())
+		}
+	}()
+	users, err := s.GetAllUsers()
+	if err != nil {
+		s.plugin.API.LogError(constants.ErrorGetUsers, "Error", err.Error())
+		return
+	}
+
+	for _, user := range users {
+		if err := s.DeleteUser(user.MattermostUserID); err != nil {
+			s.plugin.API.LogWarn("Unable to delete a user on encryption secret change", "UserID", user.MattermostUserID, "Error", err.Error())
+			continue
+		}
+	}
+}
+
+/*
+DeleteAllUsersState function is used for storing a process in store to check if the process to delete the users is already running on a node to avoid race conditions.
+A node acquires a lock on the below function to avoid race conditions while deleting the user from the store.
+We remove the lock as soon as all users are deleted.
+*/
+func (s *pluginStore) DeleteAllUsersState() bool {
+	deleteAllUsersMutex, err := cluster.NewMutex(s.plugin.API, constants.DeleteAllUsersMutexKey)
+	if err != nil {
+		s.plugin.API.LogError("Failed to create mutex for deleting users", "Error", err.Error())
+	}
+
+	deleteAllUsersMutex.Lock()
+	defer deleteAllUsersMutex.Unlock()
+
+	key, err := s.basicKV.Load(constants.DeleteAllUsersKey)
+	if err != nil && err.Error() != "not found" {
+		s.plugin.API.LogError("Unable to get disconnect users job running flag from the store", "Error", err.Error())
+		return false
+	}
+
+	if len(key) == 0 {
+		if err := s.basicKV.Store(constants.DeleteAllUsersKey, []byte{1}); err != nil {
+			s.plugin.API.LogError("Unable to store disconnect users job running flag from the store", "Error", err.Error())
+			return false
+		}
+
+		return true
+	}
+
+	return false
 }
 
 func (s *pluginStore) VerifyOAuth2State(state string) error {
