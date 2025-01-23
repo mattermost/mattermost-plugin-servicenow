@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 import {useEffect} from 'react';
 
 // Hook that detects clicks outside of the passed ref
