@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 import {Store, Action} from 'redux';
 
 import {GlobalState} from 'src/types/common/globalState';

@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 import React, {useCallback, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 

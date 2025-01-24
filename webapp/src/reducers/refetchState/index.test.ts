@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 import reducer, {refetch, resetRefetch} from 'src/reducers/refetchState';
 
 const previousState: RefetchState = {

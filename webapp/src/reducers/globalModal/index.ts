@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 const initialState: GlobalModalState = {
