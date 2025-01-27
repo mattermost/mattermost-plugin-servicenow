@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 import React, {forwardRef} from 'react';
 
 import {ModalSubtitleAndError, ModalFooter, Checkbox} from '@brightscout/mattermost-ui-library';

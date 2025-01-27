@@ -1,3 +1,6 @@
+// Copyright (c) 2022-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 package plugin
 
 import (
@@ -530,5 +533,5 @@ func parseCommand(input string) (command, action string, parameters []string) {
 }
 
 func (p *Plugin) postCommandResponse(args *model.CommandArgs, text string) {
-	p.Ephemeral(args.UserId, args.ChannelId, args.RootId, text)
+	p.Ephemeral(args.UserId, args.ChannelId, args.RootId, "%s", text)
 }

@@ -29,12 +29,10 @@ linters:
     - ineffassign
     - misspell
     - nakedret
-    - revive
     - staticcheck
     - stylecheck
     - typecheck
     - unconvert
-    - unused
     - whitespace
 
 issues:
