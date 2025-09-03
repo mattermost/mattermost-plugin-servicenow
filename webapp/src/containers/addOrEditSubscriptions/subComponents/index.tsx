@@ -6,8 +6,6 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import {GlobalState} from '@mattermost/types/store';
 
-import Cookies from 'js-cookie';
-
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'src/plugin_constants';
@@ -26,6 +24,8 @@ import EventsPanel from './eventsPanel';
 import SearchRecordsPanel from './searchRecordsPanel';
 
 import './styles.scss';
+
+const Cookies = require('js-cookie');
 
 type AddOrEditSubscriptionProps = {
     open: boolean;
