@@ -4,7 +4,7 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import Cookies from 'js-cookie';
 
