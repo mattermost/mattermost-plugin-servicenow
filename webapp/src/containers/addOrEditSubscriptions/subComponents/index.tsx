@@ -4,9 +4,7 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
-
-import Cookies from 'js-cookie';
+import {GlobalState} from '@mattermost/types/store';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
@@ -26,6 +24,8 @@ import EventsPanel from './eventsPanel';
 import SearchRecordsPanel from './searchRecordsPanel';
 
 import './styles.scss';
+
+const Cookies = require('js-cookie');
 
 type AddOrEditSubscriptionProps = {
     open: boolean;

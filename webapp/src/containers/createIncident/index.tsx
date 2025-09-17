@@ -6,9 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import {CustomModal as Modal, InputField as Input, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
 
-import {GlobalState} from 'mattermost-redux/types/store';
-
-import Cookies from 'js-cookie';
+import {GlobalState} from '@mattermost/types/store';
 
 import usePluginApi from 'src/hooks/usePluginApi';
 import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
@@ -23,6 +21,8 @@ import CallerPanel from './callerPanel';
 import SubscribeNewIncident from './subscribeToNewIncident';
 
 import './styles.scss';
+
+const Cookies = require('js-cookie');
 
 const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');
