@@ -8,6 +8,8 @@ import {CustomModal as Modal, InputField as Input, ModalFooter, ModalHeader, Tex
 
 import {GlobalState} from '@mattermost/types/store';
 
+import Cookies from 'js-cookie';
+
 import usePluginApi from 'src/hooks/usePluginApi';
 import Constants, {RecordType, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
 
@@ -21,8 +23,6 @@ import CallerPanel from './callerPanel';
 import SubscribeNewIncident from './subscribeToNewIncident';
 
 import './styles.scss';
-
-const Cookies = require('js-cookie');
 
 const CreateIncident = () => {
     const [shortDescription, setShortDescription] = useState<string>('');

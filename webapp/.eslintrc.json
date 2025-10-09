@@ -36,7 +36,14 @@
     "beforeEach": true
   },
   "settings": {
-    "import/resolver": "webpack"
+    "import/resolver": {
+      "webpack": {
+        "config": "./webpack.config.js"
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
   },
   "rules": {
     "array-bracket-spacing": [

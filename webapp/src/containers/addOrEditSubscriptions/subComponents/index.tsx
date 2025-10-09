@@ -8,6 +8,8 @@ import {GlobalState} from '@mattermost/types/store';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
 
+import Cookies from 'js-cookie';
+
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'src/plugin_constants';
 
 import usePluginApi from 'src/hooks/usePluginApi';
@@ -24,8 +26,6 @@ import EventsPanel from './eventsPanel';
 import SearchRecordsPanel from './searchRecordsPanel';
 
 import './styles.scss';
-
-const Cookies = require('js-cookie');
 
 type AddOrEditSubscriptionProps = {
     open: boolean;
