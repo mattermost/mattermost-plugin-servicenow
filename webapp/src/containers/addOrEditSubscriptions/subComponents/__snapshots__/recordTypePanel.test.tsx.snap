@@ -11,16 +11,16 @@ exports[`Record Type Panel Should render correctly 1`] = `
       error={false}
       onChange={[Function]}
       options={
-        Array [
-          Object {
+        [
+          {
             "label": "Incident",
             "value": "incident",
           },
-          Object {
+          {
             "label": "Problem",
             "value": "problem",
           },
-          Object {
+          {
             "label": "Change Request",
             "value": "change_request",
           },
