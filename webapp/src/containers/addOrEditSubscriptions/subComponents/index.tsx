@@ -4,11 +4,11 @@
 import React, {createRef, useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
-
-import Cookies from 'js-cookie';
+import {GlobalState} from '@mattermost/types/store';
 
 import {CustomModal as Modal, ModalHeader, ModalLoader, ResultPanel} from '@brightscout/mattermost-ui-library';
+
+import Cookies from 'js-cookie';
 
 import Constants, {PanelDefaultHeights, SubscriptionEvents, SubscriptionType, RecordType} from 'src/plugin_constants';
 

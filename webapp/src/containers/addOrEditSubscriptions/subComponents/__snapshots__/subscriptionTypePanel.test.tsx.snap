@@ -11,12 +11,12 @@ exports[`Subscription Type Panel Should render correctly 1`] = `
       error={false}
       onChange={[Function]}
       options={
-        Array [
-          Object {
+        [
+          {
             "label": "Record subscription",
             "value": "record",
           },
-          Object {
+          {
             "label": "Bulk subscription",
             "value": "object",
           },

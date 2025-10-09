@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import {CustomModal as Modal, InputField as Input, ModalFooter, ModalHeader, TextArea, ToggleSwitch, ResultPanel, CircularLoader} from '@brightscout/mattermost-ui-library';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import Cookies from 'js-cookie';
 

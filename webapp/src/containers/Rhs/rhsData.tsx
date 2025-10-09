@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import {EmptyState, SubscriptionCard, BellIcon} from '@brightscout/mattermost-ui-library';
 

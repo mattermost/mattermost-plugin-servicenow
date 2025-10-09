@@ -4,7 +4,7 @@
 import React, {forwardRef, useCallback, useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 import {General as MMConstants} from 'mattermost-redux/constants';
 
 import {ModalSubtitleAndError, ModalFooter, AutoSuggest} from '@brightscout/mattermost-ui-library';

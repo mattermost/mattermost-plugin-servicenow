@@ -123,12 +123,12 @@ exports[`RHSHeader should match snapshot 2`] = `
         disabled={false}
         onChange={[Function]}
         options={
-          Array [
-            Object {
+          [
+            {
               "label": "Me",
               "value": "me",
             },
-            Object {
+            {
               "label": "Anyone",
               "value": "anyone",
             },
