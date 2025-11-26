@@ -11,6 +11,7 @@ const (
 
 	HeaderMattermostUserID = "Mattermost-User-Id"
 	CommandTrigger         = "servicenow"
+	NotAvailableText       = "N/A"
 
 	ConnectSuccessMessage = "#### Welcome to the Mattermost ServiceNow Plugin\n" +
 		"You've successfully connected your Mattermost account `%s` to ServiceNow. Read about the features of this plugin below:\n\n"
