@@ -24,6 +24,8 @@ import (
 	"github.com/mattermost/mattermost-plugin-servicenow/server/testutils"
 )
 
+const mockToken = "mockToken"
+
 func TestInitOAuth2(t *testing.T) {
 	for _, test := range []struct {
 		description          string
@@ -103,7 +105,7 @@ func TestCompleteOAuth2(t *testing.T) {
 					return &oauth2.Token{}, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewEncodedAuthToken", func(_ *Plugin, _ *oauth2.Token) (string, error) {
-					return "mockToken", nil
+					return mockToken, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "DM", func(_ *Plugin, _, _ string, _ ...interface{}) (string, error) {
 					return "", nil
@@ -212,7 +214,7 @@ func TestCompleteOAuth2(t *testing.T) {
 					return &oauth2.Token{}, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewEncodedAuthToken", func(_ *Plugin, _ *oauth2.Token) (string, error) {
-					return "mockToken", nil
+					return mockToken, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewClient", func(_ *Plugin, _ context.Context, _ *oauth2.Token) Client {
 					return &mock_plugin.Client{}
@@ -239,7 +241,7 @@ func TestCompleteOAuth2(t *testing.T) {
 					return &oauth2.Token{}, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewEncodedAuthToken", func(_ *Plugin, _ *oauth2.Token) (string, error) {
-					return "mockToken", nil
+					return mockToken, nil
 				})
 				monkey.PatchInstanceMethod(reflect.TypeOf(p), "NewClient", func(_ *Plugin, _ context.Context, _ *oauth2.Token) Client {
 					return &mock_plugin.Client{}

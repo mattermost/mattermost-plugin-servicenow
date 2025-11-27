@@ -190,7 +190,7 @@ func (sr *ServiceNowRecord) HandleNestedFields(serviceNowURL string) error {
 
 func GetNestedFieldValue(field interface{}, fieldType, serviceNowURL string) (string, error) {
 	if _, ok := field.(string); ok || field == nil {
-		return "N/A", nil
+		return constants.NotAvailableText, nil
 	}
 
 	jsonObject, ok := field.(map[string]interface{})

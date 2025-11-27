@@ -1,8 +1,6 @@
 module github.com/mattermost/mattermost-plugin-servicenow
 
-go 1.22
-
-toolchain go1.22.2
+go 1.24.6
 
 require (
 	bou.ke/monkey v1.0.2

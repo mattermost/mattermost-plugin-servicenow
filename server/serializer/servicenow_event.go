@@ -47,10 +47,10 @@ func (se *ServiceNowEvent) CreateNotificationPost(botID, serviceNowURL, pluginUR
 	}
 
 	if se.AssignedTo == "" {
-		se.AssignedTo = "N/A"
+		se.AssignedTo = constants.NotAvailableText
 	}
 	if se.AssignmentGroup == "" {
-		se.AssignmentGroup = "N/A"
+		se.AssignmentGroup = constants.NotAvailableText
 	}
 
 	var actions []*model.PostAction
