@@ -34,7 +34,7 @@ type SearchRecordsPanelProps = {
     showFooter?: boolean;
     disabled?: boolean;
     setRecordNumber?: (data: string) => void;
-}
+};
 
 const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>(({
     className,

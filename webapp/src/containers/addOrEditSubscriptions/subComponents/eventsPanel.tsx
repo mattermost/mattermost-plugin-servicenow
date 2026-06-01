@@ -21,7 +21,7 @@ type EventsPanelProps = {
     subscriptionType: SubscriptionType;
     record: string;
     recordType: RecordType;
-}
+};
 
 const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     className,

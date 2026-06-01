@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render} from '@testing-library/react';
 
 import Spinner from 'src/components/spinner';
 
@@ -12,8 +12,8 @@ describe('Spinner', () => {
     };
 
     it('should match snapshot with correct className', () => {
-        const wrapper = shallow(<Spinner {...baseProps}/>);
-        expect(wrapper).toMatchSnapshot();
-        expect(wrapper.find('div').hasClass(baseProps.extraClass)).toBeTruthy();
+        const {container} = render(<Spinner {...baseProps}/>);
+        expect(container).toMatchSnapshot();
+        expect(container.firstChild).toHaveClass(baseProps.extraClass);
     });
 });

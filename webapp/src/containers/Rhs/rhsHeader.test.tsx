@@ -2,10 +2,17 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {shallow} from 'enzyme';
-import * as redux from 'react-redux';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import RHSHeader from './rhsHeader';
+
+const mockDispatch = jest.fn();
+
+jest.mock('react-redux', () => ({
+    ...jest.requireActual('react-redux'),
+    useDispatch: () => mockDispatch,
+}));
 
 describe('RHSHeader', () => {
     const baseProps = {
@@ -17,32 +24,26 @@ describe('RHSHeader', () => {
         setResetFilter: jest.fn(),
     };
 
-    // Mock useDispatch hook
-    const spyOnUseDispatch = jest.spyOn(redux, 'useDispatch');
-
-    // Mock dispatch function returned from useDispatch
-    const mockDispatch = jest.fn();
-    spyOnUseDispatch.mockReturnValue(mockDispatch);
-
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    it('should match snapshot', () => {
-        const wrapper = shallow(<RHSHeader {...baseProps}/>);
+    it('renders header and opens filter popover with toggle, then resets', async () => {
+        const {container} = render(<RHSHeader {...baseProps}/>);
+        expect(container).toMatchSnapshot();
 
-        expect(wrapper).toMatchSnapshot();
-        expect(wrapper.find('ToggleSwitch').exists()).toBeFalsy();
-        wrapper.find('button').simulate('click');
-        expect(mockDispatch).toBeCalled();
+        expect(container.querySelector('.rhs-filter-popover')).toBeNull();
 
-        wrapper.find('IconButton').simulate('click');
-        expect(wrapper).toMatchSnapshot();
-        expect(wrapper.find('ToggleSwitch').exists()).toBeTruthy();
+        await userEvent.click(screen.getByRole('button', {name: /share/i}));
+        expect(mockDispatch).toHaveBeenCalled();
 
-        wrapper.find('Button').first().simulate('click');
-        expect(baseProps.setShowAllSubscriptions).toBeCalled();
-        expect(baseProps.setFilter).toBeCalled();
-        expect(baseProps.setResetFilter).toBeCalled();
+        await userEvent.click(screen.getByRole('button', {name: 'Filter'}));
+        expect(container).toMatchSnapshot();
+        expect(container.querySelector('.rhs-filter-popover')).not.toBeNull();
+
+        await userEvent.click(screen.getByRole('button', {name: /reset/i}));
+        expect(baseProps.setShowAllSubscriptions).toHaveBeenCalled();
+        expect(baseProps.setFilter).toHaveBeenCalled();
+        expect(baseProps.setResetFilter).toHaveBeenCalled();
     });
 });

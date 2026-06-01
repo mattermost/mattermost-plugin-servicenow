@@ -6,7 +6,7 @@
 */
 
 // TODO: Create an enum for the below modal Ids
-type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | null
+type ModalId = 'addSubscription' | 'editSubscription' | 'shareRecord' | 'addOrViewComments' | 'updateState' | 'createIncident' | null;
 type SubscriptionType = import('../../plugin_constants').SubscriptionType;
 type RecordType = import('../../plugin_constants').RecordType;
 
@@ -41,7 +41,7 @@ type Suggestion = {
     number: string;
     short_description: string;
     sys_id: string;
-}
+};
 
 type RecordData = {
     assigned_to: string | LinkData;
@@ -55,7 +55,7 @@ type RecordData = {
     kb_category: string | LinkData;
     kb_knowledge_base: string | LinkData;
     workflow_state: string;
-}
+};
 
 type SubscriptionData = {
     server_url: string;
@@ -69,7 +69,7 @@ type SubscriptionData = {
     sys_id: string;
     number: string;
     short_description: string;
-}
+};
 
 type ConfigData = {
     ServiceNowBaseURL: string;
@@ -78,28 +78,28 @@ type ConfigData = {
     EncryptionSecret: string;
     WebhookSecret: string;
     ServiceNowUpdateSetDownload: string;
-}
+};
 
 type LinkData = {
     display_value: string;
     link: string;
-}
+};
 
 type StateData = {
     label: string;
     value: string;
-}
+};
 
 type DropdownOptionType = {
     label?: string | JSX.Element;
     value: string;
-}
+};
 
 type MmHookArgTypes = {
     channel_id: string,
     team_id: string,
     root_id: string
-}
+};
 
 type EditSubscriptionData = {
     channel: string,
@@ -109,27 +109,27 @@ type EditSubscriptionData = {
     subscriptionEvents: import('../../plugin_constants').SubscriptionEvents[],
     id: string;
     userId: string;
-}
+};
 
 type RecordDataKeys = 'short_description' | 'state' | 'priority' | 'assigned_to' | 'assignment_group' | 'workflow_state' | 'author' | 'kb_category' | 'kb_knowledge_base';
 
 type RecordDataLabelConfigType = {
     key: RecordDataKeys;
     label: string;
-}
+};
 
 type WebsocketEventParams = {
     event: string,
     data: Record<string, string>,
-}
+};
 
 type SubscriptionCardBody = {
     list?: Array<string | JSX.Element>,
     labelValuePairs?: Array<{ label: string, value: string }>,
-}
+};
 
 type CallerData = {
     mattermostUserID: string;
     username: string;
     serviceNowUser: ServiceNowUser;
-}
+};

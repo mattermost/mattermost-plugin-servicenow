@@ -33,7 +33,7 @@ type RhsDataProps = {
     filter: SubscriptionFilters;
     setFilter: (filter: SubscriptionFilters) => void;
     setResetFilter: (resetFilter: boolean) => void;
-}
+};
 
 type BulkSubscriptionRecordType = Extract<RecordType, RecordType.INCIDENT | RecordType.PROBLEM | RecordType.CHANGE_REQUEST>;
 const BulkSubscriptionHeaders: Record<BulkSubscriptionRecordType, string> = {

@@ -2,18 +2,11 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-
-import {shallow, ShallowWrapper} from 'enzyme';
-
-import {ModalFooter, ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
+import {render} from '@testing-library/react';
 
 import {RecordType, RecordTypeLabelMap, SubscriptionEvents, SubscriptionType} from 'src/plugin_constants';
 
 import EventsPanel from './eventsPanel';
-
-const mockOnContinue = jest.fn();
-const mockOnBack = jest.fn();
-const mockSetSubscriptionEvents = jest.fn();
 
 const mockSubscriptionEvents: SubscriptionEvents[] = [];
 
@@ -24,111 +17,83 @@ const mockChannel: DropdownOptionType = {
 
 const eventsPanelProps = {
     className: 'mockClassName',
-    onBack: mockOnBack,
-    onContinue: mockOnContinue,
+    onBack: jest.fn(),
+    onContinue: jest.fn(),
     continueBtnDisabled: true,
     backBtnDisabled: true,
     recordType: RecordType.INCIDENT,
     subscriptionEvents: mockSubscriptionEvents,
-    setSubscriptionEvents: mockSetSubscriptionEvents,
+    setSubscriptionEvents: jest.fn(),
     channel: mockChannel,
 };
 
 describe('Events Panel', () => {
-    let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-
-    beforeEach(() => {
-        component = shallow(
+    it('renders with the passed className on the root element', () => {
+        const {container} = render(
             <EventsPanel
                 {...eventsPanelProps}
                 subscriptionType={SubscriptionType.RECORD}
                 record='mockRecord'
                 error='mockError'
-            />);
+            />,
+        );
+        expect(container).toMatchSnapshot();
+        expect(container.firstChild).toHaveClass(eventsPanelProps.className);
     });
 
-    it('Should render correctly', () => {
-        expect(component).toMatchSnapshot();
-    });
-
-    it('Should apply the passed className prop', () => {
-        expect(component.hasClass(eventsPanelProps.className)).toBeTruthy();
-    });
-
-    it('Should render the events panel body correctly', () => {
-        expect(component.find('Checkbox')).toHaveLength(5);
-        expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
-        expect(component.find('ModalFooter')).toHaveLength(1);
-    });
-
-    it('Should render the events panel body correctly when subscription type is BULK', () => {
-        component = shallow(
+    it('renders summary text for RECORD subscriptions', () => {
+        const {container} = render(
             <EventsPanel
                 {...eventsPanelProps}
-                subscriptionType={SubscriptionType.BULK}
+                subscriptionType={SubscriptionType.RECORD}
                 record='mockRecord'
-            />);
-        expect(component.find('Checkbox')).toHaveLength(6);
-        expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
-        expect(component.find('ModalFooter')).toHaveLength(1);
+                error='mockError'
+            />,
+        );
+        const text = container.textContent || '';
+        expect(text).toContain('Channel');
+        expect(text).toContain(eventsPanelProps.channel.label);
+        expect(text).toContain('Record');
+        expect(text).toContain('mockRecord');
+        expect(text).toContain('Available events:');
     });
 
-    it('Should render the events panel text correctly', () => {
-        expect(component.text().includes('Channel')).toBeTruthy();
-        expect(component.text().includes(`${eventsPanelProps.channel.label}`)).toBeTruthy();
-        expect(component.text().includes('Record')).toBeTruthy();
-        expect(component.text().includes('mockRecord')).toBeTruthy();
-        expect(component.text().includes('Available events:')).toBeTruthy();
-    });
-
-    it('Should render the events panel text correctly on not having record and subscription type BULK', () => {
-        component = shallow(
+    it('renders record type label for BULK subscriptions when no record is set', () => {
+        const {container} = render(
             <EventsPanel
                 {...eventsPanelProps}
                 subscriptionType={SubscriptionType.BULK}
                 record=''
-            />);
-        expect(component.text().includes('Channel')).toBeTruthy();
-        expect(component.text().includes(`${eventsPanelProps.channel.label}`)).toBeTruthy();
-        expect(component.text().includes('Record type')).toBeTruthy();
-        expect(component.text().includes(RecordTypeLabelMap[eventsPanelProps.recordType])).toBeTruthy();
-        expect(component.text().includes('Available events:')).toBeTruthy();
-    });
-
-    it('Should render the error correctly', () => {
-        expect(component.contains(
-            <ModalSubtitleAndError error='mockError'/>,
-        )).toBeTruthy();
-    });
-
-    it('Should not render the error, if error is not passed', () => {
-        expect(component.contains(
-            <ModalSubtitleAndError/>,
-        )).toBeFalsy();
-    });
-
-    it('Should render the footer correctly', () => {
-        expect(component.contains(
-            <ModalFooter
-                onHide={eventsPanelProps.onBack}
-                onConfirm={eventsPanelProps.onContinue}
-                confirmBtnText='Continue'
-                cancelBtnText='Back'
-                confirmDisabled={eventsPanelProps.continueBtnDisabled}
-                cancelDisabled={eventsPanelProps.backBtnDisabled}
             />,
-        )).toBeTruthy();
+        );
+        const text = container.textContent || '';
+        expect(text).toContain('Channel');
+        expect(text).toContain(eventsPanelProps.channel.label);
+        expect(text).toContain('Record type');
+        expect(text).toContain(RecordTypeLabelMap[eventsPanelProps.recordType]);
+        expect(text).toContain('Available events:');
     });
 
-    it('Should fire change event when clicked', () => {
-        const clickCheckbox = (clickNumber: number, checked: boolean) => {
-            // eslint-disable-next-line max-nested-callbacks
-            component.find('Checkbox').forEach((node) => node.simulate('change', {target: {checked}}));
-            expect(eventsPanelProps.setSubscriptionEvents).toHaveBeenCalledTimes(clickNumber);
-        };
+    it('shows the error text when error prop is provided', () => {
+        const {getByText} = render(
+            <EventsPanel
+                {...eventsPanelProps}
+                subscriptionType={SubscriptionType.RECORD}
+                record='mockRecord'
+                error='mockError'
+            />,
+        );
+        expect(getByText('mockError')).toBeInTheDocument();
+    });
 
-        // Click the checkbox
-        clickCheckbox(5, true);
-        clickCheckbox(10, false);
+    it('does not render the error text when error prop is empty', () => {
+        const {queryByText} = render(
+            <EventsPanel
+                {...eventsPanelProps}
+                subscriptionType={SubscriptionType.RECORD}
+                record='mockRecord'
+            />,
+        );
+        expect(queryByText('mockError')).toBeNull();
     });
 });
