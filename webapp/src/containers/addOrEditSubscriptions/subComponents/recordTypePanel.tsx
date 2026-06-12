@@ -20,7 +20,7 @@ type RecordTypePanelProps = {
     showFooter?: boolean;
     placeholder?: string;
     recordTypeOptions: DropdownOptionType[];
-}
+};
 
 const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     className,

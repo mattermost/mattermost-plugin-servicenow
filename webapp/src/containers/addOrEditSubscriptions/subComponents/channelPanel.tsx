@@ -30,7 +30,7 @@ type ChannelPanelProps = {
     showFooter? :boolean;
     placeholder?: string;
     required?: boolean;
-}
+};
 
 const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     className,

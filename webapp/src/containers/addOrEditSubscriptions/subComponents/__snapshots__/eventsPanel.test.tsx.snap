@@ -1,82 +1,164 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Events Panel Should render correctly 1`] = `
-<div
-  className="modal__body wizard__secondary-panel events-panel mockClassName"
->
+exports[`Events Panel renders with the passed className on the root element 1`] = `
+<div>
   <div
-    className="padding-h-12 padding-v-20 wizard__body-container"
+    class="modal__body wizard__secondary-panel events-panel mockClassName"
   >
     <div
-      className="events-panel__prev-data border-radius-8 padding-v-10 padding-h-25 margin-bottom-25"
+      class="padding-h-12 padding-v-20 wizard__body-container"
     >
-      <h4
-        className="events-panel__prev-data-header font-14 wt-400 margin-0"
+      <div
+        class="events-panel__prev-data border-radius-8 padding-v-10 padding-h-25 margin-bottom-25"
       >
-        Channel
-      </h4>
+        <h4
+          class="events-panel__prev-data-header font-14 wt-400 margin-0"
+        >
+          Channel
+        </h4>
+        <p
+          class="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+        >
+          mockChannelLabel
+        </p>
+        <h4
+          class="events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header"
+        >
+          Record
+        </h4>
+        <p
+          class="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+        >
+          mockRecord
+        </p>
+      </div>
+      <label
+        class="events-panel__label font-16 margin-bottom-12 wt-400"
+      >
+        Available events:
+      </label>
+      <div
+        class="checkbox position-relative d-flex align-items-center margin-bottom-20"
+      >
+        <input
+          class="checkbox__input-field margin-0 cursor-pointer"
+          type="checkbox"
+        />
+        <div
+          class="checkbox__box d-flex justify-content-between align-items-center"
+        >
+          <i
+            class="fa fa-check checkbox__tick"
+          />
+        </div>
+        <label
+          class="checkbox__label font-14 wt-500 padding-0 margin-left-12 cursor-pointer"
+        >
+          State changed
+        </label>
+      </div>
+      <div
+        class="checkbox position-relative d-flex align-items-center margin-bottom-20"
+      >
+        <input
+          class="checkbox__input-field margin-0 cursor-pointer"
+          type="checkbox"
+        />
+        <div
+          class="checkbox__box d-flex justify-content-between align-items-center"
+        >
+          <i
+            class="fa fa-check checkbox__tick"
+          />
+        </div>
+        <label
+          class="checkbox__label font-14 wt-500 padding-0 margin-left-12 cursor-pointer"
+        >
+          Priority changed
+        </label>
+      </div>
+      <div
+        class="checkbox position-relative d-flex align-items-center margin-bottom-20"
+      >
+        <input
+          class="checkbox__input-field margin-0 cursor-pointer"
+          type="checkbox"
+        />
+        <div
+          class="checkbox__box d-flex justify-content-between align-items-center"
+        >
+          <i
+            class="fa fa-check checkbox__tick"
+          />
+        </div>
+        <label
+          class="checkbox__label font-14 wt-500 padding-0 margin-left-12 cursor-pointer"
+        >
+          New comment
+        </label>
+      </div>
+      <div
+        class="checkbox position-relative d-flex align-items-center margin-bottom-20"
+      >
+        <input
+          class="checkbox__input-field margin-0 cursor-pointer"
+          type="checkbox"
+        />
+        <div
+          class="checkbox__box d-flex justify-content-between align-items-center"
+        >
+          <i
+            class="fa fa-check checkbox__tick"
+          />
+        </div>
+        <label
+          class="checkbox__label font-14 wt-500 padding-0 margin-left-12 cursor-pointer"
+        >
+          Assigned to changed
+        </label>
+      </div>
+      <div
+        class="checkbox position-relative d-flex align-items-center events-panel__checkbox"
+      >
+        <input
+          class="checkbox__input-field margin-0 cursor-pointer"
+          type="checkbox"
+        />
+        <div
+          class="checkbox__box d-flex justify-content-between align-items-center"
+        >
+          <i
+            class="fa fa-check checkbox__tick"
+          />
+        </div>
+        <label
+          class="checkbox__label font-14 wt-500 padding-0 margin-left-12 cursor-pointer"
+        >
+          Assignment group changed
+        </label>
+      </div>
       <p
-        className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
+        class="modal__error margin-left-15 margin-bottom-10 error-text text-capitalize"
       >
-        mockChannelLabel
-      </p>
-      <h4
-        className="events-panel__prev-data-header font-14 wt-400 margin-top-15 record-header"
-      >
-        Record
-      </h4>
-      <p
-        className="events-panel__prev-data-text font-14 wt-400 margin-v-5"
-      >
-        mockRecord
+        mockError
       </p>
     </div>
-    <label
-      className="events-panel__label font-16 margin-bottom-12 wt-400"
+    <div
+      class="modal__footer d-flex flex-row-reverse align-items-center  padding-h-12 padding-v-15 modal-footer"
     >
-      Available events:
-    </label>
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="State changed"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="Priority changed"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="New comment"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="margin-bottom-20"
-      label="Assigned to changed"
-      onChange={[Function]}
-    />
-    <Checkbox
-      checked={false}
-      className="events-panel__checkbox"
-      label="Assignment group changed"
-      onChange={[Function]}
-    />
-    <ModalSubtitleAndError
-      error="mockError"
-    />
+      <button
+        class="btn modal__confirm-btn margin-left-10 btn-primary plugin-btn"
+        disabled=""
+      >
+        Continue
+      </button>
+      <button
+        class="btn btn-link modal__cancel-btn margin-0 padding-0 plugin-btn"
+        disabled=""
+      >
+        Back
+      </button>
+    </div>
   </div>
-  <ModalFooter
-    cancelBtnText="Back"
-    cancelDisabled={true}
-    confirmBtnText="Continue"
-    confirmDisabled={true}
-    onConfirm={[MockFunction]}
-    onHide={[MockFunction]}
-  />
 </div>
 `;

@@ -16,7 +16,7 @@ type SubscriptionTypePanelProps = {
     requiredFieldValidationErr?: boolean;
     subscriptionType: SubscriptionType | null;
     setSubscriptionType: (value: SubscriptionType) => void;
-}
+};
 
 const subscriptionTypeOptions: DropdownOptionType[] = [
     {

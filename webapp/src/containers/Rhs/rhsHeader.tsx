@@ -20,7 +20,7 @@ type HeaderProps = {
     filter: SubscriptionFilters;
     setFilter: (filter: SubscriptionFilters) => void;
     setResetFilter: (resetFilter: boolean) => void;
-}
+};
 
 const Header = ({
     showFilterIcon,

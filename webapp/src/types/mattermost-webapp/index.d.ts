@@ -11,7 +11,7 @@ interface PluginRegistry {
     registerSlashCommandWillBePostedHook(hook: (message: string, args: MmHookArgTypes) => Promise<({message?: string, args?: MmHookArgTypes})>)
     registerWebSocketEventHandler(event: string, handler: (msg: any) => void)
     registerAppBarComponent(iconUrl: string, action: () => void, tooltipText: string)
-    registerPostDropdownMenuComponent(component: React.ReactNode)
+    registerPostDropdownMenuComponent(component: React.ComponentType<{postId: string}>)
 
     // Add more if needed from https://developers.mattermost.com/extend/plugins/webapp/reference
 }

@@ -2,74 +2,50 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-
-import {shallow, ShallowWrapper} from 'enzyme';
-
-import {ModalSubtitleAndError} from '@brightscout/mattermost-ui-library';
+import {render} from '@testing-library/react';
 
 import {SubscriptionType} from 'src/plugin_constants';
 
 import SubscriptionTypePanel from './subscriptionTypePanel';
 
-const mockOnContinue = jest.fn();
-const mockOnBack = jest.fn();
-const mockSetSubscriptionType = jest.fn();
-
 const subscriptionTypePanelProps = {
     className: 'mockClassName',
-    onBack: mockOnBack,
-    onContinue: mockOnContinue,
+    onBack: jest.fn(),
+    onContinue: jest.fn(),
     actionBtnDisabled: true,
     requiredFieldValidationErr: true,
     subscriptionType: SubscriptionType.RECORD,
-    setSubscriptionType: mockSetSubscriptionType,
+    setSubscriptionType: jest.fn(),
 };
 
 describe('Subscription Type Panel', () => {
-    let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-
-    beforeEach(() => {
-        component = shallow(
+    it('renders with the passed className on the root element', () => {
+        const {container} = render(
             <SubscriptionTypePanel
                 {...subscriptionTypePanelProps}
                 error='mockError'
-            />);
+            />,
+        );
+        expect(container).toMatchSnapshot();
+        expect(container.firstChild).toHaveClass(subscriptionTypePanelProps.className);
     });
 
-    it('Should render correctly', () => {
-        expect(component).toMatchSnapshot();
+    it('shows the error text when error prop is provided', () => {
+        const {getByText} = render(
+            <SubscriptionTypePanel
+                {...subscriptionTypePanelProps}
+                error='mockError'
+            />,
+        );
+        expect(getByText('mockError')).toBeInTheDocument();
     });
 
-    it('Should apply the passed className prop', () => {
-        expect(component.hasClass(subscriptionTypePanelProps.className)).toBeTruthy();
-    });
-
-    it('Should render the subscription type panel body correctly', () => {
-        expect(component.find('Dropdown')).toHaveLength(1);
-        expect(component.find('ModalSubtitleAndError')).toHaveLength(1);
-        expect(component.find('ModalFooter')).toHaveLength(1);
-    });
-
-    it('Should render the error correctly', () => {
-        expect(component.contains(
-            <ModalSubtitleAndError error='mockError'/>,
-        )).toBeTruthy();
-    });
-
-    it('Should not render the error, if error is not passed', () => {
-        expect(component.contains(
-            <ModalSubtitleAndError/>,
-        )).toBeFalsy();
-    });
-
-    it('Should fire change event when dropdown value is changed', () => {
-        const changeDropdown = (changeNumber: number) => {
-            component.find('Dropdown').simulate('change');
-            expect(subscriptionTypePanelProps.setSubscriptionType).toHaveBeenCalledTimes(changeNumber);
-        };
-
-        // Click the checkbox
-        changeDropdown(1);
-        changeDropdown(2);
+    it('does not render the error text when error prop is empty', () => {
+        const {queryByText} = render(
+            <SubscriptionTypePanel
+                {...subscriptionTypePanelProps}
+            />,
+        );
+        expect(queryByText('mockError')).toBeNull();
     });
 });

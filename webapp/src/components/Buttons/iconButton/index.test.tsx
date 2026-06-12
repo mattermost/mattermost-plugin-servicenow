@@ -2,7 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import IconButton from 'src/components/Buttons/iconButton';
 
@@ -12,11 +13,11 @@ describe('IconButton', () => {
     };
 
     it('should match snapshot with only tooltip text provided', () => {
-        const wrapper = shallow(<IconButton {...baseProps}/>);
-        expect(wrapper).toMatchSnapshot();
+        const {container} = render(<IconButton {...baseProps}/>);
+        expect(container).toMatchSnapshot();
     });
 
-    it('should match snapshot with all the props', () => {
+    it('should match snapshot with all the props', async () => {
         const props = {
             ...baseProps,
             iconClassName: 'mockIconClassName',
@@ -24,12 +25,14 @@ describe('IconButton', () => {
             onClick: jest.fn(),
             children: (<></>),
         };
-        const wrapper = shallow(<IconButton {...props}/>);
-        expect(wrapper).toMatchSnapshot();
+        const {container} = render(<IconButton {...props}/>);
+        expect(container).toMatchSnapshot();
 
-        expect(wrapper.find('Button').hasClass(props.extraClass)).toBeTruthy();
-        expect(wrapper.find('i').hasClass(props.iconClassName)).toBeTruthy();
-        wrapper.find('Button').simulate('click');
+        const button = screen.getByRole('button', {name: props.tooltipText});
+        expect(button).toHaveClass(props.extraClass);
+        expect(button.querySelector('i')).toHaveClass(props.iconClassName);
+
+        await userEvent.click(button);
         expect(props.onClick).toHaveBeenCalled();
     });
 });

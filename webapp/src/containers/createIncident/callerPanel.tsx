@@ -16,7 +16,7 @@ type CallerPanelProps = {
     showModalLoader: boolean;
     setApiError: (apiError: APIError | null) => void;
     placeholder?: string;
-}
+};
 
 const CallerPanel = (({
     className,

@@ -25,12 +25,12 @@ type PluginApiService = {
     path: string,
     method: httpMethod,
     apiServiceName: ApiServiceName,
-}
+};
 
 type APIError = {
     id: string,
     message: string,
-}
+};
 
 type APIPayloadType =
     FetchChannelsParams |

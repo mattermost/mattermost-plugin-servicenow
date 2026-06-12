@@ -19,14 +19,14 @@ type HelpText = {
         textDefault?: string;
         textValues?: string;
     }
-}
+};
 
 type Props = {
     id: string;
     label: string;
     value: string;
     helpText: HelpText;
-}
+};
 
 const DownloadButton = ({label, helpText}: Props) => {
     const siteUrl = useSelector(Utils.getSiteUrl);

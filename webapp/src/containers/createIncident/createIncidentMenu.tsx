@@ -18,7 +18,7 @@ import Utils from 'src/utils';
 
 type PropTypes = {
     postId: string;
-}
+};
 
 const CreateIncidentPostMenuAction = ({postId}: PropTypes) => {
     const {pluginState} = usePluginApi();

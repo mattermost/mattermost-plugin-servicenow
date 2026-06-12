@@ -28,7 +28,7 @@ type PropTypes = {
     setShowResultPanel: React.Dispatch<React.SetStateAction<boolean>>;
     showChannelPanel: boolean;
     setShowChannelPanel: React.Dispatch<React.SetStateAction<boolean>>;
-}
+};
 
 const SubscribeNewIncident = ({
     subscriptionPayload,

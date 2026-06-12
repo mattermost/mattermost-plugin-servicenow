@@ -1,42 +1,79 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Subscription Type Panel Should render correctly 1`] = `
-<div
-  className="modal__body wizard__secondary-panel mockClassName"
->
+exports[`Subscription Type Panel renders with the passed className on the root element 1`] = `
+<div>
   <div
-    className="padding-h-12 padding-v-20 subscription-type-panel"
+    class="modal__body wizard__secondary-panel mockClassName"
   >
-    <Dropdown
-      error={false}
-      onChange={[Function]}
-      options={
-        [
-          {
-            "label": "Record subscription",
-            "value": "record",
-          },
-          {
-            "label": "Bulk subscription",
-            "value": "object",
-          },
-        ]
-      }
-      placeholder="Select Subscription Type"
-      required={true}
-      value="record"
-    />
-    <ModalSubtitleAndError
-      error="mockError"
-    />
+    <div
+      class="padding-h-12 padding-v-20 subscription-type-panel"
+    >
+      <div
+        class="plugin-dropdown false position-relative "
+      >
+        <div
+          class="plugin-dropdown__field d-flex align-items-center justify-content-between
+                    padding-h-15 border-radius-4 cursor-pointer
+                    false
+                    undefined
+                    "
+        >
+          <label
+            class="plugin-dropdown__field-text plugin-dropdown__field-placeholder margin-0 wt-400 plugin-dropdown__field-placeholder--shifted"
+          >
+            Select Subscription Type
+            *
+          </label>
+          <p
+            class="plugin-dropdown__field-text font-14 wt-500 margin-0 margin-top-15 text-ellipsis"
+          >
+            Record subscription
+          </p>
+          <i
+            class="fa fa-angle-down plugin-dropdown__field-angle font-20 false"
+          />
+          <input
+            class="plugin-dropdown__field-input cursor-pointer"
+            type="checkbox"
+          />
+        </div>
+        <ul
+          class="plugin-dropdown__options-list channel-bg padding-0 border-radius-4 false"
+        >
+          <li
+            class="plugin-dropdown__option-item text-ellipsis font-14 margin-0 padding-v-10 padding-h-25 cursor-pointer false"
+          >
+            Record subscription
+          </li>
+          <li
+            class="plugin-dropdown__option-item text-ellipsis font-14 margin-0 padding-v-10 padding-h-25 cursor-pointer false"
+          >
+            Bulk subscription
+          </li>
+        </ul>
+      </div>
+      <p
+        class="modal__error margin-left-15 margin-bottom-10 error-text text-capitalize"
+      >
+        mockError
+      </p>
+    </div>
+    <div
+      class="modal__footer d-flex flex-row-reverse align-items-center  padding-h-12 padding-v-15 modal-footer"
+    >
+      <button
+        class="btn modal__confirm-btn margin-left-10 btn-primary plugin-btn"
+        disabled=""
+      >
+        Continue
+      </button>
+      <button
+        class="btn btn-link modal__cancel-btn margin-0 padding-0 plugin-btn"
+        disabled=""
+      >
+        Back
+      </button>
+    </div>
   </div>
-  <ModalFooter
-    cancelBtnText="Back"
-    cancelDisabled={true}
-    confirmBtnText="Continue"
-    confirmDisabled={true}
-    onConfirm={[Function]}
-    onHide={[MockFunction]}
-  />
 </div>
 `;

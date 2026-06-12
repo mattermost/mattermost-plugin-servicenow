@@ -19,22 +19,19 @@ const config = {
         ['@babel/preset-react', {
             useBuiltIns: true,
         }],
-        ['@babel/typescript', {
+        ['@babel/preset-typescript', {
             allExtensions: true,
             isTSX: true,
         }],
-        ['@emotion/babel-preset-css-prop'],
     ],
     plugins: [
-        '@babel/plugin-proposal-class-properties',
+        '@babel/plugin-transform-class-properties',
         '@babel/plugin-syntax-dynamic-import',
-        '@babel/proposal-object-rest-spread',
-        '@babel/plugin-proposal-optional-chaining',
+        '@babel/plugin-transform-object-rest-spread',
         'babel-plugin-typescript-to-proptypes',
     ],
 };
 
-// Jest needs module transformation
 config.env = {
     test: {
         presets: config.presets,
