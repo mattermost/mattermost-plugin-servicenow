@@ -5,7 +5,7 @@ import React from 'react';
 
 type SvgIconNames = 'servicenow' | 'bell' | 'unlink' | 'globe' | 'lock' | 'edit' | 'delete' | 'check' | 'share' | 'filter';
 
-const SVGIcons: Record<SvgIconNames, JSX.Element> = {
+const SVGIcons: Record<SvgIconNames, React.JSX.Element> = {
     servicenow: (
         <path
             xmlns='http://www.w3.org/2000/svg'

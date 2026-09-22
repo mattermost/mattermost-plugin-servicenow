@@ -48,7 +48,7 @@ const ChannelPanel = forwardRef<HTMLDivElement, ChannelPanelProps>(({
     showFooter = false,
     placeholder,
     required = false,
-}: ChannelPanelProps, channelPanelRef): JSX.Element => {
+}: ChannelPanelProps, channelPanelRef): React.JSX.Element => {
     const [channelSuggestions, setChannelSuggestions] = useState<Record<string, string>[]>([]);
     const [channelAutoSuggestValue, setChannelAutoSuggestValue] = useState('');
     const [validationFailed, setValidationFailed] = useState(false);

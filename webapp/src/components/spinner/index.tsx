@@ -9,7 +9,7 @@ interface SpinnerProps {
     extraClass?: string;
 }
 
-const Spinner = ({extraClass = ''}: SpinnerProps): JSX.Element => (
+const Spinner = ({extraClass = ''}: SpinnerProps): React.JSX.Element => (
     <div className={`text-align-center servicenow-spinner-wrapper ${extraClass}`}>
         <svg
             className='spinner'

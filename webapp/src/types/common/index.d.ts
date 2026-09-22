@@ -91,7 +91,7 @@ type StateData = {
 };
 
 type DropdownOptionType = {
-    label?: string | JSX.Element;
+    label?: string | React.JSX.Element;
     value: string;
 };
 
@@ -124,7 +124,7 @@ type WebsocketEventParams = {
 };
 
 type SubscriptionCardBody = {
-    list?: Array<string | JSX.Element>,
+    list?: Array<string | React.JSX.Element>,
     labelValuePairs?: Array<{ label: string, value: string }>,
 };
 
