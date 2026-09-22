@@ -21,12 +21,11 @@ type IconButtonProps = {
 const IconButton = ({tooltipText, iconClassName, children, extraClass = '', onClick}: IconButtonProps) => (
     <Tooltip tooltipContent={tooltipText}>
         <Button
-            variant='outline-danger'
             className={`plugin-btn servicenow-button-wrapper btn-icon ${extraClass}`}
-            onClick={onClick}
+            onClick={() => onClick?.()}
             aria-label={tooltipText}
             tabIndex={0}
-            onKeyDown={(event: React.KeyboardEvent<HTMLSpanElement> | React.KeyboardEvent<SVGSVGElement>) => onPressingEnterKey(event, () => onClick?.())}
+            onKeyDown={(event) => onPressingEnterKey(event, () => onClick?.())}
         >
             {iconClassName && <i className={iconClassName}/>}
             {children}

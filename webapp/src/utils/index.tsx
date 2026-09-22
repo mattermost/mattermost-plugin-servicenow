@@ -59,7 +59,7 @@ const getSubscriptionHeaderLink = (serviceNowBaseUrl: string, subscriptionType: 
         `${serviceNowBaseUrl}/nav_to.do?uri=${recordType}_list.do%3Fsysparm_query=active=true`
 );
 
-export const onPressingEnterKey = (event: React.KeyboardEvent<HTMLSpanElement> | React.KeyboardEvent<SVGSVGElement>, func: () => void) => {
+export const onPressingEnterKey = (event: React.KeyboardEvent<unknown>, func: () => void) => {
     if (event.key !== 'Enter' && event.key !== ' ') {
         return;
     }

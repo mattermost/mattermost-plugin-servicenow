@@ -13,26 +13,30 @@ exports[`RHSHeader renders header and opens filter popover with toggle, then res
       >
         Subscriptions
       </p>
-      <button
-        aria-label="Filter"
-        class="plugin-btn servicenow-button-wrapper btn-icon margin-left-auto flex-basis-initial margin-right-8 filter-button btn btn-outline-danger"
-        tabindex="0"
-        type="button"
+      <div
+        style="display: inline-block;"
       >
-        <svg
-          class=""
-          fill="none"
-          height="12"
-          viewBox="0 0 18 12"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+        <button
+          aria-label="Filter"
+          class="plugin-btn servicenow-button-wrapper btn-icon margin-left-auto flex-basis-initial margin-right-8 filter-button btn btn-default"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
-            fill="#8A8C94"
-          />
-        </svg>
-      </button>
+          <svg
+            class=""
+            fill="none"
+            height="12"
+            viewBox="0 0 18 12"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
+              fill="#8A8C94"
+            />
+          </svg>
+        </button>
+      </div>
       <button
         class="btn btn-primary share-record-btn false"
       >
@@ -71,26 +75,30 @@ exports[`RHSHeader renders header and opens filter popover with toggle, then res
       >
         Subscriptions
       </p>
-      <button
-        aria-label="Filter"
-        class="plugin-btn servicenow-button-wrapper btn-icon margin-left-auto flex-basis-initial margin-right-8 filter-button btn btn-outline-danger"
-        tabindex="0"
-        type="button"
+      <div
+        style="display: inline-block;"
       >
-        <svg
-          class=""
-          fill="none"
-          height="12"
-          viewBox="0 0 18 12"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+        <button
+          aria-label="Filter"
+          class="plugin-btn servicenow-button-wrapper btn-icon margin-left-auto flex-basis-initial margin-right-8 filter-button btn btn-default"
+          tabindex="0"
+          type="button"
         >
-          <path
-            d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
-            fill="#8A8C94"
-          />
-        </svg>
-      </button>
+          <svg
+            class=""
+            fill="none"
+            height="12"
+            viewBox="0 0 18 12"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 7H15V5H3V7ZM0 0V2H18V0H0ZM7 12H11V10H7V12Z"
+              fill="#8A8C94"
+            />
+          </svg>
+        </button>
+      </div>
       <button
         class="btn btn-primary share-record-btn false"
       >

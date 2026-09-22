@@ -2,26 +2,34 @@
 
 exports[`IconButton should match snapshot with all the props 1`] = `
 <div>
-  <button
-    aria-label="mockTooltip"
-    class="plugin-btn servicenow-button-wrapper btn-icon mockExtraClass btn btn-outline-danger"
-    tabindex="0"
-    type="button"
+  <div
+    style="display: inline-block;"
   >
-    <i
-      class="mockIconClassName"
-    />
-  </button>
+    <button
+      aria-label="mockTooltip"
+      class="plugin-btn servicenow-button-wrapper btn-icon mockExtraClass btn btn-default"
+      tabindex="0"
+      type="button"
+    >
+      <i
+        class="mockIconClassName"
+      />
+    </button>
+  </div>
 </div>
 `;
 
 exports[`IconButton should match snapshot with only tooltip text provided 1`] = `
 <div>
-  <button
-    aria-label="mockTooltip"
-    class="plugin-btn servicenow-button-wrapper btn-icon  btn btn-outline-danger"
-    tabindex="0"
-    type="button"
-  />
+  <div
+    style="display: inline-block;"
+  >
+    <button
+      aria-label="mockTooltip"
+      class="plugin-btn servicenow-button-wrapper btn-icon  btn btn-default"
+      tabindex="0"
+      type="button"
+    />
+  </div>
 </div>
 `;
