@@ -18,19 +18,24 @@ type IconButtonProps = {
     onClick?: (event?: React.MouseEvent<HTMLElement>) => void
 };
 
-const IconButton = ({tooltipText, iconClassName, children, extraClass = '', onClick}: IconButtonProps) => (
-    <Tooltip tooltipContent={tooltipText}>
-        <Button
-            className={`plugin-btn servicenow-button-wrapper btn-icon ${extraClass}`}
-            onClick={() => onClick?.()}
-            aria-label={tooltipText}
-            tabIndex={0}
-            onKeyDown={(event) => onPressingEnterKey(event, () => onClick?.())}
-        >
-            {iconClassName && <i className={iconClassName}/>}
-            {children}
-        </Button>
-    </Tooltip>
-);
+const IconButton = ({tooltipText, iconClassName, children, extraClass = '', onClick}: IconButtonProps) => {
+    // react-bootstrap's types describe the Button component rather than the element it renders.
+    const handleClick = (event: React.MouseEvent<unknown>) => onClick?.(event as React.MouseEvent<HTMLElement>);
+
+    return (
+        <Tooltip tooltipContent={tooltipText}>
+            <Button
+                className={`plugin-btn servicenow-button-wrapper btn-icon ${extraClass}`}
+                onClick={handleClick}
+                aria-label={tooltipText}
+                tabIndex={0}
+                onKeyDown={(event) => onPressingEnterKey(event, () => onClick?.())}
+            >
+                {iconClassName && <i className={iconClassName}/>}
+                {children}
+            </Button>
+        </Tooltip>
+    );
+};
 
 export default IconButton;
