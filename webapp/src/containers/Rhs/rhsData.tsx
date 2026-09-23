@@ -84,7 +84,7 @@ const RhsData = ({
         (totalSubscriptions.length - (paginationQueryParams.page * Constants.DefaultPageSize) === Constants.DefaultPageSize)
     ), [totalSubscriptions]);
 
-    const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): JSX.Element => {
+    const getSubscriptionCardHeader = useCallback((subscription: SubscriptionData): React.JSX.Element => {
         const isSubscriptionTypeRecord = subscription.type === SubscriptionType.RECORD;
         const header = isSubscriptionTypeRecord ? subscription.number : BulkSubscriptionHeaders[subscription.record_type as BulkSubscriptionRecordType];
         const serviceNowBaseURL = getConfigState().data?.ServiceNowBaseURL;

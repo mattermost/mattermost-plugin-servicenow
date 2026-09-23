@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {Store, Action} from 'redux';
+import {Store, UnknownAction} from 'redux';
 
 import {GlobalState} from '@mattermost/types/store';
 
@@ -32,7 +32,7 @@ import './styles/main.scss';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-    public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    public async initialize(registry: PluginRegistry, store: Store<GlobalState, UnknownAction>) {
         // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
         registry.registerReducer(reducer);
         registry.registerRootComponent(AddSubscription);

@@ -36,7 +36,7 @@ const Header = ({
     const isFilterApplied = useCallback(() => showAllSubscriptions || filter.createdBy !== Constants.DefaultSubscriptionFilters.createdBy, [filter, showAllSubscriptions]);
 
     // Detects and closes the filter popover whenever it is opened and the user clicks outside of it
-    const wrapperRef = useRef(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
     useOutsideClick(wrapperRef, () => {
         setShowFilter(false);
     });

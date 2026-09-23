@@ -26,7 +26,7 @@ import Header from './rhsHeader';
 
 import './rhs.scss';
 
-const Rhs = (): JSX.Element => {
+const Rhs = (): React.JSX.Element => {
     const {pluginState, makeApiRequest, getApiState} = usePluginApi();
     const isCurrentUserSysAdmin = useSelector((state: GlobalState) => getCurrentUser(state).roles.includes(MMConstants.SYSTEM_ADMIN_ROLE));
     const dispatch = useDispatch();

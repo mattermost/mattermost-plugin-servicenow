@@ -26,7 +26,7 @@ const CallerPanel = (({
     showModalLoader,
     setApiError,
     placeholder,
-}: CallerPanelProps): JSX.Element => {
+}: CallerPanelProps): React.JSX.Element => {
     const [options, setOptions] = useState<CallerData[]>([]);
     const [suggestions, setSuggestions] = useState<Record<string, string>[]>([]);
     const [autoSuggestValue, setAutoSuggestValue] = useState('');

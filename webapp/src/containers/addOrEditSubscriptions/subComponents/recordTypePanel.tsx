@@ -34,7 +34,7 @@ const RecordTypePanel = forwardRef<HTMLDivElement, RecordTypePanelProps>(({
     showFooter = false,
     placeholder,
     recordTypeOptions,
-}: RecordTypePanelProps, recordTypePanelRef): JSX.Element => {
+}: RecordTypePanelProps, recordTypePanelRef): React.JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
     // Hide error state once the value is valid

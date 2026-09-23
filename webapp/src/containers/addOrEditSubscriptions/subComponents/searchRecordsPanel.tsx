@@ -57,7 +57,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     showFooter = false,
     disabled = false,
     setRecordNumber,
-}: SearchRecordsPanelProps, searchRecordPanelRef): JSX.Element => {
+}: SearchRecordsPanelProps, searchRecordPanelRef): React.JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
     const [validationMsg, setValidationMsg] = useState<null | string>(null);
     const {makeApiRequest, getApiState} = usePluginApi();
@@ -224,7 +224,7 @@ const SearchRecordsPanel = forwardRef<HTMLDivElement, SearchRecordsPanelProps>((
     };
 
     // Returns value for record data header
-    const getRecordValueForHeader = (key: RecordDataKeys): string | JSX.Element | null => {
+    const getRecordValueForHeader = (key: RecordDataKeys): string | React.JSX.Element | null => {
         const value = getRecordDataState().data?.[key];
 
         if (!value) {

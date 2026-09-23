@@ -37,7 +37,7 @@ const SubscriptionTypePanel = forwardRef<HTMLDivElement, SubscriptionTypePanelPr
     actionBtnDisabled,
     subscriptionType,
     setSubscriptionType,
-}: SubscriptionTypePanelProps, subscriptionTypePanelRef): JSX.Element => {
+}: SubscriptionTypePanelProps, subscriptionTypePanelRef): React.JSX.Element => {
     const [validationFailed, setValidationFailed] = useState(false);
 
     // Hide error state once the value is valid

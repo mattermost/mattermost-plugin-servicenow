@@ -3,14 +3,14 @@
 
 import {useCallback} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {FetchBaseQueryError} from '@reduxjs/toolkit/dist/query';
-import {ThunkDispatch, AnyAction} from '@reduxjs/toolkit';
+import {FetchBaseQueryError} from '@reduxjs/toolkit/query';
+import {ThunkDispatch, UnknownAction} from '@reduxjs/toolkit';
 
 import services from 'src/services';
 
 function usePluginApi() {
     const pluginState = useSelector((state: ReduxState) => state['plugins-mattermost-plugin-servicenow']);
-    const dispatch = useDispatch<ThunkDispatch<ReduxState, unknown, AnyAction>>();
+    const dispatch = useDispatch<ThunkDispatch<ReduxState, unknown, UnknownAction>>();
 
     const makeApiRequest = useCallback((apiServiceName: string, payload?: APIPayloadType) => {
         dispatch(services.endpoints[apiServiceName].initiate(payload as APIPayloadType));

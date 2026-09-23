@@ -10,7 +10,7 @@ import Constants from 'src/plugin_constants';
 
 import {setConnected} from 'src/reducers/connectedState';
 
-const GetConfig = (): JSX.Element => {
+const GetConfig = (): React.JSX.Element => {
     const {makeApiRequest, getApiState} = usePluginApi();
     const dispatch = useDispatch();
 

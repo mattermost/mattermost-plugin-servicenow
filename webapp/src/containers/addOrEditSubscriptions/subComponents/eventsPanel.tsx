@@ -36,7 +36,7 @@ const EventsPanel = forwardRef<HTMLDivElement, EventsPanelProps>(({
     subscriptionType,
     record,
     recordType,
-}: EventsPanelProps, eventsPanelRef): JSX.Element => {
+}: EventsPanelProps, eventsPanelRef): React.JSX.Element => {
     const handleSelectedEventsChange = (selected: boolean, event: SubscriptionEvents) => {
         const filterEvents = (events: SubscriptionEvents[]): SubscriptionEvents[] => (
             events.filter((currentEvent) => currentEvent !== event)
